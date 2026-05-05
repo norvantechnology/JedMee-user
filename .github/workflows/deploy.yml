@@ -34,9 +34,6 @@ jobs:
       - name: Cache SAM build
         uses: actions/cache@v4
         with:
-          # Cache both build output AND SAM's internal hash metadata (.aws-sam/cache).
-          # Without the cache/ dir, --cached has no prior hashes to compare and
-          # rebuilds every function from scratch on every run.
           path: |
             backend/.aws-sam/build
             backend/.aws-sam/cache
@@ -113,7 +110,6 @@ jobs:
           fi
           echo "S3_BUCKET=$BUCKET" >> $GITHUB_ENV
 
-          # Create bucket if it doesn't exist
           if ! aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then
             echo "Creating S3 bucket: $BUCKET"
             aws s3api create-bucket \
@@ -124,103 +120,81 @@ jobs:
             echo "Bucket $BUCKET already exists"
           fi
 
-          # Allow public access (required for CloudFront + static hosting)
           aws s3api put-public-access-block \
             --bucket "$BUCKET" \
             --public-access-block-configuration \
               "BlockPublicAcls=false,IgnorePublicAcls=false,BlockPublicPolicy=false,RestrictPublicBuckets=false"
 
-          # Set public-read bucket policy
-          aws s3api put-bucket-policy --bucket "$BUCKET" --policy "{
-            \"Version\": \"2012-10-17\",
-            \"Statement\": [{
-              \"Sid\": \"PublicReadGetObject\",
-              \"Effect\": \"Allow\",
-              \"Principal\": \"*\",
-              \"Action\": \"s3:GetObject\",
-              \"Resource\": \"arn:aws:s3:::${BUCKET}/*\"
-            }]
-          }"
+          aws s3api put-bucket-policy --bucket "$BUCKET" --policy \
+            "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"PublicRead\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::${BUCKET}/*\"}]}"
 
       - name: Ensure CloudFront distribution exists
         run: |
           BUCKET="${{ env.S3_BUCKET }}"
           DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
 
-          # If secret is empty, look for an existing distribution pointing to this bucket
           if [ -z "$DIST_ID" ]; then
             ORIGIN_DOMAIN="${BUCKET}.s3.eu-north-1.amazonaws.com"
             DIST_ID=$(aws cloudfront list-distributions \
               --query "DistributionList.Items[?Origins.Items[0].DomainName=='${ORIGIN_DOMAIN}'].Id | [0]" \
-              --output text 2>/dev/null)
+              --output text 2>/dev/null || true)
             if [ "$DIST_ID" = "None" ] || [ -z "$DIST_ID" ]; then
               DIST_ID=""
             fi
           fi
 
-          # Create a new distribution if still not found
           if [ -z "$DIST_ID" ]; then
             echo "No CloudFront distribution found — creating one..."
             BUCKET_ORIGIN="${BUCKET}.s3.eu-north-1.amazonaws.com"
             CALLER_REF="jedmee-$(date +%s)"
 
-            cat > /tmp/cf-config.json <<EOF
-{
-  "CallerReference": "${CALLER_REF}",
-  "Comment": "JedMee Frontend",
-  "DefaultRootObject": "index.html",
-  "Enabled": true,
-  "HttpVersion": "http2",
-  "PriceClass": "PriceClass_100",
-  "Origins": {
-    "Quantity": 1,
-    "Items": [
-      {
-        "Id": "S3-${BUCKET}",
-        "DomainName": "${BUCKET_ORIGIN}",
-        "S3OriginConfig": { "OriginAccessIdentity": "" }
-      }
-    ]
-  },
-  "DefaultCacheBehavior": {
-    "TargetOriginId": "S3-${BUCKET}",
-    "ViewerProtocolPolicy": "redirect-to-https",
-    "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
-    "Compress": true,
-    "AllowedMethods": {
-      "Quantity": 2,
-      "Items": ["GET", "HEAD"],
-      "CachedMethods": {
-        "Quantity": 2,
-        "Items": ["GET", "HEAD"]
-      }
-    }
-  },
-  "CustomErrorResponses": {
-    "Quantity": 2,
-    "Items": [
-      {
-        "ErrorCode": 403,
-        "ResponsePagePath": "/index.html",
-        "ResponseCode": "200",
-        "ErrorCachingMinTTL": 0
-      },
-      {
-        "ErrorCode": 404,
-        "ResponsePagePath": "/index.html",
-        "ResponseCode": "200",
-        "ErrorCachingMinTTL": 0
-      }
-    ]
-  }
-}
-EOF
+            jq -n \
+              --arg ref  "$CALLER_REF" \
+              --arg bid  "S3-${BUCKET}" \
+              --arg dom  "$BUCKET_ORIGIN" \
+              '{
+                CallerReference:   $ref,
+                Comment:           "JedMee Frontend",
+                DefaultRootObject: "index.html",
+                Enabled:           true,
+                HttpVersion:       "http2",
+                PriceClass:        "PriceClass_100",
+                Origins: {
+                  Quantity: 1,
+                  Items: [{
+                    Id:             $bid,
+                    DomainName:     $dom,
+                    S3OriginConfig: { OriginAccessIdentity: "" }
+                  }]
+                },
+                DefaultCacheBehavior: {
+                  TargetOriginId:       $bid,
+                  ViewerProtocolPolicy: "redirect-to-https",
+                  CachePolicyId:        "658327ea-f89d-4fab-a63d-7e88639e58f6",
+                  Compress:             true,
+                  AllowedMethods: {
+                    Quantity: 2,
+                    Items:    ["GET","HEAD"],
+                    CachedMethods: {
+                      Quantity: 2,
+                      Items:    ["GET","HEAD"]
+                    }
+                  }
+                },
+                CustomErrorResponses: {
+                  Quantity: 2,
+                  Items: [
+                    { ErrorCode: 403, ResponsePagePath: "/index.html", ResponseCode: "200", ErrorCachingMinTTL: 0 },
+                    { ErrorCode: 404, ResponsePagePath: "/index.html", ResponseCode: "200", ErrorCachingMinTTL: 0 }
+                  ]
+                }
+              }' > /tmp/cf-config.json
 
             DIST_ID=$(aws cloudfront create-distribution \
               --distribution-config file:///tmp/cf-config.json \
               --query 'Distribution.Id' --output text)
             echo "Created CloudFront distribution: $DIST_ID"
-            echo "⚠️  Add this as CLOUDFRONT_DISTRIBUTION_ID secret to speed up future runs: $DIST_ID"
+            echo "Add CLOUDFRONT_DISTRIBUTION_ID=$DIST_ID to your dev environment secrets"
           else
             echo "Using existing CloudFront distribution: $DIST_ID"
           fi
@@ -231,13 +205,11 @@ EOF
         run: |
           BUCKET="${{ env.S3_BUCKET }}"
 
-          # Hashed assets — cache forever
           aws s3 sync dist/ s3://${BUCKET}/ \
             --exclude "index.html" \
             --cache-control "max-age=31536000,immutable" \
             --delete
 
-          # index.html — always revalidate
           aws s3 cp dist/index.html s3://${BUCKET}/index.html \
             --cache-control "no-cache"
 
