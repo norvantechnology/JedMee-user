@@ -1,0 +1,404 @@
+/* SchemeDiscountPopup  lines use theme tokens; pairs with .mfz / mfzInput / AppButton */
+
+.sdpPage {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.8vw, 18px);
+  margin: -4px 0 0;
+}
+
+/* KPI board (replaces single facts bar) */
+.sdpKpiBoard {
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--color-border) 82%, transparent);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-card) 94%, var(--color-surface)),
+    color-mix(in srgb, var(--color-primary-light) 28%, var(--color-card))
+  );
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.sdpKpiHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: clamp(12px, 2.4vw, 14px) clamp(14px, 2.8vw, 16px);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+}
+
+.sdpKpiHeadIcon {
+  width: clamp(36px, 7vw, 40px);
+  height: clamp(36px, 7vw, 40px);
+  border-radius: clamp(10px, 2vw, 12px);
+  display: grid;
+  place-items: center;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  flex-shrink: 0;
+}
+
+.sdpKpiHeadIcon svg {
+  display: block;
+}
+
+.sdpKpiHeadKicker {
+  margin: 0;
+  font-size: clamp(10px, 1.8vw, 11px);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+}
+
+.sdpKpiHeadTitle {
+  margin: 2px 0 0;
+  font-size: clamp(14px, 2.6vw, 15px);
+  font-weight: 900;
+  color: var(--color-text-heading);
+}
+
+.sdpKpiTiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(8px, 1.8vw, 10px);
+  padding: clamp(12px, 2.4vw, 14px);
+}
+
+.sdpKpiTile {
+  padding: clamp(10px, 2vw, 12px);
+  border-radius: clamp(10px, 1.8vw, 12px);
+  border: 1px solid color-mix(in srgb, var(--color-border) 78%, transparent);
+  background: color-mix(in srgb, var(--color-card) 92%, var(--color-surface));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.sdpKpiTile:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+  box-shadow: var(--shadow-xs);
+}
+
+.sdpKpiTileLab {
+  font-size: clamp(9.5px, 1.8vw, 11px);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+}
+
+.sdpKpiTileVal {
+  font-size: clamp(14px, 2.6vw, 16px);
+  font-weight: 900;
+  color: var(--color-text-heading);
+  word-break: break-word;
+}
+
+/* Scheme lane */
+.sdpSchemePanel {
+  border-radius: var(--radius);
+  border: 1px dashed color-mix(in srgb, var(--color-warning) 38%, var(--color-border));
+  background: color-mix(in srgb, var(--color-warning-light) 55%, var(--color-card));
+  padding: clamp(12px, 2.6vw, 16px);
+}
+
+.sdpSchemeInner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: clamp(12px, 2.5vw, 16px);
+}
+
+.sdpSchemeCopy {
+  display: flex;
+  gap: 12px;
+  min-width: min(100%, 220px);
+  flex: 1 1 200px;
+}
+
+.sdpSchemeIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--color-warning-darker);
+  background: color-mix(in srgb, var(--color-warning) 12%, var(--color-card));
+  border: 1px solid color-mix(in srgb, var(--color-warning) 28%, var(--color-border));
+}
+
+.sdpSchemeIcon svg {
+  display: block;
+}
+
+.sdpSchemeKicker {
+  margin: 0;
+  font-size: clamp(10px, 1.8vw, 11px);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-warning-darker);
+}
+
+.sdpSchemeTitle {
+  margin: 4px 0 0;
+  font-size: clamp(16px, 3vw, 18px);
+  font-weight: 900;
+  color: var(--color-text-heading);
+}
+
+.sdpSchemeHint {
+  margin: 6px 0 0;
+  font-size: clamp(12px, 2.2vw, 13px);
+  font-weight: 650;
+  color: var(--color-text-2);
+  line-height: 1.45;
+  max-width: 36rem;
+}
+
+.sdpSchemeBtn {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.sdpSchemeEmpty {
+  margin: 0;
+  font-size: clamp(12.5px, 2.2vw, 14px);
+  font-weight: 650;
+  color: var(--color-text-3);
+  text-align: center;
+  padding: 8px 4px;
+}
+
+/* Adjustments */
+.sdpAdjust {
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  background: var(--color-card);
+  box-shadow: var(--shadow-xs);
+  padding: clamp(12px, 2.4vw, 16px);
+}
+
+.sdpAdjustHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: clamp(12px, 2.2vw, 14px);
+  color: var(--color-primary);
+}
+
+.sdpAdjustHead svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sdpAdjustKicker {
+  margin: 0;
+  font-size: clamp(10px, 1.8vw, 11px);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+}
+
+.sdpAdjustTitle {
+  margin: 2px 0 0;
+  font-size: clamp(15px, 2.8vw, 16px);
+  font-weight: 900;
+  color: var(--color-text-heading);
+}
+
+.sdpAdjustGrid {
+  gap: clamp(10px, 2vw, 12px);
+}
+
+/* Ledger */
+.sdpLedger {
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--color-border) 82%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 65%, var(--color-card));
+  padding: 0;
+  overflow: hidden;
+}
+
+.sdpLedgerHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: clamp(10px, 2vw, 12px) clamp(14px, 2.6vw, 16px);
+  font-size: clamp(11px, 2vw, 12px);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: color-mix(in srgb, var(--color-text) 3%, transparent);
+}
+
+.sdpLedgerHead svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.sdpLedgerList {
+  list-style: none;
+  margin: 0;
+  padding: clamp(8px, 1.8vw, 10px) clamp(14px, 2.6vw, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sdpLedgerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: clamp(13px, 2.3vw, 14.5px);
+  font-weight: 650;
+  color: var(--color-text-2);
+}
+
+.sdpLedgerRow strong {
+  font-weight: 900;
+  color: var(--color-text-heading);
+}
+
+.sdpLedgerRow_muted strong {
+  color: var(--color-text-2);
+}
+
+.sdpLedgerRow_net {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent);
+  font-size: clamp(14px, 2.5vw, 16px);
+  color: var(--color-text-heading);
+}
+
+.sdpLedgerRow_net strong {
+  font-size: clamp(16px, 2.8vw, 18px);
+  color: var(--color-primary);
+}
+
+.sdpLedgerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  padding: clamp(10px, 2vw, 12px) clamp(14px, 2.6vw, 16px);
+  border-top: 1px dashed color-mix(in srgb, var(--color-border) 72%, transparent);
+  font-size: clamp(11.5px, 2vw, 12.5px);
+  font-weight: 650;
+  color: var(--color-text-3);
+}
+
+/* Lock banner */
+.sdpLockBanner {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: clamp(10px, 2vw, 12px) clamp(12px, 2.4vw, 14px);
+  border-radius: clamp(10px, 2vw, 12px);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger-light) 50%, var(--color-card));
+  color: var(--color-danger-dark);
+}
+
+.sdpLockIcon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: var(--color-danger);
+}
+
+.sdpLockBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.sdpLockBody p {
+  margin: 0;
+  font-size: clamp(12.5px, 2.2vw, 13.5px);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+/* Modal footer row */
+.sdpModalFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.sdpModalFootActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .sdpKpiTiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sdpSchemeInner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sdpSchemeBtn {
+    align-self: stretch;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .sdpKpiTiles {
+    grid-template-columns: 1fr;
+  }
+
+  .sdpModalFoot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sdpModalFootActions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .sdpModalFootActions .appBtn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .sdpModalFootClear {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sdpKpiTile {
+    transition: none;
+  }
+}

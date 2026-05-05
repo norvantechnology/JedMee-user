@@ -1,0 +1,63 @@
+# ─── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ─── Environment / Secrets ────────────────────────────────────────────────────
+# Keep .env.example committed; never commit real .env files
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+!.env.example
+
+# ─── Frontend Build Output ────────────────────────────────────────────────────
+frontend/dist/
+frontend/.vite/
+
+# ─── AWS SAM Build Artifacts ──────────────────────────────────────────────────
+.aws-sam/
+backend/.aws-sam/
+samconfig.toml.bak
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ─── OS Files ─────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ─── Editor / IDE ─────────────────────────────────────────────────────────────
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ─── Test / Coverage ──────────────────────────────────────────────────────────
+coverage/
+*.lcov
+.nyc_output/
+
+# ─── Misc ─────────────────────────────────────────────────────────────────────
+*.tgz
+*.zip
+*.tar.gz
+.cache/
+tmp/
+temp/

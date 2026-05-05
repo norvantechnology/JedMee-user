@@ -1,0 +1,73 @@
+.qst {
+  display: inline-flex;
+  align-items: center;
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-card);
+  overflow: hidden;
+  height: 38px;
+}
+
+.qst_sm {
+  height: 34px;
+  border-radius: 11px;
+}
+
+.qstBtn {
+  height: 100%;
+  min-width: 38px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 950;
+  cursor: pointer;
+  transition: background 140ms, color 140ms;
+}
+
+.qst_sm .qstBtn {
+  min-width: 34px;
+  font-size: 15px;
+}
+
+.qstBtn:hover:not(:disabled) {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.qstBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.qstInput {
+  width: 56px;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  font-weight: 900;
+  color: var(--color-text);
+  background: transparent;
+}
+
+.qst_sm .qstInput {
+  width: 52px;
+  font-size: 13px;
+}
+
+.qst_dis {
+  opacity: 0.7;
+}
+
+@media (max-width: 520px) {
+  .qst {
+    height: 36px;
+    border-radius: 12px;
+  }
+  .qstInput { width: 52px; }
+}
+

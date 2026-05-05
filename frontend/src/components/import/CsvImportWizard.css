@@ -1,0 +1,431 @@
+.ciwOverlay {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: min(78vh, 740px);
+  /* Derived from global tokens (no new colors). */
+  --ciw-surface: color-mix(in srgb, var(--cm-surface, var(--color-surface)) 88%, var(--color-primary) 3%);
+  --ciw-card: color-mix(in srgb, var(--cm-section, var(--color-card)) 92%, var(--ciw-surface) 8%);
+  --ciw-border: color-mix(in srgb, var(--cm-section-border, var(--color-border)) 78%, transparent);
+  --ciw-shadow: 0 8px 22px color-mix(in srgb, var(--color-text) 8%, transparent);
+  --ciw-shadow-soft: 0 3px 12px color-mix(in srgb, var(--color-text) 6%, transparent);
+  animation: ciwIn 220ms var(--modal-motion-ease, ease) both;
+}
+
+.ciwStepper {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 4px;
+  margin-bottom: 4px;
+}
+
+.ciwStepPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: clamp(11.5px, 0.72rem + 0.26vw, 13px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text-3, #6b7280);
+  background: color-mix(in srgb, var(--ciw-card) 72%, var(--ciw-surface) 28%);
+  border: 1px solid var(--ciw-border);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.ciwStepPill_active {
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--ciw-card));
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent), 0 8px 18px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.ciwStepPill_done {
+  color: var(--color-success, #15803d);
+  background: color-mix(in srgb, var(--color-success) 10%, var(--ciw-card));
+  border-color: color-mix(in srgb, var(--color-success) 26%, transparent);
+}
+
+.ciwStepChev {
+  color: var(--color-text-3);
+  font-size: 12px;
+  user-select: none;
+  padding: 0 2px;
+}
+
+.ciwStage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ciwCard {
+  border: 1px solid var(--ciw-border);
+  background: var(--ciw-card);
+  border-radius: 14px;
+  box-shadow: var(--ciw-shadow-soft);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.ciwCardHead {
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--ciw-card) 78%, var(--ciw-surface) 22%);
+  border-bottom: 1px solid color-mix(in srgb, var(--ciw-border) 70%, transparent);
+}
+
+.ciwCardBody {
+  padding: 14px;
+  min-width: 0;
+}
+
+.ciwLead {
+  font-size: clamp(14.5px, 0.92rem + 0.38vw, 16.5px);
+  line-height: 1.5;
+  color: var(--color-text-2, #374151);
+  margin: 0 0 4px;
+}
+
+.ciwHint {
+  font-size: clamp(13px, 0.82rem + 0.32vw, 14.5px);
+  color: var(--color-text-3, #6b7280);
+  margin: 0 0 12px;
+  line-height: 1.45;
+}
+
+.ciwDrop {
+  position: relative;
+  border: 2px dashed color-mix(in srgb, var(--color-primary) 26%, var(--ciw-border));
+  border-radius: 14px;
+  padding: 26px 18px;
+  text-align: center;
+  background: color-mix(in srgb, var(--ciw-surface) 65%, var(--ciw-card) 35%);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.16s ease, box-shadow 0.16s ease;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent);
+}
+
+.ciwDrop:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--ciw-surface));
+  transform: translateY(-1px);
+  box-shadow: var(--ciw-shadow);
+}
+
+.ciwDrop_drag {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--ciw-surface));
+}
+
+.ciwDrop_busy {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.ciwDrop input {
+  display: none;
+}
+
+.ciwDropIcon {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 10px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--ciw-card));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, var(--ciw-border));
+  box-shadow: 0 10px 18px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.ciwDropTitle {
+  font-size: clamp(15.5px, 0.98rem + 0.4vw, 17.5px);
+  font-weight: 650;
+  color: var(--color-text);
+  margin: 0 0 6px;
+}
+
+.ciwDropSub {
+  font-size: clamp(13px, 0.82rem + 0.32vw, 14.5px);
+  color: var(--color-text-3);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.ciwFileBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ciw-card) 72%, var(--ciw-surface) 28%);
+  border: 1px solid var(--ciw-border);
+  font-size: clamp(13.5px, 0.86rem + 0.34vw, 15px);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.ciwMetaRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ciwMapOk {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-success) 22%, var(--ciw-border));
+  background: color-mix(in srgb, var(--color-success) 8%, var(--ciw-card));
+  color: var(--color-text-2);
+  font-size: clamp(12.5px, 0.8rem + 0.3vw, 14px);
+  font-weight: 700;
+}
+
+.ciwMapTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(13.5px, 0.86rem + 0.34vw, 15px);
+}
+
+.ciwMapTable th,
+.ciwMapTable td {
+  border-bottom: 1px solid var(--color-border, #e5e5e5);
+  padding: 10px 8px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.ciwMapTable th {
+  font-size: clamp(11.5px, 0.72rem + 0.26vw, 13px);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-3);
+  background: color-mix(in srgb, var(--ciw-card) 78%, var(--ciw-surface) 22%);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.ciwMapTable select {
+  width: 100%;
+  max-width: min(320px, 100%);
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--ciw-border) 85%, transparent);
+  font-size: clamp(13.5px, 0.86rem + 0.34vw, 15px);
+  background: color-mix(in srgb, var(--ciw-card) 86%, var(--ciw-surface) 14%);
+  color: var(--color-text);
+  transition: border-color 0.14s, box-shadow 0.14s;
+}
+
+.ciwMapTable select:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--ciw-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.ciwMapScroll {
+  overflow: auto;
+  max-height: min(380px, 52vh);
+  border: 1px solid var(--ciw-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ciw-card) 70%, var(--ciw-surface) 30%);
+}
+
+.ciwPreview {
+  max-height: 220px;
+  overflow: auto;
+  font-size: clamp(13px, 0.82rem + 0.32vw, 14.5px);
+  background: color-mix(in srgb, var(--ciw-surface) 65%, var(--ciw-card) 35%);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--ciw-border);
+  margin-top: 12px;
+}
+
+.ciwErr {
+  color: var(--color-danger, #b00020);
+  font-size: clamp(12.5px, 0.8rem + 0.3vw, 14px);
+}
+
+.ciwSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  font-size: clamp(13.5px, 0.86rem + 0.34vw, 15px);
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--ciw-card) 70%, var(--ciw-surface) 30%);
+  border-radius: 12px;
+  border: 1px solid var(--ciw-border);
+}
+
+.ciwSummary strong {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.ciwFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 4px;
+}
+
+.ciwFooter_actions {
+  justify-content: flex-start;
+  margin-top: 0;
+  padding: 10px 14px 14px;
+  border-top: 1px solid color-mix(in srgb, var(--ciw-border) 70%, transparent);
+  background: color-mix(in srgb, var(--ciw-card) 78%, var(--ciw-surface) 22%);
+}
+
+.ciwFooter_start {
+  justify-content: space-between;
+}
+
+.ciwFooter_start .ciwFooterRight {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ciwRadioRow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: clamp(13.5px, 0.86rem + 0.34vw, 15px);
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--ciw-card) 70%, var(--ciw-surface) 30%);
+  border: 1px solid var(--ciw-border);
+  border-radius: 12px;
+  margin-top: 12px;
+}
+
+.ciwRadioRow > strong {
+  font-size: clamp(12.5px, 0.78rem + 0.28vw, 14px);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-2);
+}
+
+.ciwRadioRow label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.ciwHistory {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.ciwHistoryTitle {
+  font-size: clamp(13.5px, 0.86rem + 0.34vw, 15px);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 10px;
+}
+
+.ciwHistoryScroll {
+  overflow: auto;
+  max-height: 180px;
+  border: 1px solid var(--ciw-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ciw-card) 70%, var(--ciw-surface) 30%);
+}
+
+.ciwHistory .ciwMapTable {
+  margin: 0;
+}
+
+.ciwHistory .ciwMapTable th {
+  position: static;
+}
+
+.ciwSpinnerBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 32px 20px;
+  text-align: center;
+  border: 1px solid var(--ciw-border);
+  border-radius: 14px;
+  background: var(--ciw-card);
+}
+
+.ciwSpinnerText {
+  font-size: clamp(15.5px, 0.98rem + 0.4vw, 17.5px);
+  font-weight: 650;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.ciwSpinnerSub {
+  font-size: clamp(13.5px, 0.86rem + 0.34vw, 15px);
+  color: var(--color-text-3);
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.45;
+}
+
+.ciwSpin {
+  animation: ciwSpin 0.82s linear infinite;
+  color: var(--color-primary);
+}
+
+.ciwMapOk {
+  /* moved earlier; keep for backwards compatibility if referenced elsewhere */
+}
+
+.ciwColName {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.ciwSample {
+  color: var(--color-text-3);
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  .ciwOverlay {
+    gap: 12px;
+    max-height: min(82vh, 760px);
+  }
+  .ciwCardBody {
+    padding: 12px;
+  }
+  .ciwFooter_actions,
+  .ciwFooter_start {
+    gap: 8px;
+  }
+  .ciwFooter_actions .appBtn,
+  .ciwFooter_start .appBtn,
+  .ciwFooter .appBtn {
+    width: 100%;
+    justify-content: center;
+  }
+  .ciwMapScroll {
+    max-height: min(320px, 44vh);
+  }
+}

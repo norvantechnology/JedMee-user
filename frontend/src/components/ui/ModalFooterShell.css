@@ -1,0 +1,7 @@
+/* App-button modal footers (catalog modals, place-order wizard, etc.) */
+.mfsAppActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}

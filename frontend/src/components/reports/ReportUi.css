@@ -1,0 +1,969 @@
+.rptThreePane {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* Master–detail (e.g. Mfg–Stockist): equal columns, stable minmax */
+.rptThreePane.rptThreePane--balanced {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.rptPaneHead--aligned {
+  min-height: 44px;
+  align-items: center;
+}
+
+.rptPaneSub--muted {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-text-3, #6b7280);
+}
+
+@media (max-width: 1100px) {
+  .rptThreePane {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rptPane {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border, #e6e9ef);
+  border-radius: 12px;
+  overflow: hidden;
+  min-height: 0;
+  max-height: min(70vh, 640px);
+}
+
+.rptPaneHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border, #eef0f4);
+  background: var(--color-bg-soft, #f7f9fc);
+}
+
+.rptPaneTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-2, #4b5563);
+}
+
+.rptPaneSub {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-2, #4b5563);
+}
+
+.rptPaneBody {
+  flex: 1;
+  overflow: auto;
+}
+
+.rptList {
+  display: flex;
+  flex-direction: column;
+}
+
+.rptListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border-soft, #f1f3f7);
+  transition: background 120ms ease;
+}
+
+.rptListItemText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+
+.rptListItemAside {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-align: right;
+}
+
+.rptListItem:hover {
+  background: var(--color-bg-soft, #f7f9fc);
+}
+
+.rptListItem.is-selected {
+  background: color-mix(in srgb, var(--color-primary, #7c3aed) 8%, transparent);
+  border-left: 3px solid var(--color-primary, #7c3aed);
+  padding-left: 9px;
+}
+
+.rptListItem.is-selected .rptListItemPrimary {
+  color: var(--color-primary, #7c3aed);
+  font-weight: 700;
+}
+
+.rptListItemPrimary {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-heading, #111827);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rptListItemSecondary {
+  font-size: 11px;
+  color: var(--color-text-3, #6b7280);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rptListItemMeta {
+  font-size: 11px;
+  color: var(--color-text-3, #6b7280);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rptListEmpty {
+  padding: 24px 14px;
+  text-align: center;
+  color: var(--color-text-3, #6b7280);
+  font-size: 13px;
+}
+
+.rptListEmptyLoad {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rptListEmptyLoad .cl--inline {
+  justify-content: center;
+}
+
+.rptSearchRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.rptSearchInput {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border, #d4d8e0);
+  font-size: 14px;
+  background: var(--color-surface, #fff);
+}
+
+.rptSearchInput:focus {
+  outline: none;
+  border-color: var(--color-primary, #2563eb);
+  box-shadow: 0 0 0 3px var(--color-primary-soft, #dbeafe);
+}
+
+.rptSearchInput_narrow {
+  width: 110px;
+  flex: 0 0 auto;
+}
+
+.rptTableScroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/*
+ * Use border-collapse: collapse so thead/td columns share one grid.
+ * Sticky thead inside overflow-x:auto wrappers caused column drift in Chromium/WebKit.
+ */
+.rptBatchTable {
+  width: 100%;
+  min-width: 36rem;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.rptBatchTable thead th {
+  background: var(--color-bg-soft, #f7f9fc);
+  text-align: left;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-3, #6b7280);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border, #e6e9ef);
+  vertical-align: bottom;
+}
+
+.rptBatchTable thead th.rptNum {
+  text-align: right;
+}
+
+.rptBatchTable tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border-soft, #f1f3f7);
+  vertical-align: middle;
+}
+
+/* FEFO / wide batch grid: stable column widths (Product–Supplier bottom table) */
+.rptBatchTable.rptBatchTable--fefo {
+  table-layout: fixed;
+  min-width: 58rem;
+}
+
+.rptBatchTable.rptBatchTable--fefo thead th:first-child,
+.rptBatchTable.rptBatchTable--fefo tbody td:first-child {
+  white-space: nowrap;
+}
+
+.rptBatchTable.rptBatchTable--mfgStockist {
+  table-layout: fixed;
+  min-width: 100%;
+}
+
+.rptBatchTable--mfgStockist col.rptColMfgStockistName {
+  width: 38%;
+}
+
+.rptBatchTable--mfgStockist col.rptColMfgStockistPhone {
+  width: 28%;
+}
+
+.rptBatchTable--mfgStockist col.rptColMfgStockistDate {
+  width: 34%;
+}
+
+/* ── Legacy banner (kept for backward compat, hidden in new layout) ── */
+.rptMfgStockistBanner { display: none; }
+.rptMfgStockistBannerLabel,
+.rptMfgStockistBannerName,
+.rptMfgStockistBannerCode,
+.rptMfgStockistBannerHint { display: none; }
+
+/* ── Manufacturer list item with avatar ── */
+.rptMfgItem {
+  align-items: center;
+  padding: 10px 12px;
+  gap: 10px;
+}
+
+.rptMfgAvatar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-primary, #7c3aed) 12%, transparent);
+  color: var(--color-primary, #7c3aed);
+  font-size: 14px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--color-primary, #7c3aed) 20%, transparent);
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.rptMfgAvatar--active {
+  background: var(--color-primary, #7c3aed);
+  color: #fff;
+  border-color: var(--color-primary, #7c3aed);
+}
+
+.rptMfgCodeBadge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-border, #e6e9ef) 60%, transparent);
+  color: var(--color-text-3, #6b7280);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+}
+
+.rptMfgChevron {
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-primary, #7c3aed);
+  line-height: 1;
+  opacity: 0.7;
+}
+
+/* ── Selected manufacturer card (right pane header) ── */
+.rptMfgSelectedCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border, #eef0f4);
+  background: color-mix(in srgb, var(--color-primary, #7c3aed) 5%, var(--color-surface, #fff));
+}
+
+.rptMfgSelectedAvatar {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--color-primary, #7c3aed);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary, #7c3aed) 30%, transparent);
+}
+
+.rptMfgSelectedInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rptMfgSelectedName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-heading, #111827);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rptMfgSelectedCode {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-primary, #7c3aed) 12%, transparent);
+  color: var(--color-primary, #7c3aed);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.rptMfgSelectedHint {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--color-text-3, #6b7280);
+  max-width: 160px;
+  text-align: right;
+  line-height: 1.35;
+}
+
+/* ── Empty state hint ── */
+.rptEmptyHint {
+  display: block;
+  font-size: 13px;
+  color: var(--color-text-3, #6b7280);
+  line-height: 1.5;
+}
+
+.rptEmptyHintSub {
+  display: block;
+  font-size: 11.5px;
+  color: var(--color-text-4, #9ca3af);
+  margin-top: 4px;
+}
+
+/* ── Vendor row with rank number ── */
+.rptVendorRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rptVendorRank {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-4, #9ca3af);
+  font-variant-numeric: tabular-nums;
+  min-width: 18px;
+}
+
+/* ── Phone link ── */
+.rptVendorPhoneLink {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary, #7c3aed);
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.rptVendorPhoneLink:hover {
+  text-decoration: underline;
+}
+
+.rptVendorPhoneEmpty {
+  font-size: 12px;
+  color: var(--color-text-4, #9ca3af);
+}
+
+/* ── Supply date cell ── */
+.rptSupplyDate {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-2, #4b5563);
+  font-variant-numeric: tabular-nums;
+}
+
+.rptSupplyDate--none {
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--color-text-4, #9ca3af);
+  font-style: italic;
+}
+
+.rptToolbarFilters--tight {
+  flex: 1 1 220px;
+  justify-content: flex-end;
+  gap: 8px 12px;
+}
+
+.rptToolbarHint--end {
+  text-align: right;
+  max-width: min(100%, 400px);
+  line-height: 1.35;
+}
+
+.rptBatchTable.rptBatchTable--supplierList {
+  table-layout: fixed;
+  min-width: 100%;
+}
+
+.rptBatchTable tbody tr:hover {
+  background: var(--color-bg-soft, #f7f9fc);
+}
+
+.rptNum {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.rptExpiry {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.rptExpiry_red {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.rptExpiry_amber {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.rptExpiry_green {
+  color: #047857;
+}
+
+.rptExpiryStack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.25;
+}
+
+.rptExpirySub {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-3, #6b7280);
+}
+
+.rptBadge {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.rptBadge_pref {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.rptSupplierTable tbody td {
+  vertical-align: middle;
+}
+
+.rptDateCell .rptListItemSecondary {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Product–Supplier: make product ↔ manufacturer ↔ vendor relationship explicit */
+.rptSkuContext {
+  padding: 8px 12px 10px;
+  border-bottom: 1px solid var(--color-border, #eef0f4);
+  background: linear-gradient(180deg, var(--color-bg-soft, #f7f9fc) 0%, var(--color-surface, #fff) 100%);
+}
+
+.rptSkuTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rptSkuCodePill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-1);
+  color: var(--color-text-3, #6b7280);
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rptSkuMetaChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 8px;
+}
+
+.rptSkuMetaChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--color-bg-soft, #f7f9fc);
+  border: 1px solid var(--color-border, #eef0f4);
+  color: var(--color-text-2, #4b5563);
+  font-size: 10.5px;
+  line-height: 1.2;
+}
+
+.rptSkuContextLabel {
+  margin: 0 0 2px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-3, #6b7280);
+}
+
+.rptSkuContextName {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-heading, #111827);
+}
+
+.rptSkuContextGrid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  align-items: baseline;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.rptSkuContextKey {
+  color: var(--color-text-3, #6b7280);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rptSkuContextVal {
+  color: var(--color-text-heading, #111827);
+  font-weight: 500;
+  min-width: 0;
+}
+
+.rptSkuContextHint {
+  margin: 0 0 8px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--color-text-2, #4b5563);
+}
+
+.rptDetailHeader {
+  padding: 8px 14px 10px;
+  border-bottom: 1px solid var(--color-border, #eef0f4);
+  background: var(--color-surface, #fff);
+}
+
+.rptDetailHeaderTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.rptDetailName {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-heading, #111827);
+}
+
+.rptDetailMeta {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: var(--color-text-3, #6b7280);
+}
+
+.rptStockTotals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--color-text-2, #4b5563);
+  font-variant-numeric: tabular-nums;
+}
+
+.rptStockTotals strong {
+  color: var(--color-text-heading, #111827);
+}
+
+.rptBatchPane {
+  margin-top: 16px;
+}
+
+.rptToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.rptToolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.rptToolbarPrim {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.rptToolbarPrim .rptSearchInput {
+  min-width: 0;
+}
+
+.rptToolbarFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+  flex: 1 1 240px;
+}
+
+.rptToolbarCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.rptToolbarCheck input {
+  margin: 0;
+  cursor: pointer;
+}
+
+.rptToolbarHint {
+  color: var(--color-text-3, #6b7280);
+  font-size: 11px;
+}
+
+.rptCountChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--color-primary-soft, #dbeafe);
+  color: var(--color-primary, #2563eb);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rptCountChip .cl--inline {
+  gap: 6px;
+}
+
+.rptCountChip .cl__inlineText {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary, #2563eb);
+}
+
+.rptVendorContact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rptVendorName {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-heading, #111827);
+}
+
+.rptVendorPhone {
+  font-size: 11px;
+  color: var(--color-text-3, #6b7280);
+  font-variant-numeric: tabular-nums;
+}
+
+.rptVendorAddress {
+  font-size: 10.5px;
+  color: var(--color-text-3, #6b7280);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+.rptSupplierTable .rptVendorAddress {
+  max-width: 220px;
+}
+
+@media (max-width: 1100px) {
+  .rptBatchTable.rptBatchTable--fefo {
+    min-width: 52rem;
+  }
+}
+
+.rptExpiryChip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.rptExpiryChip.is-expired { background: #fee2e2; color: #b91c1c; }
+.rptExpiryChip.is-soon { background: #fef3c7; color: #b45309; }
+.rptExpiryChip.is-warn { background: #fff7ed; color: #c2410c; }
+.rptExpiryChip.is-ok { background: #ecfdf5; color: #047857; }
+
+/* Optional: indeterminate bar while any report fetch is in flight */
+.rptCard {
+  position: relative;
+}
+
+.rptCardBusyBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  line-height: 0;
+}
+
+.rptCardBusyBar .cl--bar {
+  display: block;
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — comprehensive additions
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/*
+ * Fix: .rptThreePane--balanced (specificity 0,2,0) overrides the base
+ * .rptThreePane (0,1,0) rule inside the 1100px media query, keeping two
+ * columns on narrow screens. Explicitly target the combined selector.
+ */
+@media (max-width: 1100px) {
+  .rptThreePane.rptThreePane--balanced {
+    grid-template-columns: 1fr;
+  }
+  .rptPane {
+    max-height: min(45vh, 380px);
+  }
+}
+
+/* ── 720px: toolbar stacks, panes uncapped, search full-width ── */
+@media (max-width: 720px) {
+  .rptToolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .rptToolbarPrim {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+  .rptToolbarFilters {
+    flex: 1 1 auto;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  .rptToolbarFilters--tight {
+    justify-content: flex-start;
+  }
+  .rptToolbarHint--end {
+    text-align: left;
+    max-width: 100%;
+  }
+  .rptPane {
+    max-height: none;
+    min-height: 80px;
+  }
+  .rptMfgSelectedHint {
+    display: none;
+  }
+  .rptSearchInput {
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .rptCountChip {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .sfmBtnGhost {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+  }
+}
+
+/* ── 560px: batch table → card layout ── */
+@media (max-width: 560px) {
+  .rptBatchTable,
+  .rptBatchTable thead,
+  .rptBatchTable tbody,
+  .rptBatchTable th,
+  .rptBatchTable td,
+  .rptBatchTable tr {
+    display: block;
+  }
+  .rptBatchTable thead {
+    display: none;
+  }
+  .rptBatchTable tbody tr {
+    border: 1px solid var(--color-border, #e6e9ef);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    background: var(--color-surface, #fff);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  .rptBatchTable tbody td {
+    padding: 5px 0;
+    border-bottom: 1px solid var(--color-border-soft, #f1f3f7);
+    display: grid;
+    grid-template-columns: 82px 1fr;
+    gap: 6px;
+    align-items: start;
+    font-size: 12.5px;
+    text-align: left;
+  }
+  .rptBatchTable tbody tr td:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .rptBatchTable tbody td::before {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-3, #6b7280);
+    padding-top: 1px;
+    white-space: nowrap;
+  }
+  /* Non-Moving table labels */
+  .rptBatchTable tbody td:nth-child(1)::before { content: "Product"; }
+  .rptBatchTable tbody td:nth-child(2)::before { content: "Batch"; }
+  .rptBatchTable tbody td:nth-child(3)::before { content: "Mfg"; }
+  .rptBatchTable tbody td:nth-child(4)::before { content: "Supplier"; }
+  .rptBatchTable tbody td:nth-child(5)::before { content: "Stock"; }
+  .rptBatchTable tbody td:nth-child(6)::before { content: "Last sold"; }
+  .rptBatchTable tbody td:nth-child(7)::before { content: "Days idle"; }
+  /* Mfg–Stockist table labels */
+  .rptBatchTable--mfgStockist tbody td:nth-child(1)::before { content: "Stockist"; }
+  .rptBatchTable--mfgStockist tbody td:nth-child(2)::before { content: "Phone"; }
+  .rptBatchTable--mfgStockist tbody td:nth-child(3)::before { content: "Last supply"; }
+  /* Ledger table labels */
+  .rptBatchTable--ledger tbody td:nth-child(1)::before { content: "Date"; }
+  .rptBatchTable--ledger tbody td:nth-child(2)::before { content: "Type"; }
+  .rptBatchTable--ledger tbody td:nth-child(3)::before { content: "Reference"; }
+  .rptBatchTable--ledger tbody td:nth-child(4)::before { content: "Dr"; }
+  .rptBatchTable--ledger tbody td:nth-child(5)::before { content: "Cr"; }
+  .rptBatchTable--ledger tbody td:nth-child(6)::before { content: "Balance"; }
+  .rptVendorAddress {
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+  .rptSearchInput_narrow {
+    width: 80px;
+  }
+  .rptMfgSelectedCard {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .rptMfgSelectedAvatar {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    border-radius: 9px;
+  }
+  .rptMfgSelectedName {
+    font-size: 12.5px;
+  }
+  .rptMfgAvatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+}

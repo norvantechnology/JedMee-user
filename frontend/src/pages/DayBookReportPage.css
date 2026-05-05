@@ -1,0 +1,607 @@
+/* Day Book Report — premium redesign, theme tokens only */
+
+.dbPage {
+  width: 100%;
+  padding-bottom: 24px;
+}
+
+/* ── Page header ── */
+.dbHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  flex-wrap: wrap;
+}
+
+.dbHeaderLeft {
+  min-width: 0;
+}
+
+.dbTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-text-heading, var(--color-text));
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+.dbSub {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--color-text-3, var(--color-text-muted));
+}
+
+.dbDateBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+  border-radius: 99px;
+  padding: 5px 13px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Toolbar ── */
+.dbToolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+/* grouped date-picker pill */
+.dbFilterGroup {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 8px;
+  background: var(--color-card);
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dbFilterGroup:focus-within {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+.dbFilterGroupIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.dbDateInput {
+  padding: 8px 12px 8px 4px;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 13.5px;
+  color: var(--color-text);
+  outline: none;
+  min-width: 130px;
+}
+
+/* Today quick button */
+.dbTodayBtn {
+  padding: 7px 13px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 8px;
+  background: var(--color-card);
+  font-family: var(--font);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  line-height: 1;
+}
+
+.dbTodayBtn:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card));
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* ── Summary stat cards ── */
+.dbSummaryRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dbSumCard {
+  background: var(--color-card);
+  border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  border-radius: 14px;
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 8px color-mix(in srgb, var(--color-primary) 6%, transparent);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  min-width: 0;
+}
+
+.dbSumCard:hover {
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--color-primary) 12%, transparent);
+  transform: translateY(-2px);
+}
+
+.dbSumIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dbSumIcon_in   { background: var(--color-success-light); color: var(--color-success-deep); }
+.dbSumIcon_out  { background: var(--color-danger-light);  color: var(--color-danger); }
+.dbSumIcon_cash { background: var(--color-primary-light); color: var(--color-primary); }
+
+.dbSumText {
+  min-width: 0;
+  flex: 1;
+}
+
+.dbSumVal {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text-heading);
+  line-height: 1;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dbSumVal_in   { color: var(--color-success-deep); }
+.dbSumVal_out  { color: var(--color-danger); }
+.dbSumVal_cash { color: var(--color-primary); }
+
+.dbSumLbl {
+  font-size: 12px;
+  color: var(--color-text-3);
+  margin-top: 5px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+/* ── Two-column grid ── */
+.dbGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ── Section cards ── */
+.dbSection {
+  background: var(--color-card);
+  border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 8px color-mix(in srgb, var(--color-primary) 5%, transparent);
+}
+
+.dbSectionHdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 40%, transparent);
+  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-card) 100%);
+}
+
+.dbSectionHdrIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dbSectionHdrIcon_in  { background: var(--color-success-light); color: var(--color-success-deep); }
+.dbSectionHdrIcon_out { background: var(--color-danger-light);  color: var(--color-danger); }
+
+.dbSectionTitle {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+  margin: 0;
+}
+
+.dbSectionBody {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.dbRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 11px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 25%, transparent);
+}
+
+.dbRow:last-child { border-bottom: none; padding-bottom: 0; }
+.dbRow:first-child { padding-top: 0; }
+
+.dbRowLabel {
+  font-size: 14px;
+  color: var(--color-text-2);
+  min-width: 0;
+  flex: 1;
+}
+
+.dbRowValue {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--color-text-heading);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.dbRow_total {
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1.5px solid color-mix(in srgb, var(--color-border) 55%, transparent) !important;
+  border-bottom: none !important;
+}
+
+.dbRow_total .dbRowLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-heading);
+}
+
+.dbRow_total .dbRowValue {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.dbRow_total_in .dbRowValue  { color: var(--color-success-deep); }
+.dbRow_total_out .dbRowValue { color: var(--color-danger); }
+
+/* ── Cash Position card ── */
+.dbCashCard {
+  background: var(--color-card);
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.dbCashHdr {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 18%, transparent);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-primary) 8%, var(--color-surface)) 0%,
+    var(--color-card) 100%
+  );
+}
+
+.dbCashHdrIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dbCashTitle {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+  margin: 0;
+}
+
+.dbCashBody {
+  padding: 20px;
+}
+
+.dbCashEquation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  margin-bottom: 16px;
+}
+
+.dbCashChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
+  border-radius: 12px;
+  padding: 12px 16px;
+  min-width: 0;
+  flex: 1;
+}
+
+.dbCashChipVal {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-heading);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.dbCashChipLbl {
+  font-size: 11px;
+  color: var(--color-text-3);
+  margin-top: 4px;
+  text-align: center;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.dbCashOp {
+  font-size: 20px;
+  font-weight: 700;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.dbCashOp_plus  { color: var(--color-success-deep); }
+.dbCashOp_minus { color: var(--color-danger); }
+.dbCashOp_eq    { color: var(--color-primary); }
+
+.dbCashResult {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: color-mix(in srgb, var(--color-primary) 7%, var(--color-card));
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+
+.dbCashResultLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.dbCashResultVal {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--color-primary);
+  letter-spacing: -0.8px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ── Responsive: 720px ── */
+@media (max-width: 720px) {
+  .dbSummaryRow {
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+
+  .dbSumCard {
+    padding: 10px 8px;
+    gap: 7px;
+    border-radius: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .dbSumIcon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+  }
+
+  .dbSumVal {
+    font-size: 13px;
+  }
+
+  .dbSumLbl {
+    font-size: 9.5px;
+    margin-top: 2px;
+  }
+
+  .dbGrid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .dbTitle {
+    font-size: 18px;
+  }
+
+  .dbCashChip {
+    padding: 7px 6px;
+  }
+
+  .dbCashChipVal {
+    font-size: 12px;
+  }
+
+  .dbCashChipLbl {
+    font-size: 9px;
+  }
+
+  .dbCashOp {
+    font-size: 14px;
+  }
+
+  .dbCashResultVal {
+    font-size: 18px;
+  }
+
+  .dbSectionBody {
+    padding: 12px 14px;
+  }
+
+  .dbSectionHdr {
+    padding: 10px 14px;
+  }
+}
+
+/* ── Responsive: 480px ── */
+@media (max-width: 480px) {
+  .dbHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .dbTitle {
+    font-size: 17px;
+  }
+
+  .dbSub {
+    font-size: 12px;
+  }
+
+  .dbSummaryRow {
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+
+  .dbSumCard {
+    padding: 8px 7px;
+    gap: 5px;
+  }
+
+  .dbSumIcon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+  }
+
+  .dbSumVal {
+    font-size: 11.5px;
+  }
+
+  .dbSumLbl {
+    font-size: 9px;
+    margin-top: 1px;
+  }
+
+  .dbToolbar {
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 8px 10px;
+  }
+
+  .dbDateInput {
+    font-size: 13px;
+    min-width: 110px;
+  }
+
+  .dbTodayBtn {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .dbCashEquation {
+    gap: 4px;
+  }
+
+  .dbCashChip {
+    padding: 6px 5px;
+  }
+
+  .dbCashChipVal {
+    font-size: 11px;
+  }
+
+  .dbCashChipLbl {
+    font-size: 8.5px;
+  }
+
+  .dbCashOp {
+    font-size: 12px;
+  }
+
+  .dbCashResultVal {
+    font-size: 16px;
+  }
+
+  .dbCashResult {
+    padding: 10px 12px;
+  }
+
+  .dbRowLabel {
+    font-size: 12.5px;
+  }
+
+  .dbRowValue {
+    font-size: 13px;
+  }
+
+  .dbRow_total .dbRowValue {
+    font-size: 14px;
+  }
+}
+
+/* ── Responsive: 360px ── */
+@media (max-width: 360px) {
+  .dbSumCard {
+    padding: 7px 6px;
+    gap: 4px;
+  }
+
+  .dbSumVal {
+    font-size: 10.5px;
+  }
+
+  .dbSumLbl {
+    font-size: 8.5px;
+  }
+
+  .dbCashChipVal {
+    font-size: 10.5px;
+  }
+
+  .dbCashResultVal {
+    font-size: 15px;
+  }
+}

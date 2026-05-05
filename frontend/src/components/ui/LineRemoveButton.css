@@ -1,0 +1,60 @@
+.lineRemoveBtn {
+  --lrb-size: 26px;
+  width: var(--lrb-size);
+  height: var(--lrb-size);
+  min-width: var(--lrb-size);
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--color-card));
+  color: var(--color-danger);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 60%, transparent) inset,
+    0 10px 16px color-mix(in srgb, var(--color-text) 10%, transparent);
+  transition: transform 0.14s ease, background 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease, color 0.14s ease, filter 0.14s ease;
+}
+
+.lineRemoveBtn svg {
+  display: block;
+  filter:
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--color-card) 55%, transparent))
+    drop-shadow(0 10px 16px color-mix(in srgb, var(--color-text) 10%, transparent));
+}
+
+.lineRemoveBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger) 14%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-border));
+  transform: translateY(-1px);
+  filter: brightness(1.01);
+}
+
+.lineRemoveBtn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 60%, transparent) inset,
+    0 6px 12px color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+.lineRemoveBtn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-danger) 40%, transparent);
+  outline-offset: 2px;
+}
+
+.lineRemoveBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+  filter: none;
+}
+
+@media (max-width: 420px) {
+  .lineRemoveBtn {
+    --lrb-size: 28px;
+  }
+}
+

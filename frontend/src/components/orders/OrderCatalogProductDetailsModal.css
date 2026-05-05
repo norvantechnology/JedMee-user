@@ -1,0 +1,348 @@
+/* ═══════════════════════════════════════════════════════════════
+   OrderCatalogProductDetailsModal  Premium UI Styles
+   Uses project CSS vars. No hardcoded colors.
+═══════════════════════════════════════════════════════════════ */
+
+.cpd_wrap {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(12px, 3.5vw, 20px);
+}
+
+/* ── Section container ──────────────────────────────────────── */
+.cpd_section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 55%, var(--color-card));
+}
+
+/* ── Section Header ─────────────────────────────────────────── */
+.cpd_sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cpd_sectionIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cpd_sectionIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.cpd_iconBlue {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+  color: var(--color-primary);
+}
+
+.cpd_iconGreen {
+  background: color-mix(in srgb, var(--color-secondary, #28a745) 12%, var(--color-card));
+  border: 1.5px solid color-mix(in srgb, var(--color-secondary, #28a745) 22%, transparent);
+  color: var(--color-secondary, #28a745);
+}
+
+.cpd_sectionTitle {
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-2);
+}
+
+/* ── Field grid ─────────────────────────────────────────────── */
+.cpd_grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 10px;
+}
+
+.cpd_span12 { grid-column: span 12; }
+.cpd_span6  { grid-column: span 6; }
+.cpd_span4  { grid-column: span 4; }
+
+.cpd_field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cpd_label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+}
+
+.cpd_value {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-card) 85%, var(--color-surface));
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  border-radius: 10px;
+  padding: 8px 11px;
+  line-height: 1.4;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+.cpd_valueLarge {
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.cpd_mono {
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.cpd_multiline {
+  white-space: pre-line;
+  align-items: flex-start;
+  min-height: 72px;
+  padding-top: 10px;
+}
+
+/* ── Stat chips (pricing row) ───────────────────────────────── */
+.cpd_statsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.cpd_statChip {
+  border-radius: 14px;
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 75%, var(--color-card));
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cpd_chipPrimary {
+  border-color: color-mix(in srgb, var(--color-primary) 28%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card));
+}
+.cpd_chipPrimary .cpd_statValue {
+  color: var(--color-primary);
+}
+
+.cpd_chipStock {
+  border-color: color-mix(in srgb, var(--color-secondary, #28a745) 28%, transparent);
+  background: color-mix(in srgb, var(--color-secondary, #28a745) 8%, var(--color-card));
+}
+.cpd_chipStock .cpd_statValue {
+  color: var(--color-secondary, #28a745);
+}
+
+.cpd_statLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+}
+
+.cpd_statValue {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+/* ── Qty limit cards ────────────────────────────────────────── */
+.cpd_qtyLimitRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.cpd_qtyLimitCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
+  color: var(--color-text-3);
+}
+
+.cpd_qtyLimitLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+}
+
+.cpd_qtyLimitValue {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-top: 2px;
+}
+
+/* ── Notes ──────────────────────────────────────────────────── */
+.cpd_notes {
+  border-radius: 12px;
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cpd_notesLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+}
+
+.cpd_notesText {
+  font-size: 13.5px;
+  color: var(--color-text-2);
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.cpd_notesNone {
+  color: var(--color-text-3);
+  font-style: italic;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .cpd_statsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cpd_span4 {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 520px) {
+  .cpd_span6,
+  .cpd_span4 {
+    grid-column: span 12;
+  }
+  .cpd_statsRow {
+    grid-template-columns: 1fr 1fr;
+  }
+  .cpd_qtyLimitRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .cpd_section {
+    padding: 12px;
+    border-radius: 14px;
+    gap: 12px;
+  }
+
+  .cpd_sectionHeader {
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .cpd_sectionIcon {
+    width: clamp(36px, 10vw, 40px);
+    height: clamp(36px, 10vw, 40px);
+    border-radius: 11px;
+  }
+
+  .cpd_sectionIcon svg {
+    width: clamp(17px, 4.5vw, 18px);
+    height: clamp(17px, 4.5vw, 18px);
+  }
+
+  .cpd_sectionTitle {
+    font-size: clamp(11px, 3vw, 12.5px);
+    line-height: 1.3;
+  }
+
+  .cpd_grid {
+    gap: 8px;
+  }
+
+  .cpd_label {
+    font-size: clamp(10px, 2.7vw, 11px);
+  }
+
+  .cpd_value {
+    font-size: clamp(13px, 3.5vw, 13.5px);
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 11px;
+  }
+
+  .cpd_valueLarge {
+    font-size: clamp(14px, 3.8vw, 15px);
+  }
+
+  .cpd_mono {
+    font-size: clamp(12px, 3.2vw, 13px);
+  }
+
+  .cpd_statsRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .cpd_statChip {
+    padding: 9px 10px;
+    border-radius: 12px;
+  }
+
+  .cpd_statLabel {
+    font-size: clamp(9.5px, 2.6vw, 10.5px);
+  }
+
+  .cpd_statValue {
+    font-size: clamp(14px, 4vw, 16px);
+  }
+
+  .cpd_qtyLimitCard {
+    padding: 10px;
+    flex-wrap: wrap;
+    border-radius: 11px;
+  }
+
+  .cpd_notes {
+    padding: 10px 12px;
+  }
+
+  .cpd_notesText {
+    font-size: clamp(12.5px, 3.3vw, 13.5px);
+  }
+}
+
+@media (max-width: 420px) {
+  .cpd_statsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .cpd_section {
+    padding: 10px;
+  }
+}

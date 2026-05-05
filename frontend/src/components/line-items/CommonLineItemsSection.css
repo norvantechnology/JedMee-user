@@ -1,0 +1,279 @@
+.cliSection {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-surface);
+  min-width: 0;
+}
+
+.cliSectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 18px 8px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+}
+
+.cliSectionTitle {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.9px;
+  color: var(--color-text-3);
+}
+
+.cliSectionHint {
+  font-size: 11px;
+  color: var(--color-text-4);
+  font-weight: 600;
+  text-align: right;
+}
+
+.cliItemsWrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  scrollbar-width: thin;
+  background: var(--color-surface);
+}
+
+.cliItemsWrap::-webkit-scrollbar {
+  height: 10px;
+}
+
+.cliItemsWrap::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
+
+.cliFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: var(--color-surface);
+}
+
+.cliFooterLeft {
+  display: inline-flex;
+  align-items: center;
+}
+
+.cliFooterRight {
+  margin-left: auto;
+}
+
+.cliAddLineBtn.ciab {
+  height: 31px;
+  border-radius: 8px;
+}
+
+.cliItemsTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: var(--color-surface);
+}
+
+.cliItemsTable th,
+.cliItemsTable td {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 35%, transparent);
+  padding: 7px 8px;
+  font-size: 12px;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.cliItemsTable thead th {
+  background: var(--color-surface-2);
+  color: var(--color-text-3);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.cliItemsTable .num,
+.cliItemsTable .r {
+  text-align: right;
+}
+
+.cliItemsTable .center,
+.cliItemsTable .c {
+  text-align: center;
+}
+
+.cliItemsTable td .raInput {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  height: 38px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
+  font-size: var(--modal-fs-control, 13px);
+  padding: 0 8px;
+  line-height: 1.2;
+  box-sizing: border-box;
+  display: block;
+}
+
+.cliItemsTable td .raInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.cliItemsTable td select {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  height: 38px;
+  font-size: var(--modal-fs-control, 13px);
+  line-height: 1.25;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding-right: 28px;
+}
+
+.cliItemsTable tbody td {
+  vertical-align: middle;
+  background: transparent;
+}
+
+.cliItemsTable tbody tr:hover td {
+  background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+}
+
+.cliItemRow_active td {
+  background: var(--color-surface) !important;
+}
+
+.cliItemsTable .piRowNum,
+.cliItemsTable .sbmRowNum {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-surface-2) 80%, var(--color-surface) 20%);
+  color: var(--color-text-4);
+  font-size: 11px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  margin: auto;
+}
+
+/* ── Summary strip (shared by purchase and sales modals) ── */
+.cliSummaryStrip {
+  display: grid;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 10px;
+  background: var(--color-surface);
+}
+
+.cliSummaryCell {
+  padding: 10px 14px;
+  border-right: 1px solid var(--color-border);
+}
+
+.cliSummaryCell:last-child {
+  border-right: none;
+}
+
+.cliSummaryCell_total {
+  background: var(--color-primary);
+}
+
+.cliSummaryCell_total .cliSummaryLabel {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.cliSummaryCell_total .cliSummaryValue {
+  color: #ffffff;
+}
+
+.cliSummaryLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--color-text-4);
+}
+
+.cliSummaryValue {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-2);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cliSummaryValue_sm {
+  font-size: 13.5px;
+}
+
+@media (max-width: 720px) {
+  /* When piItemsTable switches to card layout, stop horizontal scroll */
+  .cliItemsWrap {
+    overflow-x: visible;
+    overflow-y: visible;
+    background: transparent;
+  }
+  .cliSection {
+    overflow: visible;
+    border-radius: var(--radius);
+  }
+  .cliFooter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .cliFooterRight {
+    margin-left: 0;
+  }
+  .cliAddLineBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .cliSectionHead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .cliSectionHint {
+    text-align: left;
+  }
+  .cliFooter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .cliFooterRight {
+    margin-left: 0;
+  }
+  .cliAddLineBtn {
+    width: 100%;
+    justify-content: center;
+    height: 40px;
+    font-size: 13.5px;
+  }
+  .cliItemsWrap::-webkit-scrollbar {
+    height: 0;
+  }
+}

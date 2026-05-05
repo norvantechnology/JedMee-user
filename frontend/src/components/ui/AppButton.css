@@ -1,0 +1,220 @@
+/* Reusable buttons  align with CommonTable primary (.ctAddBtn) and theme tokens */
+
+.appBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.14s ease, filter 0.14s ease;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.appBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.appBtn:active:not(:disabled) {
+  transform: translateY(0) scale(0.99);
+}
+
+.appBtn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.appBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.05);
+}
+
+.appBtn_md {
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 13.5px;
+}
+
+.appBtn_sm {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+  gap: 6px;
+  border-radius: 8px;
+}
+
+.appBtn_iconOnly.appBtn_md {
+  width: 38px;
+  padding: 0;
+}
+
+.appBtn_iconOnly.appBtn_sm {
+  width: 32px;
+  padding: 0;
+}
+
+.appBtn_leadIcon,
+.appBtn_trailIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.appBtn_leadIcon svg,
+.appBtn_trailIcon svg {
+  width: 1em;
+  height: 1em;
+  stroke-width: 2.35;
+  filter:
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--color-card) 55%, transparent))
+    drop-shadow(0 8px 14px color-mix(in srgb, var(--color-text) 10%, transparent));
+}
+
+.appBtn_primary {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-primary) 92%, white 8%),
+      var(--color-primary)
+    );
+  color: var(--color-card, #fff);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 32%, transparent) inset,
+    0 10px 20px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.appBtn_primary:hover:not(:disabled) {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-secondary) 92%, white 8%),
+      var(--color-secondary)
+    );
+  border-color: color-mix(in srgb, var(--color-secondary) 55%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 32%, transparent) inset,
+    0 12px 26px color-mix(in srgb, var(--color-secondary) 22%, transparent);
+}
+
+.appBtn_secondary {
+  background: color-mix(in srgb, var(--color-card) 88%, transparent);
+  color: var(--color-text);
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent),
+    0 10px 18px color-mix(in srgb, var(--color-text) 10%, transparent);
+}
+
+.appBtn_secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-primary) 22%, transparent);
+  filter: brightness(1.01);
+}
+
+.appBtn_ghost {
+  background: transparent;
+  color: var(--color-text);
+  border: 1px solid color-mix(in srgb, var(--color-border) 92%, transparent);
+}
+
+.appBtn_ghost:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface, #f3f4f6));
+  border-color: color-mix(in srgb, var(--color-text) 18%, var(--color-border));
+}
+
+.appBtn_danger {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-danger) 92%, white 8%),
+      var(--color-danger)
+    );
+  color: var(--color-on-danger, #fff);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 55%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 24%, transparent) inset,
+    0 10px 20px color-mix(in srgb, var(--color-danger) 18%, transparent);
+}
+
+.appBtn_danger:hover:not(:disabled) {
+  filter: brightness(0.98);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 24%, transparent) inset,
+    0 12px 26px color-mix(in srgb, var(--color-danger) 20%, transparent);
+}
+
+.tableCsvActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .appBtn {
+    gap: 5px;
+  }
+
+  /* Dense mobile; primary tap targets still usable */
+  .appBtn_md {
+    min-height: 36px;
+    padding: 0 9px;
+    font-size: clamp(12px, 3vw, 13.5px);
+    border-radius: 9px;
+  }
+
+  .appBtn_sm {
+    min-height: 32px;
+    padding: 0 8px;
+    font-size: clamp(11.5px, 2.8vw, 12.5px);
+    border-radius: 8px;
+    gap: 4px;
+  }
+
+  .appBtn_iconOnly.appBtn_md {
+    width: 36px;
+    min-width: 36px;
+  }
+
+  .appBtn_iconOnly.appBtn_sm {
+    width: 32px;
+    min-width: 32px;
+  }
+
+  .tableCsvActions {
+    gap: 5px;
+    margin: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .appBtn_md {
+    min-height: 34px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .appBtn_sm {
+    min-height: 30px;
+    padding: 0 7px;
+    font-size: 11.5px;
+  }
+
+  .appBtn_iconOnly.appBtn_md {
+    width: 34px;
+    min-width: 34px;
+  }
+
+  .appBtn_iconOnly.appBtn_sm {
+    width: 30px;
+    min-width: 30px;
+  }
+}

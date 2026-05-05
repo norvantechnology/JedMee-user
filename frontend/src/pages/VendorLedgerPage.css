@@ -1,0 +1,227 @@
+/* ── Vendor Ledger Page ─────────────────────────────────────────────────── */
+
+/* Date inputs — compact width */
+.vlDateInput {
+  max-width: 148px;
+}
+
+/* Clear filters button */
+.vlClearBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.vlClearBtn:hover {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+/* Action buttons in toolbar */
+.vlActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.vlBtnIcon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ── Summary stats bar ──────────────────────────────────────────────────── */
+.vlStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.vlStat {
+  flex: 1;
+  min-width: 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+}
+
+.vlStat--dr {
+  border-left: 3px solid var(--color-danger-subtle);
+}
+.vlStat--cr {
+  border-left: 3px solid var(--color-success-subtle);
+}
+.vlStat--net {
+  border-left: 3px solid var(--color-border);
+}
+.vlStat--netDr {
+  border-left-color: var(--color-danger-strong);
+}
+.vlStat--netCr {
+  border-left-color: var(--color-success-strong);
+}
+.vlStat--info {
+  border-left: 3px solid var(--color-primary-subtle);
+}
+
+.vlStatLabel {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vlStatValue {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.vlStat--dr .vlStatValue { color: var(--color-danger); }
+.vlStat--cr .vlStatValue { color: var(--color-success); }
+.vlStat--netDr .vlStatValue { color: var(--color-danger); }
+.vlStat--netCr .vlStatValue { color: var(--color-success); }
+
+.vlStatBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+.vlStat--netDr .vlStatBadge { background: var(--color-danger-light); color: var(--color-danger); }
+.vlStat--netCr .vlStatBadge { background: var(--color-success-light); color: var(--color-success); }
+
+/* ── Empty state ────────────────────────────────────────────────────────── */
+.vlEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+}
+.vlEmptyIcon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+.vlEmptyTitle {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.vlEmptyHint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  max-width: 280px;
+}
+
+/* ── Table wrapper ──────────────────────────────────────────────────────── */
+.vlTableWrap {
+  padding: 12px 14px;
+}
+
+/* No rows message */
+.vlNoRows {
+  text-align: center;
+  padding: 32px 16px !important;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* Row color coding */
+.vlRowDr {
+  background: var(--color-danger-light);
+}
+.vlRowDr:hover {
+  background: var(--color-danger-subtle) !important;
+}
+.vlRowCr {
+  background: var(--color-success-light);
+}
+.vlRowCr:hover {
+  background: var(--color-success-subtle) !important;
+}
+
+/* Cell styles */
+.vlTypeCell {
+  text-transform: capitalize;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.vlRefCell {
+  font-family: monospace;
+  font-size: 12px;
+}
+.vlDrCell {
+  color: var(--color-danger);
+  font-weight: 500;
+}
+.vlCrCell {
+  color: var(--color-success);
+  font-weight: 500;
+}
+.vlBalCell {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ── Mobile responsive ──────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .vlStats {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .vlStat {
+    min-width: calc(50% - 4px);
+    padding: 8px 12px;
+  }
+  .vlStatValue {
+    font-size: 15px;
+  }
+  .vlDateInput {
+    max-width: 100%;
+    width: 100%;
+  }
+  .vlTableWrap {
+    padding: 8px 10px;
+  }
+  .vlActionBtn span:last-child {
+    display: none;
+  }
+  .vlActionBtn {
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .vlStat {
+    min-width: 100%;
+  }
+  .vlStatValue {
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,111 @@
+.ia {
+  --ia-tone: var(--color-primary);
+  --ia-border: color-mix(in srgb, var(--ia-tone) 18%, var(--color-border));
+  --ia-bg: color-mix(in srgb, var(--ia-tone) 7%, var(--color-surface));
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--ia-border);
+  background: var(--ia-bg);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--color-text) 5%, transparent);
+  transition: border-color 0.14s ease, background 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease;
+}
+
+.ia:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+
+.iaInner {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.iaDot {
+  width: 10px;
+  height: 10px;
+  margin-top: 3px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--ia-tone);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ia-tone) 14%, transparent);
+}
+
+.iaIcon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--ia-tone);
+  background: color-mix(in srgb, var(--ia-tone) 10%, var(--color-card));
+  border: 1px solid color-mix(in srgb, var(--ia-tone) 16%, transparent);
+  box-shadow: 0 10px 18px color-mix(in srgb, var(--ia-tone) 10%, transparent);
+}
+
+.iaIcon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.2;
+  filter:
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--color-card) 55%, transparent))
+    drop-shadow(0 10px 18px color-mix(in srgb, var(--color-text) 10%, transparent));
+}
+
+.iaBody {
+  min-width: 0;
+}
+
+.iaTitle {
+  font-size: clamp(12.5px, 0.82rem + 0.12vw, 14px);
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1.25;
+}
+
+.iaMsg {
+  margin-top: 2px;
+  font-size: clamp(12.5px, 0.82rem + 0.12vw, 14px);
+  font-weight: 650;
+  color: var(--color-text-2);
+  line-height: 1.45;
+}
+
+.iaActions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ia_info {
+  --ia-tone: var(--color-primary);
+}
+
+.ia_success {
+  --ia-tone: var(--color-success);
+}
+
+.ia_warn {
+  --ia-tone: var(--color-warning);
+}
+
+.ia_danger {
+  --ia-tone: var(--color-danger);
+}
+
+@media (max-width: 420px) {
+  .ia {
+    padding: 10px 10px;
+  }
+  .iaActions > * {
+    width: 100%;
+  }
+  .iaIcon {
+    width: 32px;
+    height: 32px;
+  }
+}
+

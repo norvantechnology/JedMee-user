@@ -1,0 +1,270 @@
+/* Registration page styles - use theme variables only */
+
+.regPage .regWrap {
+  max-width: min(820px, 100%);
+}
+
+.regCard .panel {
+  padding: 1.5rem 2rem 2rem;
+}
+
+.regTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.regWizard {
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.regStepPanel {
+  position: relative;
+}
+
+.regStepPanel_inRight {
+  animation: regSlideInRight 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.regStepPanel_inLeft {
+  animation: regSlideInLeft 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.regWizardNav {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 0;
+}
+
+.regNavBtn {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  font-family: var(--font);
+  font-size: clamp(12px, 1.25vw, 13px);
+  color: var(--color-text-2);
+  cursor: pointer;
+}
+
+.regNavBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.regNavPrimary {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-card);
+  font-family: var(--font);
+  font-size: clamp(12px, 1.25vw, 13px);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.regNavPrimary:hover {
+  background: var(--color-secondary);
+}
+
+.regCol {
+  display: grid;
+  gap: 14px;
+}
+
+.regSection {
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-card);
+  padding: 14px;
+}
+
+.regSectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.regSectionTitle {
+  font-size: clamp(13px, 1.35vw, 14px);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.regSectionSub {
+  font-size: clamp(11px, 1.15vw, 12px);
+  color: var(--color-text-3);
+}
+
+.regGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.regInput,
+.regSelect,
+.regTextarea {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: 11px 12px;
+  font-family: var(--font);
+  font-size: clamp(13px, 1.35vw, 14px);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.regTextarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.regInput:focus,
+.regSelect:focus,
+.regTextarea:focus {
+  border-color: var(--color-border-focus);
+  background: var(--color-card);
+  box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--color-primary) 11%, transparent);
+}
+
+.regPhoneRow {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+}
+
+.regDocs {
+  display: grid;
+  gap: 12px;
+}
+
+.regFileHint {
+  margin-top: 6px;
+  font-size: clamp(11px, 1.15vw, 12px);
+  color: var(--color-text-3);
+}
+
+.regUpload {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  background: var(--color-surface);
+  border: 1.5px dashed var(--color-border);
+  border-radius: 12px;
+}
+
+.regUpload.hasFile {
+  border-style: solid;
+  border-color: var(--color-border);
+}
+
+.regUploadInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.regUploadMain {
+  min-width: 0;
+}
+
+.regUploadTitle {
+  font-size: clamp(12px, 1.25vw, 13px);
+  font-weight: 700;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.regUploadHint {
+  margin-top: 2px;
+  font-size: clamp(11px, 1.15vw, 12px);
+  color: var(--color-text-3);
+}
+
+.regUploadBtn {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  font-family: var(--font);
+  font-size: clamp(12px, 1.25vw, 13px);
+  color: var(--color-text-2);
+}
+
+.regActions {
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-card);
+  padding: 14px;
+}
+
+.regFooter {
+  margin-top: 12px;
+  font-size: clamp(12px, 1.25vw, 13px);
+  color: var(--color-text-3);
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .regCard .panel {
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+
+  .regTop {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .regGrid2 {
+    grid-template-columns: 1fr;
+  }
+
+  .regPhoneRow {
+    grid-template-columns: 110px 1fr;
+  }
+
+  .regWizardNav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .regNavBtn,
+  .regNavPrimary {
+    width: 100%;
+  }
+}
+
+
+/* ── Logo image ── */
+.logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.auth-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}

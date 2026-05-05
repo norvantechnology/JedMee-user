@@ -1,0 +1,204 @@
+.telx {
+  font-family: var(--font);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+}
+
+.telxRibbon {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.telxRibbonMark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--color-text-heading);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.telxRibbonMark svg {
+  width: 18px;
+  height: 18px;
+}
+
+.telxRibbonText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.telxRibbonKicker {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+}
+
+.telxRibbonHint {
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.45;
+  color: var(--color-text-2);
+}
+
+.telxBoard {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.telxLane {
+  flex: 1 1 160px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.telxLane_grow {
+  flex: 2 1 220px;
+}
+
+.telxLab {
+  font-size: 12px;
+  font-weight: 850;
+  color: var(--color-text-2);
+  letter-spacing: -0.01em;
+}
+
+.telxJoin {
+  display: none;
+}
+
+.telxSlot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 10px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  transition: border-color 160ms ease, box-shadow 180ms ease;
+}
+
+.telxSlot:hover {
+  border-color: var(--color-border-focus);
+}
+
+.telxSlot:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.telxSlot_bad {
+  border-color: color-mix(in srgb, var(--color-danger) 55%, var(--color-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 10%, transparent);
+}
+
+.telxGlyph {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--color-text-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.telxGlyph svg {
+  width: 16px;
+  height: 16px;
+}
+
+.telxInp {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text-heading);
+  outline: none;
+}
+
+.telxInp::placeholder {
+  color: var(--color-text-4);
+  font-weight: 650;
+}
+
+.telxErr {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--color-danger);
+}
+
+@media (min-width: 640px) {
+  .telxBoard {
+    flex-wrap: nowrap;
+    align-items: flex-start;
+  }
+
+  .telxJoin {
+    display: block;
+    width: 1px;
+    align-self: stretch;
+    margin: 28px 12px 12px;
+    background: linear-gradient(
+      180deg,
+      transparent,
+      color-mix(in srgb, var(--color-border) 85%, transparent) 18%,
+      color-mix(in srgb, var(--color-border) 85%, transparent) 82%,
+      transparent
+    );
+  }
+}
+
+@media (max-width: 639px) {
+  .telxBoard > .telxLane ~ .telxLane {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  }
+}
+
+@media (max-width: 420px) {
+  .telx {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .telxRibbonMark {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .telxSlot {
+    transition: none;
+  }
+
+  .telxSlot:focus-within {
+    transform: none;
+  }
+}

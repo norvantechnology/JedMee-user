@@ -1,0 +1,568 @@
+.pfm {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: -18px -20px; /* align with CommonModal body padding */
+}
+
+/* Keep global page-level .raInput styles from breaking modal columns. */
+.pfm .raField {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  min-width: 0;
+}
+
+.pfm .raInput,
+.pfm .cdp {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.pfm .raInput {
+  min-height: clamp(38px, 6vw, 40px);
+  height: auto;
+  font-size: var(--modal-fs-control, clamp(14.5px, 0.9rem + 0.45vw, 16.5px));
+}
+
+.pfm .raField label {
+  display: block;
+  margin-bottom: 0;
+  font-size: var(--modal-fs-label, clamp(13.5px, 0.88rem + 0.4vw, 15px));
+  font-weight: 800;
+  color: var(--color-text-2);
+  line-height: 1.2;
+}
+
+.pfm .cdpInput {
+  min-height: clamp(38px, 6vw, 40px);
+  font-size: var(--modal-fs-control, clamp(14.5px, 0.9rem + 0.45vw, 16.5px));
+}
+
+/* Header-like summary bar */
+.pfmSummaryBar {
+  background: linear-gradient(to right, color-mix(in srgb, var(--color-primary) 8%, transparent), color-mix(in srgb, var(--color-primary) 8%, transparent));
+  border-bottom: 1px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
+  padding: 12px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pfmSummaryLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(11.5px, 0.74rem + 0.28vw, 13px);
+  font-weight: 900;
+  color: var(--color-primary);
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pfmSummaryLabel svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.pfmSummaryCards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  flex: 1;
+}
+
+.pfmSummaryCard {
+  background: var(--color-card);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
+  border-radius: 10px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text) 5%, transparent);
+  transition: box-shadow 0.14s, border-color 0.14s, background 0.14s;
+}
+
+.pfmSummaryCard:hover {
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+
+.pfmSummaryCard_hi {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 4%, transparent);
+}
+
+.pfmSummaryCardLabel {
+  font-size: clamp(10.5px, 0.68rem + 0.26vw, 12px);
+  font-weight: 800;
+  color: var(--color-text-4);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.pfmSummaryCardVal {
+  font-family: var(--font-mono);
+  font-size: clamp(15px, 0.95rem + 0.42vw, 17.5px);
+  font-weight: 900;
+  color: var(--color-text);
+}
+
+.pfmSummaryCard_hi .pfmSummaryCardVal {
+  color: var(--color-primary);
+}
+
+/* Tabs */
+.pfmTabs {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+  background: color-mix(in srgb, var(--color-text) 2%, transparent);
+  padding: 0 14px;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.pfmTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.pfmTabBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 10px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-4);
+  font-family: var(--font);
+  font-size: clamp(13.5px, 0.86rem + 0.36vw, 15px);
+  font-weight: 800;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  border-radius: 8px 8px 0 0;
+  white-space: nowrap;
+  transition: background 0.14s, color 0.14s, border-color 0.14s;
+}
+
+.pfmTabBtn svg {
+  width: clamp(13px, 2.4vw, 14px);
+  height: clamp(13px, 2.4vw, 14px);
+}
+
+.pfmTabBtn:hover {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: var(--color-primary);
+}
+
+.pfmTabBtn_active {
+  background: var(--color-card);
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+/* Body */
+.pfmBody {
+  padding: 18px 20px;
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Mobile: reduce padding and keep important fields visible ── */
+@media (max-width: 520px) {
+  .pfm {
+    margin: -12px -12px;
+  }
+
+  .pfmSummaryBar {
+    padding: 10px 12px;
+    gap: 12px;
+  }
+
+  .pfmSummaryCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .pfmTabs {
+    padding: 0 10px;
+  }
+
+  .pfmTabBtn {
+    padding: 10px 10px 8px;
+  }
+
+  .pfmBody {
+    padding: 12px 12px;
+    gap: 12px;
+  }
+
+  .pfmCardHead {
+    padding: 12px 12px;
+  }
+}
+
+/* Section cards */
+.pfmCard {
+  background: var(--color-card);
+  border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+
+.pfmCardHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  background: color-mix(in srgb, var(--color-text) 2%, transparent);
+}
+
+.pfmCardIcon {
+  width: clamp(30px, 5.8vw, 34px);
+  height: clamp(30px, 5.8vw, 34px);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.pfmCardIcon svg {
+  width: clamp(14px, 2.5vw, 15px);
+  height: clamp(14px, 2.5vw, 15px);
+}
+
+.pfmCardTitle {
+  font-size: clamp(14px, 0.9rem + 0.38vw, 15.5px);
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.pfmCardHint {
+  margin-top: 2px;
+  font-size: clamp(12.5px, 0.8rem + 0.32vw, 14px);
+  font-weight: 700;
+  color: var(--color-text-4);
+}
+
+.pfmBadge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: clamp(11.5px, 0.72rem + 0.28vw, 13px);
+  font-weight: 900;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+  color: var(--color-text-3);
+  background: color-mix(in srgb, var(--color-text) 4%, transparent);
+  white-space: nowrap;
+}
+
+.pfmBadge_warn {
+  border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+  background: color-mix(in srgb, var(--color-warning) 8%, transparent);
+  color: var(--color-warning-darker);
+}
+
+.pfmBadge_info {
+  border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  color: var(--color-primary);
+}
+
+.pfmBadge_ok {
+  border-color: color-mix(in srgb, var(--color-success) 22%, transparent);
+  background: color-mix(in srgb, var(--color-success) 8%, transparent);
+  color: var(--color-success-darker);
+}
+
+.pfmGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+}
+
+.pfmGrid3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.pfmFull {
+  grid-column: 1 / -1;
+}
+
+.pfmWarnText {
+  margin-top: 6px;
+  font-size: clamp(12.5px, 0.8rem + 0.32vw, 14px);
+  font-weight: 700;
+  color: var(--color-warning-darker);
+  background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-warning) 25%, transparent);
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+
+.pfmInsetCard {
+  border: 1px dashed color-mix(in srgb, var(--color-text) 20%, transparent);
+  border-radius: 10px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--color-text) 2%, transparent);
+}
+
+.pfmChip {
+  border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pfmChip_soft {
+  border-color: color-mix(in srgb, var(--color-text) 12%, transparent);
+  background: color-mix(in srgb, var(--color-text) 3%, transparent);
+}
+
+.pfmChip_product {
+  border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+.pfmChipTitle {
+  font-size: clamp(13.5px, 0.86rem + 0.34vw, 15px);
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.pfmChipMeta {
+  font-size: clamp(12.5px, 0.8rem + 0.3vw, 14px);
+  color: var(--color-text-2);
+}
+
+.pfmChipHint {
+  font-size: clamp(11.5px, 0.72rem + 0.28vw, 13px);
+  color: var(--color-text-3);
+  font-style: italic;
+}
+
+.pfmProductHero {
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, transparent);
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-primary) 9%, var(--color-card)),
+    color-mix(in srgb, var(--color-primary) 4%, var(--color-card))
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pfmProductHeroName {
+  font-size: clamp(16.5px, 1rem + 0.45vw, 18.5px);
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.pfmProductHeroMeta {
+  font-size: clamp(12.5px, 0.8rem + 0.3vw, 14px);
+  font-weight: 700;
+  color: var(--color-text-2);
+}
+
+.pfmProductPills {
+  margin-top: 2px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pfmPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 24%, transparent);
+  background: color-mix(in srgb, var(--color-card) 86%, var(--color-primary) 14%);
+  color: var(--color-text-2);
+  font-size: clamp(11.5px, 0.72rem + 0.26vw, 13px);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pfmInsetTitle {
+  font-size: clamp(13.5px, 0.86rem + 0.34vw, 15px);
+  font-weight: 900;
+  color: var(--color-text-2);
+}
+
+.pfmInsetHint {
+  margin-top: 2px;
+  font-size: clamp(12.5px, 0.8rem + 0.3vw, 14px);
+  color: var(--color-text-4);
+  font-weight: 700;
+}
+
+.pfmFieldHint {
+  margin-top: 6px;
+  font-size: clamp(12px, 0.76rem + 0.28vw, 13.5px);
+  color: var(--color-text-4);
+  font-weight: 700;
+}
+
+.pfmWarnBar {
+  margin: 4px 0 10px;
+  font-size: clamp(12.5px, 0.8rem + 0.32vw, 14px);
+  font-weight: 800;
+  color: var(--color-danger-dark);
+  background: color-mix(in srgb, var(--color-danger-strong) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger-strong) 25%, transparent);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.pfmTabErr {
+  margin-left: 6px;
+  font-size: clamp(11.5px, 0.72rem + 0.26vw, 13px);
+  font-weight: 900;
+  color: var(--color-danger-dark);
+}
+
+/* Footer error banner (left side of modal footer) */
+.pfmFooterErr {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 22%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 6%, transparent);
+  color: var(--color-danger);
+  font-size: clamp(13px, 0.82rem + 0.34vw, 14.5px);
+  font-weight: 900;
+  max-width: 560px;
+}
+
+.pfmFooterErr svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.pfmFooterErr span {
+  min-width: 0;
+}
+
+.pfmFooterActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .pfm {
+    margin: -14px -14px; /* align with CommonModal mobile padding */
+  }
+  .pfmSummaryBar,
+  .pfmBody {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .pfmTabs {
+    padding: 0 10px;
+  }
+  .pfmGrid {
+    grid-template-columns: 1fr;
+  }
+  .pfmGrid3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .pfmFooterActions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pfmFooterActions .sfmBtnGhost,
+  .pfmFooterActions .sfmBtnPrimary,
+  .pfmFooterActions .sfmBtnDanger {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .pfmSummaryBar {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .pfmSummaryLabel {
+    width: 100%;
+  }
+  .pfmSummaryCards {
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pfmSummaryCard {
+    padding: 8px 10px;
+  }
+  .pfmSummaryCardVal {
+    font-size: clamp(14px, 0.9rem + 0.38vw, 16px);
+  }
+}
+
+@media (max-width: 480px) {
+  .pfmSummaryBar {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .pfmSummaryCards {
+    gap: 7px;
+  }
+  .pfmSummaryCard {
+    padding: 7px 9px;
+  }
+  .pfmFooterActions {
+    gap: 6px;
+  }
+  .pfmFooterActions .sfmBtnGhost,
+  .pfmFooterActions .sfmBtnPrimary,
+  .pfmFooterActions .sfmBtnDanger {
+    min-height: 36px;
+    font-size: 12.5px;
+  }
+}
+
+@media (max-width: 420px) {
+  .pfmGrid3 {
+    grid-template-columns: 1fr;
+  }
+  .pfmTabBtn span {
+    display: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .pfmSummaryBar { padding: 7px 10px; }
+  .pfmSummaryCards {
+    grid-template-columns: 1fr;
+  }
+}
+

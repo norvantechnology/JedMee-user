@@ -1,0 +1,441 @@
+/* Toast stack  bottom anchor, top progress meter, header badge + IconBtn dismiss. */
+
+.toast-container,
+.toast-container *,
+.toast-container *::before,
+.toast-container *::after {
+  box-sizing: border-box;
+}
+
+.toast-container {
+  position: fixed;
+  z-index: calc(var(--mcm-z, 420) + 600);
+  right: clamp(10px, 3vw, 22px);
+  top: clamp(12px, 3.5vw, 24px);
+  bottom: auto;
+  left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 12px);
+  width: min(100vw - clamp(20px, 5vw, 40px), 400px);
+  max-width: min(100vw - clamp(20px, 5vw, 40px), 400px);
+  pointer-events: none;
+  font-family: var(--font);
+}
+
+.toast {
+  --toast-dur: 4s;
+  pointer-events: all;
+  position: relative;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-card) 94%, var(--color-surface) 6%),
+    var(--color-card)
+  );
+  box-shadow: var(--shadow-card);
+  animation: toastIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.toast.dismissing {
+  animation: toastOut 0.24s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* TTL → progress duration (sync with auto-dismiss) */
+.toast_dur_1 {
+  --toast-dur: 1s;
+}
+.toast_dur_2 {
+  --toast-dur: 2s;
+}
+.toast_dur_3 {
+  --toast-dur: 3s;
+}
+.toast_dur_4 {
+  --toast-dur: 4s;
+}
+.toast_dur_5 {
+  --toast-dur: 5s;
+}
+.toast_dur_6 {
+  --toast-dur: 6s;
+}
+.toast_dur_7 {
+  --toast-dur: 7s;
+}
+.toast_dur_8 {
+  --toast-dur: 8s;
+}
+.toast_dur_9 {
+  --toast-dur: 9s;
+}
+.toast_dur_10 {
+  --toast-dur: 10s;
+}
+.toast_dur_11 {
+  --toast-dur: 11s;
+}
+.toast_dur_12 {
+  --toast-dur: 12s;
+}
+.toast_dur_13 {
+  --toast-dur: 13s;
+}
+.toast_dur_14 {
+  --toast-dur: 14s;
+}
+.toast_dur_15 {
+  --toast-dur: 15s;
+}
+.toast_dur_16 {
+  --toast-dur: 16s;
+}
+.toast_dur_17 {
+  --toast-dur: 17s;
+}
+.toast_dur_18 {
+  --toast-dur: 18s;
+}
+.toast_dur_19 {
+  --toast-dur: 19s;
+}
+.toast_dur_20 {
+  --toast-dur: 20s;
+}
+.toast_dur_21 {
+  --toast-dur: 21s;
+}
+.toast_dur_22 {
+  --toast-dur: 22s;
+}
+.toast_dur_23 {
+  --toast-dur: 23s;
+}
+.toast_dur_24 {
+  --toast-dur: 24s;
+}
+.toast_dur_25 {
+  --toast-dur: 25s;
+}
+.toast_dur_26 {
+  --toast-dur: 26s;
+}
+.toast_dur_27 {
+  --toast-dur: 27s;
+}
+.toast_dur_28 {
+  --toast-dur: 28s;
+}
+.toast_dur_29 {
+  --toast-dur: 29s;
+}
+.toast_dur_30 {
+  --toast-dur: 30s;
+}
+.toast_dur_31 {
+  --toast-dur: 31s;
+}
+.toast_dur_32 {
+  --toast-dur: 32s;
+}
+.toast_dur_33 {
+  --toast-dur: 33s;
+}
+.toast_dur_34 {
+  --toast-dur: 34s;
+}
+.toast_dur_35 {
+  --toast-dur: 35s;
+}
+.toast_dur_36 {
+  --toast-dur: 36s;
+}
+.toast_dur_37 {
+  --toast-dur: 37s;
+}
+.toast_dur_38 {
+  --toast-dur: 38s;
+}
+.toast_dur_39 {
+  --toast-dur: 39s;
+}
+.toast_dur_40 {
+  --toast-dur: 40s;
+}
+.toast_dur_41 {
+  --toast-dur: 41s;
+}
+.toast_dur_42 {
+  --toast-dur: 42s;
+}
+.toast_dur_43 {
+  --toast-dur: 43s;
+}
+.toast_dur_44 {
+  --toast-dur: 44s;
+}
+.toast_dur_45 {
+  --toast-dur: 45s;
+}
+.toast_dur_46 {
+  --toast-dur: 46s;
+}
+.toast_dur_47 {
+  --toast-dur: 47s;
+}
+.toast_dur_48 {
+  --toast-dur: 48s;
+}
+.toast_dur_49 {
+  --toast-dur: 49s;
+}
+.toast_dur_50 {
+  --toast-dur: 50s;
+}
+.toast_dur_51 {
+  --toast-dur: 51s;
+}
+.toast_dur_52 {
+  --toast-dur: 52s;
+}
+.toast_dur_53 {
+  --toast-dur: 53s;
+}
+.toast_dur_54 {
+  --toast-dur: 54s;
+}
+.toast_dur_55 {
+  --toast-dur: 55s;
+}
+.toast_dur_56 {
+  --toast-dur: 56s;
+}
+.toast_dur_57 {
+  --toast-dur: 57s;
+}
+.toast_dur_58 {
+  --toast-dur: 58s;
+}
+.toast_dur_59 {
+  --toast-dur: 59s;
+}
+.toast_dur_60 {
+  --toast-dur: 60s;
+}
+
+/* Top edge timer */
+.toast-meter {
+  height: clamp(3px, 0.6vw, 4px);
+  background: var(--color-surface-2);
+  overflow: hidden;
+}
+
+.toast-meterFill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  animation: toastMeterShrink var(--toast-dur) linear forwards;
+}
+
+.toast.success .toast-meterFill {
+  background: var(--color-success);
+}
+.toast.error .toast-meterFill {
+  background: var(--color-danger);
+}
+.toast.info .toast-meterFill {
+  background: var(--color-primary);
+}
+.toast.warning .toast-meterFill {
+  background: var(--color-warning-strong);
+}
+
+/* Type-tinted shell */
+.toast.success {
+  border-color: color-mix(in srgb, var(--color-success-subtle) 55%, var(--color-border));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-success-light) 55%, var(--color-card)),
+    var(--color-card)
+  );
+}
+.toast.error {
+  border-color: color-mix(in srgb, var(--color-danger-subtle) 55%, var(--color-border));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-danger-light) 55%, var(--color-card)),
+    var(--color-card)
+  );
+}
+.toast.info {
+  border-color: color-mix(in srgb, var(--color-primary-subtle) 50%, var(--color-border));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-primary-light) 55%, var(--color-card)),
+    var(--color-card)
+  );
+}
+.toast.warning {
+  border-color: color-mix(in srgb, var(--color-warning-subtle) 55%, var(--color-border));
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-warning-light) 55%, var(--color-card)),
+    var(--color-card)
+  );
+}
+
+.toast-sheet {
+  padding: clamp(10px, 2.2vw, 14px) clamp(12px, 2.5vw, 16px) clamp(12px, 2.6vw, 16px);
+}
+
+.toast-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(8px, 2vw, 12px);
+  margin-bottom: clamp(8px, 1.8vw, 10px);
+}
+
+.toast-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(6px, 1.4vw, 8px);
+  min-width: 0;
+  padding: clamp(4px, 1vw, 6px) clamp(8px, 1.8vw, 10px);
+  border-radius: clamp(8px, 1.6vw, 10px);
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 88%, var(--color-card) 12%);
+  box-shadow: var(--shadow-xs);
+}
+
+.toast-kindGlyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toast-kindGlyph svg {
+  width: clamp(14px, 3.2vw, 17px);
+  height: clamp(14px, 3.2vw, 17px);
+}
+
+.toast.success .toast-kindGlyph {
+  color: var(--color-success);
+}
+.toast.error .toast-kindGlyph {
+  color: var(--color-danger);
+}
+.toast.info .toast-kindGlyph {
+  color: var(--color-primary);
+}
+.toast.warning .toast-kindGlyph {
+  color: var(--color-warning-strong);
+}
+
+.toast-kindText {
+  font-size: clamp(10px, 2.4vw, 11.5px);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+  line-height: 1.2;
+}
+
+/* Shared IconBtn  compact in toast chrome */
+.toast-container .toastDismiss.xib {
+  width: clamp(30px, 7.5vw, 34px);
+  height: clamp(30px, 7.5vw, 34px);
+  border-radius: clamp(9px, 1.8vw, 12px);
+}
+
+.toast-copy {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 1.2vw, 6px);
+  min-width: 0;
+}
+
+.toast-lead {
+  margin: 0;
+  font-size: clamp(13px, 2.8vw, 14.5px);
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--color-text-heading);
+}
+
+.toast.success .toast-lead {
+  color: var(--color-success-deep);
+}
+.toast.error .toast-lead {
+  color: var(--color-danger-deep);
+}
+.toast.info .toast-lead {
+  color: var(--color-primary-darker);
+}
+.toast.warning .toast-lead {
+  color: var(--color-warning-deep);
+}
+
+.toast-detail {
+  margin: 0;
+  font-size: clamp(12px, 2.5vw, 13px);
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-text-2);
+}
+
+.toast.success .toast-detail {
+  color: var(--color-success-darker);
+}
+.toast.error .toast-detail {
+  color: var(--color-danger-darker);
+}
+.toast.info .toast-detail {
+  color: var(--color-primary-dark);
+}
+.toast.warning .toast-detail {
+  color: var(--color-warning-darker);
+}
+
+@media (max-width: 480px) {
+  .toast-container {
+    right: clamp(8px, 2.5vw, 12px);
+    left: clamp(8px, 2.5vw, 12px);
+    top: max(clamp(10px, 3vw, 16px), env(safe-area-inset-top, 0px));
+    bottom: auto;
+    width: auto;
+    max-width: none;
+  }
+
+  .toast-head {
+    flex-wrap: wrap;
+  }
+
+  .toastDismiss {
+    margin-left: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation-name: toastInReduced;
+    animation-duration: 0.2s;
+    animation-timing-function: ease;
+  }
+
+  .toast.dismissing {
+    animation-name: toastOutReduced;
+    animation-duration: 0.16s;
+    animation-timing-function: ease;
+  }
+
+  .toast-meterFill {
+    animation: none;
+    opacity: 0.45;
+    transform: scaleX(0.35);
+  }
+}

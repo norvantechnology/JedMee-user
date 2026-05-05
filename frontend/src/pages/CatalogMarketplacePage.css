@@ -1,0 +1,1138 @@
+/* ─────────────────────────────────────────────
+   CatalogMarketplacePage.css
+   Wholesaler "My Catalog" + Retailer "Order Catalog"
+   Design tokens match reference HTML purple theme
+   ───────────────────────────────────────────── */
+
+/* ── Local design tokens (hardcoded to match reference) ── */
+:root {
+  --mc-p0:  #f5f3ff;
+  --mc-p1:  #ede9fe;
+  --mc-p4:  #9b59f5;
+  --mc-p5:  #7c3aed;
+  --mc-p6:  var(--color-primary);
+  --mc-s:   #ffffff;
+  --mc-s2:  #f8f7fc;
+  --mc-s3:  #f0eef8;
+  --mc-bd:  var(--color-border);
+  --mc-bd2: var(--color-border-strong);
+  --mc-ok:  #16a34a;
+  --mc-okb: #dcfce7;
+  --mc-er:  #dc2626;
+  --mc-erb: #fee2e2;
+  --mc-wn:  #d97706;
+  --mc-wnb: #fef3c7;
+  --mc-gr:  #6b7280;
+  --mc-grb: #f3f4f6;
+  --mc-sh1: 0 1px 4px rgba(93,45,168,.07);
+  --mc-sh2: 0 4px 20px rgba(93,45,168,.10);
+  --mc-sh3: 0 12px 40px rgba(93,45,168,.15);
+  --mc-tr:  .15s ease;
+}
+
+/* ══════════════════════════════════════════════
+   SHARED BUTTON SYSTEM
+   ══════════════════════════════════════════════ */
+.mcBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all var(--mc-tr);
+  white-space: nowrap;
+  line-height: 1;
+  font-family: inherit;
+}
+.mcBtn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; }
+.mcBtn_primary {
+  background: var(--mc-p6);
+  color: #fff;
+  border-color: var(--mc-p6);
+  box-shadow: 0 2px 8px rgba(93,45,168,.22);
+}
+.mcBtn_primary:hover {
+  background: var(--mc-p5);
+  box-shadow: 0 4px 14px rgba(93,45,168,.32);
+  transform: translateY(-1px);
+}
+.mcBtn_ghost {
+  background: var(--mc-s);
+  color: var(--color-text-2);
+  border-color: var(--mc-bd);
+}
+.mcBtn_ghost:hover {
+  border-color: var(--mc-p4);
+  color: var(--mc-p6);
+  background: var(--mc-p0);
+}
+.mcBtn_ok {
+  background: var(--mc-ok);
+  color: #fff;
+  border-color: var(--mc-ok);
+}
+.mcBtn_ok:hover { background: #15803d; }
+.mcBtn_er {
+  background: var(--mc-er);
+  color: #fff;
+  border-color: var(--mc-er);
+}
+.mcBtn_er:hover { background: #b91c1c; }
+.mcBtn_sm { padding: 6px 10px; font-size: 12px; }
+.mcBtn_flex { flex: 1; justify-content: center; }
+.mcBtn_disabled,
+.mcBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════
+   STAT PILLS ROW
+   ══════════════════════════════════════════════ */
+.mcStats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.mcStat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--mc-s);
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 10px;
+  padding: 10px 14px;
+  flex: 1;
+  min-width: 110px;
+  transition: box-shadow var(--mc-tr), border-color var(--mc-tr);
+}
+.mcStatIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.mcStatIcon svg { width: 16px; height: 16px; fill: none; stroke-width: 2; }
+.mcStatNum {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1;
+}
+.mcStatLabel {
+  font-size: 10.5px;
+  color: var(--color-text-2);
+  margin-top: 1px;
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════════
+   SECTION WRAPPER + TOOLBAR
+   ══════════════════════════════════════════════ */
+.mcSection {
+  background: var(--mc-s);
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 12px;
+  box-shadow: var(--mc-sh1);
+  overflow: hidden;
+}
+.mcToolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--mc-bd);
+  flex-wrap: wrap;
+}
+.mcSearchBox {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: var(--mc-s);
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 8px;
+  transition: all var(--mc-tr);
+}
+.mcSearchBox:focus-within {
+  border-color: var(--mc-p5);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.09);
+}
+.mcSearchIcon {
+  color: var(--color-text-3);
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+.mcSearchInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13.5px;
+  color: var(--color-text);
+  width: 100%;
+  font-family: inherit;
+}
+.mcSearchInput::placeholder { color: var(--color-text-3); }
+.mcCount {
+  padding: 4px 10px;
+  background: var(--mc-p1);
+  color: var(--mc-p6);
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.mcToolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════
+   CARD GRID
+   ══════════════════════════════════════════════ */
+.mcGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  padding: 16px;
+}
+
+/* ── Individual card ── */
+.mcCard {
+  position: relative;
+  background: var(--mc-s);
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color var(--mc-tr), box-shadow var(--mc-tr), transform var(--mc-tr);
+}
+.mcCard:hover {
+  border-color: var(--mc-p4);
+  box-shadow: var(--mc-sh2);
+  transform: translateY(-2px);
+}
+.mcCard_hid { opacity: 0.6; }
+
+/* Visibility badge */
+.mcVisBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.mcVisBadge_yes { background: var(--mc-okb); color: var(--mc-ok); }
+.mcVisBadge_no  { background: var(--mc-grb); color: var(--mc-gr); }
+
+/* Card header */
+.mcCardHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-right: 60px;
+}
+.mcCardIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--mc-p1);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.mcCardIcon svg { width: 18px; height: 18px; color: var(--mc-p6); fill: none; stroke: currentColor; stroke-width: 1.8; }
+.mcCardName {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+.mcCardCode {
+  font-size: 11px;
+  color: var(--color-text-3);
+  font-family: monospace;
+  margin-top: 2px;
+}
+
+/* Pills row */
+.mcPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.mcPill {
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.mcPill_pack    { background: var(--mc-s3); color: var(--color-text-2); }
+.mcPill_stock   { background: var(--mc-okb); color: var(--mc-ok); }
+.mcPill_lo      { background: var(--mc-wnb); color: var(--mc-wn); }
+.mcPill_oos     { background: var(--mc-erb); color: var(--mc-er); }
+.mcPill_hideoos { background: var(--mc-s3); color: var(--color-text-3); }
+
+/* Price grid */
+.mcPrices {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr 1px 1fr;
+  gap: 6px;
+  padding: 10px;
+  background: var(--mc-s2);
+  border-radius: 8px;
+  align-items: center;
+}
+.mcPriceDivider {
+  background: var(--mc-bd);
+  height: 28px;
+  width: 1px;
+}
+.mcPrice { text-align: center; }
+.mcPriceLabel {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--color-text-3);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.mcPriceValue {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+.mcPriceValue_cat { color: var(--mc-p6); }
+
+/* Qty row */
+.mcQtyRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--mc-s2);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.mcQtyGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mcQtyLabel {
+  font-size: 10.5px;
+  color: var(--color-text-3);
+  font-weight: 600;
+}
+.mcQtyValue {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+/* Note */
+.mcNote {
+  font-size: 11.5px;
+  color: var(--color-text-2);
+  padding: 7px 10px;
+  background: var(--mc-wnb);
+  border-radius: 6px;
+  border-left: 3px solid var(--mc-wn);
+  line-height: 1.5;
+}
+
+/* Card footer */
+.mcCardFoot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+/* ── Skeleton cards ── */
+.mcCard_skel { pointer-events: none; }
+.mcSkelLine {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--mc-bd);
+  animation: mcSkelPulse 1.4s ease-in-out infinite;
+}
+.mcSkelLine_lg { height: 16px; width: 70%; margin-bottom: 4px; }
+.mcSkelLine_sm { width: 45%; }
+.mcSkelPrices {
+  height: 44px;
+  border-radius: 8px;
+  background: var(--mc-bd);
+  animation: mcSkelPulse 1.4s ease-in-out infinite;
+}
+.mcSkelActions {
+  height: 30px;
+  border-radius: 7px;
+  background: var(--mc-bd);
+  animation: mcSkelPulse 1.4s ease-in-out infinite;
+}
+@keyframes mcSkelPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* ── Empty state ── */
+.mcEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 52px 20px;
+  gap: 8px;
+  text-align: center;
+}
+.mcEmptyIcon { color: var(--mc-bd2); margin-bottom: 4px; }
+.mcEmptyTitle { font-size: 15px; font-weight: 700; color: var(--color-text); margin-bottom: 4px; }
+.mcEmptySub   { font-size: 13px; color: var(--color-text-3); margin-bottom: 16px; }
+
+/* ══════════════════════════════════════════════
+   MODAL WIZARD BODY
+   ══════════════════════════════════════════════ */
+.mcWizBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 4px 0 2px;
+}
+
+/* ── Delete confirm modal ── */
+.mcDeleteConfirm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0 4px;
+  text-align: center;
+}
+.mcDeleteIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--mc-erb);
+  color: var(--mc-er);
+  display: grid;
+  place-items: center;
+}
+.mcDeleteIcon svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.mcDeleteMsg {
+  font-size: 14px;
+  color: var(--color-text);
+  line-height: 1.5;
+  max-width: 320px;
+}
+.mcDeleteSub {
+  font-size: 12px;
+  color: var(--color-text-3);
+  font-family: monospace;
+  background: var(--mc-s2);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.mcDeleteNote {
+  font-size: 11.5px;
+  color: var(--mc-wn);
+  background: var(--mc-wnb);
+  border-radius: 6px;
+  padding: 7px 12px;
+  border-left: 3px solid var(--mc-wn);
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
+/* Step indicator */
+.mcStepsWrap { margin-bottom: 4px; }
+.mcSteps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.mcStepDot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--mc-bd);
+  background: var(--mc-s);
+  color: var(--color-text-3);
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: all var(--mc-tr);
+  position: relative;
+  z-index: 1;
+}
+.mcStepDot_active {
+  background: var(--mc-p1);
+  border-color: var(--mc-p5);
+  color: var(--mc-p6);
+}
+.mcStepDot_done {
+  background: var(--mc-p6);
+  border-color: var(--mc-p6);
+  color: #fff;
+}
+.mcStepLine {
+  flex: 1;
+  height: 2px;
+  background: var(--mc-bd);
+  transition: background var(--mc-tr);
+}
+.mcStepLine_done { background: var(--mc-p5); }
+.mcStepLbl {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-3);
+  white-space: nowrap;
+}
+
+/* Product search list (step 1) */
+.mcProdList {
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.mcProdItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--mc-bd);
+  cursor: pointer;
+  transition: background var(--mc-tr);
+}
+.mcProdItem:last-child { border-bottom: none; }
+.mcProdItem:hover { background: var(--mc-p0); }
+.mcProdItem_sel { background: var(--mc-p0); border-left: 3px solid var(--mc-p5); }
+.mcProdItem_sel:hover { background: var(--mc-p1); }
+.mcProdRadio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--mc-bd2);
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  transition: all var(--mc-tr);
+}
+.mcProdRadio_on {
+  border-color: var(--mc-p5);
+  background: var(--mc-p5);
+  color: #fff;
+}
+.mcProdInfo { flex: 1; min-width: 0; }
+.mcProdName {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mcProdMeta { font-size: 11.5px; color: var(--color-text-3); margin-top: 1px; }
+.mcProdCode {
+  padding: 2px 7px;
+  background: var(--mc-p1);
+  color: var(--mc-p6);
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Selected product card (step 2 / edit modal) */
+.mcSelCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--mc-p0);
+  border: 1.5px solid var(--mc-p4);
+  border-radius: 10px;
+}
+.mcSelIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--mc-p6);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.mcSelIcon svg { width: 17px; height: 17px; stroke: #fff; stroke-width: 1.8; fill: none; }
+.mcSelName { font-size: 14px; font-weight: 800; color: var(--color-text); }
+.mcSelMeta { font-size: 11.5px; color: var(--color-text-2); margin-top: 2px; }
+
+/* Section label */
+.mcSecLabel {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: -4px;
+}
+.mcSecLabel::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--mc-bd);
+}
+
+/* Field rows */
+.mcFieldRow {
+  display: grid;
+  gap: 10px;
+}
+.mcFieldRow_col2 { grid-template-columns: 1fr 1fr; }
+.mcFieldRow_col3 { grid-template-columns: 1fr 1fr 1fr; }
+.mcField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.mcField label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--color-text-2);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.mcField input,
+.mcField select {
+  padding: 9px 12px;
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 8px;
+  background: var(--mc-s);
+  color: var(--color-text);
+  font-size: 13.5px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color var(--mc-tr), box-shadow var(--mc-tr);
+}
+.mcField input:focus,
+.mcField select:focus {
+  border-color: var(--mc-p5);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.09);
+}
+.mcField input::placeholder { color: var(--color-text-3); font-size: 13px; }
+.mcFieldGroup {
+  position: relative;
+}
+.mcFieldPfx {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: var(--color-text-3);
+  pointer-events: none;
+  font-weight: 600;
+}
+.mcFieldGroup input {
+  padding-left: 24px;
+}
+
+/* Notes textarea */
+.mcNoteInput {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 8px;
+  background: var(--mc-s);
+  color: var(--color-text);
+  font-size: 13.5px;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color var(--mc-tr), box-shadow var(--mc-tr);
+}
+.mcNoteInput:focus {
+  border-color: var(--mc-p5);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.09);
+}
+.mcNoteInput::placeholder { color: var(--color-text-3); }
+
+/* Toggle grid */
+.mcTogGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mcTogCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 10px;
+  cursor: pointer;
+  background: var(--mc-s2);
+  transition: all var(--mc-tr);
+  user-select: none;
+}
+.mcTogCard:hover { border-color: var(--mc-p4); background: var(--mc-p0); }
+.mcTogCard_on {
+  border-color: var(--mc-p5);
+  background: var(--mc-p0);
+}
+.mcTogSwitch {
+  width: 38px;
+  height: 22px;
+  border-radius: 11px;
+  border: 2px solid var(--mc-bd2);
+  background: var(--mc-bd2);
+  position: relative;
+  flex-shrink: 0;
+  transition: all var(--mc-tr);
+  margin-top: 1px;
+}
+.mcTogCard_on .mcTogSwitch { background: var(--mc-p5); border-color: var(--mc-p5); }
+.mcTogKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform var(--mc-tr);
+  box-shadow: 0 1px 2px rgba(0,0,0,.18);
+}
+.mcTogCard_on .mcTogKnob { transform: translateX(16px); }
+.mcTogTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+.mcTogSub {
+  font-size: 11px;
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+/* ══════════════════════════════════════════════
+   RETAILER CATALOG (existing .cmp* classes)
+   ══════════════════════════════════════════════ */
+.cmpCatalogToolbarWrap {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+}
+.cmpCatalogToolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cmpCatalogSearchBox {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+.cmpCatalogSearchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-3);
+  pointer-events: none;
+}
+.cmpCatalogSearchInput {
+  width: 100%;
+  padding: 7px 10px 7px 32px;
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 8px;
+  background: var(--mc-s);
+  color: var(--color-text);
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--mc-tr), box-shadow var(--mc-tr);
+}
+.cmpCatalogSearchInput:focus {
+  border-color: var(--mc-p5);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.09);
+}
+.cmpCatalogWsSelect {
+  padding: 7px 10px;
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 8px;
+  background: var(--mc-s);
+  color: var(--color-text);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--mc-tr);
+}
+.cmpCatalogWsSelect:focus { border-color: var(--mc-p5); }
+.cmpCatalogMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.cmpCatalogCount { font-size: 12px; color: var(--color-text-3); }
+.cmpCatalogMetaText { font-size: 12px; color: var(--color-text-4); }
+
+/* Retailer card grid */
+.cmpGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+.cmpGridEmpty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 24px;
+  color: var(--color-text-3);
+  text-align: center;
+}
+.cmpCard {
+  background: var(--mc-s);
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color var(--mc-tr), box-shadow var(--mc-tr), transform var(--mc-tr);
+}
+.cmpCard:hover {
+  border-color: var(--mc-p4);
+  box-shadow: var(--mc-sh2);
+  transform: translateY(-2px);
+}
+.cmpCard_skel { pointer-events: none; }
+.cmpCardSkelLine {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--mc-bd);
+  animation: mcSkelPulse 1.4s ease-in-out infinite;
+}
+.cmpCardSkelLine_lg { height: 16px; width: 70%; margin-bottom: 4px; }
+.cmpCardSkelLine_sm { width: 45%; }
+.cmpCardSkelPrices {
+  height: 44px;
+  border-radius: 8px;
+  background: var(--mc-bd);
+  animation: mcSkelPulse 1.4s ease-in-out infinite;
+}
+.cmpCardSkelActions {
+  height: 30px;
+  border-radius: 7px;
+  background: var(--mc-bd);
+  animation: mcSkelPulse 1.4s ease-in-out infinite;
+}
+
+/* Retailer card internals */
+
+/* Card header */
+.cmpCardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cmpCardHeadLeft { flex: 1; min-width: 0; }
+.cmpCardName {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cmpCardCode {
+  font-size: 10.5px;
+  color: var(--color-text-3);
+  font-family: monospace;
+  margin-top: 2px;
+}
+.cmpCardWsBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--mc-p1);
+  color: var(--mc-p6);
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Pills */
+.cmpCardPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.cmpPill {
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.cmpPill_pack { background: var(--mc-s3); color: var(--color-text-2); }
+.cmpPill_gst  { background: var(--mc-p1); color: var(--mc-p6); }
+.cmpPill_drug { background: var(--mc-wnb); color: var(--mc-wn); }
+
+/* Price grid — same layout as wholesaler .mcPrices */
+.cmpCardPrices {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr 1px 1fr;
+  gap: 6px;
+  padding: 10px;
+  background: var(--mc-s2);
+  border-radius: 8px;
+  align-items: center;
+}
+.cmpCardPriceDivider {
+  background: var(--mc-bd);
+  height: 28px;
+  width: 1px;
+}
+.cmpCardPriceItem { text-align: center; }
+.cmpCardPriceLabel {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--color-text-3);
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.cmpCardPriceValue {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--color-text);
+}
+.cmpCardPriceValue_cat { color: var(--mc-p6); }
+
+/* Stock row */
+.cmpCardStockRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 10px;
+  background: var(--mc-s2);
+  border-radius: 8px;
+  font-size: 11.5px;
+}
+.cmpCardStockStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-2);
+}
+.cmpStockDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mc-ok);
+  flex-shrink: 0;
+}
+.cmpStockDot_lo  { background: var(--mc-wn); }
+.cmpStockDot_no  { background: var(--mc-er); }
+.cmpCardMinMax {
+  font-size: 10.5px;
+  color: var(--color-text-3);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Card state variants */
+.cmpCard_inCart { border-color: var(--mc-ok); box-shadow: 0 0 0 2px rgba(22,163,74,.12); }
+.cmpCard_oos    { opacity: 0.7; }
+
+/* Actions row */
+.cmpCardActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+.cmpCardQtyCtrl {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--mc-bd);
+  border-radius: 7px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.cmpCardQtyBtn {
+  width: 28px;
+  height: 30px;
+  background: var(--mc-s2);
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: var(--color-text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--mc-tr);
+  line-height: 1;
+}
+.cmpCardQtyBtn:hover { background: var(--mc-bd); }
+.cmpCardQtyVal {
+  min-width: 30px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-text);
+  border-left: 1px solid var(--mc-bd);
+  border-right: 1px solid var(--mc-bd);
+  line-height: 30px;
+  padding: 0 4px;
+}
+.cmpCardAddBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  background: var(--mc-p6);
+  color: #fff;
+  transition: opacity var(--mc-tr), background var(--mc-tr);
+  height: 30px;
+}
+.cmpCardAddBtn:hover:not(:disabled) { opacity: 0.88; }
+.cmpCardAddBtn:disabled { opacity: 0.45; cursor: not-allowed; }
+.cmpCardAddBtn_done { background: var(--mc-okb); color: var(--mc-ok); border: 1.5px solid rgba(22,163,74,.25); }
+.cmpCardDetailsBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1.5px solid var(--mc-bd);
+  background: var(--mc-s2);
+  color: var(--color-text-3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--mc-tr), border-color var(--mc-tr);
+}
+.cmpCardDetailsBtn:hover { background: var(--mc-p0); border-color: var(--mc-p4); color: var(--mc-p6); }
+
+/* Cart header button */
+.cmpCartHeaderBtn { position: relative; }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  /* Stats: 2×2 grid */
+  .mcStats { gap: 6px; }
+  .mcStat  { flex: 1 1 calc(50% - 3px); min-width: calc(50% - 3px); }
+
+  /* Wholesaler card grid: single column, tighter */
+  .mcGrid  { grid-template-columns: 1fr; padding: 10px; gap: 8px; }
+  .mcCard  { padding: 12px; gap: 8px; }
+
+  /* Wholesaler price grid: keep all 3 columns, smaller font */
+  .mcPrices { padding: 8px 6px; gap: 3px; }
+  .mcPriceLabel { font-size: 8.5px; letter-spacing: 0; }
+  .mcPriceValue { font-size: 12px; }
+
+  /* Wholesaler card footer: 3 buttons tighter */
+  .mcCardFoot { gap: 4px; }
+  .mcCardFoot .mcBtn { padding: 5px 6px; font-size: 11px; gap: 3px; }
+  .mcCardFoot .mcBtn svg { width: 11px; height: 11px; }
+
+  /* Wholesaler toolbar: search full-width, count + actions wrap below */
+  .mcToolbar { flex-wrap: wrap; gap: 6px; padding: 10px 12px; }
+  .mcSearchBox { min-width: 100%; flex: 1 1 100%; }
+  .mcCount { margin-left: 0; }
+  .mcToolbarActions { flex-shrink: 0; }
+
+  /* Form fields */
+  .mcTogGrid { grid-template-columns: 1fr; }
+  .mcFieldRow_col2 { grid-template-columns: 1fr; }
+  .mcFieldRow_col3 { grid-template-columns: 1fr 1fr; }
+
+  /* Retailer card grid: single column */
+  .cmpGrid { grid-template-columns: 1fr; gap: 8px; }
+  .cmpCard { padding: 12px; gap: 7px; }
+
+  /* Retailer price grid: keep all 3 columns, smaller font */
+  .cmpCardPrices { padding: 8px 6px; gap: 3px; }
+  .cmpCardPriceLabel { font-size: 8.5px; letter-spacing: 0; }
+  .cmpCardPriceValue { font-size: 12px; }
+
+  /* Retailer stock row */
+  .cmpCardStockRow { padding: 6px 8px; font-size: 11px; }
+
+  /* Retailer actions: qty ctrl + add btn */
+  .cmpCardQtyBtn { width: 26px; height: 28px; }
+  .cmpCardQtyVal { min-width: 26px; line-height: 28px; }
+  .cmpCardAddBtn { height: 28px; font-size: 11.5px; }
+  .cmpCardDetailsBtn { width: 28px; height: 28px; }
+
+  /* Retailer toolbar */
+  .cmpCatalogToolbar { flex-wrap: wrap; }
+  .cmpCatalogSearchBox { min-width: 100%; }
+}
+
+@media (max-width: 400px) {
+  /* Stats: keep 2×2 even on very small screens */
+  .mcStat  { flex: 1 1 calc(50% - 3px); min-width: calc(50% - 3px); }
+  /* Wholesaler card footer: even smaller text */
+  .mcCardFoot .mcBtn { padding: 5px 4px; font-size: 10.5px; }
+  /* Form fields: single column */
+  .mcFieldRow_col3 { grid-template-columns: 1fr; }
+  /* Retailer: even smaller actions */
+  .cmpCardQtyBtn { width: 24px; }
+  .cmpCardAddBtn { font-size: 11px; }
+}

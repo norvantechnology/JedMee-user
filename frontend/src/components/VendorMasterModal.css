@@ -1,0 +1,132 @@
+/* Vendor master modal  layout shell only; tokens from MasterModalForm.css */
+
+.vmShell.mfz .mfzBody.vmSplit {
+  display: grid;
+  gap: clamp(12px, 2.2vw, 16px);
+}
+
+/* ── Clean / low-shadow variant for vendor/supplier modal ─────────────────── */
+/* User request: keep UI clean + remove shadows inside this modal. */
+.vmShell.mfz {
+  --mfz-shadow: none;
+  --mfz-shadow-soft: none;
+}
+
+.vmShell.mfz .mfzPanel {
+  box-shadow: none;
+  /* Flat surface (no gradient / no shadow) */
+  background: var(--color-card);
+}
+
+.vmShell.mfz .mfzPanelHead {
+  background: var(--color-card);
+}
+
+/* Tighten vendor modal headings slightly (cleaner, less bulky). */
+.vmShell.mfz .mfzPanelHead {
+  padding: 12px 14px 10px;
+}
+
+.vmShell.mfz .mfzHeadKicker {
+  font-size: 12.5px;
+}
+
+/* Keep form content compact + aligned */
+.vmShell.mfz .mfzPanelBody {
+  padding: 12px;
+  gap: 10px;
+}
+
+.vmShell.mfz .mfzGrid {
+  gap: 12px;
+}
+
+.vmShell.mfz .mfzLabel {
+  font-size: 11.5px;
+  letter-spacing: 0.085em;
+}
+
+.vmShell.mfz .mfzInput,
+.vmShell.mfz .mfzTextarea {
+  min-height: 42px;
+  border-radius: 14px;
+}
+
+.vmShell.mfz .mfzTextarea {
+  min-height: 104px;
+}
+
+.vmShell.mfz .mfzChecks {
+  padding-top: 4px;
+}
+
+.vmShell.mfz .mfzCheck span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-2);
+}
+
+.vmShell.mfz .mfzCheck input {
+  transform: translateY(1px);
+}
+
+.vmShell.mfz .mfzNote {
+  box-shadow: none;
+  background: color-mix(in srgb, var(--color-surface) 72%, var(--color-card));
+}
+
+.vmShell.mfz .mfzToggle:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.vmShell.mfz .mfzToggleIcon svg {
+  filter: none;
+}
+
+/* PhoneInput (Contact) has strong shadows by default; flatten only here. */
+.vmShell.mfz .telx,
+.vmShell.mfz .telxRibbonMark,
+.vmShell.mfz .telxSlot {
+  box-shadow: none !important;
+}
+
+.vmShell.mfz .telxRibbonMark svg,
+.vmShell.mfz .telxGlyph svg {
+  filter: none !important;
+}
+
+.vmShell.mfz .telxSlot:focus-within {
+  transform: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent) !important;
+}
+
+/* Always stack panels vertically (Supplier profile -> Reach & notes).
+   User request: no side-by-side layout on desktop. */
+.vmShell.mfz .mfzBody.vmSplit {
+  grid-template-columns: 1fr;
+}
+
+.vmColStretch.mfzPanel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.vmColStretch .mfzPanelBody {
+  flex: 1;
+  align-content: start;
+}
+
+/* Slightly larger spacing on wide screens (still stacked). */
+@media (min-width: 960px) {
+  .vmShell.mfz .mfzBody.vmSplit {
+    gap: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vmShell.mfz * {
+    transition: none !important;
+  }
+}

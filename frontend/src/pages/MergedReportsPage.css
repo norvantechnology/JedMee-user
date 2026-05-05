@@ -1,0 +1,202 @@
+/* ============================================================
+   MergedReportsPage.css
+   Shared by InventoryReportsPage and LedgerReportsPage.
+   All colors from theme variables only — no hardcoded values.
+   ============================================================ */
+
+/* ── Page header ── */
+.mrPageHeader {
+  margin-bottom: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+}
+
+.mrPageHeaderText {
+  min-width: 0;
+}
+
+.mrPageTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-text-heading, var(--color-text));
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+.mrPageSub {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--color-text-3, var(--color-text-muted));
+  line-height: 1.4;
+}
+
+/* ── Tab bar ── */
+.mrTabs {
+  display: flex;
+  gap: 6px;
+  padding: 0 0 14px;
+  margin: 0 0 18px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  border-bottom: 1px solid var(--color-border);
+  scrollbar-width: none;
+}
+
+.mrTabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Individual tab button ── */
+.mrTab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-2);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
+  white-space: nowrap;
+  line-height: 1;
+  font-family: var(--font);
+}
+
+.mrTab:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-card));
+  color: var(--color-primary);
+}
+
+.mrTab:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.mrTab_active {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
+  color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+/* Tab icon wrapper */
+.mrTabIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.mrTab_active .mrTabIcon,
+.mrTab:hover .mrTabIcon {
+  opacity: 1;
+}
+
+.mrTabIcon svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* Tab label */
+.mrTabLabel {
+  line-height: 1;
+}
+
+/* ── Tab content area ── */
+.mrBody {
+  min-width: 0;
+}
+
+/* ── Responsive: 900px ── */
+@media (max-width: 900px) {
+  .mrPageTitle {
+    font-size: 18px;
+  }
+}
+
+/* ── Responsive: 640px ── */
+@media (max-width: 640px) {
+  .mrPageHeader {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+  }
+
+  .mrPageTitle {
+    font-size: 17px;
+  }
+
+  .mrPageSub {
+    font-size: 12px;
+  }
+
+  .mrTabs {
+    gap: 5px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+  }
+
+  .mrTab {
+    padding: 8px 12px;
+    font-size: 12.5px;
+    border-radius: 9px;
+    gap: 5px;
+  }
+
+  .mrTabIcon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .mrTabIcon svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* ── Responsive: 420px ── */
+@media (max-width: 420px) {
+  .mrPageHeader {
+    gap: 9px;
+  }
+
+  .mrPageTitle {
+    font-size: 16px;
+  }
+
+  /* Always show tab labels — never hide them */
+  .mrTab {
+    padding: 7px 10px;
+    font-size: 11.5px;
+    border-radius: 8px;
+    gap: 4px;
+  }
+
+  .mrTabIcon {
+    width: 13px;
+    height: 13px;
+  }
+
+  .mrTabIcon svg {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+/* ── Page header: no icon box ── */
+.mrPageHeader:not(:has(.mrPageHeaderIcon)) {
+  gap: 0;
+}

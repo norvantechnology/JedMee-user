@@ -1,0 +1,94 @@
+/* App shell aligned to HTML developer sidebar */
+
+:root {
+  --sidebar-w: 260px;
+  --sidebar-collapsed: 76px;
+  --sidebar-transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.appShell2 {
+  min-height: 100vh;
+  background: var(--color-bg);
+  /* Allow normal page scrolling */
+  overflow: visible;
+}
+
+.appShell2Main {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+  transition: margin-left var(--sidebar-transition);
+  overflow: visible;
+}
+
+.appShell2_collapsed .appShell2Main {
+  margin-left: var(--sidebar-collapsed);
+}
+
+.appShell2Content {
+  padding: var(--layout-shell-pad-y) var(--layout-shell-pad-x);
+  overflow: visible;
+}
+
+/* Unified page heading block used across modules */
+.raTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--layout-stack-gap);
+  flex-wrap: wrap;
+  margin-bottom: var(--layout-stack-gap);
+}
+
+.raTitle {
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.raSub {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-text-3);
+}
+
+@media (max-width: 720px) {
+  .raTitle {
+    font-size: clamp(17px, 4.2vw, 20px);
+    line-height: 1.2;
+  }
+
+  .raSub {
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+}
+
+/* Unified content wrapper/card for all module pages */
+.pageWrap {
+  padding: var(--layout-page-y) var(--layout-page-x) var(--layout-page-bottom);
+  font-family: var(--font);
+}
+
+.pageCard {
+  width: 100%;
+  max-width: none;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--layout-card-radius);
+  padding: var(--layout-card-pad-y) var(--layout-card-pad-x);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+
+@media (max-width: 768px) {
+  .appShell2Main {
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .pageCard {
+    box-shadow: none;
+  }
+}
+

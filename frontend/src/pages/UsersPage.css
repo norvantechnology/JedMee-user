@@ -1,0 +1,182 @@
+.uupWrap {
+  padding: 18px 6px 24px;
+  font-family: var(--font);
+}
+
+.uupCard {
+  width: 100%;
+  max-width: none;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  background: var(--color-card);
+  padding: 18px 20px;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+
+.uupTitle {
+  font-size: clamp(16px, 1.8vw, 18px);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.uupSub {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--color-text-3);
+}
+
+.uupActionsRow {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.uupInput,
+.uupSelect {
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  padding: 0 12px;
+  font-family: var(--font);
+  font-size: 13.5px;
+  outline: none;
+  background: var(--color-card);
+  min-width: 0;
+}
+
+.uupInput:focus,
+.uupSelect:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.uupBtn {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-card);
+  font-family: var(--font);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s;
+}
+
+.uupBtn:hover {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+
+.uupBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.uupMiniSelect {
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  padding: 0 10px;
+  font-family: var(--font);
+  font-size: 13px;
+  outline: none;
+}
+
+.uupDanger {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+  color: var(--color-danger);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.uupDanger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.uupBtnSmall {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-2);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.uupBtnSmall:hover {
+  border-color: var(--color-border-focus);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.uupBtnSmall:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 860px) {
+  .uupActionsRow {
+    justify-content: stretch;
+  }
+  .uupActionsRow .uupBtn {
+    width: 100%;
+  }
+}
+
+/* CommonTable spacing is handled via `compact` mode. */
+
+/* Modal form */
+.uupModalGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.uupField label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--color-text-2);
+}
+
+.uupModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.uupBtnGhost {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-2);
+  font-family: var(--font);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.uupBtnGhost:hover {
+  background: var(--color-surface);
+}
+
+.uupBtnGhost:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+

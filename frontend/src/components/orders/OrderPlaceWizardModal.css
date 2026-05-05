@@ -1,0 +1,757 @@
+/* ═══════════════════════════════════════════════════════════════
+   OrderPlaceWizardModal  Premium UI Styles
+   Uses project CSS vars. No hardcoded colors.
+═══════════════════════════════════════════════════════════════ */
+
+.cmpOrderWizard {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 1.5vw, 10px);
+  font-family: var(--font);
+}
+
+/* Step row: label + pills tight together */
+.cmpOrderStepRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cmpOrderStepMeta {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+  line-height: 1.2;
+}
+
+/* ── Step progress bar ──────────────────────────────────────── */
+.cmpOrderStepBar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cmpOrderStepPill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 10px;
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 80%, var(--color-card));
+  padding: 7px 10px;
+  min-height: 0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.cmpStepNum {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-border) 50%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.cmpStepLabel {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--color-text-3);
+  transition: color 0.2s ease;
+}
+
+.cmpOrderStepPill.isActive {
+  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card));
+}
+.cmpOrderStepPill.isActive .cmpStepNum {
+  background: var(--color-primary);
+  color: #fff;
+}
+.cmpOrderStepPill.isActive .cmpStepLabel {
+  color: var(--color-primary);
+}
+
+.cmpOrderStepPill.isDone {
+  border-color: color-mix(in srgb, var(--color-secondary) 45%, transparent);
+  background: color-mix(in srgb, var(--color-secondary) 8%, var(--color-card));
+}
+.cmpOrderStepPill.isDone .cmpStepNum {
+  background: var(--color-secondary);
+  color: #fff;
+}
+.cmpOrderStepPill.isDone .cmpStepLabel {
+  color: var(--color-secondary);
+}
+
+.cmpOrderStepPill.isDisabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── Muted cart / wholesaler hint (replaces large banner) ───── */
+.cmpOrderContextMuted {
+  margin: 0;
+  padding: 0 2px;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+  color: var(--color-text-3);
+  word-break: break-word;
+}
+
+.cmpOrderContextSep {
+  opacity: 0.85;
+}
+
+.cmpOrderContextTag {
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--color-text-3);
+}
+
+@media (min-width: 641px) {
+  .cmpOrderStepRow {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px 14px;
+    flex-wrap: wrap;
+  }
+
+  .cmpOrderStepMeta {
+    flex: 0 0 auto;
+  }
+
+  .cmpOrderStepBar {
+    flex: 1 1 220px;
+    min-width: min(100%, 260px);
+    max-width: 420px;
+  }
+}
+
+/* ── Step 1 ─────────────────────────────────────────────────── */
+.cmpOrderStep1 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Stack on phones & narrow tablets; side‑by‑side on wider modals (laptop) */
+.cmpOrderFieldGroup {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+@media (min-width: 781px) {
+  .cmpOrderFieldGroup {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, min(34vw, 300px));
+    gap: 14px 20px;
+    align-items: start;
+  }
+}
+
+.cmpOrderQtyBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cmpOrderFieldLabel {
+  font-size: 12.5px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-text-2);
+  display: block;
+}
+
+.cmpOrderOptional {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.cmpOrderQtyRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-card);
+  width: 160px;
+}
+
+.cmpOrderQtyBtn {
+  width: 40px;
+  height: 44px;
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 300;
+  color: var(--color-text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  line-height: 1;
+}
+.cmpOrderQtyBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
+  color: var(--color-primary);
+}
+.cmpOrderQtyBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cmpOrderQtyInput {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--color-text);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  -moz-appearance: textfield;
+}
+.cmpOrderQtyInput::-webkit-inner-spin-button,
+.cmpOrderQtyInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.cmpOrderQtyHint {
+  font-size: 11.5px;
+  color: var(--color-text-3);
+  text-align: center;
+}
+
+/* Cart list (multi-product order) */
+.cmpOrderCartList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.cmpOrderCartItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
+}
+
+.cmpOrderCartItemHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cmpOrderCartFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cmpOrderCartItem.isInvalid {
+  border-color: color-mix(in srgb, var(--color-danger, #d84a4a) 40%, var(--color-border));
+}
+
+.cmpOrderCartMain {
+  min-width: 0;
+}
+
+.cmpOrderCartName {
+  font-weight: 800;
+  font-size: 13.5px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.cmpOrderCartMeta {
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: var(--color-text-3);
+  line-height: 1.35;
+}
+
+/* Compact single line (wraps); hover/title shows same text on truncate */
+.cmpOrderCartMetaLine {
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--color-text-2);
+  line-height: 1.45;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+.cmpOrderCartQty {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.cmpOrderCartTotal {
+  font-weight: 900;
+  color: var(--color-text);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.cmpOrderCartRemove {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: transparent;
+  color: var(--color-text-2);
+  cursor: pointer;
+  line-height: 1;
+  font-size: 20px;
+  font-weight: 300;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cmpOrderCartRemove:hover:not(:disabled) {
+  color: var(--color-danger, #d84a4a);
+  border-color: color-mix(in srgb, var(--color-danger, #d84a4a) 35%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger, #d84a4a) 6%, transparent);
+}
+.cmpOrderCartRemove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cmpOrderEmpty {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1.5px dashed color-mix(in srgb, var(--color-border) 65%, transparent);
+  color: var(--color-text-3);
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
+  font-size: 12.5px;
+}
+
+/* Live preview panel (shown while on step 1 when qty is valid) */
+.cmpOrderLivePreview {
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (min-width: 781px) {
+  .cmpOrderLivePreview {
+    position: sticky;
+    top: 4px;
+    align-self: start;
+  }
+}
+
+.cmpOrderLivePreviewHead {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+  margin: -2px 0 2px;
+}
+
+.cmpOrderLiveRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--color-text-2);
+}
+.cmpOrderLiveDiscount {
+  color: var(--color-secondary, #28a745);
+}
+
+.cmpOrderLiveTotal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-primary);
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: 1.5px dashed color-mix(in srgb, var(--color-border) 60%, transparent);
+}
+
+/* Notes */
+.cmpOrderNotesBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.cmpOrderNotesInput {
+  width: 100%;
+  min-height: 72px;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 13.5px;
+  padding: 9px 11px;
+  resize: vertical;
+  font-family: var(--font);
+  line-height: 1.5;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.cmpOrderNotesInput::placeholder {
+  color: var(--color-text-3);
+  opacity: 0.7;
+}
+.cmpOrderNotesInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+/* ── Step 2 ─────────────────────────────────────────────────── */
+.cmpOrderStep2 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Notes readonly */
+.cmpOrderNotesReadonly {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--color-text-2);
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
+  border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.cmpOrderNotesReadonlyLabel {
+  font-weight: 800;
+  color: var(--color-text-3);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.cmpOrderNotesReadonlyText {
+  font-size: 13px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+/* Single compact totals block (step 2) */
+.cmpOrderSummaryCompact {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+  background: color-mix(in srgb, var(--color-card) 92%, var(--color-surface));
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cmpOrderSummaryCompactTitle {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+  margin-bottom: 1px;
+}
+
+.cmpOrderSumRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--color-text-2);
+}
+
+.cmpOrderSumRow span:last-child {
+  font-weight: 700;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.cmpOrderSumCaption {
+  font-size: 11px;
+  color: var(--color-text-3);
+  margin-top: -2px;
+  margin-bottom: 2px;
+}
+
+.cmpOrderSumRowDiscount span:last-child {
+  color: var(--color-secondary, #28a745);
+}
+
+.cmpOrderSumGrand {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px dashed color-mix(in srgb, var(--color-border) 55%, transparent);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.cmpOrderSumGrand span:last-child {
+  font-size: clamp(17px, 4.5vw, 20px);
+  font-weight: 900;
+  color: var(--color-primary);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .cmpOrderStepRow {
+    gap: 5px;
+  }
+
+  .cmpOrderStepMeta {
+    font-size: 10px;
+  }
+
+  .cmpOrderStepBar {
+    gap: 6px;
+  }
+
+  .cmpOrderStepPill {
+    padding: 5px 7px;
+    gap: 5px;
+    border-radius: 9px;
+    min-height: 34px;
+  }
+
+  .cmpStepNum {
+    width: 19px;
+    height: 19px;
+    font-size: 10px;
+  }
+
+  .cmpStepLabel {
+    font-size: 9px;
+    letter-spacing: 0.02em;
+  }
+
+  .cmpOrderContextMuted {
+    font-size: 10.5px;
+    padding: 0 1px;
+  }
+
+  .cmpOrderContextTag {
+    font-size: 9px;
+  }
+
+  .cmpOrderFieldGroup {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .cmpOrderQtyRow {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .cmpOrderQtyBtn {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .cmpOrderQtyInput {
+    height: 44px;
+    font-size: 17px;
+  }
+
+  .cmpOrderCartItem {
+    gap: 8px;
+    padding: 8px 9px;
+    border-radius: 11px;
+  }
+
+  .cmpOrderCartName {
+    font-size: clamp(13px, 3.5vw, 13.5px);
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  .cmpOrderCartMetaLine {
+    font-size: clamp(11px, 2.9vw, 12px);
+    -webkit-line-clamp: 4;
+  }
+
+  .cmpOrderCartFoot {
+    flex-wrap: nowrap;
+  }
+
+  .cmpOrderCartQty {
+    justify-content: stretch;
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .cmpOrderCartQty .cmpOrderQtyBtn {
+    flex: 0 0 auto;
+  }
+
+  .cmpOrderCartQty .cmpOrderQtyInput {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cmpOrderCartTotal {
+    font-size: clamp(12.5px, 3.4vw, 13.5px);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .cmpOrderCartRemove {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    border-radius: 11px;
+    font-size: 18px;
+  }
+
+  .cmpOrderLivePreview {
+    padding: 8px 10px;
+    border-radius: 11px;
+  }
+
+  .cmpOrderLiveRow,
+  .cmpOrderLiveTotal {
+    font-size: clamp(12.5px, 3.2vw, 13px);
+  }
+
+  .cmpOrderNotesInput {
+    min-height: 76px;
+    font-size: 16px;
+    padding: 9px 11px;
+  }
+
+  .cmpOrderFieldLabel {
+    font-size: clamp(11px, 2.9vw, 12px);
+  }
+
+  .cmpOrderSummaryCompact {
+    padding: 9px 10px;
+    gap: 4px;
+  }
+
+  .cmpOrderSumRow {
+    font-size: clamp(12.5px, 3.2vw, 13px);
+  }
+
+  .cmpOrderStep1,
+  .cmpOrderStep2 {
+    gap: 10px;
+  }
+
+  .cmpOrderEmpty {
+    padding: 10px;
+    font-size: clamp(11.5px, 3vw, 12.5px);
+  }
+}
+
+@media (max-width: 480px) {
+  .cmpOrderWizard {
+    gap: 6px;
+  }
+
+  .cmpOrderStepPill {
+    padding: 4px 6px;
+    min-height: 32px;
+    gap: 4px;
+  }
+
+  .cmpStepNum {
+    width: 18px;
+    height: 18px;
+    font-size: 9px;
+  }
+
+  .cmpStepLabel {
+    font-size: 8.5px;
+  }
+
+  .cmpOrderNotesReadonly {
+    padding: 7px 9px;
+  }
+
+  .cmpOrderNotesReadonlyText {
+    font-size: clamp(12px, 3.2vw, 13px);
+  }
+
+}
+
+@media (max-width: 380px) {
+  .cmpOrderWizard {
+    gap: 5px;
+  }
+
+  .cmpOrderStepPill {
+    padding: 3px 5px;
+    min-height: 28px;
+    gap: 3px;
+  }
+
+  .cmpStepNum {
+    width: 16px;
+    height: 16px;
+    font-size: 8.5px;
+  }
+
+  .cmpStepLabel {
+    font-size: 8px;
+  }
+
+  .cmpOrderEmpty {
+    padding: 8px;
+  }
+}

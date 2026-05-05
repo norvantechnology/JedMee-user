@@ -1,0 +1,509 @@
+/* ============================================================
+   APP HEADER  Reimagined Premium SaaS Style
+   Uses only global theme variables. No raw colors.
+   ============================================================ */
+
+.hdr {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  min-height: 56px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  padding: 8px clamp(12px, 2.5vw, 20px) 8px clamp(12px, 2vw, 16px);
+  gap: 0;
+  animation: hdrSlideDown 0.35s cubic-bezier(0,0,.2,1) both;
+
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--color-primary) 4%, var(--color-card)),
+    var(--color-card) 40%
+  );
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow:
+    0 1px 0 0 color-mix(in srgb, var(--color-primary) 8%, transparent),
+    0 4px 16px -4px color-mix(in srgb, var(--color-primary) 10%, transparent),
+    0 1px 3px color-mix(in srgb, var(--color-text) 5%, transparent);
+}
+
+.hdr.hdrNoAnim { animation: none; }
+.hdr.hdrNoAnim .hdrLeft,
+.hdr.hdrNoAnim .hdrCenter,
+.hdr.hdrNoAnim .hdrRight { animation: none; }
+
+.hdrLeft { display: flex; align-items: center; gap: 10px; flex-shrink: 0; animation: hdrFadeIn 0.4s 0.05s ease both; }
+
+.hdrToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-3);
+  transition: background 0.2s ease, color 0.2s, transform 0.25s cubic-bezier(.34,1.56,.64,1);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.hdrToggle::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--color-primary); opacity: 0; transition: opacity 0.2s; }
+.hdrToggle:hover { color: var(--color-primary); transform: rotate(90deg) scale(1.08); }
+.hdrToggle:hover::before { opacity: 0.08; }
+.hdrToggle svg { width: 17px; height: 17px; position: relative; }
+
+.hdrToggleDesk { display: none; }
+.hdrToggleMobile { display: inline-flex; }
+
+.hdrBrand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 14%, transparent);
+  transition: background 0.2s, border-color 0.2s, transform 0.2s cubic-bezier(.34,1.56,.64,1);
+  cursor: default;
+}
+.hdrBrand:hover { background: color-mix(in srgb, var(--color-primary) 10%, transparent); border-color: color-mix(in srgb, var(--color-primary) 28%, transparent); transform: translateY(-1px); }
+.hdrBrandIcon {
+  width: 24px;
+  height: 24px;
+  background: var(--color-primary);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+.hdrBrandIcon svg { width: 13px; height: 13px; stroke: var(--color-on-primary); }
+.hdrBrandName { font-size: 13px; font-weight: 700; color: var(--color-primary); font-family: var(--font); letter-spacing: -0.02em; line-height: 1; }
+
+.hdrCenter {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding: 0 clamp(8px, 1.8vw, 16px);
+  animation: hdrFadeIn 0.4s 0.1s ease both;
+}
+
+.hdrCrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hdrCrumbPill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px clamp(10px, 2vw, 14px) 4px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  max-width: min(340px, 46vw);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hdrCrumbItem {
+  font-weight: 600;
+  color: var(--color-text-4);
+  white-space: nowrap;
+  font-family: var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: clamp(10px, 2vw, 11px);
+  line-height: 1.2;
+}
+
+.hdrCrumbItem_active {
+  color: var(--color-text-heading);
+  font-weight: 800;
+  text-transform: none;
+  font-size: clamp(12px, 2.4vw, 13px);
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: min(220px, 34vw);
+}
+
+.hdrCrumbSep {
+  color: var(--color-text-faint);
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.hdrCrumbSep svg {
+  width: 13px;
+  height: 13px;
+}
+
+.hdrCrumbGroup {
+  display: contents;
+}
+
+/* (Live pill removed by request) */
+
+.hdrRight {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: clamp(4px, 1.2vw, 8px);
+  margin-left: auto;
+  flex-shrink: 0;
+  animation: hdrFadeIn 0.4s 0.15s ease both;
+}
+
+.hdrSearchWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.hdrSearch {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  min-height: 34px;
+  height: 34px;
+  width: 34px;
+  padding: 0 8px;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    width 0.32s cubic-bezier(0.34, 1.2, 0.64, 1),
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+  cursor: pointer;
+  box-shadow: var(--shadow-xs);
+}
+
+.hdrSearch:focus-within,
+.hdrSearch.open {
+  width: min(240px, calc(100vw - 200px));
+  border-color: color-mix(in srgb, var(--color-border-focus) 55%, var(--color-border));
+  background: var(--color-card);
+  box-shadow: var(--shadow-sm);
+  cursor: default;
+}
+
+.hdrSearch svg {
+  align-self: center;
+  width: 15px;
+  height: 15px;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+  transition: color 0.18s ease;
+}
+
+.hdrSearch:focus-within svg {
+  color: var(--color-text-2);
+}
+
+.hdrSearch input {
+  flex: 0 0 0;
+  width: 0;
+  min-width: 0;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  box-shadow: none;
+  outline: none;
+  font-size: clamp(12.5px, 2.5vw, 13px);
+  font-family: var(--font);
+  color: var(--color-text);
+  opacity: 0;
+  margin: 0;
+  padding: 0 2px 0 0;
+  transition: opacity 0.2s ease, flex-basis 0.28s ease;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+  line-height: 1.3;
+}
+
+.hdrSearch:focus-within input,
+.hdrSearch.open input {
+  flex: 1 1 auto;
+  min-width: 72px;
+  opacity: 1;
+  margin-left: 8px;
+  pointer-events: auto;
+}
+
+.hdrSearch input::placeholder {
+  color: var(--color-text-4);
+}
+
+.hdrSearch input:focus,
+.hdrSearch input:focus-visible {
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.hdrSearch input::selection {
+  background: color-mix(in srgb, var(--color-primary) 22%, transparent);
+}
+
+.hdrSearch input:-webkit-autofill,
+.hdrSearch input:-webkit-autofill:hover,
+.hdrSearch input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text);
+  caret-color: var(--color-text);
+  transition: background-color 99999s ease-out;
+  box-shadow: 0 0 0 1000px var(--color-card) inset !important;
+  border-radius: 9999px !important;
+}
+
+.hdrShortcut {
+  align-self: center;
+  font-size: 10px;
+  color: var(--color-text-4);
+  background: color-mix(in srgb, var(--color-border) 55%, var(--color-surface));
+  border-radius: 6px;
+  padding: 2px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  transition: opacity 0.18s ease, max-width 0.22s ease, margin 0.22s ease, padding 0.22s ease;
+  margin-left: 4px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+}
+
+.hdrSearch:focus-within .hdrShortcut {
+  opacity: 0;
+  max-width: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  border-width: 0;
+}
+
+/* Notification bell matches sibling icon hit targets inside the pill rail */
+.hdrIconGroup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--color-surface) 92%, var(--color-card));
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  padding: 3px;
+  gap: 2px;
+  margin-left: clamp(4px, 1vw, 8px);
+  box-shadow: var(--shadow-xs);
+  isolation: isolate;
+}
+
+.hdrIconGroup .nfy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hdrIconGroup .nfyBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hdrIconGroup .nfyBtn:hover {
+  transform: none;
+  background: color-mix(in srgb, var(--color-primary-light) 85%, var(--color-surface));
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.hdrIconGroup .nfyBtn:active {
+  transform: scale(0.96);
+}
+
+.hdrIconGroup .nfyBtn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-border-focus) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.hdrIconGroup .nfyBadge {
+  top: -3px;
+  right: -2px;
+  border-width: 2px;
+}
+
+.hdrIconBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-3);
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+.hdrIconBtn:hover {
+  background: color-mix(in srgb, var(--color-primary-light) 85%, var(--color-surface));
+  color: var(--color-primary);
+}
+
+.hdrIconBtn:active {
+  transform: scale(0.96);
+}
+
+.hdrIconBtn:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-border-focus) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.hdrIconBtn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.hdrDivider { width: 1px; height: 22px; background: var(--color-border); margin: 0 6px; flex-shrink: 0; }
+
+/* (Command pill removed: it duplicated ⌘K with search) */
+
+/* Stronger click micro-interactions (header only) */
+.hdrToggle:active { transform: scale(0.92); }
+.hdrBrand:active { transform: translateY(0) scale(0.99); }
+.hdrIconBtn:active { transform: scale(0.9); }
+.hdrSearch:active { transform: scale(0.995); }
+.hdrProfile .pdTrigger:active { transform: translateY(0) scale(0.99); }
+
+/* ProfileDropdown restyle (scoped to header only) */
+.hdrProfile .pdTrigger {
+  height: 34px;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-card));
+  padding: 2px 10px 2px 4px;
+  gap: 8px;
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.hdrProfile .pdTrigger:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary-light) 55%, var(--color-card));
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.hdrProfile .pdTrigAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: var(--color-on-primary);
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+.hdrProfile .pdTrigInfo { gap: 1px; }
+.hdrProfile .pdTrigName { font-size: 12px; font-weight: 600; color: var(--color-text); letter-spacing: -0.01em; }
+.hdrProfile .pdTrigRole { font-size: 9.5px; color: var(--color-text-4); letter-spacing: 0.08em; text-transform: uppercase; }
+.hdrProfile .pdTrigChevron { width: 13px; height: 13px; color: var(--color-text-4); transition: transform 0.2s, color 0.2s; }
+.hdrProfile .pdTrigger:hover .pdTrigChevron { color: var(--color-primary); transform: translateY(1px); }
+
+@media (max-width: 1024px) {
+  .hdrCrumbPill {
+    max-width: min(280px, 42vw);
+  }
+}
+
+@media (max-width: 720px) {
+  .hdr {
+    padding: 6px 8px;
+    min-height: 50px;
+  }
+
+  .hdrCenter {
+    padding: 0 4px;
+  }
+
+  .hdrCrumbPill {
+    display: none;
+  }
+
+  .hdrProfile .pdTrigInfo {
+    display: none;
+  }
+
+  .hdrSearch:focus-within,
+  .hdrSearch.open {
+    width: min(200px, calc(100vw - 148px));
+  }
+
+  .hdrIconGroup {
+    margin-left: 4px;
+    padding: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hdrBrandName {
+    display: none;
+  }
+
+  .hdrSearch:focus-within,
+  .hdrSearch.open {
+    width: min(160px, calc(100vw - 132px));
+  }
+
+  /* Keep chat/settings usable; search stays expandable */
+  .hdrIconBtn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .hdrIconGroup .nfyBtn {
+    width: 28px;
+    height: 28px;
+  }
+}
+/* Desktop: hide header menu toggle (sidebar has its own). */
+@media (min-width: 721px) {
+  .hdrToggleMobile {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hdr, .hdrLeft, .hdrCenter, .hdrRight { animation: none !important; }
+  .hdrToggle, .hdrBrand, .hdrSearch, .hdrIconBtn, .hdrProfile .pdTrigger { transition: none !important; }
+}
+

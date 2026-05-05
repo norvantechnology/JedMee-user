@@ -1,0 +1,406 @@
+.mfz {
+  --mfz-surface: color-mix(in srgb, var(--color-surface) 92%, var(--color-primary) 2%);
+  --mfz-card: color-mix(in srgb, var(--color-card) 92%, var(--mfz-surface) 8%);
+  --mfz-border: color-mix(in srgb, var(--color-border) 86%, transparent);
+  --mfz-shadow: 0 18px 44px color-mix(in srgb, var(--color-text) 12%, transparent);
+  --mfz-shadow-soft: 0 2px 10px color-mix(in srgb, var(--color-text) 6%, transparent);
+  font-family: var(--font);
+}
+
+.mfzFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mfzFooterMeta {
+  font-size: 12.5px;
+  color: var(--color-text-3);
+  font-weight: 650;
+}
+
+.mfzFooterActions {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mfzBtn {
+  min-height: 38px;
+  border-radius: 12px;
+  font-weight: 850;
+}
+
+.mfzBody {
+  display: grid;
+  gap: 12px;
+}
+
+.mfzPanel {
+  border-radius: 18px;
+  border: 1px solid var(--mfz-border);
+  background: linear-gradient(180deg, var(--mfz-card), color-mix(in srgb, var(--mfz-card) 76%, var(--mfz-surface) 24%));
+  box-shadow: var(--mfz-shadow);
+  overflow: hidden;
+}
+
+.mfzPanelHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--mfz-border) 75%, transparent);
+  background: color-mix(in srgb, var(--mfz-card) 88%, var(--mfz-surface) 12%);
+}
+
+.mfzHeadKicker {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+}
+
+.mfzHeadHint {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--color-text-2);
+  line-height: 1.45;
+}
+
+.mfzHeadRight {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mfzToggle {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--mfz-border);
+  background: var(--mfz-card);
+  color: var(--color-text);
+  font-family: var(--font);
+  font-weight: 850;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mfzToggle:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--color-primary) 24%, var(--mfz-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+}
+
+.mfzToggleIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-grid;
+  place-items: center;
+  color: currentColor;
+}
+
+.mfzToggleIcon svg {
+  width: 16px;
+  height: 16px;
+  filter:
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--color-card) 55%, transparent))
+    drop-shadow(0 10px 18px color-mix(in srgb, var(--color-text) 10%, transparent));
+}
+
+.mfzRot90 { transform: rotate(90deg); }
+.mfzTop12 { margin-top: 12px; }
+
+.mfzPanelBody {
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.mfzGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mfz6 { grid-column: span 6; }
+.mfz4 { grid-column: span 4; }
+.mfz8 { grid-column: span 8; }
+.mfz12 { grid-column: span 12; }
+
+.mfzField {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mfzField > label:not(.mfzCheck),
+.mfzField > .mfzLabel {
+  margin: 0;
+  padding: 0;
+  line-height: 1.2;
+}
+
+.mfzField > .cdp,
+.mfzField > .mfzInput,
+.mfzField > input.mfzInput,
+.mfzField > select.mfzInput,
+.mfzField > textarea.mfzInput {
+  margin-top: 0;
+}
+
+.mfzLabel {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+}
+
+/* Prefer <span className="reqMark" aria-hidden="true">*</span> in JSX; .mfzReq mirrors app.css tokens. */
+.mfzReq {
+  color: var(--color-danger);
+  font-weight: 800;
+  font-size: 0.95em;
+  line-height: 1;
+  margin-left: 2px;
+  display: inline-block;
+}
+
+.mfzInput,
+.mfzTextarea {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--mfz-border);
+  background: color-mix(in srgb, var(--mfz-card) 92%, var(--mfz-surface) 8%);
+  color: var(--color-text);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 650;
+  padding: 0 12px;
+  outline: none;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.mfzTextarea {
+  min-height: 96px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.mfzInput:focus,
+.mfzTextarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+  background: var(--mfz-card);
+}
+
+.mfzHelp {
+  font-size: 12.5px;
+  color: var(--color-text-3);
+  line-height: 1.45;
+  font-weight: 650;
+}
+
+.mfzErr {
+  font-size: 12.5px;
+  color: var(--color-danger);
+  font-weight: 750;
+}
+
+.mfzNote {
+  border-radius: 14px;
+  border: 1px solid var(--mfz-border);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--mfz-card));
+  color: var(--color-text-2);
+  padding: 12px;
+  box-shadow: var(--mfz-shadow-soft);
+  line-height: 1.45;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.mfzNoteStrong {
+  border-color: color-mix(in srgb, var(--color-primary) 18%, var(--mfz-border));
+}
+
+.mfzChips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.mfzChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--mfz-border);
+  background: color-mix(in srgb, var(--mfz-card) 86%, var(--mfz-surface) 14%);
+  color: var(--color-text-2);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mfzChecks { display: grid; gap: 10px; }
+
+/* ── Mobile density + layout: stack columns & reduce padding ── */
+@media (max-width: 720px) {
+  .mfzPanelHead {
+    padding: 10px 10px 8px;
+    gap: 8px;
+  }
+
+  .mfzPanelBody {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .mfzGrid {
+    gap: 6px;
+  }
+
+  .mfzBody {
+    gap: 10px;
+  }
+
+  /* Force multi-column spans to stack on mobile */
+  .mfz6,
+  .mfz4,
+  .mfz8 {
+    grid-column: span 12;
+  }
+
+  .mfzInput,
+  .mfzTextarea {
+    min-height: 38px;
+    border-radius: 12px;
+  }
+
+  .mfzInput {
+    padding: 0 10px;
+    font-size: 13.5px;
+  }
+
+  .mfzTextarea {
+    padding: 10px 10px;
+    min-height: 88px;
+  }
+
+  .mfzLabel {
+    font-size: 11px;
+    letter-spacing: 0.07em;
+  }
+
+  .mfzFooterActions {
+    width: 100%;
+    justify-content: stretch;
+  }
+}
+
+.mfzCheck {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--mfz-border);
+  background: color-mix(in srgb, var(--mfz-card) 86%, var(--mfz-surface) 14%);
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.mfzCheck input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+@media (max-width: 720px) {
+  .mfzGrid { grid-template-columns: 1fr; }
+  .mfz6, .mfz4, .mfz8, .mfz12 { grid-column: auto; }
+  .mfzFooter {
+    gap: 6px;
+  }
+  .mfzFooterActions {
+    gap: 6px;
+  }
+  .mfzBtn {
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 10px;
+    font-size: 12.5px;
+  }
+}
+
+@media (max-width: 520px) {
+  .mfzFooter { flex-direction: column; align-items: stretch; }
+  .mfzFooterActions { width: 100%; }
+  .mfzFooterActions .appBtn, .mfzFooterActions .mfzBtn { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .mfzPanel { border-radius: 14px; }
+  .mfzPanelHead {
+    padding: 8px 9px 7px;
+    gap: 7px;
+  }
+  .mfzPanelBody {
+    padding: 8px;
+    gap: 7px;
+  }
+  .mfzGrid { gap: 6px; }
+  .mfzBody { gap: 8px; }
+  .mfzInput { padding: 0 9px; }
+  .mfzTextarea { padding: 9px; min-height: 80px; }
+  .mfzCheck { padding: 8px 10px; border-radius: 12px; }
+  .mfzNote {
+    padding: 9px 10px;
+    border-radius: 12px;
+    font-size: 12.5px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mfzPanel { border-radius: 12px; }
+  .mfzPanelHead {
+    padding: 7px 8px 6px;
+  }
+  .mfzPanelBody { padding: 7px; }
+  .mfzInput, .mfzTextarea { min-height: 36px; border-radius: 11px; }
+  .mfzInput { font-size: 13px; padding: 0 8px; }
+  .mfzBtn {
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 12px;
+    border-radius: 9px;
+  }
+  .mfzLabel {
+    font-size: 10.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mfz * { transition: none !important; }
+}
+

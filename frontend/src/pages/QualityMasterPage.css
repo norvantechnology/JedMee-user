@@ -1,0 +1,418 @@
+.qmWrap {
+  padding: 18px 6px 24px;
+  font-family: var(--font);
+}
+
+.qmCard {
+  width: 100%;
+  max-width: none;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+
+.qmTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.qmBadge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.qmBadge_ok {
+  background: color-mix(in srgb, var(--color-success) 12%, transparent);
+  color: var(--color-success-dark);
+}
+
+.qmBadge_warn {
+  background: color-mix(in srgb, var(--color-warning) 20%, transparent);
+  color: var(--color-warning-dark);
+}
+
+.ctTable tbody tr.qmRow_noBatches td {
+  background: color-mix(in srgb, var(--color-warning) 6%, transparent);
+}
+
+/*  Batches drawer (product lots)  */
+.qmBatchDrawer {
+  margin: 0;
+}
+
+.qmBatchDrawerEmpty {
+  font-size: 13.5px;
+  color: var(--color-text-3);
+  padding: 8px 0 4px;
+}
+
+.qmBatchDrawerScroll {
+  overflow: auto;
+  max-height: min(52vh, 440px);
+  border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+  border-radius: 12px;
+  background: var(--color-card);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-card) 60%, transparent);
+}
+
+.qmBatchDrawerTable {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: auto;
+}
+
+.qmBDTh,
+.qmBDTd {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+  box-sizing: border-box;
+}
+
+.qmBDTh {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-3);
+  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-surface-3) 100%);
+  white-space: nowrap;
+}
+
+.qmBDTh_check,
+.qmBDTd_check {
+  width: 44px;
+  text-align: center;
+  padding-left: 10px;
+  padding-right: 8px;
+}
+
+.qmBDCheck {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+.qmBDTh_num,
+.qmBDTd_num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.qmBDTh_center,
+.qmBDTd_center {
+  text-align: center;
+}
+
+.qmBDTh_actions,
+.qmBDTd_actions {
+  text-align: right;
+  width: 220px;
+  white-space: nowrap;
+}
+
+.qmBDTr:last-child .qmBDTd {
+  border-bottom: none;
+}
+
+.qmBDTr:hover .qmBDTd {
+  background: color-mix(in srgb, var(--color-text-3) 5%, transparent);
+}
+
+.qmBDBatchNo {
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.qmBDPack {
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: var(--color-text-3);
+  line-height: 1.25;
+  max-width: 200px;
+}
+
+.qmBDMono {
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+}
+
+.qmBDExpiry {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.qmBDExpiryMeta {
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--color-text-3);
+  white-space: nowrap;
+}
+
+.qmBDTh_expiry,
+.qmBDTd_expiry {
+  min-width: 150px;
+}
+
+.qmBDExpiry_exp {
+  color: var(--color-danger);
+}
+
+.qmBDExpiry_near {
+  color: var(--color-warning-dark);
+}
+
+.qmBDInlineBadge {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 9px;
+  padding: 2px 6px;
+}
+
+.qmBDStockNum {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.qmBDStockSub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--color-text-3);
+}
+
+.qmBDMuted {
+  color: var(--color-text-4);
+  font-size: 12px;
+}
+
+.qmBDActions {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.qmBDActBtn {
+  min-width: 52px;
+  padding: 5px 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent);
+  background: var(--color-card);
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.qmBDActBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+.qmBDActBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.qmBDActBtnDanger {
+  color: var(--color-danger-dark);
+  border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+  background: color-mix(in srgb, var(--color-danger-subtle) 55%, transparent);
+}
+
+.qmBDTd_actions .qmBDActBtn:nth-child(2) {
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  border-color: color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+.qmBDTd_actions .qmBDActBtn:nth-child(2):hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+.qmBDActBtnDanger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger-subtle) 85%, transparent);
+  border-color: color-mix(in srgb, var(--color-danger-dark) 55%, transparent);
+}
+
+.qmBatchDrawerFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.qmBatchDrawerHint {
+  margin: 0;
+  flex: 1 1 200px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--color-text-3);
+  line-height: 1.35;
+}
+
+.qmBatchDrawerFooterBtns {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  .qmBDTh_actions,
+  .qmBDTd_actions {
+    width: 1%;
+  }
+
+  .qmBDActions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .qmBatchDrawerScroll {
+    max-height: min(68vh, 620px);
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .qmBatchDrawerTable {
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+
+  .qmBatchDrawerTable thead {
+    display: none;
+  }
+
+  .qmBatchDrawerTable tbody,
+  .qmBatchDrawerTable tr,
+  .qmBatchDrawerTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .qmBDTr {
+    border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
+    border-radius: 12px;
+    background: var(--color-card);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-text) 5%, transparent);
+    overflow: hidden;
+  }
+
+  .qmBDTd {
+    border-bottom: 1px dashed color-mix(in srgb, var(--color-text) 9%, transparent);
+    padding: 8px 10px;
+    text-align: left !important;
+    white-space: normal;
+  }
+
+  .qmBDTr .qmBDTd:last-child {
+    border-bottom: none;
+  }
+
+  .qmBDTd::before {
+    content: attr(data-label);
+    display: inline-block;
+    min-width: 90px;
+    margin-right: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-3);
+    vertical-align: top;
+  }
+
+  .qmBDTd_check::before {
+    min-width: 52px;
+  }
+
+  .qmBDTd_check {
+    display: flex !important;
+    align-items: center;
+  }
+
+  .qmBDTd_actions .qmBDActions {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .qmBDTd_actions .qmBDActBtn {
+    min-width: 70px;
+  }
+
+  .qmBDPack {
+    max-width: none;
+  }
+
+  .qmBDTd_expiry .qmBDExpiry {
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  .qmBDTd_expiry .qmBDExpiryMeta {
+    margin-top: 2px;
+    font-size: 11px;
+  }
+
+  .qmBatchDrawerFooter {
+    gap: 10px;
+  }
+
+  .qmBatchDrawerFooterBtns {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+.qmBatchDrawerBtnBulk {
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 45%, transparent);
+  background: color-mix(in srgb, var(--color-danger-subtle) 65%, transparent);
+  color: var(--color-danger-dark);
+  cursor: pointer;
+  transition: opacity 0.12s, background 0.12s;
+}
+
+.qmBatchDrawerBtnBulk:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger-subtle) 90%, transparent);
+}
+
+.qmBatchDrawerBtnBulk:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+

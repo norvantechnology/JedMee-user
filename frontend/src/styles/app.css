@@ -1,0 +1,1010 @@
+/* Global app-level styles. Pages handle their own layout. */
+
+/* Compact spacing inside authenticated main surface (mobile) */
+@media (max-width: 720px) {
+  [data-app-main] .pageWrap {
+    padding-top: max(6px, var(--layout-page-y));
+    padding-bottom: max(10px, var(--layout-page-bottom));
+  }
+}
+
+/* ── Required-field indicator ──────────────────────────────────────────
+   A single, project-wide style for the "*" mark next to a required
+   form label. Use:  <label>Field <span className="reqMark" aria-hidden="true">*</span></label>
+   Legacy <span className="req"> on labels is treated like .reqMark for borders (.raField / .mfzField).
+   The .mfzReq alias keeps older master-modal markup consistent. */
+.reqMark,
+.mfzReq,
+.req {
+  display: inline-block;
+  color: var(--color-danger);
+  font-weight: 800;
+  font-size: 0.95em;
+  line-height: 1;
+  margin-left: 2px;
+  vertical-align: baseline;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* ── .raField / .mfzField visual differentiation ───────────────────────
+   These are the project's primary form-field wrappers (modals, payment
+   forms, master modals, line-item editors, etc.).
+
+   Strategy (border-color only, so existing component shadows survive):
+     1) Default control border (plain inputs):   var(--color-border)
+     2) Default field wrapper border (.raField): tinted primary
+     3) Required field wrapper border:           var(--color-primary)
+        — auto-detected via the .reqMark / .mfzReq span in the label.
+
+   Coverage per wrapper:
+   - .raInput / select.raInput / textarea.raInput
+   - .cdpInput  (CommonDatePicker trigger)
+   - .csf       (CommonSelectField wrapper used by MasterSelectWithCreate)
+   - .mfzInput / textarea.mfzTextarea (master-modal variant)
+
+   We use !important to win against component-local rules whose CSS
+   specificity matches but loads later in Vite's bundled stylesheet. */
+
+/* (2) Default raField border — non-required */
+.raField .raInput,
+.raField select.raInput,
+.raField textarea.raInput,
+.raField .cdpInput,
+.raField .csf {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+}
+
+.raField .raInput:hover:not(:disabled),
+.raField select.raInput:hover:not(:disabled),
+.raField textarea.raInput:hover:not(:disabled),
+.raField .cdpInput:hover:not(:disabled),
+.raField .csf:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border-strong)) !important;
+}
+
+.raField .raInput:focus,
+.raField .raInput:focus-visible,
+.raField select.raInput:focus,
+.raField select.raInput:focus-visible,
+.raField textarea.raInput:focus,
+.raField textarea.raInput:focus-visible,
+.raField .cdpInput:focus,
+.raField .cdpInput:focus-visible,
+.raField .cdpInput_open,
+.raField .csf:focus-within {
+  border-color: var(--color-primary) !important;
+  outline: none;
+}
+
+/* (3) Required raField — clearly stronger primary border */
+.raField:is(:has(.reqMark), :has(.req)) .raInput,
+.raField:is(:has(.reqMark), :has(.req)) select.raInput,
+.raField:is(:has(.reqMark), :has(.req)) textarea.raInput,
+.raField:is(:has(.reqMark), :has(.req)) .cdpInput,
+.raField:is(:has(.reqMark), :has(.req)) .csf {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.raField:is(:has(.reqMark), :has(.req)) .raInput:hover:not(:disabled),
+.raField:is(:has(.reqMark), :has(.req)) select.raInput:hover:not(:disabled),
+.raField:is(:has(.reqMark), :has(.req)) textarea.raInput:hover:not(:disabled),
+.raField:is(:has(.reqMark), :has(.req)) .cdpInput:hover:not(:disabled),
+.raField:is(:has(.reqMark), :has(.req)) .csf:hover,
+.raField:is(:has(.reqMark), :has(.req)) .raInput:focus,
+.raField:is(:has(.reqMark), :has(.req)) .raInput:focus-visible,
+.raField:is(:has(.reqMark), :has(.req)) select.raInput:focus,
+.raField:is(:has(.reqMark), :has(.req)) select.raInput:focus-visible,
+.raField:is(:has(.reqMark), :has(.req)) textarea.raInput:focus,
+.raField:is(:has(.reqMark), :has(.req)) textarea.raInput:focus-visible,
+.raField:is(:has(.reqMark), :has(.req)) .cdpInput:focus,
+.raField:is(:has(.reqMark), :has(.req)) .cdpInput:focus-visible,
+.raField:is(:has(.reqMark), :has(.req)) .cdpInput_open,
+.raField:is(:has(.reqMark), :has(.req)) .csf:focus-within {
+  border-color: var(--color-primary-dark) !important;
+}
+
+/* Disabled raField inputs go calm. */
+.raField .raInput:disabled,
+.raField select.raInput:disabled,
+.raField textarea.raInput:disabled,
+.raField .cdpInput:disabled,
+.raField .csf_disabled {
+  border-color: var(--color-border) !important;
+  border-width: 1px !important;
+}
+
+/* (2b) Default mfzField — optional (matches raField tinted border; contrasts with required below) */
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) select.mfzInput,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) textarea.mfzTextarea,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .cdpInput,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .csf,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .msw .csf {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput:hover:not(:disabled),
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) select.mfzInput:hover:not(:disabled),
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) textarea.mfzTextarea:hover:not(:disabled),
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .cdpInput:hover:not(:disabled),
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .csf:hover,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .msw .csf:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border-strong)) !important;
+}
+
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput:focus,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput:focus-visible,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) select.mfzInput:focus,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) textarea.mfzTextarea:focus,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .cdpInput:focus,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .cdpInput:focus-visible,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .cdpInput_open,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .csf:focus-within,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .msw .csf:focus-within {
+  border-color: var(--color-primary) !important;
+  outline: none;
+}
+
+.mfzField .mfzInput:disabled,
+.mfzField select.mfzInput:disabled,
+.mfzField textarea.mfzTextarea:disabled,
+.mfzField .cdpInput:disabled,
+.mfzField .csf_disabled {
+  border-color: var(--color-border) !important;
+  border-width: 1px !important;
+}
+
+/* Master-modal variant (.mfzField with .mfzInput / .mfzTextarea / etc.)
+   gets the same required-field treatment. Both .reqMark and the legacy
+   .mfzReq trigger it. */
+.mfzField:is(:has(.reqMark), :has(.req)) .mfzInput,
+.mfzField:is(:has(.reqMark), :has(.req)) select.mfzInput,
+.mfzField:is(:has(.reqMark), :has(.req)) textarea.mfzTextarea,
+.mfzField:is(:has(.reqMark), :has(.req)) .cdpInput,
+.mfzField:is(:has(.reqMark), :has(.req)) .csf,
+.mfzField:has(.mfzReq) .mfzInput,
+.mfzField:has(.mfzReq) select.mfzInput,
+.mfzField:has(.mfzReq) textarea.mfzTextarea,
+.mfzField:has(.mfzReq) .cdpInput,
+.mfzField:has(.mfzReq) .csf,
+.mfzLabel:is(:has(.reqMark), :has(.req)) + .mfzInput,
+.mfzLabel:has(.mfzReq) + .mfzInput,
+.mfzLabel:is(:has(.reqMark), :has(.req)) ~ .csf,
+.mfzLabel:has(.mfzReq) ~ .csf,
+.mfzLabel:is(:has(.reqMark), :has(.req)) ~ .msw .csf,
+.mfzLabel:has(.mfzReq) ~ .msw .csf {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mfzField:is(:has(.reqMark), :has(.req)) .mfzInput:focus,
+.mfzField:is(:has(.reqMark), :has(.req)) .mfzInput:focus-visible,
+.mfzField:is(:has(.reqMark), :has(.req)) textarea.mfzTextarea:focus,
+.mfzField:is(:has(.reqMark), :has(.req)) .cdpInput:focus,
+.mfzField:is(:has(.reqMark), :has(.req)) .csf:focus-within,
+.mfzField:has(.mfzReq) .mfzInput:focus,
+.mfzField:has(.mfzReq) .mfzInput:focus-visible,
+.mfzField:has(.mfzReq) textarea.mfzTextarea:focus,
+.mfzField:has(.mfzReq) .cdpInput:focus,
+.mfzField:has(.mfzReq) .csf:focus-within,
+.mfzLabel:is(:has(.reqMark), :has(.req)) ~ .msw .csf:focus-within,
+.mfzLabel:has(.mfzReq) ~ .msw .csf:focus-within {
+  border-color: var(--color-primary-dark) !important;
+}
+
+/* Nested MasterSelect: .csf lives inside .msw */
+.mfzField:is(:has(.reqMark), :has(.req)) .msw .csf,
+.mfzField:has(.mfzReq) .msw .csf {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mfzField:is(:has(.reqMark), :has(.req)) .msw .csf:focus-within,
+.mfzField:has(.mfzReq) .msw .csf:focus-within {
+  border-color: var(--color-primary-dark) !important;
+}
+
+/* Modal shells that use border shorthand on inputs — bump specificity so required/optional stay distinct */
+.pbm .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput,
+.pbm .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) select.mfzInput,
+.pbm .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) textarea.mfzTextarea {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.pbm .mfzField:is(:has(.reqMark), :has(.req)) .mfzInput,
+.pbm .mfzField:is(:has(.reqMark), :has(.req)) select.mfzInput,
+.pbm .mfzField:is(:has(.reqMark), :has(.req)) textarea.mfzTextarea,
+.pbm .mfzField:is(:has(.reqMark), :has(.req)) .cdpInput,
+.pbm .mfzField:is(:has(.reqMark), :has(.req)) .csf,
+.pbm .mfzField:is(:has(.reqMark), :has(.req)) .msw .csf {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.vmShell.mfz .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput,
+.vmShell.mfz .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) select.mfzInput {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.vmShell.mfz .mfzField:is(:has(.reqMark), :has(.req)) .mfzInput,
+.vmShell.mfz .mfzField:is(:has(.reqMark), :has(.req)) select.mfzInput,
+.vmShell.mfz .mfzField:is(:has(.reqMark), :has(.req)) .msw .csf {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.cmz .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput,
+.cmz .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) select.mfzInput {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.cmz .mfzField:is(:has(.reqMark), :has(.req)) .mfzInput,
+.cmz .mfzField:is(:has(.reqMark), :has(.req)) select.mfzInput {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+/* PhoneInput (.telx) inside required master fields */
+.mfzField:is(:has(.reqMark), :has(.req)) .telxSlot,
+.mfzField:has(.mfzReq) .telxSlot {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mfzField:is(:has(.reqMark), :has(.req)) .telxSlot:focus-within,
+.mfzField:has(.mfzReq) .telxSlot:focus-within {
+  border-color: var(--color-primary-dark) !important;
+}
+
+.raField:is(:has(.reqMark), :has(.req)) .telxSlot {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.raField:is(:has(.reqMark), :has(.req)) .telxSlot:focus-within {
+  border-color: var(--color-primary-dark) !important;
+}
+
+/* Line-items tables: when a column header carries [data-required], its
+   cells' inputs get the required visual cue. (Opt-in, JSX adds the attr.) */
+.cliItemsTable th[data-required],
+.piItemsTable th[data-required],
+.sbmItemsTable th[data-required] {
+  color: var(--color-primary);
+}
+
+.cliItemsTable td[data-required] .raInput,
+.cliItemsTable td[data-required] .csf,
+.cliItemsTable td[data-required] .cdpInput,
+.piItemsTable td[data-required] .raInput,
+.piItemsTable td[data-required] .csf,
+.piItemsTable td[data-required] .cdpInput,
+.sbmItemsTable td[data-required] .raInput,
+.sbmItemsTable td[data-required] .csf,
+.sbmItemsTable td[data-required] .cdpInput {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+/* Native constraint / aria-required when label omits .reqMark */
+.raField:not(:has(.reqMark)):not(:has(.req)) input:not([type="checkbox"]):required,
+.raField:not(:has(.reqMark)):not(:has(.req)) select:required,
+.raField:not(:has(.reqMark)):not(:has(.req)) textarea:required,
+.raField:not(:has(.reqMark)):not(:has(.req)) .raInput[aria-required="true"],
+.raField:not(:has(.reqMark)):not(:has(.req)) select.raInput[aria-required="true"],
+.raField:not(:has(.reqMark)):not(:has(.req)) textarea.raInput[aria-required="true"] {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput:required,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) select.mfzInput:required,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) textarea.mfzTextarea:required,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput[aria-required="true"],
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) select.mfzInput[aria-required="true"],
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) textarea.mfzTextarea[aria-required="true"] {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+/* ProductPicker: border is on .ppComboField, not the nested borderless .mfzInput */
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .ppComboField {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .ppComboField:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border-strong)) !important;
+}
+
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .ppComboField:focus-within,
+.mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .ppComboField_open {
+  border-color: var(--color-primary) !important;
+}
+
+.mfzField:is(:has(.reqMark), :has(.req)) .ppComboField,
+.mfzField:has(.mfzReq) .ppComboField {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mfzField:is(:has(.reqMark), :has(.req)) .ppComboField:focus-within,
+.mfzField:is(:has(.reqMark), :has(.req)) .ppComboField_open,
+.mfzField:has(.mfzReq) .ppComboField:focus-within,
+.mfzField:has(.mfzReq) .ppComboField_open {
+  border-color: var(--color-primary-dark) !important;
+}
+
+/* Structured forms + CommonModal: repeat cues so route/component CSS order cannot flatten borders */
+.sfm .raField:not(:has(.reqMark)):not(:has(.req)) .raInput,
+.sfm .raField:not(:has(.reqMark)):not(:has(.req)) select.raInput,
+.sfm .raField:not(:has(.reqMark)):not(:has(.req)) textarea.raInput,
+.sfm .raField:not(:has(.reqMark)):not(:has(.req)) .cdpInput,
+.sfm .raField:not(:has(.reqMark)):not(:has(.req)) .csf {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.sfm .raField:is(:has(.reqMark), :has(.req)) .raInput,
+.sfm .raField:is(:has(.reqMark), :has(.req)) select.raInput,
+.sfm .raField:is(:has(.reqMark), :has(.req)) textarea.raInput,
+.sfm .raField:is(:has(.reqMark), :has(.req)) .cdpInput,
+.sfm .raField:is(:has(.reqMark), :has(.req)) .csf {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.sfm .raField:is(:has(.reqMark), :has(.req)) .telxSlot {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mcm .raField:not(:has(.reqMark)):not(:has(.req)) .raInput,
+.mcm .raField:not(:has(.reqMark)):not(:has(.req)) select.raInput,
+.mcm .raField:not(:has(.reqMark)):not(:has(.req)) textarea.raInput,
+.mcm .raField:not(:has(.reqMark)):not(:has(.req)) .cdpInput,
+.mcm .raField:not(:has(.reqMark)):not(:has(.req)) .csf {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.mcm .raField:is(:has(.reqMark), :has(.req)) .raInput,
+.mcm .raField:is(:has(.reqMark), :has(.req)) select.raInput,
+.mcm .raField:is(:has(.reqMark), :has(.req)) textarea.raInput,
+.mcm .raField:is(:has(.reqMark), :has(.req)) .cdpInput,
+.mcm .raField:is(:has(.reqMark), :has(.req)) .csf {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mcm .raField:is(:has(.reqMark), :has(.req)) .telxSlot {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mcm .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput,
+.mcm .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) select.mfzInput,
+.mcm .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) textarea.mfzTextarea,
+.mcm .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .cdpInput,
+.mcm .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .csf,
+.mcm .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .msw .csf {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.mcm .mfzField:is(:has(.reqMark), :has(.req)) .mfzInput,
+.mcm .mfzField:is(:has(.reqMark), :has(.req)) select.mfzInput,
+.mcm .mfzField:is(:has(.reqMark), :has(.req)) textarea.mfzTextarea,
+.mcm .mfzField:is(:has(.reqMark), :has(.req)) .cdpInput,
+.mcm .mfzField:is(:has(.reqMark), :has(.req)) .csf,
+.mcm .mfzField:is(:has(.reqMark), :has(.req)) .msw .csf,
+.mcm .mfzField:has(.mfzReq) .mfzInput,
+.mcm .mfzField:has(.mfzReq) select.mfzInput,
+.mcm .mfzField:has(.mfzReq) textarea.mfzTextarea,
+.mcm .mfzField:has(.mfzReq) .cdpInput,
+.mcm .mfzField:has(.mfzReq) .csf,
+.mcm .mfzField:has(.mfzReq) .msw .csf {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mcm .mfzField:is(:has(.reqMark), :has(.req)) .ppComboField,
+.mcm .mfzField:has(.mfzReq) .ppComboField {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mcm .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .ppComboField {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+/* Auth / registration routes (no .raField): optional = tinted primary, required = stronger primary */
+.authPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="text"],
+.authPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="email"],
+.authPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="password"],
+.authPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="tel"] {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.authPage .field:is(:has(.reqMark), :has(.req)) input[type="text"],
+.authPage .field:is(:has(.reqMark), :has(.req)) input[type="email"],
+.authPage .field:is(:has(.reqMark), :has(.req)) input[type="password"],
+.authPage .field:is(:has(.reqMark), :has(.req)) input[type="tel"] {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.verifyOtpPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="text"],
+.verifyOtpPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="email"] {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.verifyOtpPage .field:is(:has(.reqMark), :has(.req)) input[type="text"],
+.verifyOtpPage .field:is(:has(.reqMark), :has(.req)) input[type="email"] {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.forgot-card .field:not(:has(.reqMark)):not(:has(.req)) .fpInput {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.forgot-card .field:is(:has(.reqMark), :has(.req)) .fpInput {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.forgot-card .field:not(:has(.reqMark)):not(:has(.req)) .otpBoxes input.otpBox[type="text"] {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.forgot-card .field:is(:has(.reqMark), :has(.req)) .otpBoxes input.otpBox[type="text"] {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.fcpPage .fcpField:not(:has(.reqMark)):not(:has(.req)) input[type="password"],
+.fcpPage .fcpField:not(:has(.reqMark)):not(:has(.req)) input[type="text"] {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.fcpPage .fcpField:is(:has(.reqMark), :has(.req)) input[type="password"],
+.fcpPage .fcpField:is(:has(.reqMark), :has(.req)) input[type="text"] {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.cpWrap .cpField:not(:has(.reqMark)):not(:has(.req)) input[type="password"] {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.cpWrap .cpField:is(:has(.reqMark), :has(.req)) input[type="password"] {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.regWizard .field:not(:has(.reqMark)):not(:has(.req)) .regInput,
+.regWizard .field:not(:has(.reqMark)):not(:has(.req)) .regSelect,
+.regWizard .field:not(:has(.reqMark)):not(:has(.req)) .regTextarea {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.regWizard .field:is(:has(.reqMark), :has(.req)) .regInput,
+.regWizard .field:is(:has(.reqMark), :has(.req)) .regSelect,
+.regWizard .field:is(:has(.reqMark), :has(.req)) .regTextarea {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.auField:not(:has(.reqMark)):not(:has(.req)) .auInput,
+.auField:not(:has(.reqMark)):not(:has(.req)) .auTextarea,
+.auField:not(:has(.reqMark)):not(:has(.req)) .auSelect {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.auField:is(:has(.reqMark), :has(.req)) .auInput,
+.auField:is(:has(.reqMark), :has(.req)) .auTextarea,
+.auField:is(:has(.reqMark), :has(.req)) .auSelect {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.auField:is(:has(.reqMark), :has(.req)) .auPhoneRow .auSelect,
+.auField:is(:has(.reqMark), :has(.req)) .auPhoneRow .auInput {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+/* Profile settings — .psPage uses .form-field / .form-input (not .raField); labels may use .req or .reqMark */
+.psPage .form-field:not(:has(.req)):not(:has(.reqMark)) .form-input:not(.status-ok):not([readonly]),
+.psPage .form-field:not(:has(.req)):not(:has(.reqMark)) .form-select:not([readonly]),
+.psPage .form-field:not(:has(.req)):not(:has(.reqMark)) .form-textarea:not([readonly]) {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.psPage .form-field:is(:has(.reqMark), :has(.req)) .form-input:not(.status-ok):not([readonly]),
+.psPage .form-field:is(:has(.reqMark), :has(.req)) .form-select:not([readonly]),
+.psPage .form-field:is(:has(.reqMark), :has(.req)) .form-textarea:not([readonly]) {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.psPage .form-field:not(:has(.req)):not(:has(.reqMark)) .form-input:not(.status-ok)[aria-required="true"],
+.psPage .form-field:not(:has(.req)):not(:has(.reqMark)) .form-select[aria-required="true"],
+.psPage .form-field:not(:has(.req)):not(:has(.reqMark)) input:not([type="checkbox"]):required:not(.status-ok):not([readonly]),
+.psPage .form-field:not(:has(.req)):not(:has(.reqMark)) select:required:not([readonly]),
+.psPage .form-field:not(:has(.req)):not(:has(.reqMark)) textarea:required:not([readonly]) {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+/* Orders (CommonModal): accept/receive rows use mfzInput without .mfzField — nth-child matches markup */
+.mcm .ordAcceptBox .ordOverrideRow > input.mfzInput:nth-child(2) {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mcm .ordAcceptBox .ordOverrideRow > input.mfzInput:nth-child(3),
+.mcm .ordAcceptBox .ordOverrideRow > input.mfzInput:nth-child(4) {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.mcm .ordAcceptBox > textarea.mfzTextarea,
+.mcm .ordAcceptBox .ordActions > input.mfzInput {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.mcm .ordPurchaseBody .ordOverrideRow > input.mfzInput:last-child {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+/* Retailer place-order wizard: qty strip reads as required vs optional notes */
+.mcm .cmpOrderCartItem:not(.isInvalid) .cmpOrderCartQty {
+  border: 1.5px solid var(--color-primary) !important;
+  border-radius: 11px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-card) 94%, var(--color-primary) 6%);
+}
+
+.mcm .cmpOrderNotesInput {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.mcm .cmpOrderNotesInput:focus,
+.mcm .cmpOrderNotesInput:focus-visible {
+  border-color: var(--color-primary) !important;
+}
+
+/* CSV import (CommonModal): mapped app field vs Skip column */
+.mcm .ciwMapTable select:has(option[value="__skip__"]:checked) {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+.mcm .ciwMapTable select:not(:has(option[value="__skip__"]:checked)) {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+/* Purchase invoice return builder: line qty inputs sit outside .raField wrappers */
+.mcm .piReturnRow > input.raInput[readonly] {
+  border-color: var(--color-border) !important;
+  border-width: 1px !important;
+}
+
+.mcm .piReturnRow > input.raInput:nth-child(2) {
+  border-color: var(--color-primary) !important;
+  border-width: 1.5px !important;
+}
+
+.mcm .piReturnRow > input.raInput:nth-child(3) {
+  border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+  border-width: 1px !important;
+}
+
+/* ── Small screens: keep required vs optional visible after responsive CSS ─────
+   Component stylesheets often reload borders at ≤720px / ≤380px; repeat cues here. */
+
+@media (max-width: 720px) {
+  .reqMark,
+  .mfzReq,
+  .req {
+    font-size: 1.08em;
+    margin-left: 3px;
+  }
+
+  /* .raField — same idea as .mfzField above: modal/page responsive CSS loads later */
+  .raField:not(:has(.reqMark)):not(:has(.req)) .raInput,
+  .raField:not(:has(.reqMark)):not(:has(.req)) select.raInput,
+  .raField:not(:has(.reqMark)):not(:has(.req)) textarea.raInput,
+  .raField:not(:has(.reqMark)):not(:has(.req)) .cdpInput,
+  .raField:not(:has(.reqMark)):not(:has(.req)) .csf {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .raField:is(:has(.reqMark), :has(.req)) .raInput,
+  .raField:is(:has(.reqMark), :has(.req)) select.raInput,
+  .raField:is(:has(.reqMark), :has(.req)) textarea.raInput,
+  .raField:is(:has(.reqMark), :has(.req)) .cdpInput,
+  .raField:is(:has(.reqMark), :has(.req)) .csf {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .raField:is(:has(.reqMark), :has(.req)) .telxSlot {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .sfm .raField:not(:has(.reqMark)):not(:has(.req)) .raInput,
+  .sfm .raField:not(:has(.reqMark)):not(:has(.req)) select.raInput,
+  .sfm .raField:not(:has(.reqMark)):not(:has(.req)) textarea.raInput,
+  .sfm .raField:not(:has(.reqMark)):not(:has(.req)) .cdpInput,
+  .sfm .raField:not(:has(.reqMark)):not(:has(.req)) .csf {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .sfm .raField:is(:has(.reqMark), :has(.req)) .raInput,
+  .sfm .raField:is(:has(.reqMark), :has(.req)) select.raInput,
+  .sfm .raField:is(:has(.reqMark), :has(.req)) textarea.raInput,
+  .sfm .raField:is(:has(.reqMark), :has(.req)) .cdpInput,
+  .sfm .raField:is(:has(.reqMark), :has(.req)) .csf {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .sfm .raField:is(:has(.reqMark), :has(.req)) .telxSlot {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .mcm .raField:not(:has(.reqMark)):not(:has(.req)) .raInput,
+  .mcm .raField:not(:has(.reqMark)):not(:has(.req)) select.raInput,
+  .mcm .raField:not(:has(.reqMark)):not(:has(.req)) textarea.raInput,
+  .mcm .raField:not(:has(.reqMark)):not(:has(.req)) .cdpInput,
+  .mcm .raField:not(:has(.reqMark)):not(:has(.req)) .csf {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .mcm .raField:is(:has(.reqMark), :has(.req)) .raInput,
+  .mcm .raField:is(:has(.reqMark), :has(.req)) select.raInput,
+  .mcm .raField:is(:has(.reqMark), :has(.req)) textarea.raInput,
+  .mcm .raField:is(:has(.reqMark), :has(.req)) .cdpInput,
+  .mcm .raField:is(:has(.reqMark), :has(.req)) .csf {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .mcm .raField:is(:has(.reqMark), :has(.req)) .telxSlot {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  /* Auth / unified login / registration — repeat so AuthUnifiedPage responsive rules cannot flatten cues */
+  .authPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="text"],
+  .authPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="email"],
+  .authPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="password"],
+  .authPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="tel"] {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .authPage .field:is(:has(.reqMark), :has(.req)) input[type="text"],
+  .authPage .field:is(:has(.reqMark), :has(.req)) input[type="email"],
+  .authPage .field:is(:has(.reqMark), :has(.req)) input[type="password"],
+  .authPage .field:is(:has(.reqMark), :has(.req)) input[type="tel"] {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .verifyOtpPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="text"],
+  .verifyOtpPage .field:not(:has(.reqMark)):not(:has(.req)) input[type="email"] {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .verifyOtpPage .field:is(:has(.reqMark), :has(.req)) input[type="text"],
+  .verifyOtpPage .field:is(:has(.reqMark), :has(.req)) input[type="email"] {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .forgot-card .field:not(:has(.reqMark)):not(:has(.req)) .fpInput {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .forgot-card .field:is(:has(.reqMark), :has(.req)) .fpInput {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .forgot-card .field:not(:has(.reqMark)):not(:has(.req)) .otpBoxes input.otpBox[type="text"] {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .forgot-card .field:is(:has(.reqMark), :has(.req)) .otpBoxes input.otpBox[type="text"] {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .fcpPage .fcpField:not(:has(.reqMark)):not(:has(.req)) input[type="password"],
+  .fcpPage .fcpField:not(:has(.reqMark)):not(:has(.req)) input[type="text"] {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .fcpPage .fcpField:is(:has(.reqMark), :has(.req)) input[type="password"],
+  .fcpPage .fcpField:is(:has(.reqMark), :has(.req)) input[type="text"] {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .cpWrap .cpField:not(:has(.reqMark)):not(:has(.req)) input[type="password"] {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .cpWrap .cpField:is(:has(.reqMark), :has(.req)) input[type="password"] {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .regWizard .field:not(:has(.reqMark)):not(:has(.req)) .regInput,
+  .regWizard .field:not(:has(.reqMark)):not(:has(.req)) .regSelect,
+  .regWizard .field:not(:has(.reqMark)):not(:has(.req)) .regTextarea {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .regWizard .field:is(:has(.reqMark), :has(.req)) .regInput,
+  .regWizard .field:is(:has(.reqMark), :has(.req)) .regSelect,
+  .regWizard .field:is(:has(.reqMark), :has(.req)) .regTextarea {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .auField:not(:has(.reqMark)):not(:has(.req)) .auInput,
+  .auField:not(:has(.reqMark)):not(:has(.req)) .auTextarea,
+  .auField:not(:has(.reqMark)):not(:has(.req)) .auSelect {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .auField:is(:has(.reqMark), :has(.req)) .auInput,
+  .auField:is(:has(.reqMark), :has(.req)) .auTextarea,
+  .auField:is(:has(.reqMark), :has(.req)) .auSelect {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .auField:is(:has(.reqMark), :has(.req)) .auPhoneRow .auSelect,
+  .auField:is(:has(.reqMark), :has(.req)) .auPhoneRow .auInput {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  /* Master modals — mobile grid reflow */
+  .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .mfzInput,
+  .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) select.mfzInput,
+  .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) textarea.mfzTextarea,
+  .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .cdpInput,
+  .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .csf,
+  .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .msw .csf {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .mfzField:is(:has(.reqMark), :has(.req)) .mfzInput,
+  .mfzField:is(:has(.reqMark), :has(.req)) select.mfzInput,
+  .mfzField:is(:has(.reqMark), :has(.req)) textarea.mfzTextarea,
+  .mfzField:is(:has(.reqMark), :has(.req)) .cdpInput,
+  .mfzField:is(:has(.reqMark), :has(.req)) .csf,
+  .mfzField:is(:has(.reqMark), :has(.req)) .msw .csf,
+  .mfzField:has(.mfzReq) .mfzInput,
+  .mfzField:has(.mfzReq) select.mfzInput,
+  .mfzField:has(.mfzReq) textarea.mfzTextarea,
+  .mfzField:has(.mfzReq) .cdpInput,
+  .mfzField:has(.mfzReq) .csf,
+  .mfzField:has(.mfzReq) .msw .csf {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .mfzField:is(:has(.reqMark), :has(.req)) .telxSlot,
+  .mfzField:has(.mfzReq) .telxSlot {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .mfzField:not(:has(.reqMark)):not(:has(.mfzReq)):not(:has(.req)) .ppComboField {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .mfzField:is(:has(.reqMark), :has(.req)) .ppComboField,
+  .mfzField:has(.mfzReq) .ppComboField {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .psPage .form-field:not(:has(.req)):not(:has(.reqMark)) .form-input:not(.status-ok):not([readonly]),
+  .psPage .form-field:not(:has(.req)):not(:has(.reqMark)) .form-select:not([readonly]),
+  .psPage .form-field:not(:has(.req)):not(:has(.reqMark)) .form-textarea:not([readonly]) {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .psPage .form-field:is(:has(.reqMark), :has(.req)) .form-input:not(.status-ok):not([readonly]),
+  .psPage .form-field:is(:has(.reqMark), :has(.req)) .form-select:not([readonly]),
+  .psPage .form-field:is(:has(.reqMark), :has(.req)) .form-textarea:not([readonly]) {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .mcm .ordAcceptBox .ordOverrideRow > input.mfzInput:nth-child(2) {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .mcm .ordAcceptBox .ordOverrideRow > input.mfzInput:nth-child(3),
+  .mcm .ordAcceptBox .ordOverrideRow > input.mfzInput:nth-child(4),
+  .mcm .ordAcceptBox > textarea.mfzTextarea,
+  .mcm .ordAcceptBox .ordActions > input.mfzInput {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .mcm .ordPurchaseBody .ordOverrideRow > input.mfzInput:last-child {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .mcm .cmpOrderCartItem:not(.isInvalid) .cmpOrderCartQty {
+    border: 1.5px solid var(--color-primary) !important;
+    border-radius: 11px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-card) 94%, var(--color-primary) 6%);
+  }
+
+  .mcm .cmpOrderNotesInput {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .mcm .ciwMapTable select:has(option[value="__skip__"]:checked) {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .mcm .ciwMapTable select:not(:has(option[value="__skip__"]:checked)) {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .mcm .piReturnRow > input.raInput:nth-child(2) {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .mcm .piReturnRow > input.raInput:nth-child(3) {
+    border-color: color-mix(in srgb, var(--color-primary) 32%, var(--color-border-strong)) !important;
+    border-width: 1px !important;
+  }
+
+  .mcm .piReturnRow > input.raInput[readonly] {
+    border-color: var(--color-border) !important;
+    border-width: 1px !important;
+  }
+
+  .cliItemsTable td[data-required] .raInput,
+  .cliItemsTable td[data-required] .csf,
+  .cliItemsTable td[data-required] .cdpInput,
+  .piItemsTable td[data-required] .raInput,
+  .piItemsTable td[data-required] .csf,
+  .piItemsTable td[data-required] .cdpInput,
+  .sbmItemsTable td[data-required] .raInput,
+  .sbmItemsTable td[data-required] .csf,
+  .sbmItemsTable td[data-required] .cdpInput {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+}
+
+/* Narrow phones: slightly thicker required outline for legibility */
+@media (max-width: 380px) {
+  .raField:is(:has(.reqMark), :has(.req)) .raInput,
+  .raField:is(:has(.reqMark), :has(.req)) select.raInput,
+  .raField:is(:has(.reqMark), :has(.req)) textarea.raInput,
+  .raField:is(:has(.reqMark), :has(.req)) .cdpInput,
+  .raField:is(:has(.reqMark), :has(.req)) .csf,
+  .mfzField:is(:has(.reqMark), :has(.req)) .mfzInput,
+  .mfzField:is(:has(.reqMark), :has(.req)) select.mfzInput,
+  .mfzField:is(:has(.reqMark), :has(.req)) textarea.mfzTextarea,
+  .mfzField:is(:has(.reqMark), :has(.req)) .cdpInput,
+  .mfzField:is(:has(.reqMark), :has(.req)) .csf,
+  .mfzField:is(:has(.reqMark), :has(.req)) .msw .csf,
+  .mfzField:has(.mfzReq) .mfzInput,
+  .mfzField:has(.mfzReq) select.mfzInput,
+  .mfzField:has(.mfzReq) textarea.mfzTextarea,
+  .mfzField:has(.mfzReq) .cdpInput,
+  .mfzField:has(.mfzReq) .csf,
+  .mfzField:has(.mfzReq) .msw .csf,
+  .mfzField:is(:has(.reqMark), :has(.req)) .telxSlot,
+  .mfzField:has(.mfzReq) .telxSlot,
+  .raField:is(:has(.reqMark), :has(.req)) .telxSlot,
+  .mfzField:is(:has(.reqMark), :has(.req)) .ppComboField,
+  .mfzField:has(.mfzReq) .ppComboField,
+  .sfm .raField:is(:has(.reqMark), :has(.req)) .raInput,
+  .sfm .raField:is(:has(.reqMark), :has(.req)) select.raInput,
+  .sfm .raField:is(:has(.reqMark), :has(.req)) textarea.raInput,
+  .sfm .raField:is(:has(.reqMark), :has(.req)) .cdpInput,
+  .sfm .raField:is(:has(.reqMark), :has(.req)) .csf,
+  .mcm .raField:is(:has(.reqMark), :has(.req)) .raInput,
+  .mcm .raField:is(:has(.reqMark), :has(.req)) select.raInput,
+  .mcm .raField:is(:has(.reqMark), :has(.req)) textarea.raInput,
+  .mcm .raField:is(:has(.reqMark), :has(.req)) .cdpInput,
+  .mcm .raField:is(:has(.reqMark), :has(.req)) .csf,
+  .authPage .field:is(:has(.reqMark), :has(.req)) input[type="text"],
+  .authPage .field:is(:has(.reqMark), :has(.req)) input[type="email"],
+  .authPage .field:is(:has(.reqMark), :has(.req)) input[type="password"],
+  .authPage .field:is(:has(.reqMark), :has(.req)) input[type="tel"],
+  .verifyOtpPage .field:is(:has(.reqMark), :has(.req)) input[type="text"],
+  .verifyOtpPage .field:is(:has(.reqMark), :has(.req)) input[type="email"],
+  .forgot-card .field:is(:has(.reqMark), :has(.req)) .fpInput,
+  .forgot-card .field:is(:has(.reqMark), :has(.req)) .otpBoxes input.otpBox[type="text"],
+  .fcpPage .fcpField:is(:has(.reqMark), :has(.req)) input[type="password"],
+  .fcpPage .fcpField:is(:has(.reqMark), :has(.req)) input[type="text"],
+  .cpWrap .cpField:is(:has(.reqMark), :has(.req)) input[type="password"],
+  .regWizard .field:is(:has(.reqMark), :has(.req)) .regInput,
+  .regWizard .field:is(:has(.reqMark), :has(.req)) .regSelect,
+  .regWizard .field:is(:has(.reqMark), :has(.req)) .regTextarea,
+  .auField:is(:has(.reqMark), :has(.req)) .auInput,
+  .auField:is(:has(.reqMark), :has(.req)) .auTextarea,
+  .auField:is(:has(.reqMark), :has(.req)) .auSelect,
+  .auField:is(:has(.reqMark), :has(.req)) .auPhoneRow .auSelect,
+  .auField:is(:has(.reqMark), :has(.req)) .auPhoneRow .auInput,
+  .psPage .form-field:is(:has(.reqMark), :has(.req)) .form-input:not(.status-ok):not([readonly]),
+  .psPage .form-field:is(:has(.reqMark), :has(.req)) .form-select:not([readonly]),
+  .psPage .form-field:is(:has(.reqMark), :has(.req)) .form-textarea:not([readonly]),
+  .mcm .ordAcceptBox .ordOverrideRow > input.mfzInput:nth-child(2),
+  .mcm .ordPurchaseBody .ordOverrideRow > input.mfzInput:last-child,
+  .mcm .cmpOrderCartItem:not(.isInvalid) .cmpOrderCartQty,
+  .mcm .ciwMapTable select:not(:has(option[value="__skip__"]:checked)),
+  .mcm .piReturnRow > input.raInput:nth-child(2),
+  .cliItemsTable td[data-required] .raInput,
+  .cliItemsTable td[data-required] .csf,
+  .cliItemsTable td[data-required] .cdpInput,
+  .piItemsTable td[data-required] .raInput,
+  .piItemsTable td[data-required] .csf,
+  .piItemsTable td[data-required] .cdpInput,
+  .sbmItemsTable td[data-required] .raInput,
+  .sbmItemsTable td[data-required] .csf,
+  .sbmItemsTable td[data-required] .cdpInput {
+    border-width: 2px !important;
+  }
+}

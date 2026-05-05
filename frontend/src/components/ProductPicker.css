@@ -1,0 +1,422 @@
+/* ProductPicker  catalog search & selection (theme tokens only; pairs with mfzInput / AppButton) */
+
+.ppShell {
+  --mfz-surface: color-mix(in srgb, var(--color-surface) 92%, var(--color-primary) 2%);
+  --mfz-card: color-mix(in srgb, var(--color-card) 92%, var(--mfz-surface) 8%);
+  --mfz-border: color-mix(in srgb, var(--color-border) 86%, transparent);
+  --mfz-shadow-soft: 0 2px 10px color-mix(in srgb, var(--color-text) 6%, transparent);
+  width: 100%;
+}
+
+.ppShell_disabled {
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+.ppShell_ro .ppChoiceCard {
+  border-style: dashed;
+}
+
+/*  Selected product (summary card)  */
+.ppChoiceCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: clamp(12px, 2.4vw, 14px);
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--color-border) 82%, transparent);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-card) 94%, var(--color-surface)),
+    color-mix(in srgb, var(--color-primary-light) 35%, var(--color-card))
+  );
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+}
+
+.ppChoiceCard_ro {
+  background: color-mix(in srgb, var(--color-surface-2) 55%, var(--color-card));
+  border-left-color: color-mix(in srgb, var(--color-text-4) 40%, var(--color-border));
+}
+
+.ppChoiceHero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: clamp(12px, 2.4vw, 16px);
+  align-items: start;
+}
+
+.ppChoiceMark {
+  width: clamp(44px, 9vw, 52px);
+  height: clamp(44px, 9vw, 52px);
+  border-radius: clamp(12px, 2vw, 14px);
+  display: grid;
+  place-items: center;
+  color: var(--color-on-primary);
+  background: linear-gradient(180deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 72%, var(--color-secondary)));
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 55%, transparent) inset,
+    0 12px 28px -14px color-mix(in srgb, var(--color-primary) 35%, transparent);
+}
+
+.ppChoiceMark svg {
+  width: clamp(22px, 4.5vw, 26px);
+  height: clamp(22px, 4.5vw, 26px);
+  filter: drop-shadow(0 1px 0 color-mix(in srgb, var(--color-card) 45%, transparent));
+}
+
+.ppChoiceText {
+  min-width: 0;
+}
+
+.ppChoiceKicker {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+}
+
+.ppChoiceTitle {
+  margin: 0;
+  font-size: clamp(16px, 2.8vw, 18px);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--color-text-heading);
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.ppChoiceMeta {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--color-text-2);
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.ppChoiceBar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 0;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+}
+
+/*  Search stage  */
+.ppSearchStage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ppCombo {
+  position: relative;
+  width: 100%;
+}
+
+.ppComboField {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--mfz-border) 92%, transparent);
+  background: color-mix(in srgb, var(--mfz-card) 94%, var(--mfz-surface) 6%);
+  box-shadow: var(--mfz-shadow-soft);
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    background 0.16s ease;
+}
+
+.ppComboField:focus-within {
+  border-color: color-mix(in srgb, var(--color-primary) 42%, var(--color-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+  background: var(--color-card);
+}
+
+.ppComboField_open {
+  border-color: color-mix(in srgb, var(--color-primary) 38%, var(--color-border));
+}
+
+.ppComboGlyph {
+  display: grid;
+  place-items: center;
+  padding-left: 14px;
+  padding-right: 6px;
+  color: var(--color-text-4);
+}
+
+.ppComboGlyph svg {
+  display: block;
+}
+
+.ppComboInput.mfzInput {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  min-height: 42px;
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 8px;
+}
+
+.ppComboInput.mfzInput:focus {
+  box-shadow: none;
+  background: transparent;
+}
+
+.ppComboAffordance {
+  display: grid;
+  place-items: center;
+  padding-right: 12px;
+  padding-left: 4px;
+  color: var(--color-text-4);
+  transform: rotate(90deg);
+  transition: transform 0.2s var(--modal-motion-ease, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+.ppComboAffordance svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ppComboAffordance_open {
+  transform: rotate(-90deg);
+}
+
+.ppMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: min(320px, 52vh);
+  overflow: auto;
+  padding: 6px;
+  border-radius: clamp(12px, 2vw, 14px);
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  background: var(--color-card);
+  box-shadow: var(--shadow-lg);
+  scrollbar-gutter: stable;
+  animation: ppMenuIn var(--modal-motion-duration, 240ms) var(--modal-motion-ease, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+
+.ppEmpty {
+  padding: 14px 12px;
+  font-size: 13px;
+  font-weight: 650;
+  font-style: italic;
+  color: var(--color-text-3);
+  text-align: center;
+}
+
+.ppOpt {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  padding: 10px 12px;
+  margin-bottom: 4px;
+  border-radius: clamp(10px, 1.8vw, 12px);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font);
+  color: var(--color-text);
+  transition: background 0.14s ease, border-color 0.14s ease, transform 0.14s ease;
+}
+
+.ppOpt:last-child {
+  margin-bottom: 0;
+}
+
+.ppOpt:hover,
+.ppOpt_active {
+  background: color-mix(in srgb, var(--color-primary-light) 55%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+}
+
+.ppOpt:active:not(:disabled) {
+  transform: scale(0.995);
+}
+
+.ppOpt:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.ppOptMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+}
+
+.ppOptName {
+  font-size: 14px;
+  font-weight: 850;
+  letter-spacing: -0.01em;
+}
+
+.ppOptCode {
+  font-size: 11px;
+  font-weight: 750;
+  color: var(--color-text-3);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-surface-2) 80%, var(--color-card));
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+}
+
+.ppOptSub {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--color-text-2);
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.ppCreateRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+@media (max-width: 720px) {
+  .ppChoiceCard {
+    gap: 8px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .ppChoiceHero {
+    gap: 10px;
+  }
+
+  .ppChoiceTitle {
+    font-size: clamp(14px, 4vw, 16.5px);
+  }
+
+  .ppChoiceMeta {
+    margin-top: 6px;
+    font-size: 12.5px;
+  }
+
+  .ppChoiceBar {
+    gap: 6px;
+    padding-top: 0;
+  }
+
+  .ppSearchStage {
+    gap: 8px;
+  }
+
+  .ppComboInput.mfzInput {
+    min-height: 42px;
+    font-size: 14px;
+  }
+
+  .ppComboGlyph {
+    padding-left: 11px;
+    padding-right: 5px;
+  }
+
+  .ppComboAffordance {
+    padding-right: 10px;
+    padding-left: 3px;
+  }
+
+  .ppMenu {
+    padding: 5px;
+    border-radius: 12px;
+    max-height: min(56vh, 360px);
+  }
+
+  .ppOpt {
+    padding: 9px 10px;
+    margin-bottom: 3px;
+    border-radius: 10px;
+  }
+
+  .ppOptName {
+    font-size: 13.5px;
+  }
+
+  .ppOptCode {
+    font-size: 10.5px;
+    padding: 2px 7px;
+  }
+
+  .ppOptSub {
+    font-size: 11.5px;
+  }
+
+  .ppEmpty {
+    padding: 12px 10px;
+    font-size: 12.5px;
+  }
+
+  .ppCreateRow {
+    gap: 7px;
+  }
+}
+
+@media (max-width: 520px) {
+  .ppChoiceHero {
+    grid-template-columns: 1fr;
+  }
+
+  .ppChoiceMark {
+    width: 46px;
+    height: 46px;
+  }
+
+  .ppChoiceBar {
+    justify-content: stretch;
+  }
+
+  .ppChoiceBar .appBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ppCreateRow .appBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .ppChoiceCard {
+    padding: 9px;
+    gap: 7px;
+  }
+
+  .ppOpt {
+    padding: 8px 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ppMenu {
+    animation: none;
+  }
+
+  .ppComboAffordance {
+    transition: none;
+  }
+
+  .ppOpt:active:not(:disabled) {
+    transform: none;
+  }
+}

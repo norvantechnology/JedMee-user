@@ -1,0 +1,51 @@
+.msw {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+}
+
+.mswSelect {
+  min-width: 0;
+}
+
+.mswAdd {
+  width: 42px;
+  min-height: 40px;
+  flex: 0 0 auto;
+}
+
+/* Kind-specific emphasis */
+.mswStrong {
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 720px) {
+  .msw {
+    gap: 7px;
+  }
+
+  .mswAdd {
+    width: 42px;
+    min-height: 42px;
+  }
+}
+
+@media (max-width: 480px) {
+  .msw {
+    gap: 6px;
+  }
+
+  .mswAdd {
+    width: 40px;
+    min-height: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mswAdd:active { transform: none; }
+}
+

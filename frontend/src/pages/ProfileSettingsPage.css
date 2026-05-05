@@ -1,0 +1,143 @@
+.psPage{
+  --blue:var(--color-primary);--blue-dark:var(--color-primary-dark);--blue-light:var(--color-primary-light);--blue-mid:var(--color-primary-subtle);
+  --text-primary:var(--color-text-heading);--text-secondary:var(--color-text-2);--text-muted:var(--color-text-muted);--text-hint:var(--color-text-faint);
+  --border:var(--color-border);--border-soft:var(--color-surface-2);
+  --bg-white:var(--color-card);--bg-surface:var(--color-surface);--bg-page:var(--color-surface);
+  --success:var(--color-success-strong);--success-bg:var(--color-success-light);--success-border:var(--color-success-subtle);
+  --danger:var(--color-danger-strong);--danger-light:var(--color-danger-light);
+  --font: var(--font, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif);
+  --r-sm:7px;--r-md:10px;--r-lg:14px;
+  font-family: var(--font);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+.psPage, .psPage * , .psPage *::before, .psPage *::after { box-sizing: border-box; }
+.psPage h1, .psPage p { margin: 0; }
+
+.psInlineErr{
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* PAGE */
+.psPage .page{max-width:none;width:100%;margin:0;padding:32px 24px 100px}
+
+/* PAGE HEADER */
+.psPage .page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.psPage .page-title{font-size:22px;font-weight:600;color:var(--text-primary);margin:0;line-height:1.2}
+.psPage .page-subtitle{font-size:13.5px;color:var(--text-muted);margin-top:4px}
+
+/* HERO CARD */
+.psPage .hero-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 24px;display:flex;align-items:center;gap:18px;margin-bottom:16px;box-shadow:0 1px 4px color-mix(in srgb, var(--color-text) 5%, transparent);flex-wrap:wrap}
+.psPage .hero-avatar-wrap{position:relative;flex-shrink:0}
+.psPage .hero-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue-dark));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--color-card);letter-spacing:.5px}
+.psPage .avatar-edit-btn{position:absolute;bottom:0;right:0;width:22px;height:22px;border-radius:50%;background:var(--bg-white);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);transition:border-color .14s,color .14s}
+.psPage .avatar-edit-btn:hover{border-color:var(--blue);color:var(--blue)}
+.psPage .avatar-edit-btn svg{width:11px;height:11px}
+.psPage .avatar-edit-btn:disabled{opacity:.55;cursor:not-allowed}
+.psPage .hero-info{flex:1;min-width:0}
+.psPage .hero-name{font-size:17px;font-weight:600;color:var(--text-primary)}
+.psPage .hero-email{font-size:13px;color:var(--text-muted);margin-top:2px}
+.psPage .hero-badges{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
+.psPage .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11.5px;font-weight:600;letter-spacing:.04em}
+.psPage .badge-blue{background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-mid)}
+.psPage .badge-green{background:var(--success-bg);color:var(--color-success-dark);border:1px solid var(--success-border)}
+.psPage .badge-gray{background:var(--bg-surface);color:var(--text-muted);border:1px solid var(--border)}
+.psPage .badge svg{width:10px;height:10px}
+.psPage .hero-btns{display:flex;gap:8px;flex-shrink:0}
+.psPage .btn-ghost-sm{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 14px;border:1px solid var(--border);border-radius:var(--r-sm);background:transparent;font-family:var(--font);font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:background .14s,border-color .14s}
+.psPage .btn-ghost-sm:hover{background:var(--bg-surface);border-color:var(--color-border-strong)}
+.psPage .btn-ghost-sm svg{width:13px;height:13px}
+.psPage .btn-ghost-sm:disabled{opacity:.55;cursor:not-allowed}
+
+/* SECTION CARD */
+.psPage .section-card{background:var(--bg-white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;margin-bottom:14px;box-shadow:0 1px 4px color-mix(in srgb, var(--color-text) 5%, transparent)}
+.psPage .section-hdr{display:flex;align-items:center;justify-content:space-between;padding:15px 22px;border-bottom:1px solid var(--border-soft);gap:12px;cursor:pointer;user-select:none;transition:background .14s}
+.psPage .section-hdr:hover{background:var(--bg-surface)}
+.psPage .section-hdr:focus{outline:none}
+.psPage .section-hdr-left{display:flex;align-items:center;gap:11px}
+.psPage .section-icon{width:34px;height:34px;border-radius:var(--r-sm);background:var(--blue-light);border:1px solid var(--blue-mid);display:flex;align-items:center;justify-content:center;color:var(--blue);flex-shrink:0}
+.psPage .section-icon svg{width:16px;height:16px}
+.psPage .section-title{font-size:14.5px;font-weight:600;color:var(--text-primary)}
+.psPage .section-desc{font-size:12px;color:var(--text-muted);margin-top:1px}
+.psPage .section-chevron{color:var(--text-hint);transition:transform .22s cubic-bezier(.4,0,.2,1);flex-shrink:0}
+.psPage .section-chevron svg{width:16px;height:16px}
+.psPage .section-card.collapsed .section-chevron{transform:rotate(-90deg)}
+.psPage .section-body{padding:20px 22px 22px}
+.psPage .section-card.collapsed .section-body{display:none}
+
+/* FORM */
+.psPage .form-grid{display:grid;gap:16px}
+.psPage .cols-2{grid-template-columns:1fr 1fr}
+.psPage .cols-phone{grid-template-columns:130px 1fr}
+.psPage .mt-16{margin-top:16px}
+.psPage .form-field{display:flex;flex-direction:column;gap:5px}
+.psPage .form-label{font-size:12px;font-weight:600;color:var(--text-secondary);display:flex;align-items:center;gap:4px}
+.psPage .req{color:var(--danger);font-size:13px}
+.psPage .input-wrap{position:relative;display:flex;align-items:center}
+.psPage .input-wrap .form-input{padding-left:36px}
+.psPage .input-icon{position:absolute;left:11px;color:var(--text-hint);display:flex;align-items:center;pointer-events:none}
+.psPage .input-icon svg{width:14px;height:14px}
+.psPage .form-input,.psPage .form-textarea,.psPage .form-select{width:100%;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg-white);font-family:var(--font);font-size:13.5px;color:var(--text-primary);outline:none;transition:border-color .18s,box-shadow .18s,background .15s;appearance:none}
+.psPage .form-input::placeholder,.psPage .form-textarea::placeholder{color:var(--text-hint)}
+.psPage .form-input:hover{border-color:var(--color-border-strong);background:var(--color-surface)}
+.psPage .form-input:focus,.psPage .form-textarea:focus,.psPage .form-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);background:var(--bg-white)}
+.psPage .form-input[readonly]{background:var(--bg-surface);color:var(--text-muted);cursor:default;border-color:var(--border-soft)}
+.psPage .status-ok{background:var(--success-bg)!important;color:var(--color-success-dark)!important;border-color:var(--success-border)!important;font-weight:600}
+.psPage .form-select{padding-right:28px;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\");background-repeat:no-repeat;background-position:right 8px center;cursor:pointer}
+.psPage .form-textarea{height:auto;min-height:80px;padding:10px 12px;resize:vertical;line-height:1.55}
+
+/* DOCS */
+.psPage .doc-list{display:flex;flex-direction:column;gap:10px}
+
+/* SAVE BAR */
+.psPage .save-bar{position:fixed;bottom:0;left:0;right:0;background:color-mix(in srgb, var(--color-card) 94%, transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--border);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:50;flex-wrap:wrap}
+.psPage .save-bar{padding-bottom:calc(13px + env(safe-area-inset-bottom, 0px))}
+
+/* Keep save bar aligned with AppShell content (not under sidebar) */
+.appShell2 .psPage .save-bar{
+  left: var(--sidebar-w);
+  right: 0;
+}
+.appShell2.appShell2_collapsed .psPage .save-bar{
+  left: var(--sidebar-collapsed);
+}
+.psPage .save-bar-hint{font-size:13px;color:var(--text-muted)}
+.psPage .save-bar-hint span{color:var(--danger)}
+.psPage .save-bar-btns{display:flex;gap:8px}
+.psPage .btn-cancel{display:inline-flex;align-items:center;height:38px;padding:0 18px;border:1px solid var(--border);border-radius:var(--r-md);background:transparent;font-family:var(--font);font-size:13.5px;font-weight:500;color:var(--text-secondary);cursor:pointer;transition:background .14s}
+.psPage .btn-cancel:hover{background:var(--bg-surface)}
+.psPage .btn-cancel:disabled{opacity:.55;cursor:not-allowed}
+.psPage .btn-save{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 20px;border:none;border-radius:var(--r-md);background:var(--blue);color:var(--color-card);font-family:var(--font);font-size:13.5px;font-weight:500;cursor:pointer;box-shadow:0 1px 4px color-mix(in srgb, var(--color-primary) 25%, transparent);transition:background .15s,box-shadow .15s,transform .1s}
+.psPage .btn-save:hover{background:var(--blue-dark);box-shadow:0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent)}
+.psPage .btn-save:active{transform:scale(.98)}
+.psPage .btn-save svg{width:15px;height:15px}
+.psPage .btn-save:disabled{opacity:.55;cursor:not-allowed}
+
+/* RESPONSIVE */
+@media(max-width:620px){
+  /* Use more screen width on phones */
+  .psPage .page{padding:16px 8px 96px}
+  .psPage .cols-2{grid-template-columns:1fr}
+  .psPage .cols-phone{grid-template-columns:110px 1fr}
+  .psPage .hero-btns{display:none}
+  .psPage .hero-card{padding:16px 14px; gap:14px}
+  .psPage .section-hdr{padding-top:13px; padding-bottom:13px}
+  .psPage .section-body{padding-top:16px; padding-bottom:16px}
+  .psPage .section-hdr,.psPage .section-body{padding-left:12px;padding-right:12px}
+  .psPage .save-bar-hint{display:none}
+  .psPage .save-bar{padding:10px 10px;padding-bottom:calc(10px + env(safe-area-inset-bottom, 0px))}
+  .psPage .save-bar-btns{width:100%}
+  .psPage .btn-cancel,.psPage .btn-save{flex:1;justify-content:center}
+}
+
+@media (max-width:768px){
+  .appShell2 .psPage .save-bar{
+    left: 0;
+  }
+}
+

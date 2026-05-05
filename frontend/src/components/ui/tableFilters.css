@@ -1,0 +1,348 @@
+/* Table / list filter primitives: search, styled selects, date fields (toolbar + sheet). */
+
+.tcSearch {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  min-height: 32px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--color-card) 88%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent),
+    0 10px 18px color-mix(in srgb, var(--color-text) 10%, transparent);
+  transition: border-color 0.18s, box-shadow 0.18s, transform 0.14s ease;
+}
+
+@media (max-width: 720px) {
+  .tcSearch,
+  .tcSelectWrap,
+  .tcDateWrap {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Compact touch targets; keep 16px input font to limit iOS zoom */
+  .tcSearch {
+    min-height: 40px;
+    padding: 0 8px;
+    border-radius: 11px;
+    gap: 5px;
+  }
+
+  .tcSearchInput {
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .tcSearch .tcClearBtn.appBtn {
+    min-width: 40px;
+    min-height: 40px;
+    margin-right: -4px;
+  }
+
+  .tcSelect {
+    min-height: 40px;
+    padding: 0 34px 0 30px;
+    font-size: 16px;
+    border-radius: 12px;
+  }
+
+  .tcSelectIcon,
+  .tcSelectIconSlot {
+    left: 8px;
+  }
+
+  .tcSelectChevronSlot {
+    right: 8px;
+  }
+
+  .tcDateWrap .cdpInput {
+    min-height: 40px;
+    font-size: 16px;
+    border-radius: 12px;
+    padding: 0 10px 0 28px;
+  }
+
+  .tcDateIcon {
+    left: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tcSearch {
+    min-height: 38px;
+    padding: 0 7px;
+    gap: 4px;
+  }
+
+  .tcSearch .tcClearBtn.appBtn {
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  .tcSelect {
+    min-height: 38px;
+    padding: 0 32px 0 28px;
+    border-radius: 11px;
+  }
+
+  .tcDateWrap .cdpInput {
+    min-height: 38px;
+    padding: 0 9px 0 26px;
+  }
+}
+
+.tcSearch:focus-within {
+  border-color: color-mix(in srgb, var(--color-border-focus) 42%, var(--color-border));
+  box-shadow: var(--shadow-sm);
+}
+
+.tcSearchInput:focus,
+.tcSearchInput:focus-visible {
+  outline: none;
+}
+
+.tcSearch:active { transform: scale(0.998); }
+
+.tcSearchIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-4);
+}
+
+.tcSearchIcon svg {
+  width: clamp(14px, 2.6vw, 16px);
+  height: clamp(14px, 2.6vw, 16px);
+  stroke: currentColor;
+  filter:
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--color-card) 55%, transparent))
+    drop-shadow(0 10px 18px color-mix(in srgb, var(--color-text) 10%, transparent));
+}
+
+.tcSearchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  color: var(--color-text);
+  width: 100%;
+  font-family: var(--font);
+}
+
+.tcSearchInput::placeholder { color: var(--color-text-4); }
+
+.tcClearBtn.appBtn {
+  border: 1px solid transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.tcClearBtn.appBtn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-text-3) 8%, transparent);
+}
+
+.tcSelectWrap {
+  position: relative;
+  display: inline-flex;
+  min-width: 170px;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.tcIco {
+  display: block;
+  stroke: currentColor;
+  fill: none;
+}
+
+.tcIco3d {
+  filter:
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent))
+    drop-shadow(0 10px 18px color-mix(in srgb, var(--color-text) 12%, transparent));
+}
+
+.tcSelectIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(13px, 2.4vw, 15px);
+  height: clamp(13px, 2.4vw, 15px);
+  pointer-events: auto;
+  opacity: 0.9;
+  background: color-mix(in srgb, var(--color-primary) 55%, var(--color-text-4));
+  z-index: 2;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 5h18' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M6 11h12' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M10 17h4' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 5h18' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M6 11h12' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M10 17h4' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E")
+    no-repeat center / contain;
+  filter:
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent))
+    drop-shadow(0 10px 18px color-mix(in srgb, var(--color-text) 12%, transparent));
+}
+
+.tcSelectIconSlot {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(14px, 2.4vw, 16px);
+  height: clamp(14px, 2.4vw, 16px);
+  display: grid;
+  place-items: center;
+  z-index: 2;
+  color: var(--color-text-4);
+  pointer-events: auto;
+  filter:
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent))
+    drop-shadow(0 10px 18px color-mix(in srgb, var(--color-text) 12%, transparent));
+}
+
+.tcSelectIconSlot svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+}
+
+.tcSelect {
+  min-height: 32px;
+  padding: 0 34px 0 32px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
+  background: color-mix(in srgb, var(--color-card) 86%, transparent);
+  font-size: 13px;
+  color: var(--color-text);
+  font-family: var(--font);
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent),
+    0 10px 18px color-mix(in srgb, var(--color-text) 10%, transparent);
+  transition: border-color 0.18s, box-shadow 0.18s, transform 0.14s ease;
+}
+
+.tcSelect:focus {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent),
+    0 12px 24px color-mix(in srgb, var(--color-text) 12%, transparent);
+}
+
+.tcSelect:active { transform: scale(0.998); }
+
+.tcSelectChevronSlot {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: clamp(14px, 2.4vw, 16px);
+  height: clamp(14px, 2.4vw, 16px);
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  opacity: 0.9;
+  color: color-mix(in srgb, var(--color-primary) 55%, var(--color-text-4));
+  z-index: 2;
+  filter:
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent))
+    drop-shadow(0 10px 18px color-mix(in srgb, var(--color-text) 12%, transparent));
+}
+
+.tcSelectChevronIco {
+  display: inline-flex;
+  transform: rotate(90deg);
+}
+
+.tcSelectChevronIco svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tcSelectWrap:hover .tcSelectIcon,
+.tcSelectWrap:focus-within .tcSelectIcon {
+  background: color-mix(in srgb, var(--color-primary) 85%, var(--color-text-4));
+}
+
+.tcSelectWrap:hover .tcSelectChevronSlot,
+.tcSelectWrap:focus-within .tcSelectChevronSlot {
+  background: transparent;
+}
+
+.tcSelectWrap:hover .tcSelectIconSlot,
+.tcSelectWrap:focus-within .tcSelectIconSlot {
+  color: var(--color-primary);
+}
+
+.tcSelectWrap:hover .tcSelectChevronSlot,
+.tcSelectWrap:focus-within .tcSelectChevronSlot {
+  color: var(--color-primary);
+}
+
+.tcDateWrap {
+  position: relative;
+  display: inline-flex;
+  min-width: 170px;
+  width: 100%;
+}
+
+.tcDateIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-4);
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tcDateIcon svg {
+  width: clamp(14px, 2.6vw, 16px);
+  height: clamp(14px, 2.6vw, 16px);
+}
+
+.tcDateWrap .cdpInput {
+  min-height: 32px;
+  padding: 0 12px 0 30px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
+  background: color-mix(in srgb, var(--color-card) 86%, transparent);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent),
+    0 10px 18px color-mix(in srgb, var(--color-text) 10%, transparent);
+  transition: border-color 0.18s, box-shadow 0.18s, transform 0.14s ease;
+  font-family: var(--font);
+}
+
+.tcDateWrap .cdpInputIcon {
+  display: none;
+}
+
+.tcDateWrap .cdpInput:focus {
+  border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent),
+    0 12px 24px color-mix(in srgb, var(--color-text) 12%, transparent);
+}
+
+.tcDateWrap .cdpInput:active { transform: scale(0.998); }
+
+@media (max-width: 480px) {
+  .tcSelectWrap,
+  .tcDateWrap {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .tcSelect,
+  .tcSearchInput,
+  .tcDateWrap .cdpInput {
+    max-width: 100%;
+  }
+}

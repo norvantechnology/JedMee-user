@@ -1,0 +1,1106 @@
+/* ─── Sales Billing Modal – matches HTML mockup exactly ─────────────────── */
+
+.sbmModalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.sbmModalForm .raInput {
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
+}
+
+.sbmModalForm .raInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+/* Invoice header / sections use shared `.piSection` / `.piHeaderTop` (PurchaseInvoicesPage.css). */
+
+.sbmSecBd_tight {
+  padding: 0;
+}
+
+/* ─── Credit Line — base styles from .piCreditLine (CommonModal.css) ─────── */
+.sbmCreditLineStrong {
+  font-weight: 800;
+}
+
+/* ─── Rate Bar (retailer): compact on desktop, stacks on small screens ───── */
+.sbmRateBar {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  justify-content: flex-start;
+  min-height: 0;
+}
+
+/* Do not grow  avoids a huge empty gap between rate chips and bill type */
+.sbmRateBarLeft {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.sbmRateBarLabel {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+  white-space: nowrap;
+  align-self: center;
+}
+
+.sbmRateBtns {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  min-width: 0;
+}
+
+.sbmRateBtn {
+  appearance: none;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-1);
+  color: var(--color-text-2);
+  font-size: 11px;
+  font-weight: 600;
+  min-height: 30px;
+  height: auto;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: var(--font);
+  white-space: nowrap;
+}
+
+.sbmRateBtn:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 50%, var(--color-border));
+  color: var(--color-primary);
+}
+
+.sbmRateBtn_on {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.sbmRateBarRight {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  align-items: flex-end;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.sbmRateField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sbmRateField label {
+  font-size: 9.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-3);
+}
+
+.sbmRateField .raInput {
+  height: 36px;
+  min-height: 36px;
+  font-size: 13px;
+}
+
+.sbmRateField_btype {
+  width: 148px;
+  max-width: 100%;
+  flex: 0 0 auto;
+}
+
+.sbmRateField_disc {
+  width: 96px;
+  max-width: 100%;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 720px) {
+  .sbmRateBar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 12px;
+  }
+
+  .sbmRateBarLeft {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .sbmRateBtns {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .sbmRateBtn {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 11.5px;
+  }
+
+  .sbmRateBarRight {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .sbmRateField_btype,
+  .sbmRateField_disc {
+    width: 100%;
+    flex: none;
+  }
+
+  .sbmRateField .raInput {
+    min-height: 44px;
+    height: 44px;
+  }
+
+  .sbmRateField .csfSelect {
+    min-height: 44px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .sbmRateBarRight {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Alert ticker ───────────────────────────────────────────────────────── */
+.sbmModalTicker {
+  margin-top: 0;
+  padding: 7px 18px;
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  align-items: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: var(--color-bg-1);
+  min-height: 34px;
+}
+
+/* sbmItemsTable — column widths only; visual styles come from cliItemsTable in CommonLineItemsSection.css */
+.sbmItemsTable {
+  min-width: 1500px;
+}
+
+.sbmItemsTable thead th.num,
+.sbmItemsTable thead th.r { text-align: right; }
+.sbmItemsTable thead th.center,
+.sbmItemsTable thead th.c { text-align: center; }
+
+/* Column widths – identical to HTML mockup */
+.sbmItemsTable thead th:nth-child(1),
+.sbmItemsTable tbody td:nth-child(1) { width: 42px; text-align: center; }
+.sbmItemsTable thead th:nth-child(2),
+.sbmItemsTable tbody td:nth-child(2) { width: 320px; }
+.sbmItemsTable thead th:nth-child(3),
+.sbmItemsTable tbody td:nth-child(3) { width: 380px; }
+.sbmItemsTable thead th:nth-child(4),
+.sbmItemsTable tbody td:nth-child(4) { width: 100px; min-width: 100px; text-align: center; }
+.sbmItemsTable thead th:nth-child(5),
+.sbmItemsTable tbody td:nth-child(5) { width: 86px; text-align: center; }
+.sbmItemsTable thead th:nth-child(6),
+.sbmItemsTable tbody td:nth-child(6) { width: 82px; text-align: right; }
+.sbmItemsTable thead th:nth-child(7),
+.sbmItemsTable tbody td:nth-child(7) { width: 82px; text-align: right; }
+.sbmItemsTable thead th:nth-child(8),
+.sbmItemsTable tbody td:nth-child(8) { width: 70px; text-align: center; }
+.sbmItemsTable thead th:nth-child(9),
+.sbmItemsTable tbody td:nth-child(9) { width: 96px; text-align: right; }
+.sbmItemsTable thead th:nth-child(10),
+.sbmItemsTable tbody td:nth-child(10) { width: 96px; text-align: right; }
+.sbmItemsTable thead th:nth-child(11),
+.sbmItemsTable tbody td:nth-child(11) { width: 90px; text-align: right; }
+.sbmItemsTable thead th:nth-child(12),
+.sbmItemsTable tbody td:nth-child(12) { width: 92px; text-align: center; }
+.sbmItemsTable thead th:nth-child(13),
+.sbmItemsTable tbody td:nth-child(13) { width: 110px; text-align: right; }
+.sbmItemsTable thead th:nth-child(14),
+.sbmItemsTable tbody td:nth-child(14) {
+  width: 56px;
+  min-width: 56px;
+  text-align: center;
+  overflow: visible;
+}
+
+/* Right-align numeric inputs */
+.sbmItemsTable td:nth-child(6) .raInput,
+.sbmItemsTable td:nth-child(7) .raInput,
+.sbmItemsTable td:nth-child(9) .raInput,
+.sbmItemsTable td:nth-child(10) .raInput,
+.sbmItemsTable td:nth-child(11) .raInput { text-align: right; }
+
+.sbmItemRow:hover {
+  background: color-mix(in srgb, var(--color-primary) 2.5%, transparent);
+}
+
+.sbmItemRow:last-child td {
+  border-bottom: none;
+}
+
+/* ─── Stock display ──────────────────────────────────────────────────────── */
+.sbmStockCell {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--color-text-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.sbmStockWh {
+  font-weight: 600;
+  color: var(--color-text-4);
+  font-size: 10.5px;
+}
+
+/* ─── Expiry ─────────────────────────────────────────────────────────────── */
+.sbmExpiryCell {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 2px;
+}
+
+.sbmExp {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* dot indicator before text */
+.sbmExp::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sbmExp_muted {
+  color: var(--color-text-4);
+  font-weight: 600;
+}
+.sbmExp_muted::before { display: none; }
+
+.sbmExp_ok { color: var(--color-success, #16a34a); }
+.sbmExp_ok::before { background: var(--color-success, #16a34a); }
+
+.sbmExp_soon { color: var(--color-warning-darker, #b45309); }
+.sbmExp_soon::before { background: var(--color-warning-darker, #b45309); }
+
+.sbmExp_bad { color: var(--color-danger, #dc2626); }
+.sbmExp_bad::before { background: var(--color-danger, #dc2626); }
+
+/* ─── Stock Chip ─────────────────────────────────────────────────────────── */
+.sbmStockChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.sbmStockChip_ok {
+  color: var(--color-success, #15803d);
+  background: color-mix(in srgb, var(--color-success, #16a34a) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-success, #16a34a) 30%, transparent);
+}
+
+.sbmStockChip_low {
+  color: var(--color-warning-darker, #92400e);
+  background: color-mix(in srgb, var(--color-warning, #f59e0b) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-warning, #f59e0b) 32%, transparent);
+}
+
+.sbmStockChip_crit {
+  color: var(--color-danger, #b91c1c);
+  background: color-mix(in srgb, var(--color-danger, #dc2626) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger, #dc2626) 30%, transparent);
+}
+
+.sbmStockChip_muted {
+  color: var(--color-text-4);
+  background: var(--color-surface, var(--color-bg-2));
+  border: 1px solid var(--color-border);
+}
+
+/* ─── Batch select ───────────────────────────────────────────────────────── */
+.sbmLineSelect,
+.sbmItemsTable td select.sbmLineSelect {
+  text-overflow: clip;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ─── Numeric inputs ─────────────────────────────────────────────────────── */
+.sbmNum {
+  text-align: right;
+}
+
+/* ─── Amount cell ────────────────────────────────────────────────────────── */
+.sbmAmount {
+  text-align: right;
+  vertical-align: middle !important;
+  font-weight: 800;
+  font-size: 12.5px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+/* ─── Trash button ───────────────────────────────────────────────────────── */
+.sbmTrashBtn {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  padding: 0;
+  border-radius: 5px;
+  margin: auto;
+}
+
+/* ─── Batch Add Button (inline in batch cell) ────────────────────────────── */
+.sbmBatchAddBtn {
+  height: 29px;
+  min-width: auto;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.sbmBatchAddBtn.ciab {
+  padding: 0 8px;
+}
+
+.sbmBatchAddBtn .ciabIcon {
+  width: 10px;
+  height: 10px;
+}
+
+/* ─── Unit Button ────────────────────────────────────────────────────────── */
+.sbmUnitBtn {
+  width: 100%;
+  height: 36px;
+  border-radius: 5px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface, var(--color-bg-2));
+  color: var(--color-text-3);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.12s;
+}
+
+.sbmUnitBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 7%, var(--color-surface));
+}
+
+.sbmTotalNow {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.sbmTotalNow-lbl {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-text-3);
+  margin-right: 4px;
+}
+
+/* Summary strip — now uses .cliSummaryStrip / .cliSummaryCell etc. from CommonLineItemsSection.css */
+
+/* Sales-specific: discount cell value shown in danger color */
+.cliSummaryStrip .cliSummaryCell:nth-child(2) .cliSummaryValue {
+  color: var(--color-danger, #dc2626);
+}
+
+/* ─── Cash row ───────────────────────────────────────────────────────────── */
+.sbmCashRow {
+  padding: 11px 18px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 11px;
+  background: var(--color-bg-1);
+}
+
+.sbmCashValue {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 8px;
+  background: var(--color-surface, var(--color-bg-2));
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--color-text-3);
+  display: flex;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.2s;
+}
+
+.sbmCashValue_pos {
+  color: var(--color-success, #16a34a);
+}
+
+.sbmCashHint {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  color: var(--color-text-3);
+}
+
+/* ─── Status Pill ────────────────────────────────────────────────────────── */
+.sbmStatusPill {
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: color-mix(in srgb, #fde68a 80%, transparent);
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+.sbmFooterInfo {
+  font-size: 11px;
+  color: var(--color-text-4);
+  font-weight: 600;
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sbmBtnCreateConfirm {
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--color-primary) 34%, transparent);
+}
+
+.sbmBtnCreateConfirm:hover {
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+/* ─── Footer send button ─────────────────────────────────────────────────── */
+.sbmFooterSendBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sbmFooterSendBtn > svg,
+.sbmFooterSendBtn .sbmInlSendSvg {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ─── Controlled medicine warning block ─────────────────────────────────── */
+.sbmControlBlock {
+  margin: 0 18px 10px;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+/* ─── Line error pills ───────────────────────────────────────────────────── */
+.psErr {
+  margin: 4px 18px;
+  font-size: 12px;
+  color: var(--color-danger, #b91c1c);
+  background: color-mix(in srgb, var(--color-danger, #dc2626) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger, #dc2626) 20%, transparent);
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+
+/* ─── Bulk payment modal ─────────────────────────────────────────────────── */
+.sbmBulkPayBanner {
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--color-surface, var(--color-bg-2));
+  font-size: 13px;
+  color: var(--color-text-2);
+}
+
+/* ─── Send contact modal ─────────────────────────────────────────────────── */
+.sbmPhoneRow {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.sbmPhoneRow .raInput:first-of-type {
+  max-width: 90px;
+  flex-shrink: 0;
+}
+
+.sbmPhoneRow .raInput:last-of-type {
+  flex: 1;
+  min-width: 0;
+}
+
+.sbmChDeco {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--color-surface, var(--color-bg-2));
+  border: 1px dashed var(--color-border);
+  color: var(--color-text-3);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.sbmChDecoIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-success);
+}
+
+.sbmChDecoText {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Batch cell grid ────────────────────────────────────────────────────── */
+.sbmBatchCell {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.sbmBatchCell > *:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .sbmFooterInfo {
+    width: 100%;
+    order: -1;
+    margin-right: 0;
+  }
+
+  .sbmTotalNow {
+    margin-left: 0;
+  }
+
+  .sbmCashRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ultra-small phones */
+@media (max-width: 420px) {
+  .sbmModalForm {
+    gap: 10px;
+  }
+}
+
+/* ─── CommonModal header overrides (ensure no extra section borders) ─────── */
+.sbmModalForm .sfmSection {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* ─── Table action groups ────────────────────────────────────────────────── */
+.sbmModalForm .mscRow {
+  gap: 6px;
+}
+
+.sbmModalForm .mscAddBtn {
+  width: 32px;
+  min-height: 29px;
+}
+
+
+@media (max-width: 640px) {
+  /* Shortcuts trigger + close on one row under title (matches purchase) */
+  .mcm[aria-label="sales-billing-editor"] .mcmHead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 6px;
+  }
+
+  .mcm[aria-label="sales-billing-editor"] .mcmHeadMain {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .mcm[aria-label="sales-billing-editor"] .mcmHeadTools {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    align-self: center;
+    margin-top: 0;
+    padding-left: 0;
+    width: auto;
+    max-width: none;
+  }
+
+  .mcm[aria-label="sales-billing-editor"] .mcmClose {
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: end;
+    align-self: center;
+    margin-left: 0;
+  }
+}
+
+/* ── Mobile: sales line items → card rows (same pattern as purchase) ─────── */
+@media (max-width: 720px) {
+  .piModalForm.sbmModalForm {
+    overflow-x: visible;
+  }
+
+  /*
+   * `.cliItemsTable` uses `table-layout: fixed` while mobile rows use CSS grid;
+   * switch tbody to block so each row is a normal grid container.
+   */
+  .piModalForm .sbmItemsTable.cliItemsTable {
+    display: block;
+    width: 100%;
+    table-layout: auto !important;
+  }
+
+  .piModalForm .sbmItemsTable.cliItemsTable thead {
+    display: none;
+  }
+
+  .piModalForm .sbmItemsTable.cliItemsTable tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .piModalForm .sbmItemsTable.cliItemsTable tbody tr:nth-child(even) td,
+  .piModalForm .sbmItemsTable.cliItemsTable tbody tr:hover td {
+    background: transparent;
+  }
+
+  .piModalForm .msw {
+    grid-template-columns: 1fr auto !important;
+    gap: 8px !important;
+    align-items: center !important;
+  }
+
+  .piModalForm .mswAdd {
+    width: 42px !important;
+    min-height: 40px !important;
+  }
+
+  .piModalForm .cliItemsWrap {
+    overflow: visible;
+    border: 0;
+    padding: 0;
+  }
+
+  .piModalForm .sbmItemsTable {
+    min-width: 0 !important;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    width: 100%;
+  }
+
+  .piModalForm .sbmItemsTable tbody tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "product product"
+      "batch batch"
+      "expiry stock"
+      "qty free"
+      "loose unit"
+      "mrp rate"
+      "disc gst"
+      "amount amount"
+      "actions actions";
+    background: var(--color-surface-2);
+    border: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent);
+    border-radius: 14px;
+    overflow: visible;
+    padding: 0;
+    gap: 0;
+    box-shadow: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(2) .msw {
+    grid-template-columns: minmax(0, 1fr) 40px !important;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(2) .mswSelect,
+  .piModalForm .sbmItemsTable tbody td:nth-child(2) .csf {
+    min-width: 0 !important;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(2) .mswAdd {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+  }
+
+  .piModalForm .sbmItemsTable .csf,
+  .piModalForm .sbmItemsTable .ciab {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  .piModalForm .sbmItemsTable tbody td {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 22%, transparent);
+    border-right: 1px solid color-mix(in srgb, var(--color-border) 22%, transparent);
+    width: auto;
+    min-width: 0;
+    overflow: visible;
+    box-sizing: border-box;
+  }
+
+  .piModalForm .sbmItemsTable tbody td::before {
+    display: block;
+    font-size: 9.5px;
+    font-weight: 800;
+    color: var(--color-text-4);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    margin-bottom: 1px;
+  }
+
+  .piModalForm .sbmItemsTable tbody td > *,
+  .piModalForm .sbmItemsTable tbody td .raInput,
+  .piModalForm .sbmItemsTable tbody td input:not([type="checkbox"]),
+  .piModalForm .sbmItemsTable tbody td select {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(1) {
+    display: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(2) {
+    grid-area: product;
+    border-right: none;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(3) {
+    grid-area: batch;
+    border-right: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(4) {
+    grid-area: expiry;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(5) {
+    grid-area: stock;
+    border-right: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(6) {
+    grid-area: qty;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(7) {
+    grid-area: free;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(8) {
+    grid-area: loose;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(9) {
+    grid-area: unit;
+    border-right: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(10) {
+    grid-area: mrp;
+    border-right: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(11) {
+    grid-area: rate;
+    border-right: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(12) {
+    grid-area: disc;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(13) {
+    grid-area: gst;
+    border-right: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(14) {
+    grid-area: amount;
+    border-right: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(15) {
+    grid-area: actions;
+    border-right: none;
+    border-bottom: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(2)::before {
+    content: "Product";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(3)::before {
+    content: "Batch";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(4)::before {
+    content: "Expiry";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(5)::before {
+    content: "Stock";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(6)::before {
+    content: "Qty";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(7)::before {
+    content: "Free";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(8)::before {
+    content: "Loose";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(9)::before {
+    content: "Unit";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(10)::before {
+    content: "MRP";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(11)::before {
+    content: "Rate";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(12)::before {
+    content: "Disc %";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(13)::before {
+    content: "GST %";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(14)::before {
+    content: "Amount";
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(15)::before {
+    content: none;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(14) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--color-primary);
+    background: color-mix(in srgb, var(--color-primary) 4%, var(--color-card));
+    border-bottom: none;
+    padding: 10px 14px;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(14)::before {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--color-text-4);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0;
+  }
+
+  .piModalForm .sbmItemsTable tbody td:nth-child(15) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 8px 12px;
+    background: color-mix(in srgb, var(--color-surface-2) 60%, transparent);
+  }
+
+  .piModalForm .sbmBatchCell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .piModalForm .sbmBatchCell > *:first-child {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .piModalForm .sbmBatchCell .csf {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .piModalForm .sbmBatchCell .ciab {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    border-radius: 9px;
+  }
+
+  .piModalForm .sbmItemsTable td .raInput,
+  .piModalForm .sbmItemsTable td input:not([type="checkbox"]) {
+    min-height: 44px !important;
+    height: 44px !important;
+    font-size: 16px;
+    padding: 0 12px;
+  }
+
+  .piModalForm .sbmItemsTable td select.sbmLineSelect,
+  .piModalForm .sbmItemsTable td .sbmLineSelect {
+    min-height: 44px;
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .piModalForm .sbmExpiryCell {
+    width: 100%;
+    min-height: 44px;
+    justify-content: flex-start;
+  }
+
+  .piModalForm .sbmStockCell {
+    justify-content: flex-start;
+  }
+
+  .piModalForm .cliSection,
+  .piModalForm .cliItemsWrap {
+    min-width: 0;
+  }
+
+  /* Line items footer: stack total under full-width add action */
+  .mcm[aria-label="sales-billing-editor"] .cliFooter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px 14px;
+  }
+
+  .mcm[aria-label="sales-billing-editor"] .cliFooterLeft {
+    width: 100%;
+  }
+
+  .mcm[aria-label="sales-billing-editor"] .cliFooterRight {
+    margin-left: 0;
+    width: 100%;
+    padding-top: 10px;
+    border-top: 1px solid color-mix(in srgb, var(--color-border) 40%, transparent);
+  }
+
+  .mcm[aria-label="sales-billing-editor"] .cliFooterRight .sbmTotalNow {
+    text-align: center;
+    width: 100%;
+    font-size: 15px;
+  }
+
+  .mcm[aria-label="sales-billing-editor"] .cliAddLineBtn.ciab_text {
+    width: 100%;
+    min-height: 38px;
+    justify-content: center;
+    border-radius: 10px;
+    padding: 0 10px;
+  }
+
+  .mcm[aria-label="sales-billing-editor"] .cliSectionHead {
+    padding: 12px 14px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .mcm[aria-label="sales-billing-editor"] .sbmModalForm .mscAddBtn {
+    width: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+  }
+}

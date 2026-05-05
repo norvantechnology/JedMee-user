@@ -1,0 +1,649 @@
+/* Structured form shell  theme tokens, layered sections, AppButton-aligned modal actions */
+
+.sfm {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.4vw, 20px);
+}
+
+.sfmSection {
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  border-radius: var(--radius);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-card) 96%, var(--color-surface)),
+    var(--color-card)
+  );
+  padding: clamp(14px, 2.6vw, 18px) clamp(14px, 2.8vw, 18px) clamp(14px, 2.6vw, 18px)
+    calc(12px + 4px + clamp(14px, 2.6vw, 18px));
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.sfmSection::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: clamp(12px, 2.2vw, 16px);
+  bottom: clamp(12px, 2.2vw, 16px);
+  width: 4px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--color-primary), color-mix(in srgb, var(--color-secondary) 85%, var(--color-primary)));
+  pointer-events: none;
+}
+
+.sfmSectionHead {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: clamp(12px, 2.2vw, 14px);
+  padding-bottom: clamp(10px, 2vw, 12px);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+}
+
+@media (min-width: 721px) {
+  .sfmSectionHead {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: clamp(12px, 2vw, 16px);
+  }
+
+  .sfmHint {
+    text-align: right;
+    max-width: min(420px, 46%);
+  }
+}
+
+.sfmTitle {
+  font-weight: 950;
+  color: var(--color-text-heading);
+  font-size: clamp(14px, 2.6vw, 15.5px);
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.sfmHint {
+  color: var(--color-text-3);
+  font-weight: 650;
+  font-size: clamp(11.5px, 2.2vw, 12.5px);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.sfmGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(12px, 2.2vw, 14px);
+  align-items: start;
+}
+
+@media (min-width: 640px) {
+  .sfmGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.sfmFull {
+  grid-column: 1 / -1;
+}
+
+/* ── Mobile / narrow: compact spacing (≤720px) ── */
+@media (max-width: 720px) {
+  .sfm {
+    gap: 8px;
+  }
+
+  .sfmSection {
+    padding: 8px 8px 8px 12px; /* inset left for accent bar */
+    border-radius: var(--radius, 12px);
+  }
+
+  .sfmSection::before {
+    top: 8px;
+    bottom: 8px;
+  }
+
+  .sfmSectionHead {
+    gap: 4px;
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+  }
+
+  .sfmGrid {
+    gap: 8px;
+  }
+
+  .sfmTitle {
+    font-size: clamp(13px, 3.2vw, 14.5px);
+  }
+
+  .sfmHint {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .sfm .raField label {
+    font-size: clamp(10.5px, 2.8vw, 12px);
+  }
+
+  .sfm .raInput,
+  .sfm .cdpInput {
+    min-height: 42px;
+    font-size: 16px;
+  }
+
+  .sfmCheck {
+    padding: 5px 7px;
+    gap: 6px;
+  }
+
+  .sfmModalFooter {
+    gap: 6px;
+  }
+
+  .sfmKpiRow {
+    gap: 8px;
+    padding-bottom: 2px;
+    margin: 0;
+  }
+}
+
+.sfmKpiRow {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 4px;
+  margin: 0 -2px;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sfmKpiRow::-webkit-scrollbar {
+  height: 6px;
+}
+
+.sfmKpiRow::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-border) 80%, transparent);
+  border-radius: 999px;
+}
+
+@media (min-width: 900px) {
+  .sfmKpiRow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    overflow: visible;
+    padding-bottom: 0;
+  }
+}
+
+.sfmKpi {
+  flex: 0 0 min(160px, 78vw);
+  scroll-snap-align: start;
+  border: 1px solid color-mix(in srgb, var(--color-border) 82%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
+  border-radius: clamp(11px, 2vw, 13px);
+  padding: clamp(10px, 2vw, 12px);
+  min-width: 0;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+@media (min-width: 900px) {
+  .sfmKpi {
+    flex: none;
+    min-width: 0;
+  }
+}
+
+.sfmKpi:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  box-shadow: var(--shadow-xs);
+}
+
+.sfmKpiLabel {
+  color: var(--color-text-4);
+  font-size: clamp(10.5px, 2vw, 11.5px);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sfmKpiVal {
+  margin-top: 6px;
+  font-size: clamp(14px, 2.5vw, 15px);
+  font-weight: 900;
+  color: var(--color-text-heading);
+  font-variant-numeric: tabular-nums;
+}
+
+.sfmCheckRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(10px, 2vw, 12px);
+  padding-top: 6px;
+}
+
+/* Customer payment allocation (ledger) */
+.custPayAllocWrap {
+  margin-top: 8px;
+}
+
+.custPayAllocToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.custPayAllocToolbar .sfmHint {
+  flex: 1 1 200px;
+  margin: 0;
+}
+
+.custPayAllocTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: clamp(11.5px, 2.1vw, 12.5px);
+  border-radius: clamp(10px, 1.8vw, 12px);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
+  background: var(--color-card);
+  box-shadow: var(--shadow-xs);
+}
+
+.custPayAllocTable th,
+.custPayAllocTable td {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent);
+  padding: clamp(8px, 1.6vw, 10px) clamp(8px, 1.8vw, 10px);
+  vertical-align: middle;
+}
+
+.custPayAllocTable th:last-child,
+.custPayAllocTable td:last-child {
+  border-right: none;
+}
+
+.custPayAllocTable tr:last-child td {
+  border-bottom: none;
+}
+
+.custPayAllocTable th {
+  background: color-mix(in srgb, var(--color-surface) 88%, var(--color-card));
+  font-weight: 850;
+  text-align: left;
+  color: var(--color-text-2);
+}
+
+.custPayAllocTable .num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.custPayAllocTable input.raInput {
+  max-width: 120px;
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 12px;
+}
+
+.custPayAllocSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: clamp(10px, 1.8vw, 12px);
+  border: 1px dashed color-mix(in srgb, var(--color-border) 80%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 55%, var(--color-card));
+  font-size: clamp(11.5px, 2.1vw, 12.5px);
+  font-weight: 800;
+}
+
+.custPayAllocSummary span {
+  color: var(--color-text-4);
+  font-weight: 700;
+}
+
+.custPayAllocSummary strong {
+  color: var(--color-text-heading);
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sfmCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: clamp(12.5px, 2.4vw, 13.5px);
+  color: var(--color-text-2);
+  font-weight: 700;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border-radius: clamp(10px, 1.8vw, 12px);
+  border: 1px solid color-mix(in srgb, var(--color-border) 78%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 45%, transparent);
+}
+
+.sfmCheck input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+.sfm .raField {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  min-width: 0;
+}
+
+.sfm .raInput,
+.sfm .cdp {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.sfm .raInput {
+  min-height: clamp(38px, 6vw, 42px);
+  height: auto;
+  font-size: clamp(13px, 2.4vw, 14px);
+}
+
+.sfm .raField label {
+  display: block;
+  margin-bottom: 0;
+  font-size: clamp(11.5px, 2.2vw, 12.5px);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+  line-height: 1.2;
+}
+
+.sfm .cdpInput {
+  min-height: clamp(38px, 6vw, 42px);
+  font-size: clamp(13px, 2.4vw, 14px);
+}
+
+.sfmSectionHead .sfmHint {
+  text-align: left;
+}
+
+/* Modal footers (pair with AppButton when migrated; sfm* kept for legacy markup) */
+.sfmModalFooter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  align-items: center;
+}
+
+.sfmModalMeta {
+  margin-right: auto;
+  font-size: clamp(11.5px, 2.1vw, 12.5px);
+  color: var(--color-text-3);
+  font-weight: 700;
+  line-height: 1.35;
+  max-width: min(100%, 420px);
+}
+
+.sfmBtnGhost {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  background: color-mix(in srgb, var(--color-card) 88%, transparent);
+  color: var(--color-text);
+  font-family: var(--font);
+  font-size: clamp(13px, 2.3vw, 14px);
+  font-weight: 750;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.14s ease;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent),
+    0 10px 18px color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+
+.sfmBtnGhost:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  transform: translateY(-1px);
+}
+
+.sfmBtnPrimary {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-primary) 92%, white 8%),
+    var(--color-primary)
+  );
+  color: var(--color-on-primary);
+  font-family: var(--font);
+  font-size: clamp(13px, 2.3vw, 14px);
+  font-weight: 750;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.14s ease;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 32%, transparent) inset,
+    0 10px 20px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.sfmBtnPrimary:hover:not(:disabled) {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-secondary) 92%, white 8%),
+    var(--color-secondary)
+  );
+  border-color: color-mix(in srgb, var(--color-secondary) 55%, transparent);
+  transform: translateY(-1px);
+}
+
+.sfmBtnDanger {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 55%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-danger) 92%, white 8%),
+    var(--color-danger)
+  );
+  color: var(--color-on-danger);
+  font-family: var(--font);
+  font-size: clamp(13px, 2.3vw, 14px);
+  font-weight: 750;
+  cursor: pointer;
+  transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.14s ease;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-card) 24%, transparent) inset,
+    0 10px 20px color-mix(in srgb, var(--color-danger) 18%, transparent);
+}
+
+.sfmBtnDanger:hover:not(:disabled) {
+  filter: brightness(0.98);
+  transform: translateY(-1px);
+}
+
+.sfmBtnGhost:focus-visible,
+.sfmBtnPrimary:focus-visible,
+.sfmBtnDanger:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.sfmBtnDanger:focus-visible {
+  outline-color: color-mix(in srgb, var(--color-danger) 55%, transparent);
+}
+
+.sfmBtnGhost:disabled,
+.sfmBtnPrimary:disabled,
+.sfmBtnDanger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.sfmFooterErr {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 25%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 6%, var(--color-card));
+  color: var(--color-danger);
+  font-size: clamp(12.5px, 2.2vw, 13.5px);
+  font-weight: 800;
+  max-width: min(520px, 100%);
+  line-height: 1.35;
+}
+
+.psErr {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--color-danger);
+  line-height: 1.25;
+}
+
+@media (max-width: 720px) {
+  .sfmModalFooter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .sfmModalMeta {
+    width: 100%;
+    margin-right: 0;
+    order: -1;
+  }
+
+  .sfmBtnGhost,
+  .sfmBtnPrimary,
+  .sfmBtnDanger {
+    width: 100%;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: clamp(12px, 2.9vw, 13.5px);
+  }
+}
+
+@media (max-width: 520px) {
+  .sfmKpiRow {
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .sfmKpi {
+    flex: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .sfm {
+    gap: 7px;
+  }
+
+  .sfmSection {
+    padding: 7px 7px 7px 11px;
+    border-radius: 11px;
+  }
+
+  .sfmSectionHead {
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+  }
+
+  .sfmGrid {
+    gap: 7px;
+  }
+
+  .sfmCheck {
+    padding: 4px 7px;
+    gap: 6px;
+    border-radius: 10px;
+    font-size: 12.5px;
+  }
+
+  .sfmKpi {
+    padding: 9px;
+    border-radius: 11px;
+  }
+
+  .sfmKpiVal {
+    font-size: 13.5px;
+  }
+
+  .sfmFooterErr {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+
+  .sfm .raInput,
+  .sfm .cdpInput {
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 380px) {
+  .sfm {
+    gap: 6px;
+  }
+
+  .sfmSection {
+    padding: 6px 6px 6px 10px;
+  }
+
+  .sfmGrid {
+    gap: 6px;
+  }
+
+  .sfm .raInput,
+  .sfm .cdpInput {
+    min-height: 38px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sfmKpi,
+  .sfmBtnGhost,
+  .sfmBtnPrimary,
+  .sfmBtnDanger {
+    transition: none !important;
+  }
+
+  .sfmBtnGhost:hover:not(:disabled),
+  .sfmBtnPrimary:hover:not(:disabled),
+  .sfmBtnDanger:hover:not(:disabled) {
+    transform: none;
+  }
+}

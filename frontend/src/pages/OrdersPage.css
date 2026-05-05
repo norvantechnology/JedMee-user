@@ -1,0 +1,783 @@
+/* ── OrdersPage ─────────────────────────────────────────────── */
+
+/* Page header */
+.opHeader { margin-bottom: 16px; }
+.opTitle {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--color-text);
+  letter-spacing: -0.3px;
+  margin: 0 0 3px;
+}
+.opSub {
+  font-size: 13px;
+  color: var(--color-text-3);
+  margin: 0;
+}
+
+/* ── Stat pills ─────────────────────────────────────────────── */
+.opStatsScroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 18px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.opStatsScroll::-webkit-scrollbar { display: none; }
+
+.opStat {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  cursor: pointer;
+  min-width: 110px;
+}
+.opStat:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+}
+.opStat_active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-card));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+/* Square icon box (34×34, radius 8) */
+.opStatIc {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.opStatIc svg { width: 16px; height: 16px; stroke-width: 2; }
+
+.opStatIc_all        { background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card)); }
+.opStatIc_all svg    { stroke: var(--color-primary); }
+.opStatIc_pending    { background: var(--color-warning-light); }
+.opStatIc_pending svg { stroke: var(--color-warning-strong); }
+.opStatIc_accepted   { background: #eff6ff; }
+.opStatIc_accepted svg { stroke: #1d4ed8; }
+.opStatIc_dispatched { background: #e0f2fe; }
+.opStatIc_dispatched svg { stroke: #0891b2; }
+.opStatIc_delivered  { background: var(--color-success-light); }
+.opStatIc_delivered svg { stroke: var(--color-success); }
+.opStatIc_rejected   { background: var(--color-danger-light); }
+.opStatIc_rejected svg { stroke: var(--color-danger); }
+.opStatIc_cancelled  { background: var(--color-surface); }
+.opStatIc_cancelled svg { stroke: var(--color-text-4); }
+
+.opStatN {
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1;
+}
+.opStatL {
+  font-size: 10.5px;
+  color: var(--color-text-2);
+  margin-top: 2px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* ── Toolbar ────────────────────────────────────────────────── */
+.opToolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+
+/* Search box — flex container with icon inside */
+.opSearchBox {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.opSearchBox:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 9%, transparent);
+}
+.opSearchBox svg {
+  color: var(--color-text-3);
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  stroke-width: 1.8;
+  stroke: currentColor;
+  fill: none;
+}
+.opSearchBox input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--color-text);
+  width: 100%;
+  font-family: inherit;
+}
+.opSearchBox input::placeholder { color: var(--color-text-3); }
+
+.opStatusSel {
+  padding: 10px 12px;
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  font-size: 13.5px;
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.15s;
+  cursor: pointer;
+  min-width: 130px;
+  font-family: inherit;
+}
+.opStatusSel:focus { border-color: var(--color-primary); }
+
+/* ── Result meta ────────────────────────────────────────────── */
+.opMeta {
+  font-size: 12.5px;
+  color: var(--color-text-3);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.opMetaCnt {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
+  color: var(--color-primary);
+  padding: 2px 9px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+/* ── Order list ─────────────────────────────────────────────── */
+.opList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Order card ─────────────────────────────────────────────── */
+.opCard {
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  position: relative;
+}
+.opCard:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+  border-color: var(--color-primary);
+}
+
+/* Left accent bar via ::before */
+.opCard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 4px 0 0 4px;
+}
+.opCard_pending::before    { background: var(--color-warning-strong); }
+.opCard_accepted::before   { background: #1d4ed8; }
+.opCard_dispatched::before { background: #0891b2; }
+.opCard_delivered::before  { background: var(--color-success); }
+.opCard_rejected::before   { background: var(--color-danger); }
+.opCard_cancelled::before  { background: var(--color-text-4); }
+
+/* Card body — wraps all rows */
+.opCardBody {
+  padding: 14px 16px 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Row 1: id + date + badge */
+.opCardRow1 {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.opCardId {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+.opCardDate {
+  font-size: 11.5px;
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+/* Status badge */
+.opBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.opBadgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.opSt_pending    { background: var(--color-warning-light);  color: var(--color-warning-strong); }
+.opSt_pending .opBadgeDot    { background: var(--color-warning-strong); }
+.opSt_accepted   { background: #eff6ff; color: #1d4ed8; }
+.opSt_accepted .opBadgeDot   { background: #1d4ed8; }
+.opSt_dispatched { background: #e0f2fe; color: #0891b2; }
+.opSt_dispatched .opBadgeDot { background: #0891b2; }
+.opSt_delivered  { background: var(--color-success-light);  color: var(--color-success); }
+.opSt_delivered .opBadgeDot  { background: var(--color-success); }
+.opSt_rejected   { background: var(--color-danger-light);   color: var(--color-danger); }
+.opSt_rejected .opBadgeDot   { background: var(--color-danger); }
+.opSt_cancelled  { background: var(--color-surface); color: var(--color-text-4); }
+.opSt_cancelled .opBadgeDot  { background: var(--color-text-4); }
+
+/* Row 2: info grid with dividers */
+.opCardRow2 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+.opCardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.opCardInfoL {
+  font-size: 10px;
+  color: var(--color-text-3);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.opCardInfoV {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.opCardInfoV_amt {
+  color: var(--color-primary);
+  font-size: 16px;
+  font-weight: 900;
+}
+.opCardDiv {
+  width: 1px;
+  height: 28px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+/* Row 3: action buttons */
+.opCardRow3 {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.opBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+/* Override AppIcons fixed 22px size to fit button */
+.opBtn svg { width: 14px !important; height: 14px !important; stroke-width: 2; flex-shrink: 0; }
+.opBtn_view {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--color-primary);
+}
+.opBtn_view:hover {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-card));
+}
+.opBtn_cancel {
+  background: var(--color-danger-light);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+.opBtn_cancel:hover {
+  background: var(--color-danger);
+  color: #fff;
+}
+.opBtn_action {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.opBtn_action:hover { opacity: 0.88; }
+.opBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Empty / Loading ────────────────────────────────────────── */
+.opEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+.opEmpty svg {
+  width: 40px;
+  height: 40px;
+  stroke: var(--color-text-4);
+  stroke-width: 1.5;
+}
+.opEmptyT {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 12px 0 4px;
+}
+.opEmptyS {
+  font-size: 13px;
+  color: var(--color-text-3);
+  margin: 0;
+}
+.opLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--color-text-3);
+  font-size: 14px;
+}
+
+/* ── Detail modal content ───────────────────────────────────── */
+.opDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.opMetaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.opMetaBox {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.opMetaLbl {
+  font-size: 10px;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.opMetaVal {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+.opMetaVal_big {
+  font-size: 20px;
+  color: var(--color-primary);
+  font-weight: 900;
+}
+
+.opSecTitle {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.opSecTitle::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+.opSecCnt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 20px;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* Fulfillment steps — bordered box layout */
+.opFulfil {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0;
+}
+.opFulStep {
+  flex: 1;
+  padding: 12px 12px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-right: 1px solid var(--color-border);
+}
+.opFulStep:last-child { border-right: none; }
+.opFulStep_done { background: var(--color-success-light); }
+.opFulLabel {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-3);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+.opFulDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--color-border);
+}
+.opFulDot_done { background: var(--color-success); }
+.opFulVal {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+.opFulVal_pend {
+  color: var(--color-text-3);
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* Items list */
+.opItemsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.opItemRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+.opItemLeft {
+  flex: 1;
+  min-width: 0;
+}
+.opItemName {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.opItemMeta {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.opPill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 10.5px;
+  font-weight: 600;
+}
+.opPill_pack  { background: color-mix(in srgb, var(--color-primary) 10%, transparent); color: var(--color-primary); }
+.opPill_ord   { background: var(--color-surface); color: var(--color-text-2); border: 1px solid var(--color-border); }
+.opPill_acc   { background: var(--color-success-light); color: var(--color-success); }
+.opPill_batch { background: #e0f2fe; color: #0891b2; }
+.opPill_stock { background: var(--color-warning-light); color: var(--color-warning-strong); }
+
+.opItemTotal {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Accept / override box */
+.opAcceptBox {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Column headers row */
+.opAcceptHeader {
+  display: grid;
+  grid-template-columns: 1fr 90px 80px 120px;
+  gap: 8px;
+  padding: 0 0 6px;
+  border-bottom: 1px solid var(--color-border);
+}
+.opAcceptHProduct {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-3);
+}
+.opAcceptHField {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-text-3);
+  text-align: center;
+}
+
+/* Item override row */
+.opOverrideRow {
+  display: grid;
+  grid-template-columns: 1fr 90px 80px 120px;
+  gap: 8px;
+  align-items: center;
+}
+.opOverrideName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.opOverrideStock {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--color-warning-strong);
+  background: var(--color-warning-light);
+  padding: 1px 6px;
+  border-radius: 10px;
+  display: inline-block;
+  width: fit-content;
+}
+.opOverrideSub {
+  font-size: 11px;
+  color: var(--color-text-3);
+  margin-top: 2px;
+}
+
+/* Reject section — visually separated */
+.opRejectBox {
+  border-top: 1px dashed var(--color-border);
+  padding-top: 12px;
+  margin-top: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.opRejectLabel {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-danger);
+}
+.opRejectRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.opRejectRow .mfzInput { flex: 1; }
+
+/* Modal footer */
+.opModalFoot {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Cancel modal body */
+.opCancelBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+.opCancelIc {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-danger-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.opCancelIc svg {
+  width: 26px;
+  height: 26px;
+  stroke: var(--color-danger);
+  stroke-width: 2;
+  fill: none;
+}
+.opCancelText {
+  font-size: 14px;
+  color: var(--color-text-2);
+  margin: 0;
+  line-height: 1.6;
+}
+.opCancelId {
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+/* Purchase modal body */
+.opPurchaseBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Shared input/textarea used inside modals */
+.mfzInput {
+  padding: 8px 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.mfzInput:focus { border-color: var(--color-primary); }
+.mfzTextarea {
+  padding: 8px 10px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+  min-height: 72px;
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.mfzTextarea:focus { border-color: var(--color-primary); }
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .opTitle { font-size: 18px; }
+
+  .opStat { padding: 8px 10px; gap: 8px; min-width: 90px; }
+  .opStatIc { width: 28px; height: 28px; }
+  .opStatIc svg { width: 13px; height: 13px; }
+  .opStatN { font-size: 16px; }
+
+  .opToolbar { flex-direction: column; }
+  .opSearchBox, .opStatusSel { width: 100%; min-width: unset; }
+
+  .opCardRow2 { gap: 10px; }
+  .opCardDiv { height: 20px; }
+
+  .opMetaGrid { grid-template-columns: 1fr 1fr; }
+
+  /* Fulfillment: stack vertically on small screens */
+  .opFulfil { flex-direction: column; }
+  .opFulStep { border-right: none; border-bottom: 1px solid var(--color-border); }
+  .opFulStep:last-child { border-bottom: none; }
+
+  /* Accept form: collapse to single column on mobile */
+  .opAcceptHeader { display: none; }
+  .opOverrideRow { grid-template-columns: 1fr 1fr; }
+  .opOverrideName { grid-column: 1 / -1; }
+  .opRejectRow { flex-direction: column; }
+  .opRejectRow .mfzInput { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .opCardBody { padding: 12px 14px 12px 18px; }
+  .opCardRow3 { gap: 6px; }
+  .opBtn { padding: 6px 10px; font-size: 12px; }
+
+  .opMetaGrid { grid-template-columns: 1fr 1fr; }
+
+  .opItemRow { flex-direction: column; gap: 6px; }
+  .opItemTotal { align-self: flex-end; }
+
+  .opModalFoot { flex-direction: column-reverse; }
+  .opModalFoot > * { width: 100%; }
+}
+
+@media (max-width: 400px) {
+  .opMetaGrid { grid-template-columns: 1fr; }
+  .mh-title { font-size: 14px; }
+}

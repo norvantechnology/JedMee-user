@@ -1,0 +1,18 @@
+.tableCsvActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 720px) {
+  .tableCsvActions {
+    width: 100%;
+    gap: 5px;
+  }
+  .tableCsvActions .appBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

@@ -1,0 +1,150 @@
+/* THEME: Plum Silk  Plum / Deep purple */
+:root {
+  --color-primary:         #6b3fa0;
+  --color-secondary:       #5c3390;
+  --color-primary-dark:    #5a3288;
+  --color-primary-darker:  #462870;
+  --color-primary-light:   #f8f3ff;
+  --color-primary-subtle:  #d0b8f0;
+
+  --color-success:         #16a34a;
+  --color-success-dark:    #15803d;
+  --color-success-darker:  #166534;
+  --color-success-deep:    #14532d;
+  --color-success-deeper:  #065f46;
+  --color-success-light:   #f0fdf4;
+  --color-success-subtle:  #bbf7d0;
+  --color-success-strong:  #10b981;
+
+  --color-danger:          #dc2626;
+  --color-danger-dark:     #b91c1c;
+  --color-danger-darker:   #991b1b;
+  --color-danger-deep:     #7f1d1d;
+  --color-danger-strong:   #ef4444;
+  --color-danger-light:    #fef2f2;
+  --color-danger-subtle:   #fecaca;
+
+  --color-warning:         #f59e0b;
+  --color-warning-dark:    #b45309;
+  --color-warning-darker:  #92400e;
+  --color-warning-deep:    #78350f;
+  --color-warning-strong:  #d97706;
+  --color-warning-light:   #fffbeb;
+  --color-warning-subtle:  #fde68a;
+
+  --color-bg:              #f8f3ff;
+  --color-card:            #ffffff;
+  --color-surface:         #fbf8ff;
+  --color-surface-2:       #f2ecff;
+  --color-surface-3:       #e8e0ff;
+
+  /* Common aliases used across pages/components */
+  --color-bg-1:            var(--color-card);
+  --color-bg-2:            var(--color-surface);
+  --color-text-1:          var(--color-text);
+  --color-input-bg:        var(--color-primary-light);
+
+  --color-border:          #d0b8f0;
+  --color-border-strong:   #bca0e0;
+  --color-border-focus:    #6b3fa0;
+
+  --color-text:            #1a0c30;
+  --color-text-2:          #381870;
+  --color-text-3:          #623898;
+  --color-text-4:          #9870c8;
+  --color-text-heading:    #0e0620;
+  --color-text-muted:      #4c2480;
+  --color-text-faint:      #a885cc;
+
+  --color-on-primary:      #ffffff;
+  --color-on-danger:       #ffffff;
+
+  --shadow-xs:   0 1px 2px color-mix(in srgb, var(--color-text) 4%, transparent);
+  --shadow-sm:   0 1px 2px color-mix(in srgb, var(--color-text) 6%, transparent);
+  --shadow-md:   0 4px 14px color-mix(in srgb, var(--color-text) 8%, transparent);
+  --shadow-lg:   0 16px 40px color-mix(in srgb, var(--color-text) 12%, transparent);
+  --shadow-card: 0 8px 30px color-mix(in srgb, var(--color-primary) 18%, transparent),
+                 0 2px 8px color-mix(in srgb, var(--color-text) 8%, transparent);
+
+  --overlay-scrim:        color-mix(in srgb, var(--color-text) 45%, transparent);
+  --overlay-scrim-strong: color-mix(in srgb, var(--color-text) 72%, transparent);
+
+  --radius: 14px;
+
+  /* ── App shell font (components, tables, forms) ── */
+  --font: "DM Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+  /* ── Landing page display font — headings, hero titles, section titles ── */
+  --font-display: "Plus Jakarta Sans", "DM Sans", system-ui, -apple-system, sans-serif;
+
+  /* ── Landing page body font — paragraphs, labels, descriptions ── */
+  --font-landing: "Inter", "DM Sans", system-ui, -apple-system, sans-serif;
+
+  /* ── Serif accent — testimonial quotes, decorative elements ── */
+  --font-serif: "Instrument Serif", Georgia, serif;
+
+  /* ── Monospace — code, invoice numbers, batch codes ── */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* Layout rhythm — tightened on small screens for dense mobile UI */
+  --layout-shell-pad-x: 16px;
+  --layout-shell-pad-y: 16px;
+  --layout-page-x: 6px;
+  --layout-page-y: 18px;
+  --layout-page-bottom: 24px;
+  --layout-card-pad-x: 20px;
+  --layout-card-pad-y: 18px;
+  --layout-card-radius: 18px;
+  --layout-stack-gap: 12px;
+}
+
+@media (max-width: 720px) {
+  :root {
+    --radius: 12px;
+    --layout-shell-pad-x: 6px;
+    --layout-shell-pad-y: 6px;
+    --layout-page-x: 2px;
+    --layout-page-y: 8px;
+    --layout-page-bottom: 12px;
+    --layout-card-pad-x: 10px;
+    --layout-card-pad-y: 10px;
+    --layout-card-radius: 14px;
+    --layout-stack-gap: 8px;
+    --shadow-card: var(--shadow-sm);
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--color-bg); color: var(--color-text); font-family: var(--font); }
+a { color: var(--color-primary); text-decoration: none; }
+a:hover { color: var(--color-secondary); text-decoration: underline; }
+
+/* ── Focus visuals suppressed app-wide (no outlines / synthetic rings on focused controls only) ── */
+*:focus,
+*:focus-visible {
+  outline: none !important;
+}
+
+*:focus-visible {
+  box-shadow: none !important;
+}
+
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible,
+button:focus,
+button:focus-visible {
+  outline: none !important;
+}
+
+button::-moz-focus-inner {
+  border: 0;
+}
+
+:-moz-focusring {
+  outline: none !important;
+}

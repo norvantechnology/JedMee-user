@@ -1,0 +1,191 @@
+.raWrap {
+  padding: 18px 6px 24px;
+  font-family: var(--font);
+}
+
+.raCard {
+  /* Match UsersPage card spacing for consistent CommonTable layout */
+  width: 100%;
+  max-width: none;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text) 6%, transparent);
+}
+
+/* CommonTable spacing is handled via `compact` mode. */
+
+.raInput {
+  flex: 1;
+  min-width: 240px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  padding: 0 12px;
+  font-family: var(--font);
+  font-size: 13.5px;
+  outline: none;
+  background: var(--color-card);
+}
+
+.raInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.raBtn {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-card);
+  font-family: var(--font);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s;
+}
+
+.raBtn:hover {
+  background: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+
+.raBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.raMatrix {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.raPermRow {
+  display: grid;
+  grid-template-columns: 72px repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-card);
+}
+
+.raPermRes {
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--color-text-2);
+  letter-spacing: 0.02em;
+}
+
+.raCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--color-text-3);
+  white-space: nowrap;
+}
+
+.raCheck input {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--color-primary);
+}
+
+@media (max-width: 720px) {
+  .raInput {
+    min-width: 100%;
+  }
+  .raPermRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.raBtnSmall {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-2);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.raBtnSmall:hover {
+  background: var(--color-surface);
+}
+
+.raDanger {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
+  color: var(--color-danger);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.raDanger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.raEmpty {
+  padding: 18px 8px;
+  text-align: center;
+  color: var(--color-text-4);
+}
+
+.raField label {
+  display: block;
+  margin-bottom: 0;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--color-text-2);
+  line-height: 1.2;
+}
+
+.raModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.raBtnGhost {
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-2);
+  font-family: var(--font);
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.raBtnGhost:hover {
+  background: var(--color-surface);
+}
+
+.raBtnGhost:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.raModalGrid {
+  display: grid;
+  gap: 12px;
+}
+
