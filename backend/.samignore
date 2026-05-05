@@ -1,0 +1,26 @@
+# Files/dirs excluded from every Lambda function package during sam build.
+# The Lambda layer (lib/nodejs-light) provides all runtime dependencies.
+
+# Local dev server — not needed in Lambda
+local-server.js
+
+# SQL migrations — not needed in Lambda
+sql/
+
+# Layer source — deployed separately as a LayerVersion
+lib/
+
+# SAM/build artifacts
+.aws-sam/
+
+# Dev config files
+samconfig.toml
+.env
+.env.*
+*.md
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

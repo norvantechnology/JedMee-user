@@ -24,10 +24,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/lib/nodejs-light/nodejs/package-lock.json
 
       - name: Install Lambda layer dependencies
         working-directory: backend/lib/nodejs-light/nodejs
         run: npm ci
+
+      - name: Cache SAM build
+        uses: actions/cache@v4
+        with:
+          # Cache both build output AND SAM's internal hash metadata (.aws-sam/cache).
+          # Without the cache/ dir, --cached has no prior hashes to compare and
+          # rebuilds every function from scratch on every run.
+          path: |
+            backend/.aws-sam/build
+            backend/.aws-sam/cache
+          key: sam-${{ hashFiles('backend/template.yaml', 'backend/src/**') }}
+          restore-keys: |
+            sam-
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -38,15 +53,17 @@ jobs:
 
       - name: Set up AWS SAM CLI
         uses: aws-actions/setup-sam@v2
+        with:
+          use-installer: true   # faster than pip install
 
       - name: SAM build
-        run: sam build
+        run: sam build --parallel --cached
 
       - name: SAM deploy
         run: |
           sam deploy \
             --s3-bucket ${{ secrets.SAM_DEPLOY_BUCKET }} \
-            --parameter-overrides Stage=prod \
+            --parameter-overrides Stage=dev \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
 
@@ -54,7 +71,8 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend (Vite → S3 + CloudFront)
     runs-on: ubuntu-latest
-    needs: deploy-backend          # wait for API to be up-to-date first
+    # Runs in parallel with deploy-backend — VITE_API_BASE_URL is already
+    # known from secrets and does not change between deploys.
     environment: dev
 
     defaults:
@@ -69,6 +87,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Write .env for Vite build
         run: |

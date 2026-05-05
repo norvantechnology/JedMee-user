@@ -49,12 +49,12 @@ Mappings:
       AppName: "medico-user-backend-dev"
       ApiName: "medico-user-api-dev"
       LightLayerName: "medico-user-lib-light-dev"
-      DbHost: "db.tcmjudishpkcyesabvqq.supabase.co"
+      DbHost: "13.60.252.58"
       DbPort: "5432"
       DbName: "postgres"
       DbUser: "postgres"
       DbPassword: "Medico#123456$"
-      DbSsl: "require"
+      DbSsl: "disable"
       BcryptCost: "12"
       JwtAccessSecret: "dev_only_change_me"
       AccessTokenTtlSeconds: "900"
@@ -2313,7 +2313,7 @@ Resources:
             Method: PATCH
 
 
-PublicPlansFunction:
+  PublicPlansFunction:
     Type: AWS::Serverless::Function
     Properties:
       Description: Public pricing plans (no auth)
