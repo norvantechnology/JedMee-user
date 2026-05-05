@@ -108,7 +108,6 @@ Globals:
     MemorySize: !FindInMap [StageConfig, !Ref Stage, MemorySize]
     Timeout: 30
     Tracing: Active
-    Role: !GetAtt LambdaExecutionRole.Arn
     Environment:
       Variables:
         STAGE: !Ref Stage
@@ -204,6 +203,7 @@ Resources:
       CodeUri: .
       Handler: src/handlers/router/index.handler
       Timeout: 300
+      Role: !GetAtt LambdaExecutionRole.Arn
       Description: Central API router — dispatches to individual handler modules
       Events:
         # ── Hello ──────────────────────────────────────────────────────────────
@@ -1235,6 +1235,7 @@ Resources:
       CodeUri: .
       Handler: src/handlers/notifications/dailyDigest.handler
       Timeout: 120
+      Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         DailyLowStockDigest:
           Type: Schedule
