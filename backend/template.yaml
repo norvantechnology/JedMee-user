@@ -145,7 +145,7 @@ Globals:
       Environment: !FindInMap [StageConfig, !Ref Stage, EnvironmentTag]
 
 Resources:
-  # ── Shared IAM execution role (one role for all functions keeps resource count under 500) ──
+  # ── Shared IAM execution role ───────────────────────────────────────────────
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -193,1594 +193,1042 @@ Resources:
       Cors:
         AllowOrigin: "'*'"
         AllowHeaders: "'Content-Type,Authorization'"
-        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowMethods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
 
-  HelloFunction:
+  # ── Single router function — handles ALL API routes ─────────────────────────
+  # Replaces ~155 individual Lambda functions → cuts CloudFormation resources
+  # from 500+ to ~50 and deploy time from 20 min to ~2 min.
+  RouterFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
-      Handler: src/handlers/hello.handler
+      Handler: src/handlers/router/index.handler
+      Timeout: 300
+      Description: Central API router — dispatches to individual handler modules
       Events:
+        # ── Hello ──────────────────────────────────────────────────────────────
         Hello:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /hello
             Method: GET
-
-  AuthSignupFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/auth/signup.handler
-      Events:
-        Signup:
+        # ── Auth ───────────────────────────────────────────────────────────────
+        AuthSignup:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /auth/signup
             Method: POST
-
-  AuthLoginFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/auth/login.handler
-      Events:
-        Login:
+        AuthLogin:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /auth/login
             Method: POST
-
-  AuthRefreshFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/auth/refresh.handler
-      Events:
-        Refresh:
+        AuthRefresh:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /auth/refresh
             Method: POST
-
-  AuthLogoutFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/auth/logout.handler
-      Events:
-        Logout:
+        AuthLogout:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /auth/logout
             Method: POST
-
-  AuthChangePasswordFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/auth/changePassword.handler
-      Events:
-        ChangePassword:
+        AuthChangePassword:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /auth/password/change
             Method: POST
-
-  UserMeFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/user/me.handler
-      Events:
-        Me:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /me
-            Method: GET
-
-  UserUpdateMeFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/user/updateMe.handler
-      Events:
-        UpdateMe:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /me/update
-            Method: POST
-
-  AccessListRolesFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/listRoles.handler
-      Events:
-        ListRoles:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/roles
-            Method: GET
-
-  AccessCreateRoleFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/createRole.handler
-      Events:
-        CreateRole:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/roles
-            Method: POST
-
-  AccessBulkDeleteRolesFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/bulkDeleteRoles.handler
-      Events:
-        BulkDeleteRoles:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/bulk-delete-roles
-            Method: POST
-
-  AccessDeleteRoleFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/deleteRole.handler
-      Events:
-        DeleteRole:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/roles/{id}
-            Method: POST
-
-  AccessMeFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/me.handler
-      Events:
-        AccessMe:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/me
-            Method: GET
-
-  AccessListPermissionResourcesFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/listPermissionResources.handler
-      Events:
-        ListPermissionResources:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/permission-resources
-            Method: GET
-
-  AccessUpdateRoleFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/updateRole.handler
-      Events:
-        UpdateRole:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/roles/{id}/update
-            Method: POST
-
-  AccessListUsersFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/listUsers.handler
-      Events:
-        ListUsers:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/users
-            Method: GET
-
-  AccessCreateUserFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/createUser.handler
-      Events:
-        CreateUser:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/users
-            Method: POST
-
-  AccessAssignUserRoleFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/assignUserRole.handler
-      Events:
-        AssignUserRole:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/users/{id}/role
-            Method: POST
-
-  AccessUpdateUserFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/updateUser.handler
-      Events:
-        UpdateUser:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/users/{id}/update
-            Method: POST
-
-  AccessDeleteUserFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/deleteUser.handler
-      Events:
-        DeleteUser:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/users/{id}/delete
-            Method: POST
-
-  AccessBulkDeleteUsersFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/access/bulkDeleteUsers.handler
-      Events:
-        BulkDeleteUsers:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /access/bulk-delete-users
-            Method: POST
-
-  VendorListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendors/listVendors.handler
-      Events:
-        VendorList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendors
-            Method: GET
-
-  VendorCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendors/createVendor.handler
-      Events:
-        VendorCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendors
-            Method: POST
-
-  VendorUpdateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendors/updateVendor.handler
-      Events:
-        VendorUpdate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendors/{id}/update
-            Method: POST
-
-  VendorDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendors/deleteVendor.handler
-      Events:
-        VendorDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendors/{id}/delete
-            Method: POST
-
-  VendorBulkDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendors/bulkDelete.handler
-      Events:
-        VendorBulkDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendors/bulk-delete
-            Method: POST
-
-  DivisionsListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/divisions/list.handler
-      Events:
-        DivisionsList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /divisions
-            Method: GET
-
-  DivisionsCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/divisions/create.handler
-      Events:
-        DivisionsCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /divisions
-            Method: POST
-
-  DivisionsGetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/divisions/get.handler
-      Events:
-        DivisionsGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /divisions/{id}
-            Method: GET
-
-  DivisionsUpdateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/divisions/update.handler
-      Events:
-        DivisionsUpdate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /divisions/{id}/update
-            Method: POST
-
-  DivisionsDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/divisions/delete.handler
-      Events:
-        DivisionsDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /divisions/{id}/delete
-            Method: POST
-
-  DivisionsOutstandingFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/divisions/outstanding.handler
-      Events:
-        DivisionsOutstanding:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /divisions/{id}/outstanding
-            Method: GET
-
-  DivisionPaymentsListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/divisionPayments/list.handler
-      Events:
-        DivisionPaymentsList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /division-payments
-            Method: GET
-
-  DivisionPaymentsCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/divisionPayments/create.handler
-      Events:
-        DivisionPaymentsCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /division-payments
-            Method: POST
-
-  DivisionPaymentsBulkSettleFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/divisionPayments/bulkSettle.handler
-      Events:
-        DivisionPaymentsBulkSettle:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /division-payments/bulk-settle
-            Method: POST
-
-  MfgCompaniesListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/mfgCompanies/listMfgCompanies.handler
-      Events:
-        MfgCompaniesList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /mfg-companies
-            Method: GET
-
-  MfgCompaniesCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/mfgCompanies/createMfgCompany.handler
-      Events:
-        MfgCompaniesCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /mfg-companies
-            Method: POST
-
-  MfgCompaniesUpdateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/mfgCompanies/updateMfgCompany.handler
-      Events:
-        MfgCompaniesUpdate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /mfg-companies/{id}/update
-            Method: POST
-
-  MfgCompaniesDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/mfgCompanies/deleteMfgCompany.handler
-      Events:
-        MfgCompaniesDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /mfg-companies/{id}/delete
-            Method: POST
-
-  MfgCompaniesBulkDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/mfgCompanies/bulkDelete.handler
-      Events:
-        MfgCompaniesBulkDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /mfg-companies/bulk-delete
-            Method: POST
-
-  MfgCompaniesCheckUniqueFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/mfgCompanies/checkUnique.handler
-      Events:
-        MfgCompaniesCheckUnique:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /mfg-companies/check-unique
-            Method: GET
-
-  MfgCompaniesPolicyImpactFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/mfgCompanies/getPolicyImpact.handler
-      Events:
-        MfgCompaniesPolicyImpact:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /mfg-companies/{id}/policy-impact
-            Method: GET
-
-  ProductBatchesListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/productBatches/list.handler
-      Events:
-        ProductBatchesList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /api/product-batches
-            Method: GET
-
-  ProductBatchesGetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/productBatches/get.handler
-      Events:
-        ProductBatchesGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /api/product-batches/{id}
-            Method: GET
-
-  ProductBatchesCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/productBatches/create.handler
-      Events:
-        ProductBatchesCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /api/product-batches
-            Method: POST
-
-  ProductBatchesUpdateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/productBatches/update.handler
-      Events:
-        ProductBatchesUpdate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /api/product-batches/{id}
-            Method: PUT
-
-  ProductBatchesLooseStockFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/productBatches/updateLooseStock.handler
-      Events:
-        ProductBatchesLooseStock:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /product-batches/{id}/loose-stock
-            Method: PATCH
-
-  ProductBatchesDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/productBatches/delete.handler
-      Events:
-        ProductBatchesDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /api/product-batches/{id}
-            Method: DELETE
-
-  ProductBatchesBulkDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/productBatches/bulkDelete.handler
-      Events:
-        ProductBatchesBulkDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /api/product-batches/bulk-delete
-            Method: POST
-
-  ProductBatchesCheckFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/productBatches/check.handler
-      Events:
-        ProductBatchesCheck:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /api/product-batches/check
-            Method: GET
-
-  ProductsListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/products/list.handler
-      Events:
-        ProductsList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /products
-            Method: GET
-
-  ProductsCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/products/create.handler
-      Events:
-        ProductsCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /products
-            Method: POST
-
-  ProductsUpdateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/products/update.handler
-      Events:
-        ProductsUpdate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /products/{id}
-            Method: PUT
-
-  ProductsDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/products/delete.handler
-      Events:
-        ProductsDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /products/{id}
-            Method: DELETE
-
-  ProductsBulkDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/products/bulkDelete.handler
-      Events:
-        ProductsBulkDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /products/bulk-delete
-            Method: POST
-
-  ProductsCheckCodeFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/products/checkCode.handler
-      Events:
-        ProductsCheckCode:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /products/check-code
-            Method: GET
-
-  ProductsCheckNameFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/products/checkName.handler
-      Events:
-        ProductsCheckName:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /products/check-name
-            Method: GET
-
-  PurchaseInvoicesListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseInvoices/list.handler
-      Events:
-        PurchaseInvoicesList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-invoices
-            Method: GET
-
-  PurchaseInvoicesCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseInvoices/create.handler
-      Events:
-        PurchaseInvoicesCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-invoices
-            Method: POST
-
-  PurchaseInvoicesGetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseInvoices/get.handler
-      Events:
-        PurchaseInvoicesGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-invoices/{id}
-            Method: GET
-
-  PurchaseInvoicesUpdateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseInvoices/update.handler
-      Events:
-        PurchaseInvoicesUpdate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-invoices/{id}
-            Method: PUT
-
-  PurchaseInvoicesConfirmFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseInvoices/confirm.handler
-      Events:
-        PurchaseInvoicesConfirm:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-invoices/{id}/confirm
-            Method: POST
-
-  PurchaseInvoicesCancelFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseInvoices/cancel.handler
-      Events:
-        PurchaseInvoicesCancel:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-invoices/{id}/cancel
-            Method: POST
-
-  PurchaseInvoicesDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseInvoices/delete.handler
-      Events:
-        PurchaseInvoicesDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-invoices/{id}/delete
-            Method: POST
-
-  PurchaseInvoicesBulkCancelFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseInvoices/bulkCancel.handler
-      Events:
-        PurchaseInvoicesBulkCancel:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-invoices/bulk-cancel
-            Method: POST
-
-  PurchaseInvoicesBulkConfirmFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseInvoices/bulkConfirm.handler
-      Events:
-        PurchaseInvoicesBulkConfirm:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-invoices/bulk-confirm
-            Method: POST
-
-  PurchaseInvoicesSendEmailFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseInvoices/sendEmail.handler
-      Events:
-        PurchaseInvoicesSendEmail:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-invoices/send-email
-            Method: POST
-
-  PurchaseReturnsCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseReturns/create.handler
-      Events:
-        PurchaseReturnsCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-returns
-            Method: POST
-
-  PurchaseReturnsConfirmFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/purchaseReturns/confirm.handler
-      Events:
-        PurchaseReturnsConfirm:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /purchase-returns/{id}/confirm
-            Method: POST
-
-  VendorPaymentsListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendorPayments/list.handler
-      Events:
-        VendorPaymentsList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendor-payments
-            Method: GET
-
-  VendorPaymentsCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendorPayments/create.handler
-      Events:
-        VendorPaymentsCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendor-payments
-            Method: POST
-
-  VendorPaymentsBulkSettleFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendorPayments/bulkSettle.handler
-      Events:
-        VendorPaymentsBulkSettle:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendor-payments/bulk-settle
-            Method: POST
-
-  CustomersListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customers/list.handler
-      Events:
-        CustomersList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customers
-            Method: GET
-
-  CustomersCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customers/create.handler
-      Events:
-        CustomersCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customers
-            Method: POST
-
-  CustomersGetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customers/get.handler
-      Events:
-        CustomersGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customers/{id}
-            Method: GET
-
-  CustomersUpdateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customers/update.handler
-      Events:
-        CustomersUpdate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customers/{id}
-            Method: PUT
-
-  CustomersDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customers/delete.handler
-      Events:
-        CustomersDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customers/{id}
-            Method: DELETE
-
-  CustomersBulkDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customers/bulkDelete.handler
-      Events:
-        CustomersBulkDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customers/bulk-delete
-            Method: POST
-
-  CustomersOutstandingFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customers/outstanding.handler
-      Events:
-        CustomersOutstanding:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customers/{id}/outstanding
-            Method: GET
-
-  CustomersLedgerPrintFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customers/ledgerPrint.handler
-      Events:
-        CustomersLedgerPrint:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customers/{id}/ledger/print
-            Method: GET
-
-  CustomersLedgerSendEmailFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customers/sendLedgerEmail.handler
-      Events:
-        CustomersLedgerSendEmail:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customers/{id}/ledger/send-email
-            Method: POST
-
-  VendorsLedgerFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendors/ledger.handler
-      Events:
-        VendorsLedger:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendors/{id}/ledger
-            Method: GET
-
-  VendorsLedgerSendEmailFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendors/sendLedgerEmail.handler
-      Events:
-        VendorsLedgerSendEmail:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendors/{id}/ledger/send-email
-            Method: POST
-
-  SalesInvoicesListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/list.handler
-      Events:
-        SalesInvoicesList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices
-            Method: GET
-
-  SalesInvoicesCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/create.handler
-      Events:
-        SalesInvoicesCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices
-            Method: POST
-
-  SalesInvoicesGetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/get.handler
-      Events:
-        SalesInvoicesGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/{id}
-            Method: GET
-
-  SalesInvoicesUpdateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/update.handler
-      Events:
-        SalesInvoicesUpdate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/{id}
-            Method: PUT
-
-  SalesInvoicesRateTypeFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/changeRateType.handler
-      Events:
-        SalesInvoicesRateType:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/{id}/rate-type
-            Method: PATCH
-
-  SalesInvoicesGlobalDiscountFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/applyGlobalDiscount.handler
-      Events:
-        SalesInvoicesGlobalDiscount:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/{id}/global-discount
-            Method: PATCH
-
-  SalesInvoicesSchemeOverrideFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/overrideLineScheme.handler
-      Events:
-        SalesInvoicesSchemeOverride:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/{id}/items/{itemId}/scheme
-            Method: POST
-
-  SalesInvoicesLooseSaleFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/recordLooseSale.handler
-      Events:
-        SalesInvoicesLooseSale:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/{id}/loose-sale
-            Method: POST
-
-  SalesInvoicesConfirmFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/confirm.handler
-      Events:
-        SalesInvoicesConfirm:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/{id}/confirm
-            Method: POST
-
-  SalesInvoicesCancelFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/cancel.handler
-      Events:
-        SalesInvoicesCancel:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/{id}/cancel
-            Method: POST
-
-  SalesInvoicesBulkCancelFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/bulkCancel.handler
-      Events:
-        SalesInvoicesBulkCancel:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/bulk-cancel
-            Method: POST
-
-  SalesInvoicesBulkConfirmFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/bulkConfirm.handler
-      Events:
-        SalesInvoicesBulkConfirm:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/bulk-confirm
-            Method: POST
-
-  SalesInvoicesPrintFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/print.handler
-      Events:
-        SalesInvoicesPrint:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/{id}/print
-            Method: GET
-
-  SalesInvoicesBulkPrintFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/printBulk.handler
-      Events:
-        SalesInvoicesBulkPrint:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/print-bulk
-            Method: POST
-
-  SalesInvoicesSendEmailFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/sendEmail.handler
-      Events:
-        SalesInvoicesSendEmail:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/send-email
-            Method: POST
-
-  SalesInvoicesByBarcodeFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesInvoices/byBarcode.handler
-      Events:
-        SalesInvoicesByBarcode:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-invoices/by-barcode
-            Method: GET
-
-  SalesReturnsListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesReturns/list.handler
-      Events:
-        SalesReturnsList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-returns
-            Method: GET
-
-  SalesReturnsCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesReturns/create.handler
-      Events:
-        SalesReturnsCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-returns
-            Method: POST
-
-  SalesReturnsGetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesReturns/get.handler
-      Events:
-        SalesReturnsGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-returns/{id}
-            Method: GET
-
-  SalesReturnsConfirmFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesReturns/confirm.handler
-      Events:
-        SalesReturnsConfirm:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-returns/{id}/confirm
-            Method: POST
-
-  SalesReturnsCancelFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/salesReturns/cancel.handler
-      Events:
-        SalesReturnsCancel:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /sales-returns/{id}/cancel
-            Method: POST
-
-  PrescriptionsListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/prescriptions/list.handler
-      Events:
-        PrescriptionsList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /prescriptions
-            Method: GET
-
-  PrescriptionsGetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/prescriptions/get.handler
-      Events:
-        PrescriptionsGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /prescriptions/{id}
-            Method: GET
-
-  CustomerPaymentsListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customerPayments/list.handler
-      Events:
-        CustomerPaymentsList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customer-payments
-            Method: GET
-
-  CustomerPaymentsCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customerPayments/create.handler
-      Events:
-        CustomerPaymentsCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customer-payments
-            Method: POST
-
-  CustomerPaymentsBulkSettleFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/customerPayments/bulkSettle.handler
-      Events:
-        CustomerPaymentsBulkSettle:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /customer-payments/bulk-settle
-            Method: POST
-
-  AnnouncementGetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/announcement/get.handler
-      Events:
-        AnnouncementGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /api/announcement
-            Method: GET
-
-  AuthRequestOtpFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/auth/requestOtp.handler
-      Events:
-        RequestOtp:
+        AuthRequestOtp:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /auth/otp/request
             Method: POST
-
-  AuthVerifyOtpFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/auth/verifyOtp.handler
-      Events:
-        VerifyOtp:
+        AuthVerifyOtp:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /auth/otp/verify
             Method: POST
-
-  AuthForgotPasswordRequestFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/auth/forgotPasswordRequest.handler
-      Events:
         ForgotRequest:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /auth/password/forgot/request
             Method: POST
-
-  AuthForgotPasswordResendFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/auth/forgotPasswordRequest.handler
-      Events:
         ForgotResend:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /auth/password/forgot/resend
             Method: POST
-
-  AuthForgotPasswordResetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/auth/forgotPasswordReset.handler
-      Events:
         ForgotReset:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /auth/password/forgot/reset
             Method: POST
-
-  UploadsPresignFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/uploads/presign.handler
-      Events:
-        Presign:
+        # ── User / Me ───────────────────────────────────────────────────────────
+        Me:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /uploads/presign
-            Method: POST
-
-  UploadsAccessUrlFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/uploads/accessUrl.handler
-      Events:
-        AccessUrl:
+            Path: /me
+            Method: GET
+        UpdateMe:
           Type: Api
           Properties:
             RestApiId: !Ref Api
-            Path: /uploads/access-url
+            Path: /me/update
             Method: POST
-
-  UserRegisterFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/registration/register.handler
-      Events:
+        # ── Registration ────────────────────────────────────────────────────────
         Register:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /registration
             Method: POST
-
-  NotificationsListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/notifications/list.handler
-      Events:
+        # ── Access control ──────────────────────────────────────────────────────
+        ListRoles:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/roles
+            Method: GET
+        CreateRole:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/roles
+            Method: POST
+        BulkDeleteRoles:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/bulk-delete-roles
+            Method: POST
+        DeleteRole:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/roles/{id}
+            Method: POST
+        AccessMe:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/me
+            Method: GET
+        ListPermissionResources:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/permission-resources
+            Method: GET
+        UpdateRole:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/roles/{id}/update
+            Method: POST
+        ListUsers:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/users
+            Method: GET
+        CreateUser:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/users
+            Method: POST
+        AssignUserRole:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/users/{id}/role
+            Method: POST
+        UpdateUser:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/users/{id}/update
+            Method: POST
+        DeleteUser:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/users/{id}/delete
+            Method: POST
+        BulkDeleteUsers:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /access/bulk-delete-users
+            Method: POST
+        # ── Vendors ─────────────────────────────────────────────────────────────
+        VendorList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendors
+            Method: GET
+        VendorCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendors
+            Method: POST
+        VendorUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendors/{id}/update
+            Method: POST
+        VendorDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendors/{id}/delete
+            Method: POST
+        VendorBulkDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendors/bulk-delete
+            Method: POST
+        VendorsLedger:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendors/{id}/ledger
+            Method: GET
+        VendorsLedgerSendEmail:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendors/{id}/ledger/send-email
+            Method: POST
+        # ── Divisions ───────────────────────────────────────────────────────────
+        DivisionsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /divisions
+            Method: GET
+        DivisionsCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /divisions
+            Method: POST
+        DivisionsGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /divisions/{id}
+            Method: GET
+        DivisionsUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /divisions/{id}/update
+            Method: POST
+        DivisionsDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /divisions/{id}/delete
+            Method: POST
+        DivisionsOutstanding:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /divisions/{id}/outstanding
+            Method: GET
+        # ── Division payments ───────────────────────────────────────────────────
+        DivisionPaymentsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /division-payments
+            Method: GET
+        DivisionPaymentsCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /division-payments
+            Method: POST
+        DivisionPaymentsBulkSettle:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /division-payments/bulk-settle
+            Method: POST
+        # ── Mfg companies ───────────────────────────────────────────────────────
+        MfgCompaniesList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /mfg-companies
+            Method: GET
+        MfgCompaniesCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /mfg-companies
+            Method: POST
+        MfgCompaniesUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /mfg-companies/{id}/update
+            Method: POST
+        MfgCompaniesDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /mfg-companies/{id}/delete
+            Method: POST
+        MfgCompaniesBulkDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /mfg-companies/bulk-delete
+            Method: POST
+        MfgCompaniesCheckUnique:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /mfg-companies/check-unique
+            Method: GET
+        MfgCompaniesPolicyImpact:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /mfg-companies/{id}/policy-impact
+            Method: GET
+        # ── Product batches ─────────────────────────────────────────────────────
+        ProductBatchesList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /api/product-batches
+            Method: GET
+        ProductBatchesGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /api/product-batches/{id}
+            Method: GET
+        ProductBatchesCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /api/product-batches
+            Method: POST
+        ProductBatchesUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /api/product-batches/{id}
+            Method: PUT
+        ProductBatchesLooseStock:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /product-batches/{id}/loose-stock
+            Method: PATCH
+        ProductBatchesDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /api/product-batches/{id}
+            Method: DELETE
+        ProductBatchesBulkDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /api/product-batches/bulk-delete
+            Method: POST
+        ProductBatchesCheck:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /api/product-batches/check
+            Method: GET
+        # ── Products ────────────────────────────────────────────────────────────
+        ProductsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /products
+            Method: GET
+        ProductsCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /products
+            Method: POST
+        ProductsUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /products/{id}
+            Method: PUT
+        ProductsDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /products/{id}
+            Method: DELETE
+        ProductsBulkDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /products/bulk-delete
+            Method: POST
+        ProductsCheckCode:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /products/check-code
+            Method: GET
+        ProductsCheckName:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /products/check-name
+            Method: GET
+        ProductsRichSearch:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /products/rich-search
+            Method: GET
+        # ── Purchase invoices ───────────────────────────────────────────────────
+        PurchaseInvoicesList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-invoices
+            Method: GET
+        PurchaseInvoicesCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-invoices
+            Method: POST
+        PurchaseInvoicesGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-invoices/{id}
+            Method: GET
+        PurchaseInvoicesUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-invoices/{id}
+            Method: PUT
+        PurchaseInvoicesConfirm:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-invoices/{id}/confirm
+            Method: POST
+        PurchaseInvoicesCancel:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-invoices/{id}/cancel
+            Method: POST
+        PurchaseInvoicesDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-invoices/{id}/delete
+            Method: POST
+        PurchaseInvoicesBulkCancel:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-invoices/bulk-cancel
+            Method: POST
+        PurchaseInvoicesBulkConfirm:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-invoices/bulk-confirm
+            Method: POST
+        PurchaseInvoicesSendEmail:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-invoices/send-email
+            Method: POST
+        # ── Purchase returns ────────────────────────────────────────────────────
+        PurchaseReturnsCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-returns
+            Method: POST
+        PurchaseReturnsConfirm:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /purchase-returns/{id}/confirm
+            Method: POST
+        # ── Vendor payments ─────────────────────────────────────────────────────
+        VendorPaymentsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendor-payments
+            Method: GET
+        VendorPaymentsCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendor-payments
+            Method: POST
+        VendorPaymentsBulkSettle:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendor-payments/bulk-settle
+            Method: POST
+        # ── Customers ───────────────────────────────────────────────────────────
+        CustomersList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customers
+            Method: GET
+        CustomersCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customers
+            Method: POST
+        CustomersGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customers/{id}
+            Method: GET
+        CustomersUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customers/{id}
+            Method: PUT
+        CustomersDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customers/{id}
+            Method: DELETE
+        CustomersBulkDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customers/bulk-delete
+            Method: POST
+        CustomersOutstanding:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customers/{id}/outstanding
+            Method: GET
+        CustomersLedgerPrint:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customers/{id}/ledger/print
+            Method: GET
+        CustomersLedgerSendEmail:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customers/{id}/ledger/send-email
+            Method: POST
+        # ── Sales invoices ──────────────────────────────────────────────────────
+        SalesInvoicesList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices
+            Method: GET
+        SalesInvoicesCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices
+            Method: POST
+        SalesInvoicesGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/{id}
+            Method: GET
+        SalesInvoicesUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/{id}
+            Method: PUT
+        SalesInvoicesRateType:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/{id}/rate-type
+            Method: PATCH
+        SalesInvoicesGlobalDiscount:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/{id}/global-discount
+            Method: PATCH
+        SalesInvoicesSchemeOverride:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/{id}/items/{itemId}/scheme
+            Method: POST
+        SalesInvoicesLooseSale:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/{id}/loose-sale
+            Method: POST
+        SalesInvoicesConfirm:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/{id}/confirm
+            Method: POST
+        SalesInvoicesCancel:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/{id}/cancel
+            Method: POST
+        SalesInvoicesBulkCancel:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/bulk-cancel
+            Method: POST
+        SalesInvoicesBulkConfirm:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/bulk-confirm
+            Method: POST
+        SalesInvoicesPrint:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/{id}/print
+            Method: GET
+        SalesInvoicesBulkPrint:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/print-bulk
+            Method: POST
+        SalesInvoicesSendEmail:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/send-email
+            Method: POST
+        SalesInvoicesByBarcode:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-invoices/by-barcode
+            Method: GET
+        # ── Sales returns ───────────────────────────────────────────────────────
+        SalesReturnsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-returns
+            Method: GET
+        SalesReturnsCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-returns
+            Method: POST
+        SalesReturnsGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-returns/{id}
+            Method: GET
+        SalesReturnsConfirm:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-returns/{id}/confirm
+            Method: POST
+        SalesReturnsCancel:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /sales-returns/{id}/cancel
+            Method: POST
+        # ── Prescriptions ───────────────────────────────────────────────────────
+        PrescriptionsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /prescriptions
+            Method: GET
+        PrescriptionsGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /prescriptions/{id}
+            Method: GET
+        # ── Customer payments ───────────────────────────────────────────────────
+        CustomerPaymentsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customer-payments
+            Method: GET
+        CustomerPaymentsCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customer-payments
+            Method: POST
+        CustomerPaymentsBulkSettle:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /customer-payments/bulk-settle
+            Method: POST
+        # ── Uploads ─────────────────────────────────────────────────────────────
+        Presign:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /uploads/presign
+            Method: POST
+        AccessUrl:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /uploads/access-url
+            Method: POST
+        # ── Notifications ───────────────────────────────────────────────────────
         NotificationsList:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /notifications
             Method: GET
-
-  NotificationsUnreadCountFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/notifications/unreadCount.handler
-      Events:
         NotificationsUnread:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /notifications/unread-count
             Method: GET
-
-  NotificationsMarkReadFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/notifications/markRead.handler
-      Events:
         NotificationsMarkRead:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /notifications/mark-read
             Method: POST
-
-  NotificationsBroadcastFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/notifications/createBroadcast.handler
-      Events:
         NotificationsBroadcast:
           Type: Api
           Properties:
             RestApiId: !Ref Api
             Path: /notifications/broadcast
             Method: POST
+        # ── Announcement ────────────────────────────────────────────────────────
+        AnnouncementGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /api/announcement
+            Method: GET
+        # ── Supplier products ───────────────────────────────────────────────────
+        SupplierProductsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /supplier-products
+            Method: GET
+        SupplierProductsUpsert:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /supplier-products
+            Method: POST
+        SupplierProductsDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /supplier-products/{id}/delete
+            Method: POST
+        # ── Vendor manufacturers ────────────────────────────────────────────────
+        VendorManufacturersList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendor-manufacturers
+            Method: GET
+        VendorManufacturersUpsert:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendor-manufacturers
+            Method: POST
+        VendorManufacturersDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /vendor-manufacturers/{id}/delete
+            Method: POST
+        # ── Reports ─────────────────────────────────────────────────────────────
+        ReportsProductSupplier:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /reports/product-supplier
+            Method: GET
+        ReportsMfgStockist:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /reports/mfg-stockist
+            Method: GET
+        ReportsNonMoving:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /reports/non-moving
+            Method: GET
+        ReportsDayBook:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /reports/day-book
+            Method: GET
+        # ── Dashboard ───────────────────────────────────────────────────────────
+        DashboardAlerts:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /dashboard/alerts
+            Method: GET
+        DashboardSummary:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /dashboard/summary
+            Method: GET
+        # ── Import ──────────────────────────────────────────────────────────────
+        ImportParse:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /import/parse
+            Method: POST
+        ImportValidate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /import/validate
+            Method: POST
+        ImportExecute:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /import/execute
+            Method: POST
+        ImportJobsList:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /import/jobs
+            Method: GET
+        ImportJobGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /import/jobs/{id}
+            Method: GET
+        ImportTemplateMeta:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /import/template-meta
+            Method: GET
+        # ── Catalog ─────────────────────────────────────────────────────────────
+        CatalogMyCatalog:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /catalog/my-catalog
+            Method: GET
+        CatalogAddProduct:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /catalog/add-product
+            Method: POST
+        CatalogUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /catalog/{id}
+            Method: PATCH
+        CatalogDelete:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /catalog/{id}
+            Method: DELETE
+        CatalogBulkVisibility:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /catalog/bulk-visibility
+            Method: POST
+        CatalogBrowse:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /catalog/browse
+            Method: GET
+        CatalogPublic:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /catalog/public
+            Method: GET
+        CatalogWholesalers:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /catalog/wholesalers
+            Method: GET
+        # ── Orders ──────────────────────────────────────────────────────────────
+        OrdersCreate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders
+            Method: POST
+        OrdersMyOrders:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/my-orders
+            Method: GET
+        OrdersIncoming:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/incoming
+            Method: GET
+        OrdersGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/{id}
+            Method: GET
+        OrdersWholesalerView:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/{id}/wholesaler-view
+            Method: GET
+        OrdersAccept:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/{id}/accept
+            Method: POST
+        OrdersReject:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/{id}/reject
+            Method: POST
+        OrdersDispatch:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/{id}/dispatch
+            Method: POST
+        OrdersCancelRetailer:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/{id}/cancel
+            Method: POST
+        OrdersCancelWholesaler:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/{id}/cancel-by-wholesaler
+            Method: POST
+        OrdersConfirmDelivery:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/{id}/confirm-delivery
+            Method: POST
+        OrdersCreatePurchase:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /orders/{id}/create-purchase
+            Method: POST
+        # ── Wholesaler links ────────────────────────────────────────────────────
+        WholesalerLinksConnect:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /wholesaler-links/connect
+            Method: POST
+        WholesalerLinksMyConnections:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /wholesaler-links/my-connections
+            Method: GET
+        WholesalerLinksUpdate:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /wholesaler-links/{id}
+            Method: PATCH
+        # ── Public ──────────────────────────────────────────────────────────────
+        PublicPlans:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /public/plans
+            Method: GET
 
+  # ── Scheduled: daily low-stock digest (kept separate — Schedule event) ──────
   NotificationsDailyDigestFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -1795,559 +1243,3 @@ Resources:
             Name: !Sub medico-user-low-stock-digest-${Stage}
             Description: Daily in-app low-stock notifications (01:30 UTC)
             Enabled: true
-
-  # ─── Retailer pharmacy: rich product search, supplier-product map, reports ───
-  ProductsRichSearchFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/products/richSearch.handler
-      Events:
-        ProductsRichSearch:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /products/rich-search
-            Method: GET
-
-  SupplierProductsListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/supplierProducts/list.handler
-      Events:
-        SupplierProductsList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /supplier-products
-            Method: GET
-
-  SupplierProductsUpsertFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/supplierProducts/upsert.handler
-      Events:
-        SupplierProductsUpsert:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /supplier-products
-            Method: POST
-
-  SupplierProductsDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/supplierProducts/delete.handler
-      Events:
-        SupplierProductsDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /supplier-products/{id}/delete
-            Method: POST
-
-  VendorManufacturersListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendorManufacturers/list.handler
-      Events:
-        VendorManufacturersList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendor-manufacturers
-            Method: GET
-
-  VendorManufacturersUpsertFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendorManufacturers/upsert.handler
-      Events:
-        VendorManufacturersUpsert:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendor-manufacturers
-            Method: POST
-
-  VendorManufacturersDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/vendorManufacturers/delete.handler
-      Events:
-        VendorManufacturersDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /vendor-manufacturers/{id}/delete
-            Method: POST
-
-  ReportsProductSupplierFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/reports/productSupplier.handler
-      Events:
-        ReportsProductSupplier:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /reports/product-supplier
-            Method: GET
-
-  ReportsMfgStockistFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/reports/mfgStockist.handler
-      Events:
-        ReportsMfgStockist:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /reports/mfg-stockist
-            Method: GET
-
-  ReportsNonMovingFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/reports/nonMoving.handler
-      Events:
-        ReportsNonMoving:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /reports/non-moving
-            Method: GET
-
-  ReportsDayBookFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/reports/dayBook.handler
-      Events:
-        ReportsDayBook:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /reports/day-book
-            Method: GET
-
-  DashboardAlertsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/dashboard/alerts.handler
-      Events:
-        DashboardAlerts:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /dashboard/alerts
-            Method: GET
-
-  DashboardSummaryFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/dashboard/summary.handler
-      Events:
-        DashboardSummary:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /dashboard/summary
-            Method: GET
-
-  ImportParseFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/import/parse.handler
-      Events:
-        ImportParse:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /import/parse
-            Method: POST
-
-  ImportValidateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/import/validate.handler
-      Events:
-        ImportValidate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /import/validate
-            Method: POST
-
-  ImportExecuteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Timeout: 300
-      Handler: src/handlers/import/execute.handler
-      Events:
-        ImportExecute:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /import/execute
-            Method: POST
-
-  ImportJobsListFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/import/jobsList.handler
-      Events:
-        ImportJobsList:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /import/jobs
-            Method: GET
-
-  ImportJobGetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/import/jobGet.handler
-      Events:
-        ImportJobGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /import/jobs/{id}
-            Method: GET
-
-  ImportTemplateMetaFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/import/templateMeta.handler
-      Events:
-        ImportTemplateMeta:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /import/template-meta
-            Method: GET
-
-  CatalogMyCatalogFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/catalog/myCatalog.handler
-      Events:
-        CatalogMyCatalog:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /catalog/my-catalog
-            Method: GET
-
-  CatalogAddProductFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/catalog/addProduct.handler
-      Events:
-        CatalogAddProduct:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /catalog/add-product
-            Method: POST
-
-  CatalogUpdateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/catalog/updateCatalogItem.handler
-      Events:
-        CatalogUpdate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /catalog/{id}
-            Method: PATCH
-
-  CatalogDeleteFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/catalog/deleteCatalogItem.handler
-      Events:
-        CatalogDelete:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /catalog/{id}
-            Method: DELETE
-
-  CatalogBulkVisibilityFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/catalog/bulkVisibility.handler
-      Events:
-        CatalogBulkVisibility:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /catalog/bulk-visibility
-            Method: POST
-
-  CatalogBrowseFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/catalog/browse.handler
-      Events:
-        CatalogBrowse:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /catalog/browse
-            Method: GET
-        CatalogPublic:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /catalog/public
-            Method: GET
-
-  CatalogWholesalersFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/catalog/wholesalers.handler
-      Events:
-        CatalogWholesalers:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /catalog/wholesalers
-            Method: GET
-
-  OrdersCreateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/create.handler
-      Events:
-        OrdersCreate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders
-            Method: POST
-
-  OrdersMyOrdersFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/myOrders.handler
-      Events:
-        OrdersMyOrders:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/my-orders
-            Method: GET
-
-  OrdersIncomingFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/incoming.handler
-      Events:
-        OrdersIncoming:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/incoming
-            Method: GET
-
-  OrdersGetFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/get.handler
-      Events:
-        OrdersGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/{id}
-            Method: GET
-
-  OrdersWholesalerViewFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/wholesalerView.handler
-      Events:
-        OrdersWholesalerView:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/{id}/wholesaler-view
-            Method: GET
-
-  OrdersAcceptFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/accept.handler
-      Events:
-        OrdersAccept:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/{id}/accept
-            Method: POST
-
-  OrdersRejectFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/reject.handler
-      Events:
-        OrdersReject:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/{id}/reject
-            Method: POST
-
-  OrdersDispatchFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/dispatch.handler
-      Events:
-        OrdersDispatch:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/{id}/dispatch
-            Method: POST
-
-  OrdersCancelRetailerFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/cancelRetailer.handler
-      Events:
-        OrdersCancelRetailer:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/{id}/cancel
-            Method: POST
-
-  OrdersCancelWholesalerFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/cancelWholesaler.handler
-      Events:
-        OrdersCancelWholesaler:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/{id}/cancel-by-wholesaler
-            Method: POST
-
-  OrdersConfirmDeliveryFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/confirmDelivery.handler
-      Events:
-        OrdersConfirmDelivery:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/{id}/confirm-delivery
-            Method: POST
-
-  OrdersCreatePurchaseFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/orders/createPurchase.handler
-      Events:
-        OrdersCreatePurchase:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /orders/{id}/create-purchase
-            Method: POST
-
-  WholesalerLinksConnectFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/wholesalerLinks/connect.handler
-      Events:
-        WholesalerLinksConnect:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /wholesaler-links/connect
-            Method: POST
-
-  WholesalerLinksMyConnectionsFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/wholesalerLinks/myConnections.handler
-      Events:
-        WholesalerLinksMyConnections:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /wholesaler-links/my-connections
-            Method: GET
-
-  WholesalerLinksUpdateFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: .
-      Handler: src/handlers/wholesalerLinks/update.handler
-      Events:
-        WholesalerLinksUpdate:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /wholesaler-links/{id}
-            Method: PATCH
-
-
-  PublicPlansFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Description: Public pricing plans (no auth)
-      CodeUri: .
-      Handler: src/handlers/public/plans.handler
-      Events:
-        PublicPlans:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Api
-            Path: /public/plans
-            Method: GET
