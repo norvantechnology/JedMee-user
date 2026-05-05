@@ -54,7 +54,7 @@ jobs:
       - name: Set up AWS SAM CLI
         uses: aws-actions/setup-sam@v2
         with:
-          use-installer: true   # faster than pip install
+          use-installer: true
 
       - name: SAM build
         run: sam build --parallel --cached
@@ -71,8 +71,6 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend (Vite → S3 + CloudFront)
     runs-on: ubuntu-latest
-    # Runs in parallel with deploy-backend — VITE_API_BASE_URL is already
-    # known from secrets and does not change between deploys.
     environment: dev
 
     defaults:
@@ -107,20 +105,144 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region:            eu-north-1
 
+      - name: Ensure S3 bucket exists and is public
+        run: |
+          BUCKET="${{ secrets.FRONTEND_S3_BUCKET }}"
+          if [ -z "$BUCKET" ]; then
+            BUCKET="jedmee-frontend"
+          fi
+          echo "S3_BUCKET=$BUCKET" >> $GITHUB_ENV
+
+          # Create bucket if it doesn't exist
+          if ! aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then
+            echo "Creating S3 bucket: $BUCKET"
+            aws s3api create-bucket \
+              --bucket "$BUCKET" \
+              --region eu-north-1 \
+              --create-bucket-configuration LocationConstraint=eu-north-1
+          else
+            echo "Bucket $BUCKET already exists"
+          fi
+
+          # Allow public access (required for CloudFront + static hosting)
+          aws s3api put-public-access-block \
+            --bucket "$BUCKET" \
+            --public-access-block-configuration \
+              "BlockPublicAcls=false,IgnorePublicAcls=false,BlockPublicPolicy=false,RestrictPublicBuckets=false"
+
+          # Set public-read bucket policy
+          aws s3api put-bucket-policy --bucket "$BUCKET" --policy "{
+            \"Version\": \"2012-10-17\",
+            \"Statement\": [{
+              \"Sid\": \"PublicReadGetObject\",
+              \"Effect\": \"Allow\",
+              \"Principal\": \"*\",
+              \"Action\": \"s3:GetObject\",
+              \"Resource\": \"arn:aws:s3:::${BUCKET}/*\"
+            }]
+          }"
+
+      - name: Ensure CloudFront distribution exists
+        run: |
+          BUCKET="${{ env.S3_BUCKET }}"
+          DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
+
+          # If secret is empty, look for an existing distribution pointing to this bucket
+          if [ -z "$DIST_ID" ]; then
+            ORIGIN_DOMAIN="${BUCKET}.s3.eu-north-1.amazonaws.com"
+            DIST_ID=$(aws cloudfront list-distributions \
+              --query "DistributionList.Items[?Origins.Items[0].DomainName=='${ORIGIN_DOMAIN}'].Id | [0]" \
+              --output text 2>/dev/null)
+            if [ "$DIST_ID" = "None" ] || [ -z "$DIST_ID" ]; then
+              DIST_ID=""
+            fi
+          fi
+
+          # Create a new distribution if still not found
+          if [ -z "$DIST_ID" ]; then
+            echo "No CloudFront distribution found — creating one..."
+            BUCKET_ORIGIN="${BUCKET}.s3.eu-north-1.amazonaws.com"
+            CALLER_REF="jedmee-$(date +%s)"
+
+            cat > /tmp/cf-config.json <<EOF
+{
+  "CallerReference": "${CALLER_REF}",
+  "Comment": "JedMee Frontend",
+  "DefaultRootObject": "index.html",
+  "Enabled": true,
+  "HttpVersion": "http2",
+  "PriceClass": "PriceClass_100",
+  "Origins": {
+    "Quantity": 1,
+    "Items": [
+      {
+        "Id": "S3-${BUCKET}",
+        "DomainName": "${BUCKET_ORIGIN}",
+        "S3OriginConfig": { "OriginAccessIdentity": "" }
+      }
+    ]
+  },
+  "DefaultCacheBehavior": {
+    "TargetOriginId": "S3-${BUCKET}",
+    "ViewerProtocolPolicy": "redirect-to-https",
+    "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+    "Compress": true,
+    "AllowedMethods": {
+      "Quantity": 2,
+      "Items": ["GET", "HEAD"],
+      "CachedMethods": {
+        "Quantity": 2,
+        "Items": ["GET", "HEAD"]
+      }
+    }
+  },
+  "CustomErrorResponses": {
+    "Quantity": 2,
+    "Items": [
+      {
+        "ErrorCode": 403,
+        "ResponsePagePath": "/index.html",
+        "ResponseCode": "200",
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 404,
+        "ResponsePagePath": "/index.html",
+        "ResponseCode": "200",
+        "ErrorCachingMinTTL": 0
+      }
+    ]
+  }
+}
+EOF
+
+            DIST_ID=$(aws cloudfront create-distribution \
+              --distribution-config file:///tmp/cf-config.json \
+              --query 'Distribution.Id' --output text)
+            echo "Created CloudFront distribution: $DIST_ID"
+            echo "⚠️  Add this as CLOUDFRONT_DISTRIBUTION_ID secret to speed up future runs: $DIST_ID"
+          else
+            echo "Using existing CloudFront distribution: $DIST_ID"
+          fi
+
+          echo "CF_DIST_ID=$DIST_ID" >> $GITHUB_ENV
+
       - name: Sync dist to S3
         run: |
+          BUCKET="${{ env.S3_BUCKET }}"
+
           # Hashed assets — cache forever
-          aws s3 sync dist/ s3://${{ secrets.FRONTEND_S3_BUCKET }}/ \
+          aws s3 sync dist/ s3://${BUCKET}/ \
             --exclude "index.html" \
             --cache-control "max-age=31536000,immutable" \
             --delete
 
           # index.html — always revalidate
-          aws s3 cp dist/index.html s3://${{ secrets.FRONTEND_S3_BUCKET }}/index.html \
+          aws s3 cp dist/index.html s3://${BUCKET}/index.html \
             --cache-control "no-cache"
 
       - name: Invalidate CloudFront cache
         run: |
           aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --distribution-id ${{ env.CF_DIST_ID }} \
             --paths "/*"
