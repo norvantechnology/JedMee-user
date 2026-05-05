@@ -4,7 +4,7 @@ const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { sendMail } = require("../../shared/mailOut");
 const { buildCustomerLedgerDoc } = require("./ledgerDoc");
-const { ledgerDocToPdfAttachment } = require("../../shared/pdf/ledgerHtmlPdf");
+const { buildCustomerLedgerPdfAttachment } = require("../../shared/pdf/customerLedgerPdf");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -51,31 +51,11 @@ async function handler(event) {
   );
   const seller = sellerRs.rows?.[0] || null;
 
-  let attachment;
-  const entries = doc.entries || [];
-  const totalDr = entries.reduce((s, e) => s + Number(e.debit || 0), 0);
-  const totalCr = entries.reduce((s, e) => s + Number(e.credit || 0), 0);
   const netBal = Number(doc.summary?.netBalance || 0);
 
+  let attachment;
   try {
-    attachment = await ledgerDocToPdfAttachment({
-      partyType: "Customer",
-      party: {
-        name: cust.name,
-        code: cust.code,
-        address: cust.full_address || cust.address || [cust.city, cust.state, cust.pincode].filter(Boolean).join(", ")
-      },
-      entries,
-      summary: {
-        net: netBal,
-        netType: netBal > 0 ? "DR" : netBal < 0 ? "CR" : "NIL",
-        totalDr,
-        totalCr,
-        balanceDue: doc.summary?.balanceDue,
-        advanceAmount: doc.summary?.advanceAmount
-      },
-      seller
-    });
+    attachment = await buildCustomerLedgerPdfAttachment({ ...doc, seller });
   } catch (e) {
     return fail(500, "INTERNAL_ERROR", "PDF generation failed.", { subMessage: String(e?.message || "") });
   }

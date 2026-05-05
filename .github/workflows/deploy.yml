@@ -59,7 +59,11 @@ jobs:
       - name: SAM deploy
         run: |
           sam deploy \
+            --stack-name medico-user-backend-dev \
             --s3-bucket ${{ secrets.SAM_DEPLOY_BUCKET }} \
+            --s3-prefix sam-artifacts \
+            --region eu-north-1 \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --parameter-overrides Stage=dev \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset

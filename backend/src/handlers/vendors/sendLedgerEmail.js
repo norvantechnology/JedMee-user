@@ -3,7 +3,7 @@ const { query } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { sendMail } = require("../../shared/mailOut");
-const { ledgerDocToPdfAttachment } = require("../../shared/pdf/ledgerHtmlPdf");
+const { buildVendorLedgerPdfAttachment } = require("../../shared/pdf/vendorLedgerPdf");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -163,23 +163,9 @@ async function handler(event) {
   );
   const seller = sellerRs.rows?.[0] || null;
 
-  const totalDr = doc.entries.reduce((s, e) => s + Number(e.debit || 0), 0);
-  const totalCr = doc.entries.reduce((s, e) => s + Number(e.credit || 0), 0);
-
   let attachment;
   try {
-    attachment = await ledgerDocToPdfAttachment({
-      partyType: "Supplier",
-      party: { name: vendor.name, code: vendor.code, address: vendor.address },
-      entries: doc.entries,
-      summary: {
-        net: doc.summary.net_balance,
-        netType: doc.summary.net_balance_type,
-        totalDr,
-        totalCr
-      },
-      seller
-    });
+    attachment = await buildVendorLedgerPdfAttachment({ ...doc, seller });
   } catch (e) {
     return fail(500, "INTERNAL_ERROR", "PDF generation failed.", { subMessage: String(e?.message || "") });
   }

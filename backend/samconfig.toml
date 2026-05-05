@@ -1,26 +1,29 @@
-# AWS SAM CLI configuration for JedMee User Backend
-# Used by `sam build` and `sam deploy` — values here are defaults that the
-# GitHub Actions workflow overrides via CLI flags where needed.
+# AWS SAM CLI configuration for JedMee User Backend.
+# These are defaults for local `sam` invocations only. The GitHub Actions
+# workflow always passes --stack-name and --parameter-overrides explicitly so
+# CI is not coupled to whatever was last set here.
 
 version = 0.1
 
 [default.global.parameters]
-stack_name = "medico-user-backend"
+stack_name = "medico-user-backend-local"
 
-# ── Production (main branch CI/CD) ───────────────────────────────────────────
+# ── Local (laptop runs) ──────────────────────────────────────────────────────
 [default.build.parameters]
-template_file = "template.yaml"
+template_file   = "template.yaml"
 cached          = true
 parallel        = true
 
 [default.deploy.parameters]
-stack_name          = "medico-user-backend"
-s3_prefix           = "sam-artifacts"
-region              = "eu-north-1"
-confirm_changeset   = false
+# IMPORTANT: per-stage stack names. Mixing stages into the same stack forces
+# CloudFormation to replace named IAM roles / API names / layer names, which
+# usually fails because the role is in use.
+stack_name              = "medico-user-backend-local"
+s3_prefix               = "sam-artifacts"
+region                  = "eu-north-1"
+confirm_changeset       = false
 fail_on_empty_changeset = false
-capabilities        = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
-parameter_overrides = "Stage=prod"
-# s3_bucket is intentionally omitted here — supply it via
-# --s3-bucket ${{ secrets.SAM_DEPLOY_BUCKET }} in the workflow so the bucket
-# name stays out of source control.
+capabilities            = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
+parameter_overrides     = "Stage=local"
+# s3_bucket is intentionally omitted — pass it via
+# --s3-bucket <bucket> in CI or `sam deploy --guided` locally.

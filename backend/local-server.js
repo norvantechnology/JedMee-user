@@ -134,14 +134,26 @@ for (const [logicalId, resource] of Object.entries(tpl.Resources)) {
   const props = resource.Properties || {};
   const handlerStr = props.Handler;
   if (!handlerStr) continue;
+  // Resolve handler relative to the function's CodeUri so local dev mirrors
+  // what Lambda sees (e.g. CodeUri: src/, Handler: handlers/router/index.handler
+  // → ./src/handlers/router/index.js).
+  const codeUri = String(props.CodeUri || ".").replace(/\/+$/, "") || ".";
 
   const events = props.Events || {};
   for (const evt of Object.values(events)) {
     if (evt.Type !== "Api") continue;
-    const apiPath = String(evt.Properties.Path || "").replace(/\{([^}]+)\}/g, ":$1");
-    const method = evt.Properties.Method.toLowerCase();
+    // SAM uses `{proxy+}` for greedy catch-alls. Express 5 / path-to-regexp v8
+    // requires a NAMED wildcard (`/*splat`). `{name}` placeholders become
+    // `:name`. Trailing `+` suffix on a literal segment is also reserved by
+    // path-to-regexp, so we strip it from the SAM proxy syntax.
+    const apiPath = String(evt.Properties.Path || "")
+      .replace(/\/?\{proxy\+\}$/g, "/*splat")
+      .replace(/\{([^}]+)\}/g, ":$1");
+    const rawMethod = String(evt.Properties.Method || "").toLowerCase();
+    // SAM `Method: ANY` means "all HTTP verbs" — Express uses `app.all()`.
+    const method = rawMethod === "any" ? "all" : rawMethod;
     const idx = handlerStr.lastIndexOf(".");
-    const modulePath = handlerStr.substring(0, idx);
+    const modulePath = path.join(codeUri, handlerStr.substring(0, idx));
     const fnName = handlerStr.substring(idx + 1);
     routes.push({ logicalId, method, apiPath, modulePath, fnName });
   }

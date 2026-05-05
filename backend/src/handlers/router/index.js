@@ -238,19 +238,108 @@ const ROUTES = {
   'GET /public/plans': '../public/plans',
 };
 
-exports.handler = async (event) => {
-  const key = `${event.httpMethod} ${event.resource}`;
-  const modulePath = ROUTES[key];
+// ── Pre-compiled lookup tables ─────────────────────────────────────────────
+// Built once per Lambda init so per-invocation dispatch stays O(1) for literal
+// paths and O(n) only for parameterised templates.
+//
+// We need both because the function is now wired to API Gateway via a single
+// `ANY /{proxy+}` catch-all (to keep the Lambda resource policy under the 20 KB
+// limit), so `event.resource` is always `/{proxy+}` and we must dispatch on
+// `event.path` instead. The literal map handles every concrete path in O(1);
+// the pattern list handles `{id}`-style templates and also restores
+// `event.resource` + `event.pathParameters` so downstream handlers don't care
+// how they were invoked.
+const LITERAL_ROUTES = Object.create(null);
+const PATTERN_ROUTES = [];
 
-  if (!modulePath) {
+for (const [key, modulePath] of Object.entries(ROUTES)) {
+  const spaceIdx = key.indexOf(' ');
+  const method = key.slice(0, spaceIdx);
+  const template = key.slice(spaceIdx + 1);
+
+  if (template.indexOf('{') === -1) {
+    LITERAL_ROUTES[`${method} ${template}`] = { template, modulePath };
+    continue;
+  }
+
+  const paramNames = [];
+  const regexBody = template.replace(/\{([^}]+)\}/g, (_, name) => {
+    paramNames.push(name);
+    return '([^/]+)';
+  });
+  PATTERN_ROUTES.push({
+    method,
+    template,
+    modulePath,
+    paramNames,
+    regex: new RegExp(`^${regexBody}$`),
+  });
+}
+
+// Prefer more-specific templates first: fewer params, then longer literal text.
+PATTERN_ROUTES.sort((a, b) => {
+  if (a.paramNames.length !== b.paramNames.length) {
+    return a.paramNames.length - b.paramNames.length;
+  }
+  return b.template.length - a.template.length;
+});
+
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+  'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,PATCH,OPTIONS',
+};
+
+function resolveRoute(method, path, fallbackResource) {
+  const literal = LITERAL_ROUTES[`${method} ${path}`];
+  if (literal) {
+    return { template: literal.template, modulePath: literal.modulePath, params: null };
+  }
+
+  for (const p of PATTERN_ROUTES) {
+    if (p.method !== method) continue;
+    const m = p.regex.exec(path);
+    if (!m) continue;
+    const params = {};
+    for (let i = 0; i < p.paramNames.length; i++) {
+      try {
+        params[p.paramNames[i]] = decodeURIComponent(m[i + 1]);
+      } catch (_) {
+        params[p.paramNames[i]] = m[i + 1];
+      }
+    }
+    return { template: p.template, modulePath: p.modulePath, params };
+  }
+
+  // Backward-compat: if the function is still wired to per-route events,
+  // event.resource will already be the template — try a direct lookup.
+  if (fallbackResource && fallbackResource !== '/{proxy+}') {
+    const direct = ROUTES[`${method} ${fallbackResource}`];
+    if (direct) return { template: fallbackResource, modulePath: direct, params: null };
+  }
+
+  return null;
+}
+
+exports.handler = async (event) => {
+  const method = event.httpMethod;
+  const path = event.path || '';
+
+  // Preflight: API Gateway's MOCK integration normally handles this, but with
+  // an `ANY /{proxy+}` route OPTIONS may still hit the Lambda. Answer it here
+  // so CORS works regardless of integration type.
+  if (method === 'OPTIONS') {
+    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
+  }
+
+  const match = resolveRoute(method, path, event.resource);
+
+  if (!match) {
+    const key = `${method} ${path}`;
     console.warn(`[router] No handler for: ${key}`);
     return {
       statusCode: 404,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-      },
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
       body: JSON.stringify({
         ok: false,
         data: null,
@@ -260,7 +349,19 @@ exports.handler = async (event) => {
     };
   }
 
+  // Normalise the event so handlers see the same shape they used to under
+  // per-route Api events (resource = template, pathParameters has named keys).
+  const dispatchEvent = match.params
+    ? {
+        ...event,
+        resource: match.template,
+        pathParameters: { ...(event.pathParameters || {}), ...match.params },
+      }
+    : event.resource === match.template
+      ? event
+      : { ...event, resource: match.template };
+
   // Lazy-require: only the called module is loaded per invocation
-  const mod = require(modulePath);
-  return mod.handler(event);
+  const mod = require(match.modulePath);
+  return mod.handler(dispatchEvent);
 };
