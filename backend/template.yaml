@@ -108,6 +108,7 @@ Globals:
     MemorySize: !FindInMap [StageConfig, !Ref Stage, MemorySize]
     Timeout: 30
     Tracing: Active
+    Role: !GetAtt LambdaExecutionRole.Arn
     Environment:
       Variables:
         STAGE: !Ref Stage
@@ -144,6 +145,36 @@ Globals:
       Environment: !FindInMap [StageConfig, !Ref Stage, EnvironmentTag]
 
 Resources:
+  # ── Shared IAM execution role (one role for all functions keeps resource count under 500) ──
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub medico-user-lambda-role-${Stage}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
+      Policies:
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Join ["", ["arn:aws:s3:::", !FindInMap [StageConfig, !Ref Stage, S3Bucket]]]
+                  - !Join ["", ["arn:aws:s3:::", !FindInMap [StageConfig, !Ref Stage, S3Bucket], "/*"]]
+
   libsLight:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -1664,9 +1695,6 @@ Resources:
     Properties:
       CodeUri: .
       Handler: src/handlers/uploads/presign.handler
-      Policies:
-        - S3CrudPolicy:
-            BucketName: !FindInMap [StageConfig, !Ref Stage, S3Bucket]
       Events:
         Presign:
           Type: Api
@@ -1680,9 +1708,6 @@ Resources:
     Properties:
       CodeUri: .
       Handler: src/handlers/uploads/accessUrl.handler
-      Policies:
-        - S3CrudPolicy:
-            BucketName: !FindInMap [StageConfig, !Ref Stage, S3Bucket]
       Events:
         AccessUrl:
           Type: Api
