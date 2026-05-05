@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
-/** Load `user/backend/.env` before template.yaml so SMTP_* etc. apply without committing secrets. */
+/** Load `user/backend/.env` before template.yaml so SMTP_* etc. apply withoutcommitting secrets. */
 function loadDotEnvFileSync(filePath) {
   try {
     if (!fs.existsSync(filePath)) return;
