@@ -361,7 +361,63 @@ exports.handler = async (event) => {
       ? event
       : { ...event, resource: match.template };
 
-  // Lazy-require: only the called module is loaded per invocation
-  const mod = require(match.modulePath);
-  return mod.handler(dispatchEvent);
+  // Wrap handler load + invocation so any thrown error becomes a structured
+  // JSON 500 instead of an opaque API Gateway 502. This also keeps the
+  // function from returning a non-proxy-shaped response (which would also
+  // surface as a 502 with no useful client signal).
+  let mod;
+  try {
+    // Lazy-require: only the called module is loaded per invocation
+    mod = require(match.modulePath);
+  } catch (err) {
+    console.error(`[router] Failed to load module ${match.modulePath}:`, err);
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+      body: JSON.stringify({
+        ok: false,
+        data: null,
+        meta: null,
+        error: {
+          code: 'HANDLER_LOAD_FAILED',
+          message: 'Failed to load route handler.',
+          details: { module: match.modulePath, reason: String(err && err.message || err) },
+        },
+      }),
+    };
+  }
+
+  try {
+    const result = await mod.handler(dispatchEvent);
+    if (!result || typeof result.statusCode !== 'number') {
+      console.error(`[router] Handler ${match.modulePath} returned non-proxy shape:`, result);
+      return {
+        statusCode: 500,
+        headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+        body: JSON.stringify({
+          ok: false,
+          data: null,
+          meta: null,
+          error: { code: 'BAD_HANDLER_RESPONSE', message: 'Handler returned a non-API-Gateway-proxy response.' },
+        }),
+      };
+    }
+    return result;
+  } catch (err) {
+    console.error(`[router] Handler ${match.modulePath} threw:`, err);
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+      body: JSON.stringify({
+        ok: false,
+        data: null,
+        meta: null,
+        error: {
+          code: 'HANDLER_ERROR',
+          message: 'Unhandled error in route handler.',
+          details: { reason: String(err && err.message || err) },
+        },
+      }),
+    };
+  }
 };

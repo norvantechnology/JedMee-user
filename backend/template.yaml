@@ -189,6 +189,12 @@ Resources:
       Name: !FindInMap [StageConfig, !Ref Stage, ApiName]
       StageName: !Ref Stage
       EndpointConfiguration: REGIONAL
+      # Without OpenApiVersion, SAM auto-creates a phantom "Stage" stage in
+      # addition to the real one (because AWS::ApiGateway::Deployment defaults
+      # StageName to "Stage"). That phantom stage points at an empty deployment
+      # and returns 502 for every route. Pinning OpenApiVersion suppresses it.
+      # See: https://github.com/aws/serverless-application-model/issues/191
+      OpenApiVersion: "3.0.1"
       Cors:
         AllowOrigin: "'*'"
         AllowHeaders: "'Content-Type,Authorization'"
@@ -246,3 +252,153 @@ Resources:
             Name: !Sub medico-user-low-stock-digest-${Stage}
             Description: Daily in-app low-stock notifications (01:30 UTC)
             Enabled: true
+
+# ── Stack outputs ──────────────────────────────────────────────────────────────
+# Visible via:
+#   aws cloudformation describe-stacks --stack-name medico-user-backend-${Stage} \
+#       --region eu-north-1 --query 'Stacks[0].Outputs'
+# Anything that is a SECRET (DB password, JWT secret, SMTP password, etc.) is
+# intentionally NOT exported here — CloudFormation Outputs are readable by
+# anyone with `cloudformation:DescribeStacks`, so they must remain non-sensitive.
+Outputs:
+  Stage:
+    Description: Deployment stage
+    Value: !Ref Stage
+    Export:
+      Name: !Sub medico-user-backend-${Stage}-Stage
+
+  Region:
+    Description: AWS region the stack is deployed to
+    Value: !Ref AWS::Region
+    Export:
+      Name: !Sub medico-user-backend-${Stage}-Region
+
+  AccountId:
+    Description: AWS account hosting the stack
+    Value: !Ref AWS::AccountId
+
+  # ── API Gateway ────────────────────────────────────────────────────────────
+  ApiId:
+    Description: API Gateway REST API ID
+    Value: !Ref Api
+    Export:
+      Name: !Sub medico-user-backend-${Stage}-ApiId
+
+  ApiBaseUrl:
+    Description: Public HTTPS URL of the API (use this as VITE_API_BASE_URL in the frontend)
+    Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Stage}
+    Export:
+      Name: !Sub medico-user-backend-${Stage}-ApiBaseUrl
+
+  ApiName:
+    Description: Friendly name of the API Gateway REST API
+    Value: !FindInMap [StageConfig, !Ref Stage, ApiName]
+
+  # ── Lambda functions ──────────────────────────────────────────────────────
+  RouterFunctionName:
+    Description: Name of the API router Lambda function
+    Value: !Ref RouterFunction
+
+  RouterFunctionArn:
+    Description: ARN of the API router Lambda function
+    Value: !GetAtt RouterFunction.Arn
+    Export:
+      Name: !Sub medico-user-backend-${Stage}-RouterFunctionArn
+
+  NotificationsDailyDigestFunctionName:
+    Description: Name of the scheduled daily-digest Lambda
+    Value: !Ref NotificationsDailyDigestFunction
+
+  NotificationsDailyDigestFunctionArn:
+    Description: ARN of the scheduled daily-digest Lambda
+    Value: !GetAtt NotificationsDailyDigestFunction.Arn
+
+  # ── IAM / Layer ────────────────────────────────────────────────────────────
+  LambdaExecutionRoleArn:
+    Description: ARN of the shared Lambda execution role
+    Value: !GetAtt LambdaExecutionRole.Arn
+    Export:
+      Name: !Sub medico-user-backend-${Stage}-LambdaExecutionRoleArn
+
+  LambdaExecutionRoleName:
+    Description: Friendly name of the shared Lambda execution role
+    Value: !Ref LambdaExecutionRole
+
+  LayerArn:
+    Description: ARN of the shared Node.js dependencies layer (current version)
+    Value: !Ref libsLight
+    Export:
+      Name: !Sub medico-user-backend-${Stage}-LayerArn
+
+  LayerName:
+    Description: Friendly name of the shared Node.js dependencies layer
+    Value: !FindInMap [StageConfig, !Ref Stage, LightLayerName]
+
+  # ── Branding (passed through to the frontend build) ────────────────────────
+  BrandDisplayName:
+    Description: Brand name shown in UI / emails / PDFs (use as VITE_APP_DISPLAY_NAME)
+    Value: !FindInMap [StageConfig, !Ref Stage, BrandDisplayName]
+
+  AppName:
+    Description: Backend app identifier (CloudWatch log group prefix, etc.)
+    Value: !FindInMap [StageConfig, !Ref Stage, AppName]
+
+  # ── S3 (uploads) ───────────────────────────────────────────────────────────
+  S3Bucket:
+    Description: S3 bucket used for user-uploaded assets
+    Value: !FindInMap [StageConfig, !Ref Stage, S3Bucket]
+
+  S3Region:
+    Description: Region of the uploads S3 bucket
+    Value: !FindInMap [StageConfig, !Ref Stage, S3Region]
+
+  # ── Database (host/port only — credentials are NOT exported) ──────────────
+  DbHost:
+    Description: Database host (non-secret)
+    Value: !FindInMap [StageConfig, !Ref Stage, DbHost]
+
+  DbPort:
+    Description: Database port
+    Value: !FindInMap [StageConfig, !Ref Stage, DbPort]
+
+  DbName:
+    Description: Database name
+    Value: !FindInMap [StageConfig, !Ref Stage, DbName]
+
+  DbSslMode:
+    Description: Database SSL mode (require / disable)
+    Value: !FindInMap [StageConfig, !Ref Stage, DbSsl]
+
+  # ── SMTP (host / port / from-address only — password NOT exported) ────────
+  SmtpHost:
+    Description: SMTP host
+    Value: !FindInMap [StageConfig, !Ref Stage, SmtpHost]
+
+  SmtpPort:
+    Description: SMTP port
+    Value: !FindInMap [StageConfig, !Ref Stage, SmtpPort]
+
+  SmtpFrom:
+    Description: From address used in transactional emails
+    Value: !FindInMap [StageConfig, !Ref Stage, SmtpFrom]
+
+  # ── Token / OTP TTLs ──────────────────────────────────────────────────────
+  AccessTokenTtlSeconds:
+    Description: JWT access-token lifetime (seconds)
+    Value: !FindInMap [StageConfig, !Ref Stage, AccessTokenTtlSeconds]
+
+  RefreshTokenTtlSeconds:
+    Description: Refresh-token lifetime (seconds)
+    Value: !FindInMap [StageConfig, !Ref Stage, RefreshTokenTtlSeconds]
+
+  RefreshTokenTtlRememberSeconds:
+    Description: Refresh-token lifetime when "remember me" is checked (seconds)
+    Value: !FindInMap [StageConfig, !Ref Stage, RefreshTokenTtlRememberSeconds]
+
+  EmailVerifyOtpTtlMinutes:
+    Description: Email-verification OTP lifetime (minutes)
+    Value: !FindInMap [StageConfig, !Ref Stage, EmailVerifyOtpTtlMinutes]
+
+  PasswordResetOtpTtlMinutes:
+    Description: Password-reset OTP lifetime (minutes)
+    Value: !FindInMap [StageConfig, !Ref Stage, PasswordResetOtpTtlMinutes]
