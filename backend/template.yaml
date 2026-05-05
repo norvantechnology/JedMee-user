@@ -197,14 +197,14 @@ Resources:
   # ── Single router function — handles ALL API routes ─────────────────────────
   # Replaces ~155 individual Lambda functions → cuts CloudFormation resources
   # from 500+ to ~50 and deploy time from 20 min to ~2 min.
-  RouterFunction:
+  RouterFunctionA:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: .
       Handler: src/handlers/router/index.handler
       Timeout: 300
       Role: !GetAtt LambdaExecutionRole.Arn
-      Description: Central API router — dispatches to individual handler modules
+      Description: "API router A — Hello, Auth, Me, Access, Vendors, Divisions, MfgCompanies, Products, PurchaseInvoices, VendorPayments"
       Events:
         # ── Hello ──────────────────────────────────────────────────────────────
         Hello:
@@ -706,6 +706,16 @@ Resources:
             RestApiId: !Ref Api
             Path: /vendor-payments/bulk-settle
             Method: POST
+
+  RouterFunctionB:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: src/handlers/router/index.handler
+      Timeout: 300
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Description: "API router B — Customers, SalesInvoices, SalesReturns, Payments, Notifications, Import, Catalog, Orders, WholesalerLinks, Public"
+      Events:
         # ── Customers ───────────────────────────────────────────────────────────
         CustomersList:
           Type: Api
