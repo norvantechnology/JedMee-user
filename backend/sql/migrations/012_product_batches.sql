@@ -62,9 +62,35 @@ CREATE TABLE IF NOT EXISTS product_batches (
 );
 
 -- Uniqueness / lookup (account scoped)
-CREATE UNIQUE INDEX IF NOT EXISTS product_batches_account_product_code_key ON product_batches (account_id, lower(product_code));
-CREATE UNIQUE INDEX IF NOT EXISTS product_batches_account_product_batch_key ON product_batches (account_id, lower(product_code), lower(batch_no));
-CREATE UNIQUE INDEX IF NOT EXISTS product_batches_account_barcode_key ON product_batches (account_id, barcode) WHERE barcode IS NOT NULL AND barcode <> '';
+-- Deduplicate before creating unique indexes (idempotency guard for re-runs)
+DO $$ BEGIN
+  DELETE FROM product_batches a USING product_batches b
+  WHERE a.id > b.id
+    AND a.account_id = b.account_id
+    AND lower(a.product_code) = lower(b.product_code);
+EXCEPTION WHEN undefined_table THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE UNIQUE INDEX IF NOT EXISTS product_batches_account_product_code_key
+    ON product_batches (account_id, lower(product_code));
+EXCEPTION WHEN unique_violation OR others THEN
+  RAISE NOTICE 'product_batches_account_product_code_key: skipped (%)' , SQLERRM;
+END $$;
+
+DO $$ BEGIN
+  CREATE UNIQUE INDEX IF NOT EXISTS product_batches_account_product_batch_key
+    ON product_batches (account_id, lower(product_code), lower(batch_no));
+EXCEPTION WHEN unique_violation OR others THEN
+  RAISE NOTICE 'product_batches_account_product_batch_key: skipped (%)' , SQLERRM;
+END $$;
+
+DO $$ BEGIN
+  CREATE UNIQUE INDEX IF NOT EXISTS product_batches_account_barcode_key
+    ON product_batches (account_id, barcode) WHERE barcode IS NOT NULL AND barcode <> '';
+EXCEPTION WHEN unique_violation OR others THEN
+  RAISE NOTICE 'product_batches_account_barcode_key: skipped (%)' , SQLERRM;
+END $$;
 
 -- Seed permission resource for RBAC
 INSERT INTO permission_resources(resource)

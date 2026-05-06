@@ -78,6 +78,7 @@ export default function Sidebar({
   const canCustomers = isOwner || Boolean(perms?.CUSTOMERS?.VIEW);
   const canSales = isOwner || Boolean(perms?.SALES_INVOICES?.VIEW);
   const canSalesReturns = isOwner || Boolean(perms?.SALES_RETURNS?.VIEW);
+  const canPurchaseReturns = isOwner || Boolean(perms?.PURCHASE_RETURNS?.VIEW);
   const canDivisionPayments = isOwner || Boolean(perms?.DIVISION_PAYMENTS?.VIEW) || Boolean(perms?.VENDOR_PAYMENTS?.VIEW);
   const canCustomerPayments = isOwner || Boolean(perms?.CUSTOMER_PAYMENTS?.VIEW);
   const canPrescriptions = isOwner || Boolean(perms?.PRESCRIPTIONS?.VIEW);
@@ -137,6 +138,7 @@ export default function Sidebar({
           ]
         : []),
       ...(canSalesReturns ? [{ to: "/sales-returns", label: NAV_LABELS.salesReturns, icon: <RotateCcw />, shortcut: "Alt+S" }] : []),
+      ...(canPurchaseReturns ? [{ to: "/purchase-returns", label: "Purchase Returns", icon: <RotateCcw />, shortcut: "Alt+N" }] : []),
       ...(canOrders
         ? [
             {
@@ -154,6 +156,7 @@ export default function Sidebar({
     const reportItems = [
       ...(canQuality || canMfg ? [{ to: "/reports/inventory", label: "Inventory Reports", icon: <Layers /> }] : []),
       ...(canSales ? [{ to: "/reports/day-book", label: "Day Book", icon: <IconDayBook /> }] : []),
+      ...(canSales ? [{ to: "/reports/gst-r1", label: "GST Report (R1)", icon: <IconDayBook /> }] : []),
       ...(canCustomers || canDivisions ? [{ to: "/reports/ledger", label: "Ledger", icon: <IconLedger /> }] : [])
     ];
     if (reportItems.length) out.push({ title: "REPORTS", items: reportItems });
@@ -171,7 +174,7 @@ export default function Sidebar({
     if (userManagementItems.length) out.push({ title: "USER MANAGEMENT", items: userManagementItems });
 
     return out;
-  }, [canUsers, canRoles, canDivisions, canQuality, canMfg, canPurchase, canCustomers, canSales, canSalesReturns, canOrders, canPrescriptions, canDivisionPayments, canCustomerPayments, isRetailer, authTick]);
+  }, [canUsers, canRoles, canDivisions, canQuality, canMfg, canPurchase, canCustomers, canSales, canSalesReturns, canPurchaseReturns, canOrders, canPrescriptions, canDivisionPayments, canCustomerPayments, isRetailer, authTick]);
 
   const flatNavItems = useMemo(() => sections.flatMap((s) => s.items), [sections]);
 
