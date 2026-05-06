@@ -50,9 +50,3 @@ BEFORE UPDATE ON vendors
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
 
-DROP TRIGGER IF EXISTS trg_product_batches_updated_at ON product_batches;
-CREATE TRIGGER trg_product_batches_updated_at
-BEFORE UPDATE ON product_batches
-FOR EACH ROW
-EXECUTE FUNCTION set_updated_at();
-

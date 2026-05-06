@@ -71,3 +71,10 @@ INSERT INTO permission_resources(resource)
 VALUES ('PRODUCT_BATCHES')
 ON CONFLICT (resource) DO NOTHING;
 
+-- updated_at trigger
+DROP TRIGGER IF EXISTS trg_product_batches_updated_at ON product_batches;
+CREATE TRIGGER trg_product_batches_updated_at
+BEFORE UPDATE ON product_batches
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
