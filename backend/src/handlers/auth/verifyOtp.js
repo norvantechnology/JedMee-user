@@ -159,9 +159,14 @@ async function handler(event) {
   const row = userRes.rows[0];
   if (!row) return fail(404, "NOT_FOUND", "User not found");
 
-  await ensureAccountRoleBootstrap(row.id, row.role);
-
+  // Check blocked BEFORE bootstrapping so blocked users don't get account data created.
   if (row.is_blocked) return fail(403, "USER_BLOCKED", "Your account is blocked. Please contact support.");
+
+  // Only bootstrap account settings / walk-in customer for APPROVED users.
+  // PENDING users will be bootstrapped when an admin approves them.
+  if (String(row.status || "").toUpperCase() === "APPROVED") {
+    await ensureAccountRoleBootstrap(row.id, row.role);
+  }
 
   const accessTtl = parseTtlSeconds(process.env.ACCESS_TOKEN_TTL_SECONDS, 900);
   const refreshTtl = rememberMe

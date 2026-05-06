@@ -90,8 +90,17 @@ export default function VerifyOtpPage() {
                     });
                     if (user) saveAuthUser(user);
                   }
-                  emitToast({ type: "success", message: "Email verified successfully." });
-                  navigate("/dashboard", { replace: true });
+                  emitToast({ type: "success", message: "Email verified! Your account is being reviewed." });
+                  // Navigate based on account status — PENDING/REJECTED/BLOCKED go to approval gate.
+                  const status = String(user?.status || "").toUpperCase();
+                  const isBlocked = Boolean(user?.is_blocked);
+                  if (isBlocked || status === "PENDING" || status === "REJECTED") {
+                    navigate("/approval", { replace: true });
+                  } else if (Boolean(user?.must_change_password)) {
+                    navigate("/first-login-change-password", { replace: true });
+                  } else {
+                    navigate("/dashboard", { replace: true });
+                  }
                 } else {
                   emitToast({ type: "error", message: parseApiError(resp) });
                 }

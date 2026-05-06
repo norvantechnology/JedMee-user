@@ -288,34 +288,41 @@ export default function AuthUnifiedPage() {
     setLoginBusy(true);
     try {
       const resp = await login({ role: loginRole, email: loginEmail, password: loginPassword, rememberMe: loginRemember });
-      if (resp.status >= 200 && resp.status < 300 && resp.json?.ok) {
-        const t = resp.json?.data?.tokens;
-        const user = resp.json?.data?.user;
-        if (t?.accessToken && t?.refreshToken) {
-          saveAuth({
-            rememberMe: Boolean(t.rememberMe ?? loginRemember),
-            email: loginEmail,
-            accessToken: t.accessToken,
-            accessExpiresInSec: t.accessExpiresInSec,
-            refreshToken: t.refreshToken,
-          });
-          if (user) saveAuthUser(user);
-        }
-        if (Boolean(user?.must_change_password)) {
-          navigate("/first-login-change-password", { replace: true });
-        } else {
-          navigate("/dashboard", { replace: true });
-        }
-      } else {
-        const code = resp?.json?.error?.code;
-        if (resp?.status === 403 && code === "EMAIL_NOT_VERIFIED") {
-          const rm = loginRemember ? "1" : "0";
-          navigate(
-            `/verify-otp?email=${encodeURIComponent(loginEmail)}&role=${encodeURIComponent(loginRole)}&rememberMe=${rm}`,
-            { replace: true }
-          );
-        }
+    if (resp.status >= 200 && resp.status < 300 && resp.json?.ok) {
+      const t = resp.json?.data?.tokens;
+      const user = resp.json?.data?.user;
+      if (t?.accessToken && t?.refreshToken) {
+        saveAuth({
+          rememberMe: Boolean(t.rememberMe ?? loginRemember),
+          email: loginEmail,
+          accessToken: t.accessToken,
+          accessExpiresInSec: t.accessExpiresInSec,
+          refreshToken: t.refreshToken,
+        });
+        if (user) saveAuthUser(user);
       }
+      // Navigate based on account status — never send PENDING/REJECTED/BLOCKED to dashboard.
+      const status = String(user?.status || "").toUpperCase();
+      const isBlocked = Boolean(user?.is_blocked);
+      if (isBlocked || status === "PENDING" || status === "REJECTED") {
+        navigate("/approval", { replace: true });
+      } else if (Boolean(user?.must_change_password)) {
+        navigate("/first-login-change-password", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    } else {
+      const code = resp?.json?.error?.code;
+      if (resp?.status === 403 && code === "EMAIL_NOT_VERIFIED") {
+        const rm = loginRemember ? "1" : "0";
+        navigate(
+          `/verify-otp?email=${encodeURIComponent(loginEmail)}&role=${encodeURIComponent(loginRole)}&rememberMe=${rm}`,
+          { replace: true }
+        );
+      } else {
+        emitToast({ type: "error", message: parseApiError(resp) });
+      }
+    }
     } finally {
       setLoginBusy(false);
     }
