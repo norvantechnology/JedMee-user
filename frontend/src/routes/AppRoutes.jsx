@@ -1,5 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import LandingPage from "../pages/LandingPage.jsx";
+import AboutPage from "../pages/AboutPage.jsx";
+import TermsPage from "../pages/TermsPage.jsx";
+import ContactPage from "../pages/ContactPage.jsx";
 import AuthUnifiedPage from "../pages/AuthUnifiedPage.jsx";
 import DashboardPage from "../pages/DashboardPage.jsx";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage.jsx";
@@ -264,6 +267,10 @@ export function AppRoutes() {
         }
       />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      {/* Public informational pages */}
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/contact" element={<ContactPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

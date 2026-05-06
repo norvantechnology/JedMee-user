@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { readAuth } from "../services/authStorage.js";
 import { getPublicPlans } from "../services/plansService.js";
 import { useSeoMeta } from "../utils/seo.js";
@@ -1008,15 +1008,23 @@ function Footer() {
               ))}
             </div>
           </div>
-          {[
-            { title: "Platform", links: ["Features", "How It Works", "Platform Preview", "Pricing"] },
-            { title: "Company",  links: ["About JedMee", "Contact Us", "Privacy Policy", "Terms of Service"] },
-          ].map(col => (
-            <div key={col.title} className="ln-footer-col">
-              <div className="ln-footer-col-title">{col.title}</div>
-              <ul>{col.links.map(l => <li key={l}><a href="#top">{l}</a></li>)}</ul>
-            </div>
-          ))}
+          <div className="ln-footer-col">
+            <div className="ln-footer-col-title">Platform</div>
+            <ul>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#workflow">How It Works</a></li>
+              <li><a href="#platform">Platform Preview</a></li>
+              <li><a href="#pricing">Pricing</a></li>
+            </ul>
+          </div>
+          <div className="ln-footer-col">
+            <div className="ln-footer-col-title">Company</div>
+            <ul>
+              <li><Link to="/about">About JedMee</Link></li>
+              <li><Link to="/contact">Contact Us</Link></li>
+              <li><Link to="/terms">Terms of Service</Link></li>
+            </ul>
+          </div>
         </div>
         <div className="ln-footer-bottom">
           <span>© 2026 JedMee. All rights reserved.</span>

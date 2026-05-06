@@ -1,0 +1,34 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /terms
+Allow: /contact
+
+Disallow: /dashboard
+Disallow: /login
+Disallow: /register
+Disallow: /verify-otp
+Disallow: /change-password
+Disallow: /first-login-change-password
+Disallow: /approval
+Disallow: /profile
+Disallow: /users
+Disallow: /divisions
+Disallow: /vendors
+Disallow: /customers
+Disallow: /sales-billing
+Disallow: /sales-returns
+Disallow: /purchase-invoices
+Disallow: /orders
+Disallow: /my-orders
+Disallow: /prescriptions
+Disallow: /reports/
+Disallow: /customer-payments
+Disallow: /division-payments
+Disallow: /roles-access
+Disallow: /my-catalog
+Disallow: /order-catalog
+Disallow: /quality-master
+Disallow: /mfg-companies
+
+Sitemap: https://jedmee.com/sitemap.xml
