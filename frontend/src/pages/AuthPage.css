@@ -540,3 +540,129 @@ label {
   pointer-events: none;
 }
 
+/* ── Mobile: reduce padding so all fields fit on one screen ── */
+@media (max-width: 600px) {
+  .authBody {
+    padding: 0.75rem;
+    align-items: flex-start;
+    padding-top: 1rem;
+  }
+
+  .card-header {
+    padding: 1rem 1.25rem 0.875rem;
+  }
+
+  .logo-row {
+    margin-bottom: 0.75rem;
+  }
+
+  .auth-logo-img {
+    height: 32px;
+  }
+
+  .panel {
+    padding: 1rem 1.25rem 1.25rem;
+  }
+
+  .form-title {
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .form-sub {
+    font-size: 12px;
+    margin-bottom: 0.875rem;
+  }
+
+  .field {
+    margin-bottom: 0.625rem;
+  }
+
+  .roleRow {
+    margin-bottom: 10px;
+  }
+
+  .roleChip {
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+
+  .authPage input[type="text"],
+  .authPage input[type="email"],
+  .authPage input[type="password"],
+  .authPage input[type="tel"] {
+    padding: 9px 10px 9px var(--auth-pad-l);
+    font-size: 15px; /* prevents iOS zoom */
+    border-radius: 8px;
+  }
+
+  .country-wrap select {
+    padding: 9px 24px 9px 10px;
+    font-size: 13px;
+    min-width: 80px;
+  }
+
+  .between-row {
+    margin-bottom: 0.875rem;
+  }
+
+  .submit-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .card-footer {
+    padding: 0.5rem 1.25rem 0.875rem;
+    font-size: 12px;
+  }
+
+  .secure {
+    padding: 0.5rem 0 0;
+    font-size: 11px;
+  }
+
+  .tabs {
+    padding: 2px;
+  }
+
+  .tab {
+    padding: 7px 0;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .authBody {
+    padding: 0.5rem;
+    padding-top: 0.75rem;
+  }
+
+  .card-header {
+    padding: 0.75rem 1rem 0.75rem;
+  }
+
+  .panel {
+    padding: 0.875rem 1rem 1rem;
+  }
+
+  .form-title {
+    font-size: 16px;
+  }
+
+  .field {
+    margin-bottom: 0.5rem;
+  }
+
+  .authPage input[type="text"],
+  .authPage input[type="email"],
+  .authPage input[type="password"],
+  .authPage input[type="tel"] {
+    padding: 8px 8px 8px var(--auth-pad-l);
+    font-size: 16px;
+  }
+
+  .submit-btn {
+    padding: 9px;
+  }
+}
+

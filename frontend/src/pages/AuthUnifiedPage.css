@@ -341,11 +341,11 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: 10px;
     background: linear-gradient(135deg, #2d1560 0%, #4e2a8a 40%, #6b3fa0 70%, #8b5cc8 100%);
-    padding: 36px 24px 52px;
+    padding: 18px 20px 34px;
     width: 100%;
-    border-radius: 0 0 32px 32px;
+    border-radius: 0 0 28px 28px;
     box-shadow:
       0 8px 32px rgba(107, 63, 160, 0.3),
       0 1px 0 rgba(255, 255, 255, 0.08) inset;
@@ -464,25 +464,25 @@
 @media (max-width: 900px) {
   .auCard {
     max-width: 100%;
-    border-radius: 24px 24px 18px 18px;
+    border-radius: 20px 20px 16px 16px;
     border: none;
     box-shadow:
       0 -3px 0 rgba(107, 63, 160, 0.12),
       0 12px 48px rgba(0, 0, 0, 0.1),
       0 1px 0 rgba(255,255,255,0.9) inset;
-    padding: 28px 22px 24px;
-    margin: -24px 14px 0;
-    width: calc(100% - 28px);
+    padding: 18px 16px 16px;
+    margin: -20px 12px 0;
+    width: calc(100% - 24px);
     align-self: center;
   }
 }
 
 @media (max-width: 400px) {
   .auCard {
-    margin: -20px 10px 0;
-    width: calc(100% - 20px);
-    padding: 24px 16px 20px;
-    border-radius: 20px 20px 14px 14px;
+    margin: -16px 8px 0;
+    width: calc(100% - 16px);
+    padding: 16px 12px 14px;
+    border-radius: 18px 18px 12px 12px;
   }
 }
 
@@ -1314,163 +1314,243 @@ section.auScreen,
     background: #f3eeff;
   }
 
-  /* Tabs — larger touch targets */
+  /* Tabs */
   .auTabs {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     border-radius: 10px;
   }
 
   .auTab {
-    padding: 11px 0;
-    font-size: 14.5px;
+    padding: 8px 0;
+    font-size: 13.5px;
     font-weight: 600;
   }
 
   /* Title & subtitle */
   .auTitle {
-    font-size: 22px;
-    letter-spacing: -0.4px;
+    font-size: 18px;
+    letter-spacing: -0.3px;
     margin-bottom: 2px;
   }
 
   .auSub {
-    font-size: 13.5px;
-    margin-bottom: 18px;
+    font-size: 12.5px;
+    margin-bottom: 10px;
   }
 
-  /* Role cards — full width on very small screens */
+  /* Role cards */
   .auRoleRow {
-    gap: 8px;
-    margin-bottom: 18px;
+    gap: 6px;
+    margin-bottom: 12px;
   }
 
   .auRoleCard {
-    padding: 11px 12px;
+    padding: 8px 10px;
     border-radius: 10px;
+    gap: 8px;
   }
 
   .auRoleIcon {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     border-radius: 7px;
   }
 
   .auRoleLabel {
-    font-size: 13px;
+    font-size: 12.5px;
   }
 
   .auRoleDesc {
-    font-size: 10.5px;
+    font-size: 10px;
   }
 
   /* Form fields */
   .auField {
-    margin-bottom: 14px;
+    margin-bottom: 10px;
   }
 
   .auLabel {
-    font-size: 12px;
-    margin-bottom: 5px;
+    font-size: 11px;
+    margin-bottom: 4px;
   }
 
   .auInput,
   .auTextarea,
   .auSelect {
-    padding: 12px 14px;
+    padding: 10px 12px;
     font-size: 15px; /* prevents iOS zoom */
-    border-radius: 10px;
+    border-radius: 9px;
   }
 
   .auInput.hasIcon {
-    padding-left: 40px;
+    padding-left: 38px;
   }
 
   /* Extras row */
   .auExtrasRow {
-    margin-bottom: 18px;
+    margin-bottom: 12px;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
+    margin-top: -2px;
   }
 
   .auCheckRow {
-    font-size: 13px;
+    font-size: 12.5px;
   }
 
   .auLink {
-    font-size: 13px;
+    font-size: 12.5px;
   }
 
   /* Primary button */
   .auPrimaryBtn {
-    min-height: 50px;
-    font-size: 15px;
-    border-radius: 12px;
+    min-height: 42px;
+    font-size: 14px;
+    border-radius: 11px;
   }
 
   /* Security badge */
   .auSecurity {
-    margin-top: 14px;
-    font-size: 11.5px;
+    margin-top: 8px;
+    font-size: 11px;
   }
 
   /* Sticky nav row */
   .auNavRow {
     background: var(--color-card);
     border-top: 1px solid var(--color-border);
-    padding: 12px 0 4px;
-    margin-left: -20px;
-    margin-right: -20px;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 10px 0 4px;
+    margin-left: -16px;
+    margin-right: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-top: 10px;
   }
 
   /* Section cards in registration */
   .auSectionCard {
-    padding: 16px;
-    border-radius: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+
+  .auSectionTitle {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  .auSectionSub {
+    font-size: 11.5px;
+    margin-bottom: 12px;
   }
 
   /* Step indicator */
   .auStepDot {
-    width: 26px;
-    height: 26px;
-    font-size: 11px;
+    width: 24px;
+    height: 24px;
+    font-size: 10px;
+  }
+
+  .auStepIndicator {
+    margin-bottom: 14px;
+  }
+
+  .auStepHeader {
+    margin-bottom: 12px;
   }
 
   /* Bottom link */
   .auBottomLink {
-    margin-top: 14px;
-    font-size: 13px;
+    margin-top: 8px;
+    font-size: 12.5px;
+  }
+
+  /* Step badge */
+  .auStepBadge {
+    padding: 4px 10px;
+    font-size: 10px;
+    margin-bottom: 6px;
   }
 }
 
 /* ── Very small screens (≤400px) ── */
 @media (max-width: 400px) {
   .auMobileLogo {
-    padding: 28px 20px 40px;
-    border-radius: 0 0 24px 24px;
+    padding: 14px 16px 28px;
+    border-radius: 0 0 22px 22px;
+    gap: 8px;
   }
 
   .auMobileLogo .au-logo-img {
-    height: 34px;
+    height: 30px;
+  }
+
+  .auMobileLogoImgWrap {
+    padding: 8px 14px;
+    border-radius: 12px;
+  }
+
+  .auMobileLogoTagline {
+    font-size: 11.5px;
   }
 
   .auTitle {
-    font-size: 20px;
+    font-size: 17px;
+  }
+
+  .auSub {
+    font-size: 12px;
+    margin-bottom: 8px;
   }
 
   .auRoleRow {
     grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .auRoleCard {
+    padding: 7px 8px;
+    gap: 6px;
+  }
+
+  .auField {
+    margin-bottom: 8px;
   }
 
   .auInput,
   .auTextarea,
   .auSelect {
+    padding: 9px 11px;
     font-size: 16px; /* prevents iOS zoom */
+    border-radius: 8px;
   }
 
   .auPrimaryBtn {
-    min-height: 48px;
+    min-height: 40px;
+    font-size: 13.5px;
+  }
+
+  .auTabs {
+    margin-bottom: 10px;
+  }
+
+  .auTab {
+    padding: 7px 0;
+    font-size: 13px;
+  }
+
+  .auExtrasRow {
+    margin-bottom: 10px;
+  }
+
+  .auSecurity {
+    margin-top: 6px;
+  }
+
+  .auBottomLink {
+    margin-top: 6px;
+    font-size: 12px;
   }
 }
 /* ── Mobile logo inner layout ── */
