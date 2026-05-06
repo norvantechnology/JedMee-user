@@ -46,20 +46,13 @@ function SharedNav({ isLanding = false }) {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  // On landing page, nav links are anchor hashes; on other pages, they link to /#section
-  const links = isLanding
-    ? [
-        { label: "Features",     href: "#features" },
-        { label: "How It Works", href: "#workflow" },
-        { label: "Platform",     href: "#platform" },
-        { label: "Pricing",      href: "#pricing" },
-      ]
-    : [
-        { label: "Features",     href: "/#features" },
-        { label: "How It Works", href: "/#workflow" },
-        { label: "Platform",     href: "/#platform" },
-        { label: "Pricing",      href: "/#pricing" },
-      ];
+  // Nav links: anchor-based for landing sections, router Link for pages
+  const links = [
+    { label: "Features", href: isLanding ? "#features" : "/#features" },
+    { label: "Pricing",  href: isLanding ? "#pricing"  : "/#pricing"  },
+    { label: "About",    to: "/about" },
+    { label: "Contact",  to: "/contact" },
+  ];
 
   return (
     <>
@@ -70,19 +63,24 @@ function SharedNav({ isLanding = false }) {
           </Link>
           <ul className="ln-nav-links">
             {links.map(l => (
-              <li key={l.label}><a href={l.href}>{l.label}</a></li>
+              <li key={l.label}>
+                {l.to
+                  ? <Link to={l.to}>{l.label}</Link>
+                  : <a href={l.href}>{l.label}</a>
+                }
+              </li>
             ))}
           </ul>
           <div className="ln-nav-actions">
             {authed ? (
               <button className="ln-btn ln-btn--primary" onClick={() => navigate("/dashboard")}>
-                Go to Dashboard <Icon name="arrow" size={16} />
+                Dashboard <Icon name="arrow" size={16} />
               </button>
             ) : (
               <>
-                <button className="ln-btn ln-btn--ghost" onClick={() => navigate("/login")}>Sign In</button>
+                <button className="ln-btn ln-btn--ghost" onClick={() => navigate("/login")}>Log In</button>
                 <button className="ln-btn ln-btn--primary" onClick={() => navigate("/register")}>
-                  Get Started <Icon name="arrow" size={16} />
+                  Get Started Free <Icon name="arrow" size={16} />
                 </button>
               </>
             )}
@@ -98,20 +96,23 @@ function SharedNav({ isLanding = false }) {
           <ul className="ln-mobile-menu-links">
             {links.map(l => (
               <li key={l.label}>
-                <a href={l.href} className="ln-mobile-menu-link" onClick={() => setOpen(false)}>{l.label}</a>
+                {l.to
+                  ? <Link to={l.to} className="ln-mobile-menu-link" onClick={() => setOpen(false)}>{l.label}</Link>
+                  : <a href={l.href} className="ln-mobile-menu-link" onClick={() => setOpen(false)}>{l.label}</a>
+                }
               </li>
             ))}
           </ul>
           <div className="ln-mobile-menu-auth">
             {authed ? (
               <button className="ln-btn ln-btn--primary ln-btn--full" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
-                Go to Dashboard <Icon name="arrow" size={16} />
+                Dashboard <Icon name="arrow" size={16} />
               </button>
             ) : (
               <>
-                <button className="ln-btn ln-btn--ghost ln-btn--full" onClick={() => { setOpen(false); navigate("/login"); }}>Sign In</button>
+                <button className="ln-btn ln-btn--ghost ln-btn--full" onClick={() => { setOpen(false); navigate("/login"); }}>Log In</button>
                 <button className="ln-btn ln-btn--primary ln-btn--full" onClick={() => { setOpen(false); navigate("/register"); }}>
-                  Get Started <Icon name="arrow" size={16} />
+                  Get Started Free <Icon name="arrow" size={16} />
                 </button>
               </>
             )}
