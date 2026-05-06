@@ -5,23 +5,88 @@ const { getPermissionsForUser } = require("../../shared/permissions");
 const { sendMail } = require("../../shared/mailOut");
 const { buildCustomerLedgerDoc } = require("./ledgerDoc");
 const { buildCustomerLedgerPdfAttachment } = require("../../shared/pdf/customerLedgerPdf");
+const { emailBase, summaryCard, sectionHeading, divider, greeting, para, E, C } = require("../../shared/emailTemplate");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function cleanEmail(s) {
-  return String(s ?? "")
-    .trim()
-    .toLowerCase();
+  return String(s ?? "").trim().toLowerCase();
+}
+
+function buildCustomerLedgerEmailHtml({ cust, sellerName, netBal, balanceType, balanceColor }) {
+  const custName = E(cust.name || "Customer");
+  const safeSeller = E(sellerName || "");
+
+  const balanceSummary = summaryCard({
+    label: "Net Balance",
+    value: `Rs.\u202F${Math.abs(netBal).toFixed(2)}`,
+    valueColor: balanceColor,
+    badge: balanceType,
+  });
+
+  // Contact info block
+  const contactRows = [
+    cust.code        ? `<tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};width:40%;">Code</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(cust.code)}</td></tr>` : "",
+    cust.phone_number ? `<tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};">Phone</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(cust.phone_number)}</td></tr>` : "",
+    cust.gst_number  ? `<tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};">GSTIN</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(cust.gst_number)}</td></tr>` : "",
+    cust.address     ? `<tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};">Address</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(cust.address)}</td></tr>` : "",
+  ].filter(Boolean).join("\n");
+
+  const contactBlock = contactRows ? [
+    sectionHeading("Customer Details"),
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.bgAlt};border:1px solid ${C.border};border-radius:10px;margin-bottom:24px;">`,
+    `  <tr><td style="padding:16px 20px;">`,
+    `    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">`,
+    contactRows,
+    `    </table>`,
+    `  </td></tr>`,
+    `</table>`,
+  ].join("\n") : "";
+
+  // Balance explanation
+  const balanceNote = netBal > 0
+    ? `You have an outstanding <strong style="color:${C.danger};">debit balance</strong> of Rs.\u202F${Math.abs(netBal).toFixed(2)}. Please arrange payment at your earliest convenience.`
+    : netBal < 0
+    ? `You have a <strong style="color:${C.success};">credit balance</strong> of Rs.\u202F${Math.abs(netBal).toFixed(2)} with us.`
+    : `Your account is <strong style="color:${C.neutral};">fully settled</strong> with no outstanding balance.`;
+
+  const body = [
+    greeting(cust.name || "Customer"),
+    para("Please find your customer ledger statement attached as a PDF. Below is a summary of your account."),
+    divider(),
+
+    sectionHeading("Account Summary"),
+    balanceSummary,
+    para(balanceNote),
+
+    contactBlock ? divider() : "",
+    contactBlock,
+
+    divider(),
+    para(
+      `The attached PDF contains a complete transaction history. For any queries, please contact ${safeSeller || "us"} directly.`,
+      { color: C.textMuted, size: "12px" }
+    ),
+  ].filter(Boolean).join("\n");
+
+  return emailBase({
+    preheader: `Your ledger statement — Balance Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}`,
+    headerLabel: "Customer Ledger Statement",
+    headerTitle: custName,
+    headerSub: cust.code ? `Code: ${E(cust.code)}` : undefined,
+    body,
+    brandName: sellerName || "JedMee",
+  });
 }
 
 async function handler(event) {
   const auth = await requirePermission(event, "CUSTOMERS", "VIEW");
   if (!auth.ok) return auth.resp;
-  const actorId = String(auth.claims?.sub || "");
+  const actorId    = String(auth.claims?.sub || "");
   const customerId = String(event?.pathParameters?.id || "");
-  const ctx = await getPermissionsForUser(actorId);
+  const ctx        = await getPermissionsForUser(actorId);
   if (!ctx.accountId) return fail(400, "BAD_REQUEST", "account not found");
-  if (!customerId) return fail(400, "VALIDATION_ERROR", "customer id is required");
+  if (!customerId)    return fail(400, "VALIDATION_ERROR", "customer id is required");
 
   let doc;
   try {
@@ -32,26 +97,22 @@ async function handler(event) {
   if (!doc) return fail(404, "NOT_FOUND", "Customer not found");
 
   const cust = doc.customer;
-  const to = cleanEmail(cust.email);
+  const to   = cleanEmail(cust.email);
   if (!to || !EMAIL_RE.test(to)) {
-    return ok({
-      results: [{ status: "no_email", customerId: cust.id, customerName: cust.name || "" }]
-    });
+    return ok({ results: [{ status: "no_email", customerId: cust.id, customerName: cust.name || "" }] });
   }
 
   const sellerRs = await query(
-    `SELECT
-       u.id,
-       u.full_name,
-       COALESCE(to_jsonb(u) ->> 'firm_name', '') AS firm_name
-     FROM app_users u
-     WHERE u.id = $1
-     LIMIT 1`,
+    `SELECT u.id, u.full_name, COALESCE(to_jsonb(u) ->> 'firm_name', '') AS firm_name
+     FROM app_users u WHERE u.id = $1 LIMIT 1`,
     [ctx.accountId]
   );
-  const seller = sellerRs.rows?.[0] || null;
+  const seller     = sellerRs.rows?.[0] || null;
+  const sellerName = seller?.firm_name || seller?.full_name || "";
 
-  const netBal = Number(doc.summary?.netBalance || 0);
+  const netBal      = Number(doc.summary?.netBalance || 0);
+  const balanceType = netBal > 0 ? "DR" : netBal < 0 ? "CR" : "NIL";
+  const balanceColor = netBal > 0 ? C.danger : netBal < 0 ? C.success : C.neutral;
 
   let attachment;
   try {
@@ -60,44 +121,16 @@ async function handler(event) {
     return fail(500, "INTERNAL_ERROR", "PDF generation failed.", { subMessage: String(e?.message || "") });
   }
 
-  const sellerName = seller?.firm_name || seller?.full_name || "";
-  const subject = `Customer Ledger — ${cust.name || "Customer"}`.trim();
-  const text = `Dear ${cust.name || "Customer"},\n\nPlease find your customer ledger statement attached as a PDF.\n\nNet Balance: Rs.${Math.abs(netBal).toFixed(2)} ${netBal > 0 ? "DR" : netBal < 0 ? "CR" : "NIL"}\n\n— ${sellerName}`;
-  const balanceColor = netBal > 0 ? "#dc2626" : netBal < 0 ? "#16a34a" : "#4c2480";
-  const balanceType = netBal > 0 ? "DR" : netBal < 0 ? "CR" : "NIL";
-  const html = `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f8f3ff;font-family:system-ui,Segoe UI,Arial,sans-serif;">
-  <div style="max-width:600px;margin:32px auto;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(107,63,160,0.12);">
-    <div style="background:linear-gradient(135deg,#6b3fa0 0%,#5c3390 100%);padding:24px 28px;">
-      <p style="margin:0 0 4px;color:rgba(255,255,255,0.75);font-size:12px;letter-spacing:0.05em;text-transform:uppercase;">Customer Ledger Statement</p>
-      <h1 style="margin:0;color:#fff;font-size:20px;font-weight:700;">${cust.name || "Customer"}</h1>
-      ${cust.code ? `<p style="margin:4px 0 0;color:rgba(255,255,255,0.7);font-size:13px;">Code: ${cust.code}</p>` : ""}
-    </div>
-    <div style="background:#fff;padding:24px 28px;">
-      <p style="margin:0 0 16px;color:#1a0c30;font-size:14px;">Dear <strong>${cust.name || "Customer"}</strong>,</p>
-      <p style="margin:0 0 20px;color:#4c2480;font-size:14px;">Please find your customer ledger statement attached as a PDF.</p>
-      <div style="background:#fbf8ff;border:1px solid #d0b8f0;border-radius:8px;padding:16px 20px;margin-bottom:20px;">
-        <p style="margin:0 0 4px;font-size:12px;color:#9870c8;text-transform:uppercase;letter-spacing:0.05em;">Net Balance</p>
-        <p style="margin:0;font-size:24px;font-weight:700;color:${balanceColor};">
-          Rs.${Math.abs(netBal).toFixed(2)}
-          <span style="font-size:14px;font-weight:600;margin-left:6px;">${balanceType}</span>
-        </p>
-      </div>
-      <p style="margin:0;font-size:12px;color:#9870c8;border-top:1px solid #f8f3ff;padding-top:16px;">
-        This is an automated message from ${sellerName}. Please do not reply unless you have been asked to.
-      </p>
-    </div>
-  </div>
-</body>
-</html>`;
+  const subject = `Customer Ledger Statement — ${cust.name || "Customer"}`.trim();
+  const text    = `Dear ${cust.name || "Customer"},\n\nPlease find your customer ledger statement attached as a PDF.\n\nNet Balance: Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}\n\n— ${sellerName}`;
+  const html    = buildCustomerLedgerEmailHtml({ cust, sellerName, netBal, balanceType, balanceColor });
+
   const m = await sendMail({
     to,
     subject,
     text,
     html,
-    attachments: [{ filename: attachment.filename, content: attachment.buffer, contentType: "application/pdf" }]
+    attachments: [{ filename: attachment.filename, content: attachment.buffer, contentType: "application/pdf" }],
   });
 
   if (m.ok) {

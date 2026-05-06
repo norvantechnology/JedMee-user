@@ -4,6 +4,7 @@ const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { sendMail } = require("../../shared/mailOut");
 const { buildVendorLedgerPdfAttachment } = require("../../shared/pdf/vendorLedgerPdf");
+const { emailBase, summaryCard, sectionHeading, divider, greeting, para, E, C } = require("../../shared/emailTemplate");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -170,37 +171,70 @@ async function handler(event) {
     return fail(500, "INTERNAL_ERROR", "PDF generation failed.", { subMessage: String(e?.message || "") });
   }
 
-  const sellerName = seller?.firm_name || seller?.full_name || "";
-  const subject = `Supplier Ledger — ${vendor.name || "Supplier"}`.trim();
-  const text = `Dear ${vendor.name || "Supplier"},\n\nPlease find your supplier ledger statement attached as a PDF.\n\nNet Balance: Rs.${Math.abs(Number(doc.summary.net_balance || 0)).toFixed(2)} ${doc.summary.net_balance_type || ""}\n\n— ${sellerName}`;
-  const balanceColor = doc.summary.net_balance > 0 ? "#dc2626" : doc.summary.net_balance < 0 ? "#16a34a" : "#4c2480";
-  const html = `<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f8f3ff;font-family:system-ui,Segoe UI,Arial,sans-serif;">
-  <div style="max-width:600px;margin:32px auto;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(107,63,160,0.12);">
-    <div style="background:linear-gradient(135deg,#6b3fa0 0%,#5c3390 100%);padding:24px 28px;">
-      <p style="margin:0 0 4px;color:rgba(255,255,255,0.75);font-size:12px;letter-spacing:0.05em;text-transform:uppercase;">Supplier Ledger Statement</p>
-      <h1 style="margin:0;color:#fff;font-size:20px;font-weight:700;">${vendor.name || "Supplier"}</h1>
-      ${vendor.code ? `<p style="margin:4px 0 0;color:rgba(255,255,255,0.7);font-size:13px;">Code: ${vendor.code}</p>` : ""}
-    </div>
-    <div style="background:#fff;padding:24px 28px;">
-      <p style="margin:0 0 16px;color:#1a0c30;font-size:14px;">Dear <strong>${vendor.name || "Supplier"}</strong>,</p>
-      <p style="margin:0 0 20px;color:#4c2480;font-size:14px;">Please find your supplier ledger statement attached as a PDF.</p>
-      <div style="background:#fbf8ff;border:1px solid #d0b8f0;border-radius:8px;padding:16px 20px;margin-bottom:20px;">
-        <p style="margin:0 0 4px;font-size:12px;color:#9870c8;text-transform:uppercase;letter-spacing:0.05em;">Net Balance</p>
-        <p style="margin:0;font-size:24px;font-weight:700;color:${balanceColor};">
-          Rs.${Math.abs(Number(doc.summary.net_balance || 0)).toFixed(2)}
-          <span style="font-size:14px;font-weight:600;margin-left:6px;">${doc.summary.net_balance_type || "NIL"}</span>
-        </p>
-      </div>
-      <p style="margin:0;font-size:12px;color:#9870c8;border-top:1px solid #f8f3ff;padding-top:16px;">
-        This is an automated message from ${sellerName}. Please do not reply unless you have been asked to.
-      </p>
-    </div>
-  </div>
-</body>
-</html>`;
+  const sellerName  = seller?.firm_name || seller?.full_name || "";
+  const netBal      = Number(doc.summary.net_balance || 0);
+  const balanceType = doc.summary.net_balance_type || "NIL";
+  const balanceColor = netBal > 0 ? C.danger : netBal < 0 ? C.success : C.neutral;
+
+  const subject = `Supplier Ledger Statement — ${vendor.name || "Supplier"}`.trim();
+  const text    = `Dear ${vendor.name || "Supplier"},\n\nPlease find your supplier ledger statement attached as a PDF.\n\nNet Balance: Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}\n\n— ${sellerName}`;
+
+  // ── Contact / detail rows ────────────────────────────────────────────────
+  const contactRows = [
+    vendor.code         ? `<tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};width:40%;">Code</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(vendor.code)}</td></tr>` : "",
+    vendor.phone_number ? `<tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};">Phone</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(vendor.phone_number)}</td></tr>` : "",
+    vendor.address      ? `<tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};">Address</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(vendor.address)}</td></tr>` : "",
+  ].filter(Boolean).join("\n");
+
+  const contactBlock = contactRows ? [
+    sectionHeading("Supplier Details"),
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.bgAlt};border:1px solid ${C.border};border-radius:10px;margin-bottom:24px;">`,
+    `  <tr><td style="padding:16px 20px;">`,
+    `    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">`,
+    contactRows,
+    `    </table>`,
+    `  </td></tr>`,
+    `</table>`,
+  ].join("\n") : "";
+
+  const balanceNote = netBal > 0
+    ? `You have an outstanding <strong style="color:${C.danger};">debit balance</strong> of Rs.\u202F${Math.abs(netBal).toFixed(2)}. Please arrange payment at your earliest convenience.`
+    : netBal < 0
+    ? `You have a <strong style="color:${C.success};">credit balance</strong> of Rs.\u202F${Math.abs(netBal).toFixed(2)} with us.`
+    : `Your account is <strong style="color:${C.neutral};">fully settled</strong> with no outstanding balance.`;
+
+  const emailBody = [
+    greeting(vendor.name || "Supplier"),
+    para("Please find your supplier ledger statement attached as a PDF. Below is a summary of your account."),
+    divider(),
+
+    sectionHeading("Account Summary"),
+    summaryCard({
+      label: "Net Balance",
+      value: `Rs.\u202F${Math.abs(netBal).toFixed(2)}`,
+      valueColor: balanceColor,
+      badge: balanceType,
+    }),
+    para(balanceNote),
+
+    contactBlock ? divider() : "",
+    contactBlock,
+
+    divider(),
+    para(
+      `The attached PDF contains a complete transaction history. For any queries, please contact ${E(sellerName) || "us"} directly.`,
+      { color: C.textMuted, size: "12px" }
+    ),
+  ].filter(Boolean).join("\n");
+
+  const html = emailBase({
+    preheader: `Your supplier ledger — Balance Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}`,
+    headerLabel: "Supplier Ledger Statement",
+    headerTitle: E(vendor.name || "Supplier"),
+    headerSub: vendor.code ? `Code: ${E(vendor.code)}` : undefined,
+    body: emailBody,
+    brandName: sellerName || "JedMee",
+  });
   const m = await sendMail({
     to,
     subject,
