@@ -402,7 +402,11 @@ exports.handler = async (event) => {
         }),
       };
     }
-    return result;
+    // Always inject CORS headers so error responses (4xx) are readable cross-origin
+    return {
+      ...result,
+      headers: { ...CORS_HEADERS, ...(result.headers || {}) },
+    };
   } catch (err) {
     console.error(`[router] Handler ${match.modulePath} threw:`, err);
     return {
