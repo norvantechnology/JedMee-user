@@ -301,7 +301,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 32px;
+  padding: 24px 24px;
   background: var(--color-card);
   overflow-y: auto;
   position: relative;
@@ -452,7 +452,7 @@
     0 4px 6px rgba(0,0,0,0.04),
     0 12px 40px rgba(107,63,160,0.08),
     0 1px 0 rgba(255,255,255,0.8) inset;
-  padding: 36px 36px 32px;
+  padding: 24px 28px 20px;
   animation: auFadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
   text-align: left;
 }
@@ -499,22 +499,22 @@ section.auScreen,
 .auTabs {
   display: flex;
   gap: 3px;
-  padding: 4px;
-  border-radius: 14px;
+  padding: 3px;
+  border-radius: 12px;
   background: var(--color-surface-2);
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   border: 1px solid var(--color-border);
 }
 
 .auTab {
   flex: 1;
-  padding: 11px 0;
+  padding: 8px 0;
   border: none;
   background: transparent;
-  border-radius: 11px;
+  border-radius: 10px;
   cursor: pointer;
   font-family: var(--font);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--color-text-4);
   transition: background 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
@@ -537,22 +537,22 @@ section.auScreen,
 
 /* ── Typography ── */
 .auTitle {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--color-text-heading);
-  letter-spacing: -0.5px;
-  margin: 0 0 4px;
+  letter-spacing: -0.4px;
+  margin: 0 0 3px;
   text-align: left;
 }
 
 @media (min-width: 1024px) {
-  .auTitle { font-size: 28px; }
+  .auTitle { font-size: 22px; }
 }
 
 .auSub {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-text-faint);
-  margin: 0 0 22px;
+  margin: 0 0 14px;
   line-height: 1.5;
   text-align: left;
 }
@@ -566,8 +566,8 @@ section.auScreen,
 .auRoleRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 22px;
+  gap: 8px;
+  margin-bottom: 14px;
 }
 
 @media (max-width: 400px) {
@@ -577,9 +577,9 @@ section.auScreen,
 .auRoleCard {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 13px 15px;
-  border-radius: 14px;
+  gap: 9px;
+  padding: 10px 12px;
+  border-radius: 12px;
   border: 1.5px solid var(--color-border);
   background: var(--color-surface);
   cursor: pointer;
@@ -654,14 +654,14 @@ section.auScreen,
 }
 
 /* ── Fields ── */
-.auField { margin-bottom: 18px; text-align: left; }
+.auField { margin-bottom: 12px; text-align: left; }
 
 .auLabel {
   display: block;
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--color-text-muted);
-  margin-bottom: 7px;
+  margin-bottom: 5px;
   letter-spacing: 0.02em;
   text-align: left;
   text-transform: uppercase;
@@ -710,12 +710,12 @@ section.auScreen,
 .auTextarea,
 .auSelect {
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
-  border-radius: 11px;
+  border-radius: 10px;
   font-family: var(--font);
-  font-size: 14px;
+  font-size: 13.5px;
   color: var(--color-text);
   transition: border-color 0.22s, box-shadow 0.22s, background 0.22s;
   appearance: none;
@@ -745,7 +745,7 @@ section.auScreen,
 
 .auTextarea {
   resize: vertical;
-  min-height: 88px;
+  min-height: 72px;
   line-height: 1.6;
 }
 
@@ -778,9 +778,9 @@ section.auScreen,
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  margin-top: -4px;
+  gap: 10px;
+  margin-bottom: 14px;
+  margin-top: -2px;
 }
 
 .auCheckRow {
@@ -813,9 +813,9 @@ section.auScreen,
 .auPrimaryBtn {
   width: 100%;
   justify-content: center;
-  min-height: 50px;
-  border-radius: 13px;
-  font-size: 15px;
+  min-height: 42px;
+  border-radius: 11px;
+  font-size: 14px;
   font-weight: 800;
   position: relative;
   overflow: hidden;
@@ -853,15 +853,15 @@ section.auScreen,
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-top: 14px;
-  font-size: 12px;
+  margin-top: 8px;
+  font-size: 11.5px;
   color: var(--color-text-faint);
 }
 
 .auSecurity svg { color: var(--color-success); }
 
 /* ── Register step header ── */
-.auStepHeader { margin-bottom: 18px; }
+.auStepHeader { margin-bottom: 10px; }
 
 .auStepBadge {
   display: inline-flex;
@@ -889,7 +889,7 @@ section.auScreen,
 .auStepIndicator {
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   gap: 0;
 }
 
@@ -948,9 +948,9 @@ section.auScreen,
 .auSectionCard {
   background: var(--color-surface);
   border: 1.5px solid var(--color-border);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
   text-align: left;
   position: relative;
   overflow: hidden;
@@ -968,22 +968,22 @@ section.auScreen,
 }
 
 @media (min-width: 1024px) {
-  .auSectionCard { padding: 22px 24px; }
+  .auSectionCard { padding: 16px 18px; }
 }
 
 .auSectionTitle {
-  font-size: 14.5px;
+  font-size: 13.5px;
   font-weight: 800;
   color: var(--color-text-2);
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   text-align: left;
   letter-spacing: -0.2px;
 }
 
 .auSectionSub {
-  font-size: 12.5px;
+  font-size: 12px;
   color: var(--color-text-faint);
-  margin-bottom: 18px;
+  margin-bottom: 12px;
   text-align: left;
   line-height: 1.5;
 }
@@ -991,8 +991,8 @@ section.auScreen,
 .auGrid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .auGrid2:last-child { margin-bottom: 0; }
@@ -1013,12 +1013,12 @@ section.auScreen,
   bottom: 0;
   z-index: 10;
   background: var(--color-card);
-  padding: 16px 0 4px;
-  margin-top: 16px;
+  padding: 10px 0 4px;
+  margin-top: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   border-top: 1px solid var(--color-border);
 }
 
@@ -1043,18 +1043,18 @@ section.auScreen,
   }
 }
 
-.auScreen { padding-bottom: 8px; }
+.auScreen { padding-bottom: 4px; }
 
 .auSecondaryBtn {
-  min-height: 46px;
-  border-radius: 13px;
+  min-height: 38px;
+  border-radius: 11px;
   font-weight: 600;
 }
 
 .auNextBtn {
-  min-height: 46px;
-  border-radius: 13px;
-  padding: 0 28px;
+  min-height: 38px;
+  border-radius: 11px;
+  padding: 0 22px;
   font-weight: 700;
   background: linear-gradient(135deg, #5a2d96 0%, #7b4bbf 50%, #9b6dd8 100%) !important;
   box-shadow: 0 4px 14px rgba(107,63,160,0.35) !important;
@@ -1112,8 +1112,8 @@ section.auScreen,
 /* ── Bottom link ── */
 .auBottomLink {
   text-align: center;
-  margin-top: 16px;
-  font-size: 13.5px;
+  margin-top: 10px;
+  font-size: 13px;
   color: var(--color-text-faint);
 }
 
