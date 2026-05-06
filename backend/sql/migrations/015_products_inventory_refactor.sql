@@ -51,6 +51,9 @@ ALTER TABLE product_batches
   ALTER COLUMN product_id SET NOT NULL;
 
 ALTER TABLE product_batches
+  DROP CONSTRAINT IF EXISTS product_batches_product_fk;
+
+ALTER TABLE product_batches
   ADD CONSTRAINT product_batches_product_fk
   FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT;
 

@@ -6,7 +6,7 @@ ALTER TABLE purchase_invoices
 
 -- Allow reusing invoice numbers after soft-delete; keep uniqueness among non-deleted rows only.
 DROP INDEX IF EXISTS purchase_invoices_account_invoice_number_key;
-CREATE UNIQUE INDEX purchase_invoices_account_invoice_number_key
+CREATE UNIQUE INDEX IF NOT EXISTS purchase_invoices_account_invoice_number_key
   ON purchase_invoices (account_id, lower(invoice_number))
   WHERE deleted_at IS NULL;
 

@@ -7,7 +7,15 @@
     "dev": "STAGE=local PORT=4000 node local-server.js",
     "dev:dev": "STAGE=dev PORT=4000 node local-server.js",
     "dev:prod": "STAGE=prod PORT=4000 node local-server.js",
-    "layer:install": "cd lib/nodejs-light/nodejs && npm install"
+    "layer:install": "cd lib/nodejs-light/nodejs && npm install",
+    "migrate": "node migrate.js",
+    "migrate:local": "node migrate.js local",
+    "migrate:dev": "node migrate.js dev",
+    "migrate:prod": "node migrate.js prod",
+    "migrate:local:seeds": "node migrate.js local --seeds",
+    "migrate:dev:seeds": "node migrate.js dev --seeds",
+    "migrate:prod:seeds": "node migrate.js prod --seeds",
+    "migrate:dry": "node migrate.js local --dry-run"
   },
   "engines": {
     "node": ">=22"

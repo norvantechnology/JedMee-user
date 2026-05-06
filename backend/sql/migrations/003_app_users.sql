@@ -45,8 +45,17 @@ CREATE TABLE IF NOT EXISTS app_users (
   CONSTRAINT app_users_status_check CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED'))
 );
 
--- Self-references (created_by_user_id)
-ALTER TABLE app_users
-  ADD CONSTRAINT app_users_created_by_fk
-  FOREIGN KEY (created_by_user_id) REFERENCES app_users(id) ON DELETE SET NULL;
+-- Self-references (created_by_user_id) — idempotent guard
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname = 'app_users_created_by_fk'
+      AND conrelid = 'app_users'::regclass
+  ) THEN
+    ALTER TABLE app_users
+      ADD CONSTRAINT app_users_created_by_fk
+      FOREIGN KEY (created_by_user_id) REFERENCES app_users(id) ON DELETE SET NULL;
+  END IF;
+END $$;
 

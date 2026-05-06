@@ -718,23 +718,33 @@ function ComparisonSection() {
 function TestimonialsSection() {
   const testimonials = [
     {
-      quote: "JedMee transformed our pharmacy. Billing that took 30 minutes now takes 5. The GST invoicing alone saves us hours every week.",
-      name: "Rajesh Patel", role: "Owner, Patel Medical Store", initials: "RP", rating: 5,
+      quote: "Before JedMee, I was spending nearly 2 hours every evening just on billing and stock entries. Now my entire day's billing is done in under 30 minutes. GST invoices print perfectly, customers get a copy instantly, and I haven't had a single expired batch slip through in over 8 months. I genuinely wish I had switched sooner.",
+      name: "Amit Desai",
+      role: "Proprietor, Desai Medical & General Store · Surat, Gujarat",
+      initials: "AD",
+      rating: 5,
     },
     {
-      quote: "The order catalog is brilliant. We manage all retailer orders from one place. No more phone calls or confusion.",
-      name: "Suresh Kumar", role: "Director, Kumar Pharmaceuticals", initials: "SK", rating: 5,
+      quote: "We supply to 60+ retail pharmacies. Managing their orders over phone was a constant mess — wrong quantities, missed items, endless follow-up calls. With JedMee's order catalog, retailers place orders themselves and I confirm in one click. Our dispatch errors dropped to almost zero within the first month.",
+      name: "Vikram Nair",
+      role: "Owner, Nair Pharma Distributors · Kochi, Kerala",
+      initials: "VN",
+      rating: 5,
     },
     {
-      quote: "Stock management used to be a nightmare. Now we always know what we have, what's expiring, and what to reorder.",
-      name: "Priya Sharma", role: "Manager, Sharma Medicals", initials: "PS", rating: 5,
+      quote: "The expiry tracking alone is worth every rupee. We used to write off ₹15,000–20,000 in expired stock every quarter. Last quarter it was under ₹2,000. JedMee alerts us 60 days before expiry so we have time to return or sell the stock — that's real money saved.",
+      name: "Sunita Agarwal",
+      role: "Manager, Agarwal Medicals · Jaipur, Rajasthan",
+      initials: "SA",
+      rating: 5,
     },
   ];
   return (
     <section className="ln-testimonials">
       <div className="ln-container">
         <div className="ln-section-label">Customer Stories</div>
-        <h2 className="ln-section-title">Trusted by Pharmacies Across India</h2>
+        <h2 className="ln-section-title">Real Pharmacies. Real Results.</h2>
+        <p className="ln-section-sub">See how medicine shops and distributors across India are saving time, reducing losses, and growing with JedMee.</p>
         <div className="ln-testi-layout">
           <div className="ln-testi-featured">
             <div className="ln-testi-stars">{[1,2,3,4,5].map(i => <Icon key={i} name="star" size={14} className="ln-star" />)}</div>
@@ -748,7 +758,7 @@ function TestimonialsSection() {
             </div>
             <div className="ln-testi-score">
               <span className="ln-testi-score-num">4.9</span>
-              <span className="ln-testi-score-label">/ 5 from 500+ pharmacies</span>
+              <span className="ln-testi-score-label">/ 5 · Rated by 500+ pharmacies</span>
             </div>
           </div>
           <div className="ln-testi-stack">
@@ -778,19 +788,78 @@ function TestimonialsSection() {
 const FALLBACK_PLANS = [
   {
     name: "Starter", price: "Free", period: "14-day trial", highlight: false,
-    cta: "Start Free Trial",
-    description: "Perfect for getting started. No credit card required.",
-    features: ["Up to 500 products", "GST billing & invoicing", "Inventory management", "Expiry & stock alerts", "Basic reports", "Email support"],
-    badge: null,
+    badge: null, cta: "Start Free Trial",
+    description: "Try JedMee free for 14 days. No credit card required. Perfect for small medicine shops just getting started.",
+    features: [
+      "Up to 200 products & batches",
+      "GST billing & PDF invoices",
+      "Basic inventory tracking",
+      "Expiry & low stock alerts",
+      "1 user account",
+      "Email support",
+    ],
+  },
+  {
+    name: "Growth", price: "₹499", period: "per month", highlight: false,
+    badge: null, cta: "Get Started",
+    description: "For growing pharmacies that need full billing, stock control, and supplier management in one place.",
+    features: [
+      "Up to 2,000 products & batches",
+      "GST billing & PDF invoices",
+      "Full inventory with batch tracking",
+      "Purchase & supplier management",
+      "Customer credit management",
+      "Day book & sales reports",
+      "Up to 3 user accounts",
+      "Email support",
+    ],
   },
   {
     name: "Professional", price: "₹999", period: "per month", highlight: true,
     badge: "Most Popular", cta: "Get Started",
-    description: "Everything you need to run a growing pharmacy.",
-    features: ["Unlimited products", "Advanced GST billing", "Full inventory control", "Order catalog & management", "Customer credit management", "Supplier & purchase tracking", "Advanced analytics & P&L", "Priority support"],
+    description: "Everything a busy pharmacy or distributor needs — billing, orders, analytics, and team access, all connected.",
+    features: [
+      "Unlimited products & batches",
+      "Advanced GST billing & invoicing",
+      "Full inventory with expiry tracking",
+      "Online order catalog for retailers",
+      "Customer ledger & credit control",
+      "Supplier & purchase tracking",
+      "Advanced analytics & P&L reports",
+      "PDF invoices with email sharing",
+      "Up to 10 user accounts",
+      "Priority email support",
+    ],
+  },
+  {
+    name: "Enterprise", price: "₹2,499", period: "per month", highlight: false,
+    badge: "Best Value", cta: "Contact Us",
+    description: "For large distributors and multi-branch operations that need unlimited scale, custom branding, and dedicated support.",
+    features: [
+      "Everything in Professional",
+      "Unlimited user accounts",
+      "Multi-branch management",
+      "Custom branding on invoices",
+      "API access for integrations",
+      "Dedicated account manager",
+      "Custom onboarding & training",
+      "SLA-backed 99.9% uptime",
+      "Phone & priority support",
+    ],
   },
 ];
 
+/** Format price/period from either FALLBACK_PLANS (strings) or live API (numerics). */
+function fmtPrice(price, period) {
+  if (typeof price === "string") return price;
+  const n = parseFloat(price);
+  if (n === 0 || period === "free") return "Free";
+  return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+}
+function fmtPeriod(period) {
+  if (typeof period === "string" && /month|trial|year|time/i.test(period)) return period;
+  return { free: "14-day trial", monthly: "per month", yearly: "per year", one_time: "one time" }[period] ?? period;
+}
 function PricingSection({ navigate }) {
   const [plans, setPlans] = useState(null);   // null = loading
   const [error, setError] = useState(false);
@@ -824,24 +893,27 @@ function PricingSection({ navigate }) {
         <p className="ln-section-sub">Start free, upgrade when you're ready. No hidden fees.</p>
         <div className={`ln-pricing-grid${isLoading ? " ln-pricing-grid--loading" : ""}`}>
           {displayPlans.map((plan, i) => (
-            <div key={plan.id ?? i} className={`ln-plan${plan.highlight ? " ln-plan--hi" : ""}${isLoading ? " ln-plan--skeleton" : ""}`}>
-              {plan.badge && <div className="ln-plan-badge">{plan.badge}</div>}
-              <div className="ln-plan-name">{plan.name}</div>
-              <div className="ln-plan-price">
-                <span className="ln-plan-amount">{plan.price}</span>
-                <span className="ln-plan-period"> / {plan.period}</span>
+            <div key={plan.id ?? i} className="ln-plan-wrap">
+              <div className={`ln-plan${plan.highlight ? " ln-plan--hi" : ""}${isLoading ? " ln-plan--skeleton" : ""}`}>
+                {plan.badge && <div className="ln-plan-badge">{plan.badge}</div>}
+                <div className="ln-plan-name">{plan.name}</div>
+                <div className="ln-plan-price">
+                  <span className="ln-plan-amount">{fmtPrice(plan.price, plan.period)}</span>
+                  <span className="ln-plan-period"> / {fmtPeriod(plan.period)}</span>
+                </div>
+                <p className="ln-plan-desc">{plan.description}</p>
+                <div className="ln-plan-divider" />
+                <ul className="ln-plan-features">
+                  {(Array.isArray(plan.features) ? plan.features : []).map((f, j) => (
+                    <li key={j}><Icon name="checkMark" size={13} className="ln-plan-check" /><span>{f}</span></li>
+                  ))}
+                </ul>
+                <button
+                  className={`ln-btn ln-btn--lg ${plan.highlight ? "ln-btn--primary" : "ln-btn--outline"} ln-plan-cta`}
+                  onClick={() => navigate("/login")}>
+                  {plan.cta} <Icon name="arrow" size={15} />
+                </button>
               </div>
-              <p className="ln-plan-desc">{plan.description}</p>
-              <ul className="ln-plan-features">
-                {(Array.isArray(plan.features) ? plan.features : []).map((f, j) => (
-                  <li key={j}><Icon name="checkMark" size={14} className="ln-plan-check" /><span>{f}</span></li>
-                ))}
-              </ul>
-              <button
-                className={`ln-btn ln-btn--lg ${plan.highlight ? "ln-btn--primary" : "ln-btn--outline"} ln-plan-cta`}
-                onClick={() => navigate("/login")}>
-                {plan.cta} <Icon name="arrow" size={16} />
-              </button>
             </div>
           ))}
         </div>
