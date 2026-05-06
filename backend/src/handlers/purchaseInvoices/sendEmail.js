@@ -5,7 +5,7 @@ const { parseJsonBody } = require("../../shared/request");
 const { getPurchaseInvoicePrintDoc } = require("./printDoc");
 const { sendMail } = require("../../shared/mailOut");
 const { buildPurchaseInvoicePdfAttachment } = require("../../shared/pdf/purchaseInvoicePdf");
-const { emailBase, summaryCard, sectionHeading, divider, greeting, para, E, C } = require("../../shared/emailTemplate");
+const { emailBase, summaryCard, sectionHeading, divider, greeting, para, noticeBox, E, C, ICONS } = require("../../shared/emailTemplate");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

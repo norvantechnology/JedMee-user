@@ -10,7 +10,6 @@ import { otpRequestSuccessMessage } from "../utils/authUiMessages.js";
 import { isEmailLike } from "../utils/validation.js";
 import { APP_DISPLAY_NAME } from "../constants/brand.js";
 import "./VerifyOtpPage.css";
-import { IconAuthLock } from "../components/ui/AppIcons.jsx";
 
 export default function VerifyOtpPage() {
   const location = useLocation();
@@ -58,8 +57,21 @@ export default function VerifyOtpPage() {
           </div>
 
           <div className="panel">
-            <div className="form-title">Verify email</div>
-            <p className="form-sub">Enter the 6-digit code sent to <span className="emailText">{maskedEmail}</span>.</p>
+            {/* Centered icon badge */}
+            <div className="otp-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+                <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+              </svg>
+            </div>
+
+            <div className="form-title">Verify your email</div>
+            <p className="form-sub">
+              We sent a 6-digit code to{" "}
+              <span className="emailText">{maskedEmail}</span>.
+              <br />Enter it below to continue.
+            </p>
 
             <form
               noValidate
@@ -91,7 +103,6 @@ export default function VerifyOtpPage() {
                     if (user) saveAuthUser(user);
                   }
                   emitToast({ type: "success", message: "Email verified! Your account is being reviewed." });
-                  // Navigate based on account status — PENDING/REJECTED/BLOCKED go to approval gate.
                   const status = String(user?.status || "").toUpperCase();
                   const isBlocked = Boolean(user?.is_blocked);
                   if (isBlocked || status === "PENDING" || status === "REJECTED") {
@@ -108,10 +119,17 @@ export default function VerifyOtpPage() {
               }}
             >
               <div className="field">
-                <label>OTP <span className="reqMark" aria-hidden="true">*</span></label>
+                <label htmlFor="otp-input">
+                  Verification code <span className="reqMark" aria-hidden="true">*</span>
+                </label>
                 <div className="input-wrap">
-                  <IconAuthLock />
+                  <svg className="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round"/>
+                    <path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"/>
+                    <circle cx="12" cy="16" r="1.4" fill="currentColor"/>
+                  </svg>
                   <input
+                    id="otp-input"
                     type="text"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
@@ -123,6 +141,7 @@ export default function VerifyOtpPage() {
                     }}
                     placeholder="000000"
                     inputMode="numeric"
+                    autoComplete="one-time-code"
                     maxLength={6}
                     required
                   />
@@ -146,17 +165,17 @@ export default function VerifyOtpPage() {
                     setBusy(false);
                   }}
                 >
-                  {busy ? <InlineButtonProgress label="Sending..." /> : "Resend OTP"}
+                  {busy ? <InlineButtonProgress label="Sending…" /> : "Resend OTP"}
                 </button>
                 <button className="submit-btn" type="submit" disabled={busy}>
-                  {busy ? <InlineButtonProgress label="Verifying..." /> : "Verify & continue"}
+                  {busy ? <InlineButtonProgress label="Verifying…" /> : "Verify & continue"}
                 </button>
               </div>
             </form>
 
             <div className="footerLinks">
               <Link className="link-btn" to="/login">
-                Back to sign in
+                ← Back to sign in
               </Link>
             </div>
           </div>

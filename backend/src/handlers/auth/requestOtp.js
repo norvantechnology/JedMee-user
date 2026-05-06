@@ -2,8 +2,12 @@ const { ok, fail } = require("../../shared/response");
 const { parseJsonBody } = require("../../shared/request");
 const { isEmailLike, normalizeEmail } = require("../../shared/validation");
 const { issueEmailVerificationOtp } = require("../../shared/authOtpIssuance");
+const { checkRateLimit, lambdaClientIp } = require("../../shared/rateLimiter");
 
 async function handler(event) {
+  const limited = checkRateLimit('otp', lambdaClientIp(event));
+  if (limited) return fail(429, 'RATE_LIMITED', limited.message);
+
   const body = parseJsonBody(event);
   const email = normalizeEmail(body.email);
   const role = body.role ? String(body.role || "").toUpperCase() : "";

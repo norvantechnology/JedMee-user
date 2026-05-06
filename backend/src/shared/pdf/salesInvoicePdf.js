@@ -1,166 +1,204 @@
-const { pdfToBuffer } = require("./pdfBuffer");
-const { n, inr, safeFilePart } = require("./money");
-
-const COLOR_PRIMARY = "#6b3fa0";
-const COLOR_HEADING = "#4c2480";
-const COLOR_TEXT = "#1a0c30";
-const COLOR_MUTED = "#9870c8";
-const COLOR_LINE = "#d0b8f0";
-
-function ymd(v) {
-  return String(v || "").slice(0, 10);
-}
-
-function safeStr(s, max) {
-  const t = String(s ?? "").replace(/\s+/g, " ").trim();
-  return max ? t.slice(0, max) : t;
-}
-
 /**
- * pdfkit-native sales invoice. No puppeteer, no Chromium, no frontend coupling.
- * Trades the browser-print HTML fidelity for something that works in Lambda.
- *
- * @param {object} doc — shape from getSalesInvoicePrintDoc
- * @returns {Promise<{ buffer: Buffer; filename: string }>}
+ * Sales invoice PDF — matches the browser print view layout.
+ * Uses PDFKit (no Chromium/Puppeteer) for Lambda compatibility.
  */
+const { pdfToBuffer } = require('./pdfBuffer');
+const { n, inr, safeFilePart } = require('./money');
+const {
+  P, safeStr, ymd,
+  drawInfoBox, drawTable, drawSectionLabel, drawHRule,
+  drawPageHeader, drawPageFooter, drawSellerHeader, drawTotals,
+} = require('./pdfLayout');
+
 async function buildSalesInvoicePdfAttachment(doc) {
-  const inv = doc.invoice || {};
-  const seller = doc.seller || {};
-  const items = doc.items || [];
+  const inv        = doc.invoice    || {};
+  const seller     = doc.seller     || {};
+  const items      = doc.items      || [];
   const taxSummary = doc.tax_summary || [];
-  const sellerName = safeStr(seller.firm_name || seller.full_name || "Sales Invoice", 120);
+  const payments   = doc.payments   || [];
+
+  const invNumber  = safeStr(inv.invoice_number || 'Sales Invoice', 60);
+  const status     = safeStr(inv.payment_status_resolved || inv.status || '', 30).toUpperCase();
 
   const buffer = await pdfToBuffer((pdf) => {
-    const left = pdf.page.margins.left;
-    const usable = pdf.page.width - pdf.page.margins.left - pdf.page.margins.right;
+    const ML = 36, MR = 36, MT = 36, MB = 48;
+    const PW = pdf.page.width;
+    const PH = pdf.page.height;
+    const W  = PW - ML - MR;   // usable width ≈ 523pt
 
-    pdf.fontSize(16).fillColor(COLOR_PRIMARY).text(sellerName);
-    pdf.fontSize(9).fillColor(COLOR_TEXT);
-    if (seller.address) pdf.text(safeStr(seller.address, 200));
-    const sellerLine2 = [
-      seller.phone_number ? `Phone: ${safeStr(seller.phone_number, 40)}` : "",
-      seller.email ? `Email: ${safeStr(seller.email, 80)}` : "",
-      seller.gst_number ? `GSTIN: ${safeStr(seller.gst_number, 40)}` : ""
-    ].filter(Boolean).join("   |   ");
-    if (sellerLine2) pdf.text(sellerLine2);
-    pdf.moveDown(0.5);
+    let y = MT;
 
-    pdf.fontSize(13).fillColor(COLOR_HEADING).text("Sales Invoice", { underline: true });
-    pdf.moveDown(0.3);
+    // ── Page header (date | invoice number) ──────────────────────────────────
+    y = drawPageHeader(pdf, ML, y, W, invNumber, 'Sales Invoice');
+    y += 4;
 
-    const meta = [
-      ["Invoice No", safeStr(inv.invoice_number, 40)],
-      ["Date", ymd(inv.invoice_date)],
-      ["Status", safeStr(inv.payment_status_resolved || inv.status, 24)]
+    // ── Seller block ─────────────────────────────────────────────────────────
+    y = drawSellerHeader(pdf, ML, y, W, seller, 'Sales Invoice');
+    y += 4;
+
+    // ── Divider ──────────────────────────────────────────────────────────────
+    drawHRule(pdf, ML, y, W, P.border);
+    y += 10;
+
+    // ── Two-column info boxes: INVOICE | CUSTOMER ─────────────────────────────
+    const boxW = (W - 8) / 2;
+
+    const invRows = [
+      ['Invoice No',   inv.invoice_number],
+      ['Invoice Date', ymd(inv.invoice_date)],
+      ['Status',       safeStr(inv.status || '', 24)],
+      ['Payment',      safeStr(inv.payment_status_resolved || inv.payment_status || '', 24)],
     ];
-    pdf.fontSize(10).fillColor(COLOR_TEXT);
-    for (const [k, v] of meta) {
-      if (!v) continue;
-      pdf.font("Helvetica-Bold").text(`${k}: `, { continued: true });
-      pdf.font("Helvetica").text(v);
-    }
-    pdf.moveDown(0.4);
-
-    pdf.fontSize(10).fillColor(COLOR_HEADING).font("Helvetica-Bold").text("Bill To");
-    pdf.fontSize(10).fillColor(COLOR_TEXT).font("Helvetica");
-    pdf.text(safeStr(inv.customer_name || "Cash Customer", 120));
-    if (inv.customer_address || inv.customer_city || inv.customer_state || inv.customer_pincode) {
-      pdf.text(safeStr(
-        [inv.customer_address, inv.customer_city, inv.customer_state, inv.customer_pincode]
-          .filter(Boolean).join(", "),
-        200
-      ));
-    }
-    if (inv.customer_phone) pdf.text(`Phone: ${safeStr(inv.customer_phone, 40)}`);
-    if (inv.customer_gst_number) pdf.text(`GSTIN: ${safeStr(inv.customer_gst_number, 40)}`);
-    pdf.moveDown(0.6);
-
-    const cols = [
-      { label: "#",       w: usable * 0.04, align: "right"  },
-      { label: "Item",    w: usable * 0.30, align: "left"   },
-      { label: "Batch",   w: usable * 0.10, align: "left"   },
-      { label: "Exp",     w: usable * 0.08, align: "left"   },
-      { label: "Qty",     w: usable * 0.06, align: "right"  },
-      { label: "Free",    w: usable * 0.06, align: "right"  },
-      { label: "MRP",     w: usable * 0.08, align: "right"  },
-      { label: "Rate",    w: usable * 0.08, align: "right"  },
-      { label: "GST%",    w: usable * 0.06, align: "right"  },
-      { label: "Amount",  w: usable * 0.14, align: "right"  }
+    const custRows = [
+      ['Name',    inv.customer_name || 'Walk-in / Counter Sale'],
+      ['Phone',   inv.customer_phone],
+      ['GST',     inv.customer_gst_number],
+      ['Address', [inv.customer_address, inv.customer_city, inv.customer_state, inv.customer_pincode].filter(Boolean).join(', ')],
     ];
-    const xs = []; let acc = left;
-    for (const c of cols) { xs.push(acc); acc += c.w; }
 
-    let y = pdf.y;
-    const headerH = 14;
-    pdf.rect(left, y, usable, headerH).fill(COLOR_PRIMARY);
-    pdf.fontSize(8).fillColor("#ffffff").font("Helvetica-Bold");
-    cols.forEach((c, i) => {
-      pdf.text(c.label, xs[i] + 3, y + 3, { width: c.w - 6, align: c.align });
-    });
-    y += headerH;
-    pdf.font("Helvetica").fillColor(COLOR_TEXT).fontSize(8);
+    const leftBoxBottom  = drawInfoBox(pdf, ML,          y, boxW, 'Invoice',  invRows);
+    const rightBoxBottom = drawInfoBox(pdf, ML + boxW + 8, y, boxW, 'Customer', custRows);
+    y = Math.max(leftBoxBottom, rightBoxBottom) + 12;
 
-    const rowH = 13;
-    items.forEach((it, idx) => {
-      if (y > pdf.page.height - pdf.page.margins.bottom - 110) {
-        pdf.addPage();
-        y = pdf.page.margins.top;
-      }
-      const cells = [
-        String(idx + 1),
-        safeStr(it.product_name || it.drug_name, 60),
-        safeStr(it.batch_no, 16),
-        ymd(it.expiry_date),
-        n(it.qty).toString(),
-        n(it.free_qty) ? n(it.free_qty).toString() : "",
-        n(it.mrp) ? inr(it.mrp) : "",
-        n(it.sales_rate) ? inr(it.sales_rate) : "",
-        n(it.gst_percent) ? `${n(it.gst_percent)}%` : "",
-        inr(it.line_total)
-      ];
-      cols.forEach((c, i) => {
-        pdf.text(cells[i], xs[i] + 3, y + 2, { width: c.w - 6, align: c.align });
-      });
-      y += rowH;
-      pdf.moveTo(left, y).lineTo(left + usable, y).strokeColor(COLOR_LINE).lineWidth(0.3).stroke();
-    });
+    // ── Items table ───────────────────────────────────────────────────────────
+    y = drawSectionLabel(pdf, ML, y, W, 'Invoice Items');
+    y += 4;
 
-    pdf.y = y + 8;
-    pdf.fontSize(9).fillColor(COLOR_HEADING).font("Helvetica-Bold").text("Totals", { underline: true });
-    pdf.moveDown(0.2);
-    pdf.font("Helvetica").fontSize(10).fillColor(COLOR_TEXT);
-    const totals = [
-      ["Subtotal", inv.subtotal_amount],
-      ["Discount", inv.discount_amount],
-      ["Taxable", inv.taxable_amount],
-      ["GST", inv.gst_amount],
-      ["Round Off", inv.round_off_amount],
-      ["Total", inv.total_amount],
-      ["Paid", inv.amount_paid_resolved],
-      ["Balance Due", inv.balance_due_resolved]
+    const itemCols = [
+      { label: '#',       w: 0.04, align: 'right'  },
+      { label: 'Product', w: 0.28, align: 'left'   },
+      { label: 'Batch',   w: 0.09, align: 'left'   },
+      { label: 'Exp',     w: 0.08, align: 'left'   },
+      { label: 'Qty',     w: 0.05, align: 'right'  },
+      { label: 'Free',    w: 0.05, align: 'right'  },
+      { label: 'MRP',     w: 0.08, align: 'right'  },
+      { label: 'Rate',    w: 0.08, align: 'right'  },
+      { label: 'Disc',    w: 0.07, align: 'right'  },
+      { label: 'GST%',    w: 0.06, align: 'right'  },
+      { label: 'Amount',  w: 0.12, align: 'right'  },
     ];
-    for (const [k, v] of totals) {
-      if (v == null || v === "") continue;
-      pdf.font("Helvetica-Bold").text(`${k}: `, { continued: true, indent: 0 });
-      pdf.font("Helvetica").text(inr(v));
+
+    const itemRows = items.map((it, idx) => [
+      String(idx + 1),
+      safeStr(it.product_name || it.drug_name || '—', 50),
+      safeStr(it.batch_no || '', 14),
+      ymd(it.expiry_date),
+      n(it.qty).toString(),
+      n(it.free_qty) ? n(it.free_qty).toString() : '',
+      n(it.mrp) ? inr(it.mrp) : '',
+      n(it.sales_rate || it.rate) ? inr(it.sales_rate || it.rate) : '',
+      n(it.discount_amount) ? inr(it.discount_amount) : '0.00',
+      n(it.gst_percent) ? `${n(it.gst_percent)}%` : '',
+      inr(it.line_total),
+    ]);
+
+    // Check if items fit on current page; add page if needed
+    const itemTableH = 16 + itemRows.length * 14 + 20;
+    if (y + itemTableH > PH - MB - 80) {
+      pdf.addPage();
+      y = MT;
     }
 
+    y = drawTable(pdf, ML, y, W, itemCols, itemRows, { rowH: 14, fontSize: 8 });
+    y += 14;
+
+    // ── GST Summary + Totals (two columns) ────────────────────────────────────
+    const gstW  = W * 0.42;
+    const totW  = W * 0.55;
+    const totX  = ML + W - totW;
+    const gstX  = ML;
+
+    // GST Summary table (left)
     if (taxSummary.length) {
-      pdf.moveDown(0.4);
-      pdf.fontSize(9).fillColor(COLOR_HEADING).font("Helvetica-Bold").text("Tax Breakdown", { underline: true });
-      pdf.moveDown(0.2);
-      pdf.font("Helvetica").fontSize(8).fillColor(COLOR_TEXT);
-      for (const r of taxSummary) {
-        pdf.text(`GST ${n(r.gst_percent)}% — Taxable ${inr(r.taxable_amount)}, Tax ${inr(r.gst_amount)}`);
-      }
+      y = drawSectionLabel(pdf, gstX, y, gstW, 'GST Summary');
+      y += 4;
+      const gstCols = [
+        { label: 'GST %',   w: 0.30, align: 'right' },
+        { label: 'Taxable', w: 0.40, align: 'right' },
+        { label: 'GST',     w: 0.30, align: 'right' },
+      ];
+      const gstRows = taxSummary.map(r => [
+        `${n(r.gst_percent)}%`,
+        inr(r.taxable_amount),
+        inr(r.gst_amount),
+      ]);
+      const gstTableBottom = drawTable(pdf, gstX, y, gstW, gstCols, gstRows, { rowH: 13, fontSize: 8 });
+
+      // Totals block (right, aligned to same y start)
+      const totStartY = y - 4; // align with section label
+      const totRows = [
+        ['Subtotal',     inv.subtotal_amount != null ? inr(inv.subtotal_amount) : null, false],
+        ['Discount',     n(inv.discount_amount) ? inr(inv.discount_amount) : null, false],
+        ['GST',          inv.gst_amount != null ? inr(inv.gst_amount) : null, false],
+        ['Round Off',    n(inv.round_off_amount) ? inr(inv.round_off_amount) : null, false],
+        ['Total Amount', inv.total_amount != null ? inr(inv.total_amount) : null, true],
+        ['Amount Paid',  inv.amount_paid_resolved != null ? inr(inv.amount_paid_resolved) : null, false, P.success],
+        ['Balance Due',  inv.balance_due_resolved != null ? inr(inv.balance_due_resolved) : null, true,
+          n(inv.balance_due_resolved) > 0 ? P.danger : P.success],
+      ];
+      drawTotals(pdf, totX, totStartY + 18, totW, totRows, { fontSize: 8.5, rowH: 13 });
+
+      y = Math.max(gstTableBottom, totStartY + 18 + totRows.filter(([, v]) => v != null).length * 13) + 12;
+    } else {
+      // No GST summary — just totals full width
+      y = drawSectionLabel(pdf, ML, y, W, 'Totals');
+      y += 6;
+      const totRows = [
+        ['Subtotal',     inv.subtotal_amount != null ? inr(inv.subtotal_amount) : null, false],
+        ['Discount',     n(inv.discount_amount) ? inr(inv.discount_amount) : null, false],
+        ['GST',          inv.gst_amount != null ? inr(inv.gst_amount) : null, false],
+        ['Round Off',    n(inv.round_off_amount) ? inr(inv.round_off_amount) : null, false],
+        ['Total Amount', inv.total_amount != null ? inr(inv.total_amount) : null, true],
+        ['Amount Paid',  inv.amount_paid_resolved != null ? inr(inv.amount_paid_resolved) : null, false, P.success],
+        ['Balance Due',  inv.balance_due_resolved != null ? inr(inv.balance_due_resolved) : null, true,
+          n(inv.balance_due_resolved) > 0 ? P.danger : P.success],
+      ];
+      drawTotals(pdf, ML, y, W, totRows, { fontSize: 8.5, rowH: 13 });
+      y += totRows.filter(([, v]) => v != null).length * 13 + 12;
     }
 
-    pdf.moveDown(1);
-    pdf.fontSize(8).fillColor(COLOR_MUTED)
-      .text("This is an automated email. Please do not reply unless asked to.");
+    // ── Payments section ──────────────────────────────────────────────────────
+    if (payments.length) {
+      y = drawSectionLabel(pdf, ML, y, W, 'Payments');
+      y += 4;
+      const payCols = [
+        { label: '#',         w: 0.05, align: 'right' },
+        { label: 'Date',      w: 0.15, align: 'left'  },
+        { label: 'Mode',      w: 0.15, align: 'left'  },
+        { label: 'Reference', w: 0.45, align: 'left'  },
+        { label: 'Amount',    w: 0.20, align: 'right' },
+      ];
+      const payRows = payments.map((p, idx) => [
+        String(idx + 1),
+        ymd(p.payment_date || p.date),
+        safeStr(p.payment_mode || p.mode || '', 20),
+        safeStr(p.reference || p.notes || '', 60),
+        inr(p.amount),
+      ]);
+      y = drawTable(pdf, ML, y, W, payCols, payRows, { rowH: 13, fontSize: 8 });
+      y += 10;
+    } else {
+      // Show empty payments table
+      y = drawSectionLabel(pdf, ML, y, W, 'Payments');
+      y += 4;
+      const payCols = [
+        { label: '#',         w: 0.05, align: 'right' },
+        { label: 'Date',      w: 0.15, align: 'left'  },
+        { label: 'Mode',      w: 0.15, align: 'left'  },
+        { label: 'Reference', w: 0.45, align: 'left'  },
+        { label: 'Amount',    w: 0.20, align: 'right' },
+      ];
+      y = drawTable(pdf, ML, y, W, payCols, [['', 'No payments linked', '', '', '']], {
+        rowH: 13, fontSize: 8,
+      });
+      y += 10;
+    }
+
+    // ── Page footer ───────────────────────────────────────────────────────────
+    drawPageFooter(pdf, ML, PH - MB + 4, W, invNumber, status);
   });
 
-  const filename = `Sales-Invoice-${safeFilePart(inv.invoice_number)}.pdf`;
+  const filename = `Sales-Invoice-${safeFilePart(inv.invoice_number || 'doc')}.pdf`;
   return { buffer, filename };
 }
 

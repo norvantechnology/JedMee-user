@@ -3,6 +3,7 @@ const { ok, fail } = require("../../shared/response");
 const { query } = require("../../shared/db");
 const { parseJsonBody } = require("../../shared/request");
 const { isEmailLike, isValidRole, normalizeEmail } = require("../../shared/validation");
+const { checkRateLimit, lambdaClientIp } = require("../../shared/rateLimiter");
 const {
   parseTtlSeconds,
   secondsFromNow,
@@ -13,6 +14,9 @@ const {
 } = require("../../shared/tokens");
 
 async function handler(event) {
+  const limited = checkRateLimit('auth', lambdaClientIp(event));
+  if (limited) return fail(429, 'RATE_LIMITED', limited.message);
+
   const body = parseJsonBody(event);
   const email = normalizeEmail(body.email);
   const password = String(body.password || "");

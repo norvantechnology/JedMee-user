@@ -3,6 +3,7 @@ const { query } = require("../../shared/db");
 const { parseJsonBody } = require("../../shared/request");
 const { isEmailLike, normalizeEmail } = require("../../shared/validation");
 const { verifyOtpHash } = require("../../shared/otp");
+const { checkRateLimit, lambdaClientIp } = require("../../shared/rateLimiter");
 const {
   parseTtlSeconds,
   secondsFromNow,
@@ -91,6 +92,9 @@ async function ensureAccountRoleBootstrap(userId, roleCode) {
 }
 
 async function handler(event) {
+  const limited = checkRateLimit('otp', lambdaClientIp(event));
+  if (limited) return fail(429, 'RATE_LIMITED', limited.message);
+
   const body = parseJsonBody(event);
   const email = normalizeEmail(body.email);
   const otp = String(body.otp || "").trim();

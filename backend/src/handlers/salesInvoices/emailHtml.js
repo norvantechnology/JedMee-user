@@ -1,4 +1,4 @@
-const { emailBase, summaryCard, metaRow, sectionHeading, divider, greeting, para, E, C } = require("../../shared/emailTemplate");
+const { emailBase, summaryCard, metaRow, sectionHeading, divider, greeting, para, noticeBox, E, C, ICONS } = require("../../shared/emailTemplate");
 
 function n(v) {
   const x = Number(v);

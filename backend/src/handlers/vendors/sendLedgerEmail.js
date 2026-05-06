@@ -4,7 +4,7 @@ const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { sendMail } = require("../../shared/mailOut");
 const { buildVendorLedgerPdfAttachment } = require("../../shared/pdf/vendorLedgerPdf");
-const { emailBase, summaryCard, sectionHeading, divider, greeting, para, E, C } = require("../../shared/emailTemplate");
+const { emailBase, summaryCard, sectionHeading, divider, greeting, para, noticeBox, E, C, ICONS } = require("../../shared/emailTemplate");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

@@ -184,9 +184,18 @@ routes.sort((a, b) => {
   return a.apiPath.localeCompare(b.apiPath);
 });
 
+const { rateLimitMiddleware } = require('./src/shared/rateLimiter');
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// ── IP-based rate limiting on sensitive endpoints ─────────────────────────────
+// Auth: login, registration, OTP request/verify, password reset
+app.use('/auth',         rateLimitMiddleware('auth'));
+app.use('/registration', rateLimitMiddleware('auth'));
+// General API: loose limit on everything else
+app.use('/',             rateLimitMiddleware('api'));
 
 for (const route of routes) {
   const mod = require(path.join(__dirname, route.modulePath));
