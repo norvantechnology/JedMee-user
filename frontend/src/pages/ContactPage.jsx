@@ -33,9 +33,12 @@ export default function ContactPage() {
   const [status, setStatus] = useState("idle"); // idle | sending | sent
 
   useSeoMeta({
-    title: "Contact JedMee — Pharmacy Management Software Support",
+    title: "Contact JedMee — Pharmacy Software Support & Sales India",
     description:
-      "Get in touch with the JedMee team. We help Indian pharmacies and distributors with onboarding, billing questions, technical support, and sales enquiries.",
+      "Contact JedMee for pharmacy management software support, pricing, or a free demo. We help Indian medicine shops, chemists, and pharmaceutical distributors get started with GST billing and inventory management.",
+    keywords:
+      "contact JedMee, pharmacy software support India, medicine shop software help, pharmacy billing software demo, JedMee support, pharmacy management software contact",
+    canonical: "https://jedmee.com/contact",
   });
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));

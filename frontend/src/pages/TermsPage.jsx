@@ -97,9 +97,12 @@ export default function TermsPage() {
   const [active, setActive] = useState(null);
 
   useSeoMeta({
-    title: "Terms of Service — JedMee Pharmacy Management Software",
+    title: "Terms of Service — JedMee Pharmacy Management Software India",
     description:
-      "Read JedMee's Terms of Service. Understand your rights and responsibilities when using our pharmacy management platform for medicine shops and distributors in India.",
+      "Read JedMee's Terms of Service for our pharmacy management platform. Understand your rights and responsibilities when using our medicine shop software, GST billing system, and inventory management tools in India.",
+    keywords:
+      "JedMee terms of service, pharmacy software terms, medicine shop software terms, pharmacy management platform terms India",
+    canonical: "https://jedmee.com/terms",
   });
 
   const scrollTo = (id) => {

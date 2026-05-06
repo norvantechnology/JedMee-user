@@ -56,9 +56,12 @@ export default function AboutPage() {
   const navigate = useNavigate();
 
   useSeoMeta({
-    title: "About JedMee — Pharmacy Management Software for India",
+    title: "About JedMee — Pharmacy Software Built for India's Medicine Shops",
     description:
-      "JedMee is built for Indian medicine shops and distributors. Learn our story, mission, and why 500+ pharmacies across India trust us for GST billing, stock management, and more.",
+      "Learn about JedMee — India's trusted pharmacy management software. Built for medicine shops, chemists, and pharmaceutical distributors. GST-compliant billing, inventory management, and cloud-based operations for 500+ pharmacies across India.",
+    keywords:
+      "about JedMee, pharmacy software company India, medicine shop management company, Indian pharmacy software, chemist software India, pharmaceutical software company",
+    canonical: "https://jedmee.com/about",
   });
 
   const stats = [

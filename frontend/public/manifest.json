@@ -1,0 +1,38 @@
+{
+  "name": "JedMee — Pharmacy Management Software India",
+  "short_name": "JedMee",
+  "description": "Best pharmacy management software for Indian medicine shops & distributors. GST billing, inventory tracking, purchase orders, sales invoices, expiry alerts.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0a1a",
+  "theme_color": "#6b3fa0",
+  "orientation": "portrait-primary",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "scope": "/",
+  "categories": ["business", "productivity", "medical"],
+  "icons": [
+    {
+      "src": "/favicon.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "label": "JedMee Pharmacy Management Dashboard"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

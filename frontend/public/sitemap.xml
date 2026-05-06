@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
   <url>
     <loc>https://jedmee.com/</loc>
     <lastmod>2026-05-07</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://jedmee.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jedmee.com/"/>
   </url>
 
   <url>
@@ -16,6 +16,8 @@
     <lastmod>2026-05-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://jedmee.com/about"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jedmee.com/about"/>
   </url>
 
   <url>
@@ -23,13 +25,17 @@
     <lastmod>2026-05-07</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://jedmee.com/contact"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jedmee.com/contact"/>
   </url>
 
   <url>
     <loc>https://jedmee.com/terms</loc>
     <lastmod>2026-05-07</lastmod>
     <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en-IN" href="https://jedmee.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://jedmee.com/terms"/>
   </url>
 
 </urlset>

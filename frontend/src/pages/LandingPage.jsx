@@ -1051,9 +1051,12 @@ export default function LandingPage() {
   const authed = Boolean(readAuth()?.refreshToken);
 
   useSeoMeta({
-    title: "Pharmacy Management Software for India",
+    title: "Pharmacy Management Software India | GST Billing & Inventory",
     description:
-      "JedMee helps medicine shops and distributors manage stock, GST billing, orders, and payments — all in one simple app. Trusted by 500+ pharmacies across India.",
+      "JedMee is India's best pharmacy management software for medicine shops & distributors. GST billing, inventory tracking, expiry alerts, purchase orders & sales invoices. Free plan available — no credit card required.",
+    keywords:
+      "pharmacy management software India, medicine shop software, GST billing pharmacy, medical store management software, pharmacy inventory software, drug store software India, pharmacy POS software, medicine distributor software, pharmacy billing system India, online pharmacy management system, medical shop billing software, pharmacy stock management, medicine expiry tracking, wholesale pharma software India, chemist shop software, pharmacy ERP India",
+    canonical: "https://jedmee.com/",
   });
 
   useEffect(() => {
