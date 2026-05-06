@@ -52,24 +52,24 @@ export default function ContactPage() {
     {
       icon: <Icon name="mail" size={22} />,
       title: "Email Support",
-      detail: "support@jedmee.com",
+      detail: "supportjedmee@gmail.com",
       sub: "We reply within 24 hours on business days",
-      href: "mailto:support@jedmee.com",
+      href: "mailto:supportjedmee@gmail.com",
       cc: "#6b3fa0",
     },
     {
       icon: <Icon name="briefcase" size={22} />,
-      title: "Sales Enquiries",
-      detail: "sales@jedmee.com",
-      sub: "For Enterprise plans and custom pricing",
-      href: "mailto:sales@jedmee.com",
+      title: "Sales & Onboarding",
+      detail: "supportjedmee@gmail.com",
+      sub: "For Enterprise plans, pricing & onboarding help",
+      href: "mailto:supportjedmee@gmail.com",
       cc: "#0ea5e9",
     },
     {
-      icon: <Icon name="mapPin" size={22} />,
-      title: "Headquarters",
-      detail: "Ahmedabad, Gujarat, India",
-      sub: "Serving pharmacies across all of India",
+      icon: <Icon name="clock" size={22} />,
+      title: "Support Hours",
+      detail: "Mon – Sat, 9 AM – 7 PM IST",
+      sub: "We're available across all Indian time zones",
       href: null,
       cc: "#16a34a",
     },
@@ -80,6 +80,7 @@ export default function ContactPage() {
     { icon: <Icon name="globe" size={16} />, text: "Support in Hindi and English" },
     { icon: <Icon name="check" size={16} />, text: "Free onboarding help for all new accounts" },
     { icon: <Icon name="phone" size={16} />, text: "Phone support for Professional & Enterprise plans" },
+    { icon: <Icon name="mail" size={16} />, text: "Email us anytime at supportjedmee@gmail.com" },
   ];
 
   const faqs = [
@@ -148,7 +149,7 @@ export default function ContactPage() {
               <h2 className="ip-form-info-title">Send Us a Message</h2>
               <p style={{ color: "var(--color-text-muted)", lineHeight: 1.8, fontSize: "var(--text-sm)" }}>
                 Fill in the form and we'll get back to you within one business day. For urgent issues, email us directly at{" "}
-                <a href="mailto:support@jedmee.com" style={{ color: "var(--color-primary)", fontWeight: 600 }}>support@jedmee.com</a>.
+                <a href="mailto:supportjedmee@gmail.com" style={{ color: "var(--color-primary)", fontWeight: 600 }}>supportjedmee@gmail.com</a>.
               </p>
               <div className="ip-form-info-list">
                 {infoItems.map(item => (

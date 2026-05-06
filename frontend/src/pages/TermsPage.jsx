@@ -88,7 +88,7 @@ const SECTIONS = [
   {
     num: "14",
     title: "Contact",
-    content: `For questions about these Terms, please contact us at legal@jedmee.com or write to: JedMee, Ahmedabad, Gujarat, India.`,
+    content: `For questions about these Terms, please contact us at supportjedmee@gmail.com and we'll be happy to help.`,
   },
 ];
 
@@ -185,14 +185,9 @@ export default function TermsPage() {
                 <p style={{ color: "var(--color-text-muted)", marginBottom: "20px", fontSize: "var(--text-sm)" }}>
                   Have questions about our terms? We're happy to help.
                 </p>
-                <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-                  <button className="ln-btn ln-btn--primary" onClick={() => navigate("/contact")}>
-                    Contact Us <Icon name="arrow" size={16} />
-                  </button>
-                  <button className="ln-btn ln-btn--ghost" onClick={() => navigate("/")}>
-                    Back to Home
-                  </button>
-                </div>
+                <button className="ln-btn ln-btn--primary" onClick={() => navigate("/contact")}>
+                  Contact Us <Icon name="arrow" size={16} />
+                </button>
               </div>
             </div>
           </div>

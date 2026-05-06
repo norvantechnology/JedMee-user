@@ -138,6 +138,9 @@ function SharedFooter() {
                 <span key={label} className="ln-footer-badge"><Icon name={icon} size={12} />{label}</span>
               ))}
             </div>
+            <a href="mailto:supportjedmee@gmail.com" style={{ display: "block", marginTop: "10px", fontSize: "0.8rem", color: "rgba(255,255,255,0.55)", textDecoration: "none" }}>
+              supportjedmee@gmail.com
+            </a>
           </div>
           <div className="ln-footer-col">
             <div className="ln-footer-col-title">Platform</div>
