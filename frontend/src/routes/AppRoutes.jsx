@@ -13,6 +13,7 @@ import DivisionsPage from "../pages/DivisionsPage.jsx";
 import QualityMasterPage from "../pages/QualityMasterPage.jsx";
 import MfgCompaniesPage from "../pages/MfgCompaniesPage.jsx";
 import PurchaseInvoicesPage from "../pages/PurchaseInvoicesPage.jsx";
+import PurchaseReturnsPage from "../pages/PurchaseReturnsPage.jsx";
 import CustomersPage from "../pages/CustomersPage.jsx";
 import SalesBillingPage from "../pages/SalesBillingPage.jsx";
 import SalesReturnsPage from "../pages/SalesReturnsPage.jsx";
@@ -23,6 +24,7 @@ import PrescriptionsPage from "../pages/PrescriptionsPage.jsx";
 import InventoryReportsPage from "../pages/InventoryReportsPage.jsx";
 import DayBookReportPage from "../pages/DayBookReportPage.jsx";
 import LedgerReportsPage from "../pages/LedgerReportsPage.jsx";
+import GstReportPage from "../pages/GstReportPage.jsx";
 import CustomerLedgerPage from "../pages/CustomerLedgerPage.jsx";
 import VendorLedgerPage from "../pages/VendorLedgerPage.jsx";
 import ProfileSettingsPage from "../pages/ProfileSettingsPage.jsx";
@@ -184,6 +186,12 @@ export function AppRoutes() {
         }
       />
       <Route
+        path="/purchase-returns"
+        element={
+          !authed ? <Navigate to="/login" replace /> : mustChange ? <Navigate to="/first-login-change-password" replace /> : approvalGate ? <Navigate to="/approval" replace /> : <PurchaseReturnsPage />
+        }
+      />
+      <Route
         path="/orders"
         element={
           !authed ? <Navigate to="/login" replace /> : mustChange ? <Navigate to="/first-login-change-password" replace /> : approvalGate ? <Navigate to="/approval" replace /> : <OrdersPage key="orders" />
@@ -211,6 +219,12 @@ export function AppRoutes() {
         path="/reports/day-book"
         element={
           !authed ? <Navigate to="/login" replace /> : mustChange ? <Navigate to="/first-login-change-password" replace /> : approvalGate ? <Navigate to="/approval" replace /> : <DayBookReportPage />
+        }
+      />
+      <Route
+        path="/reports/gst-r1"
+        element={
+          !authed ? <Navigate to="/login" replace /> : mustChange ? <Navigate to="/first-login-change-password" replace /> : approvalGate ? <Navigate to="/approval" replace /> : <GstReportPage />
         }
       />
       <Route

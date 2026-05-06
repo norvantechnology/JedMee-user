@@ -111,7 +111,9 @@ const ROUTES = {
   'POST /purchase-invoices/send-email':       '../purchaseInvoices/sendEmail',
 
   // ── Purchase returns ────────────────────────────────────────────────────────
+  'GET /purchase-returns':                '../purchaseReturns/list',
   'POST /purchase-returns':               '../purchaseReturns/create',
+  'GET /purchase-returns/{id}':           '../purchaseReturns/get',
   'POST /purchase-returns/{id}/confirm':  '../purchaseReturns/confirm',
 
   // ── Vendor payments ─────────────────────────────────────────────────────────
@@ -192,6 +194,7 @@ const ROUTES = {
   'GET /reports/mfg-stockist':     '../reports/mfgStockist',
   'GET /reports/non-moving':       '../reports/nonMoving',
   'GET /reports/day-book':         '../reports/dayBook',
+  'GET /reports/gst-r1':           '../reports/gstR1',
 
   // ── Dashboard ───────────────────────────────────────────────────────────────
   'GET /dashboard/alerts':  '../dashboard/alerts',
