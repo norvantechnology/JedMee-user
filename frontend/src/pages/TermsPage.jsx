@@ -180,15 +180,6 @@ export default function TermsPage() {
                 </div>
               ))}
 
-              {/* Footer CTA */}
-              <div style={{ textAlign: "center", paddingTop: "32px", borderTop: "1px solid var(--color-border)", marginTop: "8px" }}>
-                <p style={{ color: "var(--color-text-muted)", marginBottom: "20px", fontSize: "var(--text-sm)" }}>
-                  Have questions about our terms? We're happy to help.
-                </p>
-                <button className="ln-btn ln-btn--primary" onClick={() => navigate("/contact")}>
-                  Contact Us <Icon name="arrow" size={16} />
-                </button>
-              </div>
             </div>
           </div>
         </div>
