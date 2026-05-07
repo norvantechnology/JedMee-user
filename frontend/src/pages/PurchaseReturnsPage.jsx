@@ -1,238 +1,258 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { readAuth } from '../services/authStorage.js';
-
-const API = import.meta.env.VITE_API_URL || '';
-
-const STATUS_COLORS = {
-  DRAFT:     { bg: '#fff8e1', color: '#f59e0b', label: 'Draft' },
-  CONFIRMED: { bg: '#e8f5e9', color: '#22c55e', label: 'Confirmed' },
-  CANCELLED: { bg: '#fce4ec', color: '#ef4444', label: 'Cancelled' },
-};
-
-function fmt(n) {
-  return Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+import { useSeoMeta } from "../utils/seo.js";
+import { AppButton } from "../components/ui/buttons.jsx";
+import { useEffect, useState } from "react";
+import AppShell from "../layouts/AppShell.jsx";
+import CommonTable from "../components/CommonTable.jsx";
+import ConfirmDialog from "../components/ConfirmDialog.jsx";
+import { readAuth } from "../services/authStorage.js";
+import { can } from "../utils/access.js";
+import { listPurchaseReturns, confirmPurchaseReturn } from "../services/purchaseService.js";
+import { parseApiError } from "../utils/api.js";
+import { emitToast } from "../services/toastBus.js";
+import { NAV_LABELS } from "../constants/navLabels.js";
+import { fmtMoney } from "../utils/format.js";
+import { IconBtn, IconConfirm } from "../components/TableActionKit.jsx";
+import { downloadCsvFile } from "../components/reports/reportExport.js";
+import TableCsvActions from "../components/ui/TableCsvActions.jsx";
+import { useNavigate } from "react-router-dom";
+import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
 
 export default function PurchaseReturnsPage() {
+  useSeoMeta({ title: "Purchase Returns" });
+  const auth = readAuth();
+  const user = auth?.user || null;
   const navigate = useNavigate();
-  const [items, setItems]       = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [search, setSearch]     = useState('');
-  const [status, setStatus]     = useState('');
-  const [page, setPage]         = useState(1);
-  const [pagination, setPagination] = useState({});
-  const [error, setError]       = useState('');
 
-  const load = useCallback(async () => {
-    setLoading(true); setError('');
-    try {
-      const { token } = readAuth();
-      const qs = new URLSearchParams({ page, limit: 20 });
-      if (search) qs.set('search', search);
-      if (status) qs.set('status', status);
-      const res = await fetch(`${API}/purchase-returns?${qs}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to load');
-      setItems(data.items || []);
-      setPagination(data.pagination || {});
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
+  const canView = can("PURCHASE_RETURNS", "VIEW");
+  const canUpdate = can("PURCHASE_RETURNS", "UPDATE");
+  const canAdd = can("PURCHASE_RETURNS", "ADD");
+
+  const [busy, setBusy] = useState(false);
+  const [rows, setRows] = useState([]);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [confirm, setConfirm] = useState({ open: false, id: "" });
+  const [confirmBusy, setConfirmBusy] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+
+  async function refresh() {
+    setBusy(true);
+    const r = await listPurchaseReturns({
+      search: search || undefined,
+      status: statusFilter || undefined,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
+      limit: 500
+    });
+    if (r.status >= 200 && r.status < 300 && r.json?.ok) {
+      setRows(r.json?.data?.items || []);
+    } else if (r.status !== 401) {
+      emitToast({ type: "error", message: parseApiError(r) });
     }
-  }, [page, search, status]);
+    setBusy(false);
+  }
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    if (canView) refresh();
+  }, [canView, search, statusFilter, dateFrom, dateTo]);
 
-  async function confirmReturn(id) {
-    if (!confirm('Confirm this purchase return? Stock will be adjusted.')) return;
-    try {
-      const { token } = readAuth();
-      const res = await fetch(`${API}/purchase-returns/${id}/confirm`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Failed to confirm');
-      load();
-    } catch (e) {
-      alert(e.message);
+  async function handleConfirm() {
+    if (!confirm.id) return;
+    setConfirmBusy(true);
+    const r = await confirmPurchaseReturn(confirm.id);
+    setConfirmBusy(false);
+    if (r.status >= 200 && r.status < 300 && r.json?.ok) {
+      emitToast({ type: "success", message: "Purchase return confirmed. Stock adjusted." });
+      setConfirm({ open: false, id: "" });
+      await refresh();
+    } else if (r.status !== 401) {
+      emitToast({ type: "error", message: parseApiError(r) });
     }
   }
 
-  return (
-    <div style={{ padding: '24px', maxWidth: 1100, margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#1e293b' }}>Purchase Returns</h1>
-          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 14 }}>
-            Manage returns to vendors with credit note tracking
-          </p>
-        </div>
-        <button
-          onClick={() => navigate('/purchase-returns/new')}
-          style={{
-            background: '#6b3fa0', color: '#fff', border: 'none', borderRadius: 8,
-            padding: '10px 20px', fontWeight: 600, cursor: 'pointer', fontSize: 14,
-          }}
-        >
-          + New Return
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-        <input
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(1); }}
-          placeholder="Search return # or credit note…"
-          style={{
-            flex: 1, minWidth: 200, padding: '9px 14px', border: '1px solid #e2e8f0',
-            borderRadius: 8, fontSize: 14, outline: 'none',
-          }}
-        />
-        <select
-          value={status}
-          onChange={e => { setStatus(e.target.value); setPage(1); }}
-          style={{
-            padding: '9px 14px', border: '1px solid #e2e8f0', borderRadius: 8,
-            fontSize: 14, background: '#fff', cursor: 'pointer',
-          }}
-        >
-          <option value="">All Status</option>
-          <option value="DRAFT">Draft</option>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="CANCELLED">Cancelled</option>
-        </select>
-        <button
-          onClick={load}
-          style={{
-            padding: '9px 18px', background: '#f1f5f9', border: '1px solid #e2e8f0',
-            borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 500,
-          }}
-        >
-          Refresh
-        </button>
-      </div>
-
-      {/* Error */}
-      {error && (
-        <div style={{ background: '#fce4ec', color: '#c62828', padding: '12px 16px', borderRadius: 8, marginBottom: 16 }}>
-          {error}
-        </div>
-      )}
-
-      {/* Table */}
-      <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-        {loading ? (
-          <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>Loading…</div>
-        ) : items.length === 0 ? (
-          <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>
-            <div style={{ fontSize: 40, marginBottom: 12 }}>📦</div>
-            <div style={{ fontWeight: 600, color: '#475569' }}>No purchase returns found</div>
-            <div style={{ fontSize: 13, marginTop: 4 }}>Create a return against a purchase invoice</div>
+  if (!canView) {
+    return (
+      <AppShell
+        userName={user?.full_name || "User"}
+        userEmail={user?.email || auth?.email || ""}
+        userBusinessName={user?.firm_name || ""}
+        userGstNumber={user?.gst_number || ""}
+        variant="user"
+      >
+        <div className="pageWrap">
+          <div className="pageCard">
+            <div className="raTitle">{NAV_LABELS.purchaseReturns}</div>
+            <div className="raSub">You do not have permission to view purchase returns.</div>
           </div>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                {['Return #', 'Date', 'Vendor / Division', 'Original Invoice', 'Reason', 'Amount', 'Status', 'Actions'].map(h => (
-                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((r, i) => {
-                const sc = STATUS_COLORS[r.status] || STATUS_COLORS.DRAFT;
-                return (
-                  <tr key={r.id} style={{ borderBottom: '1px solid #f1f5f9', background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
-                    <td style={{ padding: '12px 16px', fontWeight: 600, color: '#6b3fa0', fontSize: 14 }}>
-                      {r.return_number}
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: 13, color: '#475569' }}>
-                      {r.return_date ? new Date(r.return_date).toLocaleDateString('en-IN') : '—'}
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: 13, color: '#1e293b' }}>
-                      {r.vendor_name || r.division_name || '—'}
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: 13, color: '#475569' }}>
-                      {r.original_invoice_number || '—'}
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#64748b' }}>
-                      {(r.return_reason || '').replace(/_/g, ' ')}
-                    </td>
-                    <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1e293b' }}>
-                      ₹{fmt(r.total_amount)}
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <span style={{
-                        background: sc.bg, color: sc.color, padding: '3px 10px',
-                        borderRadius: 20, fontSize: 12, fontWeight: 600,
-                      }}>
-                        {sc.label}
-                      </span>
-                    </td>
-                    <td style={{ padding: '12px 16px' }}>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button
-                          onClick={() => navigate(`/purchase-returns/${r.id}`)}
-                          style={{
-                            padding: '5px 12px', background: '#f1f5f9', border: '1px solid #e2e8f0',
-                            borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 500,
-                          }}
-                        >
-                          View
-                        </button>
-                        {r.status === 'DRAFT' && (
-                          <button
-                            onClick={() => confirmReturn(r.id)}
-                            style={{
-                              padding: '5px 12px', background: '#e8f5e9', color: '#22c55e',
-                              border: '1px solid #bbf7d0', borderRadius: 6, cursor: 'pointer',
-                              fontSize: 12, fontWeight: 600,
-                            }}
-                          >
-                            Confirm
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
+        </div>
+      </AppShell>
+    );
+  }
+
+  return (
+    <AppShell
+      userName={user?.full_name || "User"}
+      userEmail={user?.email || auth?.email || ""}
+      userBusinessName={user?.firm_name || ""}
+      userGstNumber={user?.gst_number || ""}
+      variant="user"
+    >
+      <div className="pageWrap">
+        <div className="raTop">
+          <div>
+            <div className="raTitle">{NAV_LABELS.purchaseReturns}</div>
+            <div className="raSub">Manage returns to vendors with credit note tracking.</div>
+          </div>
+        </div>
+        <div className="pageCard">
+          <CommonTable
+            title=""
+            subtitle=""
+            compact
+            countText={busy ? "Loading..." : `${rows.length} return${rows.length !== 1 ? "s" : ""}`}
+            search={search}
+            onSearchChange={setSearch}
+            filters={[
+              {
+                id: "status",
+                label: "Status",
+                value: statusFilter,
+                onChange: setStatusFilter,
+                options: [
+                  { value: "", label: "All status" },
+                  { value: "DRAFT", label: "Draft" },
+                  { value: "CONFIRMED", label: "Confirmed" },
+                  { value: "CANCELLED", label: "Cancelled" }
+                ]
+              },
+              { id: "from", type: "date", label: "From", value: dateFrom, onChange: setDateFrom },
+              { id: "to", type: "date", label: "To", value: dateTo, onChange: setDateTo }
+            ]}
+            extraHeaderActions={
+              canAdd ? (
+                <TableCsvActions
+                  disabled={busy}
+                  onImport={() => setImportOpen(true)}
+                  onExport={() => {
+                    const cols = [
+                      { key: "return_number", label: "return_number" },
+                      { key: "return_date", label: "return_date" },
+                      { key: "status", label: "status" },
+                      { key: "vendor_name", label: "vendor_name" },
+                      { key: "original_invoice_number", label: "original_invoice_number" },
+                      { key: "return_reason", label: "return_reason" },
+                      { key: "total_amount", label: "total_amount" }
+                    ];
+                    downloadCsvFile(
+                      "purchase_returns_export.csv",
+                      cols,
+                      rows.map((r) => ({
+                        return_number: r.return_number || "",
+                        return_date: String(r.return_date || "").slice(0, 10),
+                        status: r.status || "",
+                        vendor_name: r.vendor_name || r.division_name || "",
+                        original_invoice_number: r.original_invoice_number || "",
+                        return_reason: String(r.return_reason || "").replace(/_/g, " "),
+                        total_amount: r.total_amount || 0
+                      }))
+                    );
+                  }}
+                />
+              ) : null
+            }
+            primaryAction={
+              canAdd
+                ? { label: "+ New Return", onClick: () => navigate("/purchase-returns/new") }
+                : null
+            }
+            rows={rows}
+            getRowId={(r) => r.id}
+            columns={[
+              {
+                id: "return_number",
+                header: "Return #",
+                render: (r) => <span style={{ fontWeight: 700 }}>{r.return_number || "—"}</span>
+              },
+              {
+                id: "return_date",
+                header: "Date",
+                render: (r) => String(r.return_date || "").slice(0, 10) || "—"
+              },
+              {
+                id: "vendor_name",
+                header: "Vendor / Division",
+                render: (r) => r.vendor_name || r.division_name || "—"
+              },
+              {
+                id: "original_invoice_number",
+                header: "Original Invoice",
+                sortable: false,
+                render: (r) => r.original_invoice_number || "—"
+              },
+              {
+                id: "return_reason",
+                header: "Reason",
+                sortable: false,
+                render: (r) => (
+                  <span style={{ color: "var(--color-text-3)" }}>
+                    {String(r.return_reason || "").replace(/_/g, " ") || "—"}
+                  </span>
+                )
+              },
+              {
+                id: "total_amount",
+                header: "Amount",
+                align: "right",
+                render: (r) => fmtMoney(r.total_amount || 0)
+              },
+              {
+                id: "status",
+                header: "Status",
+                render: (r) => <span style={{ fontWeight: 700 }}>{r.status || "—"}</span>
+              },
+              {
+                id: "actions",
+                header: "Actions",
+                align: "right",
+                sortable: false,
+                render: (r) => (
+                  <div className="ibGroup" onClick={(e) => e.stopPropagation()}>
+                    {r.status === "DRAFT" && canUpdate ? (
+                      <IconBtn
+                        tooltip="Confirm return and adjust stock"
+                        variant="success"
+                        onClick={() => setConfirm({ open: true, id: r.id })}
+                      >
+                        <IconConfirm />
+                      </IconBtn>
+                    ) : null}
+                  </div>
+                )
+              }
+            ]}
+          />
+        </div>
       </div>
 
-      {/* Pagination */}
-      {pagination.pages > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage(p => p - 1)}
-            style={{ padding: '7px 16px', borderRadius: 8, border: '1px solid #e2e8f0', cursor: page <= 1 ? 'not-allowed' : 'pointer', background: '#fff' }}
-          >
-            ← Prev
-          </button>
-          <span style={{ padding: '7px 16px', color: '#64748b', fontSize: 14 }}>
-            Page {page} of {pagination.pages}
-          </span>
-          <button
-            disabled={page >= pagination.pages}
-            onClick={() => setPage(p => p + 1)}
-            style={{ padding: '7px 16px', borderRadius: 8, border: '1px solid #e2e8f0', cursor: page >= pagination.pages ? 'not-allowed' : 'pointer', background: '#fff' }}
-          >
-            Next →
-          </button>
-        </div>
-      )}
-    </div>
+      <ConfirmDialog
+        open={confirm.open}
+        title="Confirm Purchase Return"
+        message="Confirm this purchase return? Stock will be adjusted and this action cannot be undone."
+        confirmLabel="Confirm Return"
+        busy={confirmBusy}
+        onConfirm={handleConfirm}
+        onCancel={() => setConfirm({ open: false, id: "" })}
+      />
+
+      <CsvImportWizard
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        entityType="PURCHASE_RETURNS"
+        title="Import Purchase Returns"
+        onCompleted={() => { setImportOpen(false); refresh(); }}
+      />
+    </AppShell>
   );
 }

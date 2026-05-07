@@ -16,16 +16,13 @@ import {
   updateMfgCompany
 } from "../services/mfgCompanyService.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
+import { clean } from "../utils/format.js";
 import "../components/StructuredForm.css";
 import "./MfgCompaniesPage.css";
 import { IconBtn, IconEdit, IconTrash } from "../components/TableActionKit.jsx";
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
-
-function clean(v) {
-  return String(v ?? "").trim();
-}
 
 export default function MfgCompaniesPage() {
   useSeoMeta({ title: "Manufacturers" });

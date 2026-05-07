@@ -5,12 +5,9 @@ import AppShell from "../layouts/AppShell.jsx";
 import { onAuthChanged, readAuth, saveAuthUser } from "../services/authStorage.js";
 import DocumentUploadField from "../components/DocumentUploadField.jsx";
 import { updateMe } from "../services/userService.js";
+import { clean } from "../utils/format.js";
 import "./ProfileSettingsPage.css";
 import { IconPsBell, IconPsBuilding, IconPsCalendar, IconPsCheck, IconPsChevronDown, IconPsFileText, IconPsFolder, IconPsMail, IconPsMapPin, IconPsPencil, IconPsPhone, IconPsSettings, IconPsUser } from "../components/ui/AppIcons.jsx";
-
-function clean(v) {
-  return String(v ?? "").trim();
-}
 
 function initialsFromName(name) {
   const parts = String(name || "")

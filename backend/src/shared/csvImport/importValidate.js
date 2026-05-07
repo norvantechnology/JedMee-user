@@ -1,17 +1,32 @@
 const { clean, parsePharmacyDateToYmd, parseGst, parseNumber, parseBool } = require("./pharmacyParsers");
-const { REQUIRED_HINTS } = require("./fieldMeta");
+const { REQUIRED_HINTS, EITHER_OR_HINTS } = require("./fieldMeta");
 
+/**
+ * Check required fields and either/or pairs.
+ * Returns array of error strings (empty = ok).
+ */
 function basicRequired(entityType, data) {
   const reqs = REQUIRED_HINTS[entityType] || [];
   const miss = [];
   for (const k of reqs) {
     const v = data[k];
     if (v === undefined || v === null || String(v).trim() === "") {
+      // PRODUCT_BATCHES: product_code OR product_name
       if (entityType === "PRODUCT_BATCHES" && k === "product_code" && String(data.product_name || "").trim()) continue;
+      // DIVISIONS: manufacturer_code OR manufacturer_name
       if (entityType === "DIVISIONS" && k === "manufacturer_code" && String(data.manufacturer_name || "").trim()) continue;
       miss.push(k);
     }
   }
+
+  // Either/or pairs
+  const eitherOr = EITHER_OR_HINTS[entityType] || [];
+  for (const [a, b] of eitherOr) {
+    const av = String(data[a] || "").trim();
+    const bv = String(data[b] || "").trim();
+    if (!av && !bv) miss.push(`${a} or ${b}`);
+  }
+
   return miss;
 }
 
@@ -234,27 +249,43 @@ async function validateOneRow(q, accountId, roleCode, entityType, rowIndex, data
   return { ok: true, existing, data, rowIndex };
 }
 
+/** Validate a single row for document-type entities (PURCHASES, SALES, SALES_RETURNS, PURCHASE_RETURNS). */
+function validateDocRow(entityType, rowIndex, data) {
+  const errs = [];
+  const miss = basicRequired(entityType, data);
+  if (miss.length) return { ok: false, rowIndex, error: `Missing: ${miss.join(", ")}`, raw: data };
+
+  // Date validation
+  const dateFields = {
+    PURCHASES: ["invoice_date", "expiry_date"],
+    SALES: ["invoice_date"],
+    SALES_RETURNS: ["return_date"],
+    PURCHASE_RETURNS: ["return_date", "expiry_date"]
+  };
+  for (const field of dateFields[entityType] || []) {
+    if (data[field]) {
+      try {
+        parsePharmacyDateToYmd(data[field]);
+      } catch (e) {
+        return { ok: false, rowIndex, error: e.message || `Invalid ${field}`, raw: data };
+      }
+    }
+  }
+
+  return { ok: true };
+}
+
 async function validateImportRows(accountId, roleCode, entityType, rowsWithIndex, q) {
   const valid = [];
   const updates = [];
   const invalid = [];
 
-  const docGroupTypes = new Set(["PURCHASES", "SALES", "SALES_RETURNS"]);
+  const docGroupTypes = new Set(["PURCHASES", "SALES", "SALES_RETURNS", "PURCHASE_RETURNS"]);
   if (docGroupTypes.has(entityType)) {
     for (const { rowIndex, data } of rowsWithIndex) {
-      const miss = basicRequired(entityType, data);
-      if (miss.length) {
-        invalid.push({ rowIndex, error: `Missing: ${miss.join(", ")}`, raw: data });
-        continue;
-      }
-      try {
-        if (data.expiry_date && entityType === "PURCHASES") parsePharmacyDateToYmd(data.expiry_date);
-        if (data.invoice_date || data.return_date) {
-          const d = data.invoice_date || data.return_date;
-          parsePharmacyDateToYmd(d);
-        }
-      } catch (e) {
-        invalid.push({ rowIndex, error: e.message || "Invalid date", raw: data });
+      const r = validateDocRow(entityType, rowIndex, data);
+      if (!r.ok) {
+        invalid.push({ rowIndex: r.rowIndex, error: r.error, raw: r.raw });
         continue;
       }
       valid.push({ rowIndex, data });

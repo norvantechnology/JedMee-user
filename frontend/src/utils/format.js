@@ -3,6 +3,11 @@
  * Keep all currency/date/quantity formatting here so UI, print, and API
  * consumers stay consistent. Do NOT duplicate these in components/pages.
  */
+
+/** Coerce any value to a trimmed string. Replaces the local `clean(v)` helpers in pages. */
+export function clean(v) {
+  return String(v ?? "").trim();
+}
 import { formatIndianAmount } from "./amountFormat.js";
 
 /** Two-decimal fixed money string with Indian comma separation. Returns "" for non-finite input. */

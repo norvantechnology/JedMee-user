@@ -35,6 +35,7 @@ import {
   Settings,
   ShieldCheck,
   Trash2,
+  TrendingUp,
   Truck,
   Upload,
   Users,
@@ -2071,4 +2072,8 @@ export function IconMcProduct(p) {
       <path d="M4.5 12h5" strokeWidth="1.2" strokeOpacity="0.35" />
     </svg>
   );
+}
+/** IconTrendUp  gross profit / upward trend indicator. */
+export function IconTrendUp(p) {
+  return <TrendingUp aria-hidden="true" size={18} strokeWidth={2.2} {...p} />;
 }

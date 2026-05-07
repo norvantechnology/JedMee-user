@@ -21,25 +21,12 @@ import { listMfgCompanies } from "../services/mfgCompanyService.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
 import { IconProducts, IconStockAlert } from "../components/ui/AppIcons.jsx";
 import { IconBtn, IconEdit, IconLayers, IconPlus, IconTrash } from "../components/TableActionKit.jsx";
-import { fmtMoney } from "../utils/format.js";
+import { clean, daysUntil, fmtMoney } from "../utils/format.js";
 import { formatBatchExpiryRelativePhrase } from "../utils/batchExpiryDisplay.js";
 import "./QualityMasterPage.css";
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import { Download, Layers, Upload } from "../components/ui/AppIcons.jsx";
-
-function clean(v) {
-  return String(v ?? "").trim();
-}
-
-function daysUntil(dateStr) {
-  const s = String(dateStr || "").slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
-  const t = new Date(`${s}T00:00:00Z`).getTime();
-  const now = new Date();
-  const today = new Date(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}T00:00:00Z`).getTime();
-  return Math.floor((t - today) / (24 * 3600 * 1000));
-}
 
 function formatYmdFriendly(dateStr) {
   const s = String(dateStr || "").slice(0, 10);

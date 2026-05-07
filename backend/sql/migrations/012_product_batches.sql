@@ -62,13 +62,18 @@ CREATE TABLE IF NOT EXISTS product_batches (
 );
 
 -- Uniqueness / lookup (account scoped)
--- Deduplicate before creating unique indexes (idempotency guard for re-runs)
+-- Deduplicate before creating unique indexes (idempotency guard for re-runs).
+-- Wrapped in a broad EXCEPTION block because:
+--   a) the table may not exist yet (undefined_table), or
+--   b) a cascade to inventory_txns may be blocked by an immutability trigger
+--      when the DB was pre-seeded outside this migration runner.
 DO $$ BEGIN
   DELETE FROM product_batches a USING product_batches b
   WHERE a.id > b.id
     AND a.account_id = b.account_id
     AND lower(a.product_code) = lower(b.product_code);
-EXCEPTION WHEN undefined_table THEN NULL;
+EXCEPTION WHEN OTHERS THEN
+  RAISE NOTICE 'product_batches dedup skipped: %', SQLERRM;
 END $$;
 
 DO $$ BEGIN

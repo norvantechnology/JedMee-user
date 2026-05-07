@@ -16,7 +16,8 @@ import {
   IconPsCalendar,
   IconPayment,
   IconWallet,
-  IconReceipt
+  IconReceipt,
+  IconTrendUp
 } from "../components/ui/AppIcons.jsx";
 import "./DayBookReportPage.css";
 
@@ -43,11 +44,15 @@ export default function DayBookReportPage() {
 
   if (!canView) return <ReportDenied title="Day Book" message="You don't have permission to view this report." />;
 
-  const rec  = data?.receipts      || {};
-  const pay  = data?.payments      || {};
-  const cash = data?.cash_position || {};
+  const rec    = data?.receipts      || {};
+  const pay    = data?.payments      || {};
+  const cash   = data?.cash_position || {};
+  const profit = data?.profit        || {};
   const money = (v) => fmtMoneyINR(v) || "₹0.00";
+  const pct   = (v) => `${Number(v ?? 0).toFixed(1)}%`;
   const displayDate = fmtDateIndian(data?.date || date);
+  const closingNeg  = (cash.closing_cash ?? 0) < 0;
+  const profitNeg   = (profit.gross_profit ?? 0) < 0;
 
   return (
     <ReportShell>
@@ -111,7 +116,7 @@ export default function DayBookReportPage() {
               </div>
               <div className="dbSumText">
                 <div className="dbSumVal dbSumVal_in">{money(rec.total_receipts)}</div>
-                <div className="dbSumLbl">Total Receipts</div>
+                <div className="dbSumLbl">Cash Receipts</div>
               </div>
             </div>
             <div className="dbSumCard">
@@ -132,6 +137,17 @@ export default function DayBookReportPage() {
                 <div className="dbSumLbl">Closing Cash</div>
               </div>
             </div>
+            <div className="dbSumCard">
+              <div className={`dbSumIcon ${profitNeg ? "dbSumIcon_out" : "dbSumIcon_profit"}`}>
+                <IconTrendUp width={22} height={22} />
+              </div>
+              <div className="dbSumText">
+                <div className={`dbSumVal ${profitNeg ? "dbSumVal_out" : "dbSumVal_profit"}`}>
+                  {money(profit.gross_profit)}
+                </div>
+                <div className="dbSumLbl">Gross Profit</div>
+              </div>
+            </div>
           </div>
 
           {/* ── Two-column grid: Money In / Money Out ── */}
@@ -143,7 +159,7 @@ export default function DayBookReportPage() {
                 <div className="dbSectionHdrIcon dbSectionHdrIcon_in">
                   <IconReceipt width={14} height={14} />
                 </div>
-                <h2 className="dbSectionTitle">Money In — Receipts</h2>
+                <h2 className="dbSectionTitle">Money In — Cash Receipts</h2>
               </div>
               <div className="dbSectionBody">
                 <div className="dbRow">
@@ -151,17 +167,23 @@ export default function DayBookReportPage() {
                   <span className="dbRowValue">{money(rec.cash_sales)}</span>
                 </div>
                 <div className="dbRow">
-                  <span className="dbRowLabel">Credit Sales</span>
-                  <span className="dbRowValue">{money(rec.credit_sales)}</span>
-                </div>
-                <div className="dbRow">
                   <span className="dbRowLabel">Customer Payments</span>
                   <span className="dbRowValue">{money(rec.customer_receipts)}</span>
                 </div>
                 <div className="dbRow dbRow_total dbRow_total_in">
-                  <span className="dbRowLabel">Total Receipts</span>
+                  <span className="dbRowLabel">Total Cash Receipts</span>
                   <span className="dbRowValue">{money(rec.total_receipts)}</span>
                 </div>
+                {/* Informational: credit sales are not cash — shown separately */}
+                {(rec.credit_sales ?? 0) > 0 && (
+                  <div className="dbRow dbRow_info">
+                    <span className="dbRowLabel dbRowLabel_info">
+                      Credit Sales Today
+                      <span className="dbInfoBadge">not cash</span>
+                    </span>
+                    <span className="dbRowValue dbRowValue_info">{money(rec.credit_sales)}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -187,6 +209,39 @@ export default function DayBookReportPage() {
 
           </div>
 
+          {/* ── Profit Summary ── */}
+          <div className="dbProfitCard">
+            <div className="dbSectionHdr">
+              <div className={`dbSectionHdrIcon ${profitNeg ? "dbSectionHdrIcon_out" : "dbSectionHdrIcon_profit"}`}>
+                <IconTrendUp width={14} height={14} />
+              </div>
+              <h2 className="dbSectionTitle">Gross Profit — Today's Sales</h2>
+              {(profit.profit_margin_pct != null) && (
+                <span className={`dbProfitMarginBadge ${profitNeg ? "dbProfitMarginBadge_neg" : ""}`}>
+                  {pct(profit.profit_margin_pct)} margin
+                </span>
+              )}
+            </div>
+            <div className="dbSectionBody">
+              <div className="dbRow">
+                <span className="dbRowLabel">Sales Revenue (excl. GST)</span>
+                <span className="dbRowValue">{money(profit.total_revenue)}</span>
+              </div>
+              <div className="dbRow">
+                <span className="dbRowLabel">Cost of Goods Sold (COGS)</span>
+                <span className="dbRowValue dbRowValue_cogs">− {money(profit.total_cogs)}</span>
+              </div>
+              <div className={`dbRow dbRow_total ${profitNeg ? "dbRow_total_out" : "dbRow_total_in"}`}>
+                <span className="dbRowLabel">Gross Profit</span>
+                <span className="dbRowValue">{money(profit.gross_profit)}</span>
+              </div>
+            </div>
+            <div className="dbProfitNote">
+              Gross profit = sales revenue (excl. GST) − purchase cost of items sold.
+              Does not include overheads, salaries, or other expenses.
+            </div>
+          </div>
+
           {/* ── Cash Position ── */}
           <div className="dbCashCard">
             <div className="dbCashHdr">
@@ -196,27 +251,36 @@ export default function DayBookReportPage() {
               <h2 className="dbCashTitle">Cash Position</h2>
             </div>
             <div className="dbCashBody">
-              <div className="dbCashEquation">
-                <div className="dbCashChip">
-                  <span className="dbCashChipVal">{money(cash.opening_cash)}</span>
-                  <span className="dbCashChipLbl">Opening Cash</span>
+              {/* Clean table-style rows instead of confusing equation chips */}
+              <div className="dbCashRows">
+                <div className="dbCashRow">
+                  <span className="dbCashRowLabel">Opening Cash</span>
+                  <span className="dbCashRowVal">{money(cash.opening_cash)}</span>
                 </div>
-                <span className="dbCashOp dbCashOp_plus">+</span>
-                <div className="dbCashChip">
-                  <span className="dbCashChipVal">{money(cash.cash_received)}</span>
-                  <span className="dbCashChipLbl">Cash Received</span>
+                <div className="dbCashRow dbCashRow_plus">
+                  <span className="dbCashRowLabel">
+                    <span className="dbCashRowOp dbCashRowOp_plus">+</span>
+                    Cash Received
+                  </span>
+                  <span className="dbCashRowVal dbCashRowVal_in">{money(cash.cash_received)}</span>
                 </div>
-                <span className="dbCashOp dbCashOp_minus">−</span>
-                <div className="dbCashChip">
-                  <span className="dbCashChipVal">{money(cash.cash_paid)}</span>
-                  <span className="dbCashChipLbl">Cash Paid</span>
+                <div className="dbCashRow dbCashRow_minus">
+                  <span className="dbCashRowLabel">
+                    <span className="dbCashRowOp dbCashRowOp_minus">−</span>
+                    Cash Paid Out
+                  </span>
+                  <span className="dbCashRowVal dbCashRowVal_out">{money(cash.cash_paid)}</span>
                 </div>
-                <span className="dbCashOp dbCashOp_eq">=</span>
               </div>
-              <div className="dbCashResult">
+              <div className={`dbCashResult${closingNeg ? " dbCashResult_neg" : ""}`}>
                 <span className="dbCashResultLabel">Closing Cash (Expected)</span>
                 <span className="dbCashResultVal">{money(cash.closing_cash)}</span>
               </div>
+              {closingNeg && (
+                <div className="dbCashWarning">
+                  ⚠ Closing cash is negative — cash paid out exceeds cash received today.
+                </div>
+              )}
             </div>
           </div>
 

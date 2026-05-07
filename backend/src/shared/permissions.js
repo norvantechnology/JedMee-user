@@ -17,7 +17,8 @@ const RESOURCES = [
   "SALES_INVOICES",
   "SALES_RETURNS",
   "CUSTOMER_PAYMENTS",
-  "PRESCRIPTIONS"
+  "PRESCRIPTIONS",
+  "REPORTS"
 ];
 
 // Role visibility uses canonical resource keys (sidebar groups). Map our finer

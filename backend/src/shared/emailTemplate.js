@@ -41,7 +41,7 @@ function E(s) {
 
 // ─── Logo URL from env ────────────────────────────────────────────────────────
 function brandLogoUrl() {
-  return String(process.env.APP_LOGO_URL || '').trim();
+  return String(process.env.APP_LOGO_URL || 'https://jedmee.com/logo.png').trim();
 }
 
 // ─── Invisible preheader spacer ───────────────────────────────────────────────

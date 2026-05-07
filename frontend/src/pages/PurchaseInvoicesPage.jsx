@@ -1,7 +1,7 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { AppButton, AsyncButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { clean, fmtMoney, fmtMoneyINR } from "../utils/format.js";
 import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -107,10 +107,6 @@ FLOW 3: Purchase cancel
 
 KEY RULE: Quality Master creates master records; Purchase Invoice moves stock.
 */
-
-function clean(v) {
-  return String(v ?? "").trim();
-}
 
 /** Today's calendar date in the browser's local timezone (matches `<input type="date">`). */
 function localCalendarYmd(d = new Date()) {

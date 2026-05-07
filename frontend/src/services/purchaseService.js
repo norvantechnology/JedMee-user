@@ -1,5 +1,9 @@
 import { apiGet, apiPost, apiPut } from "./apiClient.js";
 
+export async function listPurchaseReturns(params) {
+  return await apiGet("/purchase-returns", { toast: "none", params });
+}
+
 export async function listPurchaseInvoices(params) {
   return await apiGet("/purchase-invoices", { toast: "none", params });
 }

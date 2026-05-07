@@ -55,11 +55,12 @@ async function buildVendorLedgerDoc({ accountId, vendorId }) {
       [accountId, vendorId]
     ),
     query(
-      `SELECT pr.id, pr.return_number, pr.return_date, pr.total_return_amount, pr.created_at
+      `SELECT pr.id, pr.return_number, pr.return_date, pr.total_amount, pr.created_at
        FROM purchase_returns pr
        WHERE pr.account_id = $1
          AND pr.vendor_id = $2
          AND pr.status = 'CONFIRMED'
+         AND pr.deleted_at IS NULL
        ORDER BY pr.return_date ASC, pr.created_at ASC`,
       [accountId, vendorId]
     )

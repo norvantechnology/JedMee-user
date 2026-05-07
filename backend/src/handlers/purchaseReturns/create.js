@@ -32,6 +32,21 @@ async function handler(event) {
       const invoice = inv.rows?.[0];
       if (!invoice) return { err: fail(404, "NOT_FOUND", "Original purchase invoice not found.") };
 
+      // ── Validate item IDs up-front ────────────────────────────────────────────
+      const itemIds = items.map((it) => clean(it.purchaseInvoiceItemId)).filter(Boolean);
+      if (itemIds.length !== items.length) {
+        return { err: fail(400, "VALIDATION_ERROR", "Each return item must have a valid purchaseInvoiceItemId.") };
+      }
+
+      // ── Batch-fetch all source invoice items in ONE query (avoids N+1) ────────
+      const srcR = await q(
+        `SELECT * FROM purchase_invoice_items
+         WHERE id = ANY($1) AND account_id = $2 AND purchase_invoice_id = $3`,
+        [itemIds, ctx.accountId, purchaseInvoiceId]
+      );
+      const srcMap = Object.fromEntries(srcR.rows.map((r) => [r.id, r]));
+
+      // ── Batch-fetch already-returned quantities in ONE query (avoids N+1) ─────
       const returnNumber = clean(body.returnNumber) || (await nextDocNumber(q, "purchase_returns", "PR", ctx.accountId));
       const rs = await q(
         `
@@ -60,6 +75,25 @@ async function handler(event) {
         ]
       );
       const ret = rs.rows?.[0];
+
+      const alreadyReturnedR = await q(
+        `SELECT pri.purchase_invoice_item_id,
+                COALESCE(SUM(pri.return_qty), 0)      AS returned_qty,
+                COALESCE(SUM(pri.return_free_qty), 0) AS returned_free_qty
+         FROM purchase_return_items pri
+         JOIN purchase_returns pr ON pr.id = pri.purchase_return_id
+         WHERE pri.account_id = $1
+           AND pri.purchase_invoice_item_id = ANY($2)
+           AND pr.status IN ('DRAFT', 'CONFIRMED')
+           AND pr.id <> $3
+         GROUP BY pri.purchase_invoice_item_id`,
+        [ctx.accountId, itemIds, ret.id]
+      );
+      const returnedMap = Object.fromEntries(
+        alreadyReturnedR.rows.map((r) => [r.purchase_invoice_item_id, r])
+      );
+
+      // ── Process each item using pre-fetched data ───────────────────────────────
       let total = 0;
       for (const it of items) {
         const purchaseInvoiceItemId = clean(it.purchaseInvoiceItemId);
@@ -69,34 +103,12 @@ async function handler(event) {
           return { err: fail(400, "VALIDATION_ERROR", "Each return item must have purchaseInvoiceItemId, returnQty > 0 and returnFreeQty >= 0.") };
         }
 
-        const srcR = await q(
-          `
-          SELECT * FROM purchase_invoice_items
-          WHERE id = $1 AND account_id = $2 AND purchase_invoice_id = $3
-          LIMIT 1
-          `,
-          [purchaseInvoiceItemId, ctx.accountId, purchaseInvoiceId]
-        );
-        const src = srcR.rows?.[0];
+        const src = srcMap[purchaseInvoiceItemId];
         if (!src) return { err: fail(400, "VALIDATION_ERROR", "Invalid source purchase invoice item in return.") };
 
-        // Validate: return qty must not exceed (purchased qty - already returned qty)
-        const alreadyReturnedR = await q(
-          `
-          SELECT COALESCE(SUM(pri.return_qty), 0) AS returned_qty,
-                 COALESCE(SUM(pri.return_free_qty), 0) AS returned_free_qty
-          FROM purchase_return_items pri
-          JOIN purchase_returns pr ON pr.id = pri.purchase_return_id
-          WHERE pri.account_id = $1
-            AND pri.purchase_invoice_item_id = $2
-            AND pr.status IN ('DRAFT', 'CONFIRMED')
-            AND pr.id <> $3
-          `,
-          [ctx.accountId, purchaseInvoiceItemId, ret.id]
-        );
-        const alreadyReturned = Number(alreadyReturnedR.rows?.[0]?.returned_qty || 0);
-        const alreadyReturnedFree = Number(alreadyReturnedR.rows?.[0]?.returned_free_qty || 0);
-        const maxReturnable = n(src.qty) - alreadyReturned;
+        const alreadyReturned     = Number(returnedMap[purchaseInvoiceItemId]?.returned_qty      || 0);
+        const alreadyReturnedFree = Number(returnedMap[purchaseInvoiceItemId]?.returned_free_qty || 0);
+        const maxReturnable     = n(src.qty)      - alreadyReturned;
         const maxReturnableFree = n(src.free_qty) - alreadyReturnedFree;
         if (returnQty > maxReturnable) {
           return { err: fail(400, "VALIDATION_ERROR", `Return qty (${returnQty}) exceeds max returnable qty (${maxReturnable}) for item "${src.product_name || purchaseInvoiceItemId}".`) };
@@ -106,20 +118,19 @@ async function handler(event) {
         }
 
         // Calculate amount: rate after discount, excluding GST (matches purchase invoice logic)
-        const rate = n(src.purchase_rate);
-        const discPct = n(src.discount_percent);
-        const gstPct = n(src.gst_percent);
-        const taxable = round2(returnQty * rate * (1 - discPct / 100));
+        const rate     = n(src.purchase_rate);
+        const discPct  = n(src.discount_percent);
+        const gstPct   = n(src.gst_percent);
+        const taxable  = round2(returnQty * rate * (1 - discPct / 100));
         const gstAmount = round2(taxable * (gstPct / 100));
-        const amount = round2(taxable + gstAmount);
+        const amount   = round2(taxable + gstAmount);
         total += amount;
         await q(
-          `
-          INSERT INTO purchase_return_items (
-            account_id, purchase_return_id, purchase_invoice_item_id, batch_id, return_qty, return_free_qty, return_amount, notes
-          )
-          VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-          `,
+          `INSERT INTO purchase_return_items (
+             account_id, purchase_return_id, purchase_invoice_item_id, batch_id,
+             return_qty, return_free_qty, return_amount, notes
+           )
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
           [ctx.accountId, ret.id, purchaseInvoiceItemId, src.batch_id, returnQty, returnFreeQty, amount, clean(it.notes) || null]
         );
       }
@@ -131,7 +142,7 @@ async function handler(event) {
     return created(data, { message: "Purchase return draft created." });
   } catch (e) {
     if (String(e.code || "") === "23505") return fail(409, "DUPLICATE", "Return number already exists.");
-    return fail(500, "INTERNAL_ERROR", "Something went wrong.", { subMessage: "Please try again." });
+    return fail(500, "INTERNAL_ERROR", "Something went wrong.", { subMessage: e.message || "Please try again." });
   }
 }
 

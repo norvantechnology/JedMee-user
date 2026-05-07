@@ -474,17 +474,17 @@
 }
 
 .rptExpiry_red {
-  color: #b91c1c;
+  color: var(--color-danger-dark, #b91c1c);
   font-weight: 600;
 }
 
 .rptExpiry_amber {
-  color: #b45309;
+  color: var(--color-warning-dark, #b45309);
   font-weight: 600;
 }
 
 .rptExpiry_green {
-  color: #047857;
+  color: var(--color-success-dark, #047857);
 }
 
 .rptExpiryStack {
@@ -509,8 +509,8 @@
 }
 
 .rptBadge_pref {
-  background: #ecfdf5;
-  color: #047857;
+  background: var(--color-success-light, #ecfdf5);
+  color: var(--color-success-dark, #047857);
 }
 
 .rptSupplierTable tbody td {
@@ -780,14 +780,14 @@
   font-size: 11px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  background: #ecfdf5;
-  color: #047857;
+  background: var(--color-success-light, #ecfdf5);
+  color: var(--color-success-dark, #047857);
 }
 
-.rptExpiryChip.is-expired { background: #fee2e2; color: #b91c1c; }
-.rptExpiryChip.is-soon { background: #fef3c7; color: #b45309; }
-.rptExpiryChip.is-warn { background: #fff7ed; color: #c2410c; }
-.rptExpiryChip.is-ok { background: #ecfdf5; color: #047857; }
+.rptExpiryChip.is-expired { background: var(--color-danger-light, #fee2e2); color: var(--color-danger-dark, #b91c1c); }
+.rptExpiryChip.is-soon    { background: var(--color-warning-light, #fef3c7); color: var(--color-warning-dark, #b45309); }
+.rptExpiryChip.is-warn    { background: var(--color-warning-light, #fff7ed); color: var(--color-warning-dark, #c2410c); }
+.rptExpiryChip.is-ok      { background: var(--color-success-light, #ecfdf5); color: var(--color-success-dark, #047857); }
 
 /* Optional: indeterminate bar while any report fetch is in flight */
 .rptCard {

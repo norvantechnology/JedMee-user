@@ -8,6 +8,7 @@ import { onAuthChanged, readAuth } from "../services/authStorage.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
 import { emitToast } from "../services/toastBus.js";
 import { parseApiError } from "../utils/api.js";
+import { clean } from "../utils/format.js";
 import { bulkDeleteVendors, createVendor, deleteVendor, listVendors, updateVendor } from "../services/vendorService.js";
 import { listMfgCompanies } from "../services/mfgCompanyService.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
@@ -18,10 +19,6 @@ import { IconBtn, IconEdit, IconTrash } from "../components/TableActionKit.jsx";
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
-
-function clean(v) {
-  return String(v ?? "").trim();
-}
 
 export default function VendorsPage() {
   useSeoMeta({ title: "Suppliers" });

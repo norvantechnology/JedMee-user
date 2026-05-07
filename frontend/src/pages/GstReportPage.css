@@ -1,0 +1,241 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   GstReportPage.css  —  GSTR-1 Summary Report
+   All classes are prefixed "gst" to avoid collisions with global styles.
+   --color-info / --color-info-dark / --color-info-light are defined globally
+   in styles/theme.css.
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Filter bar ──────────────────────────────────────────────────────────── */
+.gstFilterBar { padding: 16px 20px; }
+
+.gstFilterRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.gstFilterField { display: flex; flex-direction: column; gap: 5px; }
+
+.gstFieldLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-3);
+}
+
+.gstDateInput {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-primary-light);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  min-width: 148px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.gstDateInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.gstFilterActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ── Stat cards ──────────────────────────────────────────────────────────── */
+.gstStatRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media (max-width: 900px) { .gstStatRow { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .gstStatRow { grid-template-columns: 1fr; } }
+
+.gstStatCard {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--layout-card-radius, 12px);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Icon badge — color driven by CSS custom property --ic set inline */
+.gstStatIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  color: var(--ic, var(--color-primary));
+  background: color-mix(in srgb, var(--ic, var(--color-primary)) 12%, transparent);
+}
+
+.gstStatLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-4);
+  margin-bottom: 5px;
+}
+
+.gstStatValue {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+/* ── Table cards ─────────────────────────────────────────────────────────── */
+.gstTableCard {
+  margin-bottom: 16px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.gstB2cCard { padding: 0; }
+
+.gstTableHeader {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-2);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface, #fbf8ff);
+  letter-spacing: 0.01em;
+}
+
+.gstTableEmpty {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--color-text-4);
+  font-size: 14px;
+}
+
+.gstTableScroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+.gstTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+  color: var(--color-text);
+}
+.gstTable th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-3);
+  background: var(--color-primary-light);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.gstTable td {
+  padding: 10px 14px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  vertical-align: middle;
+}
+.gstTable tbody tr:last-child td { border-bottom: none; }
+.gstTable tbody tr:hover {
+  background: color-mix(in srgb, var(--color-primary-light) 70%, transparent);
+}
+
+/* Right-align utility */
+.tR { text-align: right !important; }
+
+/* Monospace code chip (HSN codes, GSTINs) */
+.gstCode {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12.5px;
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: var(--color-text-2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+/* Bold total column */
+.gstTotalCell {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* ── B2C summary block ───────────────────────────────────────────────────── */
+.gstB2cRow {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+}
+
+.gstB2cLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-4);
+  margin-bottom: 4px;
+}
+
+.gstB2cValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.gstEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 24px;
+  gap: 10px;
+}
+
+.gstEmptyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+
+.gstEmptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.gstEmptySub {
+  font-size: 13px;
+  color: var(--color-text-4);
+  max-width: 380px;
+  line-height: 1.5;
+}

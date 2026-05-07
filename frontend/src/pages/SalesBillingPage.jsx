@@ -1,7 +1,7 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { clean, fmtMoney, fmtMoneyINR } from "../utils/format.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AppShell from "../layouts/AppShell.jsx";
@@ -141,10 +141,6 @@ function stockChipClass(n) {
 function newLineKey() {
   if (typeof globalThis.crypto !== "undefined" && typeof globalThis.crypto.randomUUID === "function") return globalThis.crypto.randomUUID();
   return `L${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function clean(v) {
-  return String(v ?? "").trim();
 }
 
 function addDaysYmd(ymd, days) {
@@ -1045,7 +1041,7 @@ export default function SalesBillingPage() {
               salesRate: x.sales_rate,
               mrp: x.mrp,
               discountPercent: x.discount_percent,
-              gstPercent: x.gst_percent,
+              gstPercent: Number(x.gst_percent || 0),
               productName: x.product_name || "",
               productSearch: formatProductLabel({ name: x.product_name || "", code: x.product_code || "", mfg_company_name: x.mfg_company_name || "" }),
               productCode: x.product_code || "",
@@ -1088,7 +1084,7 @@ export default function SalesBillingPage() {
         setEditing(inv);
         setForm({
           customerId: inv.customer_id || "",
-          divisionId: "",
+          divisionId: inv.division_id ? String(inv.division_id) : "",
           invoiceDate: String(inv.invoice_date || "").slice(0, 10),
           dueDate: String(inv.due_date || "").slice(0, 10),
           notes: inv.notes || "",

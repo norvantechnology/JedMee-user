@@ -7,6 +7,7 @@ import { can } from "../utils/access.js";
 import { onAuthChanged, readAuth } from "../services/authStorage.js";
 import { emitToast } from "../services/toastBus.js";
 import { parseApiError } from "../utils/api.js";
+import { clean } from "../utils/format.js";
 import { createDivision, deleteDivision, listDivisions, updateDivision } from "../services/divisionService.js";
 import { listMfgCompanies } from "../services/mfgCompanyService.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
@@ -17,10 +18,6 @@ import { IconBtn, IconEdit, IconLayers, IconLinkOut, IconTrash, TableIconLink } 
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
-
-function clean(v) {
-  return String(v ?? "").trim();
-}
 
 function permDiv(resource, action) {
   return can(resource, action) || (resource === "DIVISIONS" && can("VENDORS", action));

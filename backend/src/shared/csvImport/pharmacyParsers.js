@@ -1,5 +1,11 @@
 const GST_SLABS = new Set([0, 5, 12, 18, 28]);
 
+/** Short month name → 0-based month index (handles English abbreviations). */
+const MONTH_ABBR = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+};
+
 function clean(v) {
   return String(v ?? "").trim();
 }
@@ -19,8 +25,15 @@ function excelSerialToDate(serial) {
 }
 
 /**
- * Parse pharmacy-style dates to ISO date string YYYY-MM-DD (expiry month = last day optional;
- * we use first day of month for MM/YYYY as DB date).
+ * Parse pharmacy-style dates to ISO date string YYYY-MM-DD.
+ * Supports all common formats from Marg, Busy, KMS, Tally, Excel exports:
+ *   MM/YYYY, MM/YY, MM-YYYY, MM-YY
+ *   DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD, YYYY/MM/DD
+ *   MMYYYY (6-digit)
+ *   MMM-YY, MMM-YYYY  (e.g. Jun-29, Jun-2029)
+ *   DD-MMM-YYYY, DD-MMM-YY  (e.g. 30-Jun-2029, 30-Jun-29)
+ *   DD/MMM/YYYY  (e.g. 30/Jun/2029)
+ *   Excel serial numbers
  */
 function parsePharmacyDateToYmd(dateStr) {
   if (dateStr === null || dateStr === undefined || dateStr === "") return null;
@@ -31,20 +44,58 @@ function parsePharmacyDateToYmd(dateStr) {
   const str = String(dateStr).trim();
   if (!str) return null;
 
+  // Helper: resolve 2-digit year → 4-digit (00-49 → 2000s, 50-99 → 1900s)
+  const y2 = (y) => (y < 50 ? 2000 + y : 1900 + y);
+
   const formats = [
-    [/^(\d{1,2})\/(\d{4})$/, (m) => new Date(Date.UTC(parseInt(m[2], 10), parseInt(m[1], 10) - 1, 1))],
-    [/^(\d{1,2})\/(\d{2})$/, (m) => new Date(Date.UTC(2000 + parseInt(m[2], 10), parseInt(m[1], 10) - 1, 1))],
-    [/^(\d{1,2})-(\d{4})$/, (m) => new Date(Date.UTC(parseInt(m[2], 10), parseInt(m[1], 10) - 1, 1))],
-    [
-      /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/,
-      (m) => new Date(Date.UTC(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10)))
-    ],
-    [/^(\d{4})-(\d{2})-(\d{2})$/, (m) => new Date(Date.UTC(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10)))],
-    [
-      /^(\d{1,2})-(\d{1,2})-(\d{4})$/,
-      (m) => new Date(Date.UTC(parseInt(m[3], 10), parseInt(m[2], 10) - 1, parseInt(m[1], 10)))
-    ],
-    [/^(\d{2})(\d{4})$/, (m) => new Date(Date.UTC(parseInt(m[2], 10), parseInt(m[1], 10) - 1, 1))]
+    // YYYY-MM-DD  (ISO)
+    [/^(\d{4})-(\d{2})-(\d{2})$/, (m) => new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))],
+    // YYYY/MM/DD
+    [/^(\d{4})\/(\d{2})\/(\d{2})$/, (m) => new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))],
+    // DD/MM/YYYY
+    [/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, (m) => new Date(Date.UTC(+m[3], +m[2] - 1, +m[1]))],
+    // DD-MM-YYYY
+    [/^(\d{1,2})-(\d{1,2})-(\d{4})$/, (m) => new Date(Date.UTC(+m[3], +m[2] - 1, +m[1]))],
+    // MM/YYYY  (expiry month/year — use 1st of month)
+    [/^(\d{1,2})\/(\d{4})$/, (m) => new Date(Date.UTC(+m[2], +m[1] - 1, 1))],
+    // MM-YYYY
+    [/^(\d{1,2})-(\d{4})$/, (m) => new Date(Date.UTC(+m[2], +m[1] - 1, 1))],
+    // MM/YY
+    [/^(\d{1,2})\/(\d{2})$/, (m) => new Date(Date.UTC(y2(+m[2]), +m[1] - 1, 1))],
+    // MM-YY  (e.g. 06-29)
+    [/^(\d{1,2})-(\d{2})$/, (m) => new Date(Date.UTC(y2(+m[2]), +m[1] - 1, 1))],
+    // MMYYYY  (6-digit, e.g. 062029)
+    [/^(\d{2})(\d{4})$/, (m) => new Date(Date.UTC(+m[2], +m[1] - 1, 1))],
+    // DD-MMM-YYYY  (e.g. 30-Jun-2029)
+    [/^(\d{1,2})-([A-Za-z]{3})-(\d{4})$/, (m) => {
+      const mo = MONTH_ABBR[m[2].toLowerCase()];
+      return mo !== undefined ? new Date(Date.UTC(+m[3], mo, +m[1])) : null;
+    }],
+    // DD-MMM-YY  (e.g. 30-Jun-29)
+    [/^(\d{1,2})-([A-Za-z]{3})-(\d{2})$/, (m) => {
+      const mo = MONTH_ABBR[m[2].toLowerCase()];
+      return mo !== undefined ? new Date(Date.UTC(y2(+m[3]), mo, +m[1])) : null;
+    }],
+    // DD/MMM/YYYY  (e.g. 30/Jun/2029)
+    [/^(\d{1,2})\/([A-Za-z]{3})\/(\d{4})$/, (m) => {
+      const mo = MONTH_ABBR[m[2].toLowerCase()];
+      return mo !== undefined ? new Date(Date.UTC(+m[3], mo, +m[1])) : null;
+    }],
+    // MMM-YYYY  (e.g. Jun-2029)
+    [/^([A-Za-z]{3})-(\d{4})$/, (m) => {
+      const mo = MONTH_ABBR[m[1].toLowerCase()];
+      return mo !== undefined ? new Date(Date.UTC(+m[2], mo, 1)) : null;
+    }],
+    // MMM-YY  (e.g. Jun-29) — very common in Marg ERP exports
+    [/^([A-Za-z]{3})-(\d{2})$/, (m) => {
+      const mo = MONTH_ABBR[m[1].toLowerCase()];
+      return mo !== undefined ? new Date(Date.UTC(y2(+m[2]), mo, 1)) : null;
+    }],
+    // MMM/YY  (e.g. Jun/29)
+    [/^([A-Za-z]{3})\/(\d{2})$/, (m) => {
+      const mo = MONTH_ABBR[m[1].toLowerCase()];
+      return mo !== undefined ? new Date(Date.UTC(y2(+m[2]), mo, 1)) : null;
+    }]
   ];
 
   for (const [regex, parse] of formats) {
@@ -52,7 +103,7 @@ function parsePharmacyDateToYmd(dateStr) {
     if (match) {
       try {
         const date = parse(match);
-        if (!Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+        if (date && !Number.isNaN(date.getTime())) return date.toISOString().slice(0, 10);
       } catch {
         /* continue */
       }

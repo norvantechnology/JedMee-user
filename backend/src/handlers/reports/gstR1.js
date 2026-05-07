@@ -25,82 +25,82 @@ async function handler(event) {
   }
 
   try {
-    // HSN-wise summary (B2B + B2C combined)
-    const hsnR = await query(
-      `SELECT
-         COALESCE(sii.hsn_code, 'N/A')   AS hsn_code,
-         sii.gst_percent                  AS gst_rate,
-         COUNT(DISTINCT si.id)            AS invoice_count,
-         SUM(sii.taxable_amount)          AS taxable_value,
-         SUM(sii.cgst_amount)             AS cgst,
-         SUM(sii.sgst_amount)             AS sgst,
-         SUM(sii.igst_amount)             AS igst,
-         SUM(sii.taxable_amount
-             + COALESCE(sii.cgst_amount,0)
-             + COALESCE(sii.sgst_amount,0)
-             + COALESCE(sii.igst_amount,0)) AS total_value
-       FROM sales_invoice_items sii
-       JOIN sales_invoices si ON si.id = sii.sales_invoice_id
-       WHERE si.account_id = $1
-         AND si.status = 'CONFIRMED'
-         AND si.deleted_at IS NULL
-         AND si.invoice_date BETWEEN $2 AND $3
-       GROUP BY sii.hsn_code, sii.gst_percent
-       ORDER BY sii.gst_percent DESC, hsn_code`,
-      [ctx.accountId, fromDate, toDate]
-    );
-
-    // B2B summary (customers with GSTIN)
-    const b2bR = await query(
-      `SELECT
-         c.gstin,
-         c.name AS customer_name,
-         COUNT(si.id)                     AS invoice_count,
-         SUM(si.grand_total)              AS total_value,
-         SUM(si.total_tax)                AS total_tax
-       FROM sales_invoices si
-       JOIN customers c ON c.id = si.customer_id
-       WHERE si.account_id = $1
-         AND si.status = 'CONFIRMED'
-         AND si.deleted_at IS NULL
-         AND si.invoice_date BETWEEN $2 AND $3
-         AND c.gstin IS NOT NULL AND c.gstin <> ''
-       GROUP BY c.gstin, c.name
-       ORDER BY total_value DESC
-       LIMIT 100`,
-      [ctx.accountId, fromDate, toDate]
-    );
-
-    // B2C summary (customers without GSTIN)
-    const b2cR = await query(
-      `SELECT
-         COUNT(si.id)        AS invoice_count,
-         SUM(si.grand_total) AS total_value,
-         SUM(si.total_tax)   AS total_tax
-       FROM sales_invoices si
-       LEFT JOIN customers c ON c.id = si.customer_id
-       WHERE si.account_id = $1
-         AND si.status = 'CONFIRMED'
-         AND si.deleted_at IS NULL
-         AND si.invoice_date BETWEEN $2 AND $3
-         AND (c.gstin IS NULL OR c.gstin = '')`,
-      [ctx.accountId, fromDate, toDate]
-    );
-
-    // Totals
-    const totalsR = await query(
-      `SELECT
-         COUNT(DISTINCT si.id)  AS total_invoices,
-         SUM(si.grand_total)    AS total_value,
-         SUM(si.total_tax)      AS total_tax,
-         SUM(si.taxable_amount) AS total_taxable
-       FROM sales_invoices si
-       WHERE si.account_id = $1
-         AND si.status = 'CONFIRMED'
-         AND si.deleted_at IS NULL
-         AND si.invoice_date BETWEEN $2 AND $3`,
-      [ctx.accountId, fromDate, toDate]
-    );
+    // All 4 queries are independent — run in parallel for minimum latency.
+    const [hsnR, b2bR, b2cR, totalsR] = await Promise.all([
+      // HSN-wise summary (B2B + B2C combined)
+      query(
+        `SELECT
+           COALESCE(sii.hsn_code, 'N/A')   AS hsn_code,
+           sii.gst_percent                  AS gst_rate,
+           COUNT(DISTINCT si.id)            AS invoice_count,
+           SUM(sii.taxable_amount)          AS taxable_value,
+           SUM(sii.cgst_amount)             AS cgst,
+           SUM(sii.sgst_amount)             AS sgst,
+           SUM(sii.igst_amount)             AS igst,
+           SUM(sii.taxable_amount
+               + COALESCE(sii.cgst_amount,0)
+               + COALESCE(sii.sgst_amount,0)
+               + COALESCE(sii.igst_amount,0)) AS total_value
+         FROM sales_invoice_items sii
+         JOIN sales_invoices si ON si.id = sii.sales_invoice_id
+         WHERE si.account_id = $1
+           AND si.status = 'CONFIRMED'
+           AND si.deleted_at IS NULL
+           AND si.invoice_date BETWEEN $2 AND $3
+         GROUP BY sii.hsn_code, sii.gst_percent
+         ORDER BY sii.gst_percent DESC, hsn_code`,
+        [ctx.accountId, fromDate, toDate]
+      ),
+      // B2B summary (customers with GST number)
+      query(
+        `SELECT
+           c.gst_number                     AS gstin,
+           c.name                           AS customer_name,
+           COUNT(si.id)                     AS invoice_count,
+           SUM(si.total_amount)             AS total_value,
+           SUM(COALESCE(si.total_gst, 0))   AS total_tax
+         FROM sales_invoices si
+         JOIN customers c ON c.id = si.customer_id
+         WHERE si.account_id = $1
+           AND si.status = 'CONFIRMED'
+           AND si.deleted_at IS NULL
+           AND si.invoice_date BETWEEN $2 AND $3
+           AND c.gst_number IS NOT NULL AND c.gst_number <> ''
+         GROUP BY c.gst_number, c.name
+         ORDER BY total_value DESC
+         LIMIT 100`,
+        [ctx.accountId, fromDate, toDate]
+      ),
+      // B2C summary (customers without GST number)
+      query(
+        `SELECT
+           COUNT(si.id)                    AS invoice_count,
+           SUM(si.total_amount)            AS total_value,
+           SUM(COALESCE(si.total_gst, 0))  AS total_tax
+         FROM sales_invoices si
+         LEFT JOIN customers c ON c.id = si.customer_id
+         WHERE si.account_id = $1
+           AND si.status = 'CONFIRMED'
+           AND si.deleted_at IS NULL
+           AND si.invoice_date BETWEEN $2 AND $3
+           AND (c.gst_number IS NULL OR c.gst_number = '')`,
+        [ctx.accountId, fromDate, toDate]
+      ),
+      // Totals
+      query(
+        `SELECT
+           COUNT(DISTINCT si.id)                                AS total_invoices,
+           SUM(si.total_amount)                                 AS total_value,
+           SUM(COALESCE(si.total_gst, 0))                       AS total_tax,
+           SUM(COALESCE(si.subtotal, 0) - COALESCE(si.total_discount, 0)) AS total_taxable
+         FROM sales_invoices si
+         WHERE si.account_id = $1
+           AND si.status = 'CONFIRMED'
+           AND si.deleted_at IS NULL
+           AND si.invoice_date BETWEEN $2 AND $3`,
+        [ctx.accountId, fromDate, toDate]
+      ),
+    ]);
 
     return ok({
       period: { from_date: fromDate, to_date: toDate },

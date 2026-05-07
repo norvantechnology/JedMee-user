@@ -254,16 +254,27 @@ async function execSupplier(q, accountId, actorId, data, existingId, strategy, i
   const vendorType = normalizeVendorType(data.vendor_type) || "WHOLESALER";
   const creditDays = Math.max(0, parseInt(String(data.credit_days ?? 0), 10) || 0);
   const addr = [clean(data.address), clean(data.city), clean(data.state)].filter(Boolean).join(", ");
+  const pincode = clean(data.pincode) || null;
   const notes = clean(data.notes);
   const mainCompany = clean(data.main_brand);
+  const gstNumber = clean(data.gst_number) || null;
+  const panNumber = clean(data.pan_number) || null;
+  const drugLicenseNumber = clean(data.drug_license_number) || null;
+  const contactPerson = clean(data.contact_person) || null;
   const isActive = parseBool(data.is_active, true);
 
   if (existingId) {
     if (strategy === "SKIP") return { action: "skipped" };
     await q(
-      `UPDATE vendors SET name = $2, short_name = $3, address = $4, notes = $5, main_company = $6, credit_days = $7, vendor_type = $8, is_active = $9, updated_at = now(),
-       import_source = $10, import_job_id = $11
-       WHERE id = $1 AND account_id = $12`,
+      `UPDATE vendors SET
+         name = $2, short_name = $3, address = $4, notes = $5, main_company = $6, credit_days = $7, vendor_type = $8, is_active = $9,
+         gst_number = COALESCE($10, gst_number),
+         pan_number = COALESCE($11, pan_number),
+         drug_license_number = COALESCE($12, drug_license_number),
+         contact_person = COALESCE($13, contact_person),
+         pincode = COALESCE($14, pincode),
+         updated_at = now(), import_source = $15, import_job_id = $16
+       WHERE id = $1 AND account_id = $17`,
       [
         existingId,
         name,
@@ -274,6 +285,11 @@ async function execSupplier(q, accountId, actorId, data, existingId, strategy, i
         creditDays,
         vendorType,
         isActive,
+        gstNumber,
+        panNumber,
+        drugLicenseNumber,
+        contactPerson,
+        pincode,
         IMPORT_SOURCE,
         importJobId || null,
         accountId
@@ -283,8 +299,11 @@ async function execSupplier(q, accountId, actorId, data, existingId, strategy, i
   }
 
   await q(
-    `INSERT INTO vendors (account_id, code, name, short_name, rack_number, main_company, credit_days, vendor_type, phone_number, email, address, notes, is_active, created_by_user_id, import_source, import_job_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+    `INSERT INTO vendors (
+       account_id, code, name, short_name, rack_number, main_company, credit_days, vendor_type,
+       phone_number, email, address, pincode, gst_number, pan_number, drug_license_number,
+       contact_person, notes, is_active, created_by_user_id, import_source, import_job_id
+     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
     [
       accountId,
       code.slice(0, 32),
@@ -297,6 +316,11 @@ async function execSupplier(q, accountId, actorId, data, existingId, strategy, i
       clean(data.phone).replace(/\D/g, "").slice(0, 15) || null,
       clean(data.email).toLowerCase() || null,
       addr || null,
+      pincode,
+      gstNumber,
+      panNumber,
+      drugLicenseNumber,
+      contactPerson,
       notes || null,
       isActive,
       actorId,
@@ -725,6 +749,34 @@ function groupRows(entries, keyFn) {
   return m;
 }
 
+/** Resolve product id by code first, then by name fallback. */
+async function resolveProductId(accountId, productCode, productName) {
+  const byCode = await resolveProductIdByCode(accountId, productCode);
+  if (byCode) return byCode;
+  if (clean(productName)) {
+    const r = await query(
+      `SELECT id FROM products WHERE account_id = $1 AND deleted_at IS NULL AND lower(name) = lower($2) LIMIT 1`,
+      [accountId, clean(productName)]
+    );
+    return r.rows?.[0]?.id || null;
+  }
+  return null;
+}
+
+/** Resolve vendor id by code first, then by name fallback. */
+async function resolveVendorId(accountId, supplierCode, supplierName) {
+  const byCode = await resolveVendorIdByCode(accountId, supplierCode);
+  if (byCode) return byCode;
+  if (clean(supplierName)) {
+    const r = await query(
+      `SELECT id FROM vendors WHERE account_id = $1 AND deleted_at IS NULL AND lower(name) = lower($2) LIMIT 1`,
+      [accountId, clean(supplierName)]
+    );
+    return r.rows?.[0]?.id || null;
+  }
+  return null;
+}
+
 async function execPurchaseGroups(event, accountId, actorId, entries, importJobId) {
   const groups = groupRows(entries, (d) => clean(d.invoice_number));
   let created = 0;
@@ -733,7 +785,7 @@ async function execPurchaseGroups(event, accountId, actorId, entries, importJobI
     const confirmAfter = wantConfirmedDoc(first);
     const invoiceDate = parsePharmacyDateToYmd(first.invoice_date);
     const dueDate = first.due_date ? parsePharmacyDateToYmd(first.due_date) : null;
-    const vendorId = await resolveVendorIdByCode(accountId, first.supplier_code);
+    const vendorId = await resolveVendorId(accountId, first.supplier_code, first.supplier_name);
     const divisionId = await resolveDivisionIdByCode(accountId, first.division_code);
     const headerBody = {
       invoiceNumber: clean(first.invoice_number),
@@ -746,8 +798,8 @@ async function execPurchaseGroups(event, accountId, actorId, entries, importJobI
     };
     const itemsInput = [];
     for (const { data: d } of lines) {
-      const pid = await resolveProductIdByCode(accountId, d.product_code);
-      if (!pid) throw new Error(`Unknown product code: ${d.product_code}`);
+      const pid = await resolveProductId(accountId, d.product_code, d.product_name);
+      if (!pid) throw new Error(`Unknown product: ${d.product_code || d.product_name}`);
       itemsInput.push({
         productId: pid,
         batchNo: clean(d.batch_no),
@@ -850,10 +902,10 @@ async function execSalesGroups(event, accountId, actorId, entries, importJobId) 
 
     const items = [];
     for (const { data: d } of lines) {
-      const pid = await resolveProductIdByCode(accountId, d.product_code);
-      if (!pid) throw new Error(`Unknown product ${d.product_code}`);
+      const pid = await resolveProductId(accountId, d.product_code, d.product_name);
+      if (!pid) throw new Error(`Unknown product: ${d.product_code || d.product_name}`);
       const bid = await resolveBatchIdByProductAndBatch(accountId, pid, d.batch_no);
-      if (!bid) throw new Error(`Batch ${d.batch_no} not found for product ${d.product_code}`);
+      if (!bid) throw new Error(`Batch ${d.batch_no} not found for product ${d.product_code || d.product_name}`);
       items.push({
         productId: pid,
         batchId: bid,
@@ -982,10 +1034,10 @@ async function execSalesReturnGroups(accountId, actorId, entries, importJobId) {
       );
       const ret = rs.rows?.[0];
       for (const { data: d } of lines) {
-        const pid = await resolveProductIdByCode(accountId, d.product_code);
-        if (!pid) return { err: new Error(`Unknown product ${d.product_code}`) };
-        const bid = await resolveBatchIdByProductAndBatch(accountId, pid, d.batch_no);
-        if (!bid) return { err: new Error(`Batch not found ${d.batch_no}`) };
+          const pid = await resolveProductId(accountId, d.product_code, d.product_name);
+          if (!pid) return { err: new Error(`Unknown product: ${d.product_code || d.product_name}`) };
+          const bid = await resolveBatchIdByProductAndBatch(accountId, pid, d.batch_no);
+          if (!bid) return { err: new Error(`Batch not found: ${d.batch_no}`) };
         const pb = await q(
           `SELECT pb.batch_no, pb.expiry_date, p.name AS product_name, p.mfg_company_id
            FROM product_batches pb JOIN products p ON p.id = pb.product_id AND p.account_id = pb.account_id
@@ -1027,6 +1079,166 @@ async function execSalesReturnGroups(accountId, actorId, entries, importJobId) {
     });
     if (data?.err) throw data.err;
     if (confirmAfter) await refreshLowStockNotifications(accountId, data.affectedBatchIds || []);
+    created += 1;
+  }
+  return created;
+}
+
+/**
+ * Execute PURCHASE_RETURNS import.
+ * Groups rows by return_number, creates purchase_return + items, optionally confirms.
+ */
+async function execPurchaseReturnGroups(accountId, actorId, entries, importJobId) {
+  const groups = groupRows(entries, (d) => clean(d.return_number) || `__auto_${Math.random()}`);
+  let created = 0;
+
+  for (const [, lines] of groups) {
+    const first = lines[0].data;
+    const confirmAfter = wantConfirmedDoc(first);
+    const returnDate = parsePharmacyDateToYmd(first.return_date);
+    const vendorId = await resolveVendorId(accountId, first.supplier_code, first.supplier_name);
+    const divisionId = await resolveDivisionIdByCode(accountId, first.division_code);
+
+    // Resolve linked purchase invoice
+    let purchaseInvoiceId = null;
+    if (clean(first.linked_invoice_number)) {
+      const inv = await query(
+        `SELECT id FROM purchase_invoices WHERE account_id = $1 AND invoice_number = $2 LIMIT 1`,
+        [accountId, clean(first.linked_invoice_number)]
+      );
+      purchaseInvoiceId = inv.rows?.[0]?.id || null;
+    }
+
+    // Normalise return reason
+    let reason = String(first.return_reason || "OTHER").trim().toUpperCase();
+    const validReasons = ["DAMAGED", "EXPIRED", "EXCESS", "QUALITY_ISSUE", "OTHER"];
+    if (!validReasons.includes(reason)) reason = "OTHER";
+
+    const data = await withTransaction(async (q) => {
+      // Resolve vendor name for denormalisation
+      let vendorName = clean(first.supplier_name) || null;
+      if (vendorId && !vendorName) {
+        const vr = await q(`SELECT name FROM vendors WHERE id = $1 AND account_id = $2 LIMIT 1`, [vendorId, accountId]);
+        vendorName = vr.rows?.[0]?.name || null;
+      }
+
+      // Auto-generate return number if not provided
+      const returnNumber = clean(first.return_number) || (await (async () => {
+        const last = await q(
+          `SELECT return_number FROM purchase_returns WHERE account_id = $1 AND return_number ILIKE 'PR-%' ORDER BY created_at DESC LIMIT 1`,
+          [accountId]
+        );
+        const m = String(last.rows?.[0]?.return_number || "").match(/^PR-(\d{4,})$/i);
+        const seq = m ? Number(m[1]) + 1 : 1;
+        return `PR-${String(seq).padStart(4, "0")}`;
+      })());
+
+      // Calculate totals from line items
+      let subtotal = 0;
+      let totalGst = 0;
+      const itemRows = [];
+
+      for (const { data: d } of lines) {
+        const pid = await resolveProductId(accountId, d.product_code, d.product_name);
+        if (!pid) return { err: new Error(`Unknown product: ${d.product_code || d.product_name}`) };
+        const bid = await resolveBatchIdByProductAndBatch(accountId, pid, d.batch_no);
+        if (!bid) return { err: new Error(`Batch not found: ${d.batch_no}`) };
+
+        const pb = await q(
+          `SELECT pb.batch_no, pb.expiry_date, p.name AS product_name, p.mfg_company_id
+           FROM product_batches pb JOIN products p ON p.id = pb.product_id AND p.account_id = pb.account_id
+           WHERE pb.id = $1 AND pb.product_id = $2 AND pb.account_id = $3 LIMIT 1`,
+          [bid, pid, accountId]
+        );
+        const batchRow = pb.rows?.[0];
+        const returnQty = parseNumber(d.return_qty, 0) ?? 0;
+        const returnFreeQty = parseNumber(d.return_free_qty, 0) ?? 0;
+        const purchaseRate = parseNumber(d.purchase_rate, 0) ?? 0;
+        const mrp = parseNumber(d.mrp, 0) ?? 0;
+        const gstPct = parseGst(d.gst_percent) ?? 0;
+        const lineAmount = Number((returnQty * purchaseRate).toFixed(4));
+        const lineGst = Number((lineAmount * gstPct / 100).toFixed(4));
+        subtotal += lineAmount;
+        totalGst += lineGst;
+        itemRows.push({ pid, bid, batchRow, returnQty, returnFreeQty, purchaseRate, mrp, gstPct, lineAmount, lineGst });
+      }
+
+      const totalAmount = Number((subtotal + totalGst).toFixed(4));
+
+      const ins = await q(
+        `INSERT INTO purchase_returns (
+           account_id, return_number, vendor_id, vendor_name, division_id, purchase_invoice_id,
+           return_date, return_reason, status, purchase_source,
+           subtotal, total_gst, total_amount, notes, created_by_user_id, updated_by_user_id,
+           import_source, import_job_id
+         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8::purchase_return_reason,'DRAFT',$9,$10,$11,$12,$13,$14,$14,$15,$16)
+         RETURNING *`,
+        [
+          accountId,
+          returnNumber,
+          vendorId || null,
+          vendorName,
+          divisionId || null,
+          purchaseInvoiceId,
+          returnDate,
+          reason,
+          vendorId ? "VENDOR" : "DIVISION",
+          subtotal,
+          totalGst,
+          totalAmount,
+          clean(first.notes) || null,
+          actorId,
+          IMPORT_SOURCE,
+          importJobId || null
+        ]
+      );
+      const ret = ins.rows?.[0];
+
+      for (const item of itemRows) {
+        const { pid, bid, batchRow, returnQty, returnFreeQty, purchaseRate, mrp, gstPct, lineAmount } = item;
+        await q(
+          `INSERT INTO purchase_return_items (
+             account_id, purchase_return_id, product_id, product_name, batch_id, batch_no, expiry_date,
+             mfg_company_id, return_qty, return_free_qty, purchase_rate, mrp, gst_percent, return_amount
+           ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+          [
+            accountId,
+            ret.id,
+            pid,
+            batchRow?.product_name || null,
+            bid,
+            batchRow?.batch_no || null,
+            batchRow?.expiry_date || null,
+            batchRow?.mfg_company_id || null,
+            returnQty,
+            returnFreeQty,
+            purchaseRate,
+            mrp,
+            gstPct,
+            lineAmount
+          ]
+        );
+      }
+
+      if (confirmAfter) {
+        // Confirm if the handler exists; gracefully leave as DRAFT if not yet implemented
+        try {
+          const confirmMod = require("../../handlers/purchaseReturns/runConfirmPurchaseReturnCore");
+          const cres = await confirmMod.runConfirmPurchaseReturnInTx(q, { accountId, actorId }, ret.id);
+          if (cres?.err) return { err: new Error(apiFailMessage(cres.err)) };
+          return { returnId: ret.id, affectedBatchIds: cres.affectedBatchIds || [] };
+        } catch (e) {
+          if (e.code !== "MODULE_NOT_FOUND") return { err: e };
+          return { returnId: ret.id }; // handler not yet available — leave as DRAFT
+        }
+      }
+      return { returnId: ret.id };
+    });
+
+    if (data?.err) throw data.err;
+    if (confirmAfter && data.affectedBatchIds?.length) {
+      await refreshLowStockNotifications(accountId, data.affectedBatchIds);
+    }
     created += 1;
   }
   return created;
@@ -1092,6 +1304,16 @@ async function runImportExecute(event, ctx, validation, duplicateStrategy, skipE
   if (entityType === "SALES_RETURNS") {
     try {
       const n = await execSalesReturnGroups(accountId, actorId, validation.valid || [], importJobId);
+      stats.created += n;
+    } catch (e) {
+      stats.errors.push(String(e.message || e));
+      if (!skipErrors) throw e;
+    }
+    return stats;
+  }
+  if (entityType === "PURCHASE_RETURNS") {
+    try {
+      const n = await execPurchaseReturnGroups(accountId, actorId, validation.valid || [], importJobId);
       stats.created += n;
     } catch (e) {
       stats.errors.push(String(e.message || e));

@@ -20,12 +20,18 @@ Mappings:
       AppName: "medico-user-backend-local"
       ApiName: "medico-user-api-local"
       LightLayerName: "medico-user-lib-light-local"
-      DbHost: "db.tcmjudishpkcyesabvqq.supabase.co"
+      # DbHost: "db.tcmjudishpkcyesabvqq.supabase.co"
+      # DbPort: "5432"
+      # DbName: "postgres"
+      # DbUser: "postgres"
+      # DbPassword: "Medico#123456$"
+      # DbSsl: "require"
+      DbHost: "13.60.252.58"
       DbPort: "5432"
       DbName: "postgres"
       DbUser: "postgres"
       DbPassword: "Medico#123456$"
-      DbSsl: "require"
+      DbSsl: "disable"
       BcryptCost: "12"
       JwtAccessSecret: "dev_only_change_me"
       AccessTokenTtlSeconds: "900"
@@ -42,6 +48,7 @@ Mappings:
       EmailVerifyOtpTtlMinutes: "15"
       PasswordResetOtpTtlMinutes: "15"
       MedicoEmailDryRun: ""
+      AppLogoUrl: "https://jedmee.com/logo.png"
       EnvironmentTag: "Local"
     dev:
       MemorySize: "256"
@@ -71,6 +78,7 @@ Mappings:
       EmailVerifyOtpTtlMinutes: "15"
       PasswordResetOtpTtlMinutes: "15"
       MedicoEmailDryRun: ""
+      AppLogoUrl: "https://jedmee.com/logo.png"
       EnvironmentTag: "Development"
     prod:
       MemorySize: "512"
@@ -100,6 +108,7 @@ Mappings:
       EmailVerifyOtpTtlMinutes: "15"
       PasswordResetOtpTtlMinutes: "15"
       MedicoEmailDryRun: ""
+      AppLogoUrl: "https://jedmee.com/logo.png"
       EnvironmentTag: "Production"
 
 Globals:
@@ -136,6 +145,7 @@ Globals:
         EMAIL_VERIFY_OTP_TTL_MINUTES: !FindInMap [StageConfig, !Ref Stage, EmailVerifyOtpTtlMinutes]
         PASSWORD_RESET_OTP_TTL_MINUTES: !FindInMap [StageConfig, !Ref Stage, PasswordResetOtpTtlMinutes]
         MEDICO_EMAIL_DRY_RUN: !FindInMap [StageConfig, !Ref Stage, MedicoEmailDryRun]
+        APP_LOGO_URL: !FindInMap [StageConfig, !Ref Stage, AppLogoUrl]
     Layers:
       - !Ref libsLight
     Tags:

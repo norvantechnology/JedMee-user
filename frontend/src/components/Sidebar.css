@@ -1,13 +1,4 @@
-this/* Sidebar – match provided HTML layout, using theme tokens only */
-*, *::before, *::after { box-sizing: border-box; }
-
-:root {
-  --sidebar-w: 260px;
-  --sidebar-collapsed: 76px;
-  --tr: 0.18s cubic-bezier(.4,0,.2,1);
-  --radius: 14px;
-  --radius-sm: 9px;
-}
+/* Sidebar – match provided HTML layout, using theme tokens only */
 
 /* Mobile overlay */
 .overlay {
@@ -35,6 +26,9 @@ this/* Sidebar – match provided HTML layout, using theme tokens only */
    SIDEBAR
 ════════════════════════════════════════ */
 .sidebar {
+  /* Local transition shorthand — scoped to sidebar only */
+  --tr: 0.18s cubic-bezier(.4,0,.2,1);
+
   /* Dark nav surface derived from tokens */
   --brand: var(--color-primary);
   --brand-mid: var(--color-primary-dark);
@@ -175,7 +169,6 @@ this/* Sidebar – match provided HTML layout, using theme tokens only */
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 10px 0;
   scrollbar-width: none;
   position: relative;
 }
@@ -197,7 +190,6 @@ this/* Sidebar – match provided HTML layout, using theme tokens only */
   );
   pointer-events: none;
   z-index: 2;
-  margin-bottom: -18px;
   flex-shrink: 0;
 }
 
@@ -245,7 +237,7 @@ this/* Sidebar – match provided HTML layout, using theme tokens only */
   align-items: center;
   gap: 10px;
   padding: 9px 10px;
-  border-radius: var(--radius-sm);
+  border-radius: 9px;
   cursor: pointer;
   text-decoration: none;
   color: var(--text-muted);

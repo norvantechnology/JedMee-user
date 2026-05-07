@@ -16,10 +16,23 @@ const REQUIRED_HINTS = {
   PRODUCTS: ["name"],
   PRODUCT_BATCHES: ["batch_no", "expiry_date", "mrp"],
   CUSTOMERS: ["name"],
-  PURCHASES: ["invoice_number", "invoice_date", "product_code", "batch_no", "qty"],
-  SALES: ["invoice_number", "invoice_date", "product_code", "batch_no", "qty"],
-  SALES_RETURNS: ["return_number", "customer_code", "product_code", "batch_no", "return_qty"],
+  // product_code OR product_name is accepted (validated in basicRequired)
+  PURCHASES: ["invoice_number", "invoice_date", "batch_no", "qty"],
+  SALES: ["invoice_number", "invoice_date", "batch_no", "qty"],
+  SALES_RETURNS: ["return_number", "batch_no", "return_qty"],
+  PURCHASE_RETURNS: ["return_date", "batch_no", "return_qty"],
   PRESCRIPTIONS: ["patient_name"]
+};
+
+/**
+ * Fields that are "either/or" — at least one must be present.
+ * Key = entityType, value = array of [fieldA, fieldB] pairs.
+ */
+const EITHER_OR_HINTS = {
+  PURCHASES: [["product_code", "product_name"], ["supplier_code", "supplier_name"]],
+  SALES: [["product_code", "product_name"], ["customer_code", "customer_name"]],
+  SALES_RETURNS: [["product_code", "product_name"], ["customer_code", "customer_name"]],
+  PURCHASE_RETURNS: [["product_code", "product_name"], ["supplier_code", "supplier_name"]]
 };
 
 function fieldsWithRequired(entityType) {
@@ -27,4 +40,4 @@ function fieldsWithRequired(entityType) {
   return fieldsForEntity(entityType).map((f) => ({ ...f, required: req.has(f.key) }));
 }
 
-module.exports = { fieldsForEntity, fieldsWithRequired, REQUIRED_HINTS };
+module.exports = { fieldsForEntity, fieldsWithRequired, REQUIRED_HINTS, EITHER_OR_HINTS };
