@@ -740,6 +740,11 @@ export default function CommonTable({
   const controls = (
     <div className={`tblTools ${controlsPlacement === "top" ? "tblTools_top" : ""}`}>
       <div className="tblToolsRow">
+        {controlsPlacement === "top" && countText ? (
+          <div className="tblKpi tblKpi_toolbar" aria-live="polite">
+            {String(countText).split(/\s+/)[0]}
+          </div>
+        ) : null}
         <TableSearch
           value={search || ""}
           onChange={(v) => onSearchChange?.(v)}
@@ -794,6 +799,24 @@ export default function CommonTable({
                   })}
                 </div>
               </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {controlsPlacement === "top" && !isMobile && (extraHeaderActions || primaryAction) ? (
+          <div className="tblToolsRowActions">
+            {extraHeaderActions}
+            {primaryAction ? (
+              <AppButton
+                className="tblPrimary"
+                variant="primary"
+                size="sm"
+                disabled={Boolean(primaryAction.disabled)}
+                onClick={primaryAction.onClick}
+                icon={<IconPlus />}
+              >
+                {primaryAction.label || "Create"}
+              </AppButton>
             ) : null}
           </div>
         ) : null}
@@ -950,38 +973,15 @@ export default function CommonTable({
         {controlsPlacement === "top" ? (
           <>
             <div className="tblHeadTop">
-              <div className="tblHeadMain">
-                <div className="tblTitles">
-                  {title ? <h2 className="tblTitle">{title}</h2> : null}
-                  {subtitle ? <p className="tblSub">{subtitle}</p> : null}
-                </div>
-                {countText ? (
-                  <div className="tblKpi tblKpi_toolbar" aria-live="polite">
-                    {String(countText).split(/\s+/)[0]}
-                  </div>
-                ) : null}
-              </div>
-              <div className="tblHeadFilters">{controls}</div>
-              {!isMobile && (extraHeaderActions || primaryAction) ? (
-                <div className="tblHeadToolbarActions">
-                  {/* Single flex row: extras fragment + primary — no wrapper div so nothing splits across rows */}
-                  <div className="tblHeadToolbarInner">
-                    {extraHeaderActions}
-                    {primaryAction ? (
-                      <AppButton
-                        className="tblPrimary"
-                        variant="primary"
-                        size="sm"
-                        disabled={Boolean(primaryAction.disabled)}
-                        onClick={primaryAction.onClick}
-                        icon={<IconPlus />}
-                      >
-                        {primaryAction.label || "Create"}
-                      </AppButton>
-                    ) : null}
+              {(title || subtitle) ? (
+                <div className="tblHeadMain">
+                  <div className="tblTitles">
+                    {title ? <h2 className="tblTitle">{title}</h2> : null}
+                    {subtitle ? <p className="tblSub">{subtitle}</p> : null}
                   </div>
                 </div>
               ) : null}
+              <div className="tblHeadFilters">{controls}</div>
             </div>
           </>
         ) : (

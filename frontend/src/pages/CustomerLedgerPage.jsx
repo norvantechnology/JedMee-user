@@ -210,16 +210,20 @@ export function CustomerLedgerReportContent({ embedded = false } = {}) {
             <table className="rptBatchTable rptBatchTable--ledger">
               <thead><tr><th>Date</th><th>Type</th><th>Reference</th><th className="rptNum">Dr</th><th className="rptNum">Cr</th><th className="rptNum">Balance</th></tr></thead>
               <tbody>
-                {entries.map((e, i) => (
-                  <tr key={`${e.date}-${i}`}>
-                    <td>{fmtDateIndian(e.date)}</td>
-                    <td>{e.type_label || e.type}</td>
-                    <td>{e.reference || ""}</td>
-                    <td>{Number(e.debit || 0) ? fmtMoney(e.debit) : ""}</td>
-                    <td>{Number(e.credit || 0) ? fmtMoney(e.credit) : ""}</td>
-                    <td>{fmtMoney(e.balance || 0)}</td>
-                  </tr>
-                ))}
+                {entries.map((e, i) => {
+                  const isDr = Number(e.debit  || 0) > 0;
+                  const isCr = Number(e.credit || 0) > 0;
+                  return (
+                    <tr key={`${e.date}-${i}`} className={isDr ? "vlRowDr" : isCr ? "vlRowCr" : ""}>
+                      <td>{fmtDateIndian(e.date)}</td>
+                      <td className="vlTypeCell">{e.type_label || String(e.type || "").replace(/_/g, " ")}</td>
+                      <td className="vlRefCell">{e.reference || "—"}</td>
+                      <td className="rptNum vlDrCell">{isDr ? fmtMoney(e.debit)  : ""}</td>
+                      <td className="rptNum vlCrCell">{isCr ? fmtMoney(e.credit) : ""}</td>
+                      <td className="rptNum vlBalCell">{fmtMoney(e.balance || 0)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </ReportTableScroll>

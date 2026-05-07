@@ -68,14 +68,18 @@
     min-width: 0;
   }
 
-  /* Strip action-bar padding when it sits inline in the header row; always push to right */
-  .tblHead_controlsTop .tblHeadToolbarActions {
-    padding: 0;
-    margin: 0 0 0 auto;
+  /* Action buttons group — lives inside .tblToolsRow, pushed to the right */
+  .tblToolsRowActions {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
     flex: 0 0 auto;
+    margin-left: auto;
   }
 
   /* Action buttons match filter-dropdown height (40 px) */
+  .tblToolsRowActions .appBtn,
   .tblHeadToolbarInner .appBtn {
     height: 40px !important;
     border-radius: 12px !important;
@@ -220,13 +224,23 @@
     background: transparent;
   }
 
-  /* Mobile-first compact row containing Search + Filter trigger */
+  /* Mobile-first compact row containing Search + Filter trigger.
+     flex-wrap: wrap allows many-filter pages (e.g. Purchases wholesaler with
+     6 filters) to flow onto a second line cleanly instead of overflowing. */
   .tblToolsRow {
     display: flex;
     align-items: center;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
     width: 100%;
     min-width: 0;
+  }
+
+  /* Search input grows to fill available space on the first line so filter
+     dropdowns that don't fit wrap to the next line as a tidy group. */
+  .tblToolsRow .tcSearch {
+    flex: 1 1 auto;
+    min-width: 160px;
   }
 
   /* Mobile actions row: Add / Import / Export / etc. */

@@ -101,9 +101,12 @@ export default function CustomerMasterModal({
   const phone = validatePhone(form.phoneCountryCode, form.phoneNumber);
 
   const gstRaw = String(form.gstNumber || "").trim().toUpperCase();
-  const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+  // Relaxed: 15 alphanumeric characters (A–Z, 0–9). The strict PAN-embedded
+  // format check was rejecting valid GSTINs that don't follow the canonical
+  // pattern exactly (e.g. special economic zone registrations, test accounts).
+  const GST_REGEX = /^[A-Z0-9]{15}$/;
   const gstError = submitted && gstRaw.length > 0 && !GST_REGEX.test(gstRaw)
-    ? "GSTIN must be 15 characters in valid format (e.g. 22AAAAA0000A1Z5)."
+    ? "GSTIN must be exactly 15 alphanumeric characters (letters and digits)."
     : "";
 
   const canSubmit =
