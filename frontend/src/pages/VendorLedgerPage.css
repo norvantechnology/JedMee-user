@@ -173,7 +173,7 @@
   color: var(--color-text-muted);
 }
 .vlRefCell {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 .vlDrCell {

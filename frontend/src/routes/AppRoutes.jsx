@@ -96,8 +96,8 @@ export function AppRoutes() {
 
   return (
     <Routes>
-      {/* Landing page: redirect authenticated users to dashboard */}
-      <Route path="/" element={!authed ? <LandingPage /> : mustChange ? <Navigate to="/first-login-change-password" replace /> : approvalGate ? <Navigate to="/approval" replace /> : <Navigate to="/dashboard" replace />} />
+      {/* Landing page: always accessible, even when authenticated */}
+      <Route path="/" element={<LandingPage />} />
       {/* Auth pages redirect to dashboard when already logged in */}
       <Route path="/login" element={authed ? <Navigate to={mustChange ? "/first-login-change-password" : approvalGate ? "/approval" : "/dashboard"} replace /> : <AuthUnifiedPage />} />
       <Route path="/register" element={authed ? <Navigate to={approvalGate ? "/approval" : "/dashboard"} replace /> : <AuthUnifiedPage />} />

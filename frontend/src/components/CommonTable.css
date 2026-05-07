@@ -88,6 +88,14 @@
     padding-right: 14px !important;
   }
 
+  /* Safety: hide action group on mobile (JSX already guards with !isMobile,
+     but this prevents any flash if the breakpoint fires before JS hydrates) */
+  @media (max-width: 720px) {
+    .tblToolsRowActions {
+      display: none;
+    }
+  }
+
   /* Columns button: icon-only — small square */
   .tblColsBtn.tblFilterBtn {
     width: 30px;
@@ -241,6 +249,14 @@
   .tblToolsRow .tcSearch {
     flex: 1 1 auto;
     min-width: 160px;
+  }
+
+  /* On mobile the search bar takes the full row width */
+  @media (max-width: 720px) {
+    .tblToolsRow .tcSearch {
+      min-width: 0;
+      width: 100%;
+    }
   }
 
   /* Mobile actions row: Add / Import / Export / etc. */

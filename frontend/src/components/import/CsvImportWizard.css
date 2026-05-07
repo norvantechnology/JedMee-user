@@ -393,10 +393,6 @@
   color: var(--color-primary);
 }
 
-.ciwMapOk {
-  /* moved earlier; keep for backwards compatibility if referenced elsewhere */
-}
-
 .ciwColName {
   font-weight: 700;
   color: var(--color-text);
