@@ -126,7 +126,6 @@ export default function Sidebar({
     if (masterSetupItems.length) out.push({ title: "MASTER SETUP", items: masterSetupItems });
 
     const txnItems = [
-      ...(canPurchase ? [{ to: "/purchase-invoices", label: NAV_LABELS.purchaseInvoices, icon: <ClipboardList />, shortcut: "Alt+I" }] : []),
       ...(canSales
         ? [
             {
@@ -138,6 +137,7 @@ export default function Sidebar({
           ]
         : []),
       ...(canSalesReturns ? [{ to: "/sales-returns", label: NAV_LABELS.salesReturns, icon: <RotateCcw />, shortcut: "Alt+S" }] : []),
+      ...(canPurchase ? [{ to: "/purchase-invoices", label: NAV_LABELS.purchaseInvoices, icon: <ClipboardList />, shortcut: "Alt+I" }] : []),
       ...(canPurchaseReturns ? [{ to: "/purchase-returns", label: "Purchase Returns", icon: <RotateCcw />, shortcut: "Alt+N" }] : []),
       ...(canOrders
         ? [

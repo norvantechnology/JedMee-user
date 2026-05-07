@@ -14,14 +14,12 @@ import { fmtMoney } from "../utils/format.js";
 import { IconBtn, IconConfirm } from "../components/TableActionKit.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
-import { useNavigate } from "react-router-dom";
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
 
 export default function PurchaseReturnsPage() {
   useSeoMeta({ title: "Purchase Returns" });
   const auth = readAuth();
   const user = auth?.user || null;
-  const navigate = useNavigate();
 
   const canView = can("PURCHASE_RETURNS", "VIEW");
   const canUpdate = can("PURCHASE_RETURNS", "UPDATE");
@@ -162,11 +160,7 @@ export default function PurchaseReturnsPage() {
                 />
               ) : null
             }
-            primaryAction={
-              canAdd
-                ? { label: "+ New Return", onClick: () => navigate("/purchase-returns/new") }
-                : null
-            }
+            primaryAction={null}
             rows={rows}
             getRowId={(r) => r.id}
             columns={[
