@@ -2,9 +2,9 @@ import { useEffect } from "react";
 
 const BASE_TITLE = "JedMee";
 const BASE_DESC =
-  "Best pharmacy management software for Indian medicine shops & distributors. GST billing, inventory tracking, purchase orders, sales invoices, expiry alerts. Free trial — no credit card required.";
+  "JedMee is pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial, no credit card required.";
 const BASE_KEYWORDS =
-  "pharmacy management software India, medicine shop software, GST billing pharmacy, medical store management software, pharmacy inventory software, drug store software India, pharmacy POS software, medicine distributor software";
+  "pharmacy management software, medicine shop software, pharmacy billing software, medical store management software, pharmacy inventory software, drug store software, pharmacy POS software, medicine distributor software, pharmacy management system, pharmacy stock management";
 const BASE_URL = "https://jedmee.com";
 
 /**
@@ -24,16 +24,16 @@ const BASE_URL = "https://jedmee.com";
  *
  * @example
  *   useSeoMeta({
- *     title: "Pharmacy Management Software for India",
+ *     title: "Pharmacy Management Software — Free Trial",
  *     description: "JedMee helps medicine shops...",
- *     keywords: "pharmacy billing, GST invoice pharmacy",
+ *     keywords: "pharmacy billing, tax invoice pharmacy",
  *     canonical: "https://jedmee.com/",
  *   });
  */
 export function useSeoMeta({ title, description, keywords, canonical, ogImage } = {}) {
   const fullTitle = title
     ? `${title} — ${BASE_TITLE}`
-    : `${BASE_TITLE} — #1 Pharmacy Management Software India`;
+    : `${BASE_TITLE} — Pharmacy Management Software for Medicine Shops`;
   const fullDesc = description || BASE_DESC;
   const fullKeywords = keywords
     ? `${keywords}, ${BASE_KEYWORDS}`

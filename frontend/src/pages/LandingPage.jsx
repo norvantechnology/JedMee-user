@@ -1009,11 +1009,11 @@ export default function LandingPage() {
   const authed = Boolean(readAuth()?.refreshToken);
 
   useSeoMeta({
-    title: "Pharmacy Management Software | Billing, Inventory & Stock Control",
+    title: "Pharmacy Management Software | Free Trial",
     description:
-      "JedMee is pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, purchase orders and sales invoices — all in one simple app. Free plan available, no credit card required.",
+      "JedMee is pharmacy software for medicine shops and distributors. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial, no credit card needed.",
     keywords:
-      "pharmacy management software, medicine shop software, pharmacy billing software, medical store management software, pharmacy inventory software, drug store software, pharmacy POS software, medicine distributor software, online pharmacy management system, pharmacy stock management, medicine expiry tracking, wholesale pharma software, chemist shop software, pharmacy ERP, pharmacy invoicing software, pharmacy business software",
+      "pharmacy management software, pharmacy software, pharmacy billing software, pharmacy management system, medical store software, medicine shop software, free pharmacy software, cloud pharmacy software, pharmacy inventory management, pharmacy stock management, pharmacy POS, drug store software, chemist software, pharmacy invoicing software, wholesale pharmacy software",
     canonical: "https://jedmee.com/",
   });
 

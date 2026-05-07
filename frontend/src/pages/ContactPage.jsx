@@ -35,9 +35,9 @@ export default function ContactPage() {
   useSeoMeta({
     title: "Contact JedMee — Pharmacy Software Support & Sales",
     description:
-      "Contact JedMee for pharmacy management software support, pricing, or a free demo. We help medicine shops, chemists, and pharmaceutical distributors worldwide get started with tax billing and inventory management.",
+      "Contact JedMee for pharmacy software support, pricing, or a free demo. We help medicine shops and distributors worldwide with billing and inventory management.",
     keywords:
-      "contact JedMee, pharmacy software support, medicine shop software help, pharmacy billing software demo, JedMee support, pharmacy management software contact",
+      "contact JedMee, pharmacy software support, pharmacy software demo, medicine shop software help, JedMee support, pharmacy management contact, pharmacy billing demo",
     canonical: "https://jedmee.com/contact",
   });
 

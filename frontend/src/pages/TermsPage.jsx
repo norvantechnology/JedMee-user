@@ -97,11 +97,11 @@ export default function TermsPage() {
   const [active, setActive] = useState(null);
 
   useSeoMeta({
-    title: "Terms of Service — JedMee Pharmacy Management Software",
+    title: "Terms of Service — JedMee Pharmacy Software",
     description:
-      "Read JedMee's Terms of Service for our pharmacy management platform. Understand your rights and responsibilities when using our medicine shop software, tax billing system, and inventory management tools.",
+      "Read JedMee's Terms of Service. Understand your rights when using our pharmacy management software, billing system, and inventory management tools.",
     keywords:
-      "JedMee terms of service, pharmacy software terms, medicine shop software terms, pharmacy management platform terms",
+      "JedMee terms of service, pharmacy software terms, medicine shop software terms, pharmacy management terms, pharmacy billing terms",
     canonical: "https://jedmee.com/terms",
   });
 

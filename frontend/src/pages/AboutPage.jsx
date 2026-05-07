@@ -56,11 +56,11 @@ export default function AboutPage() {
   const navigate = useNavigate();
 
   useSeoMeta({
-    title: "About JedMee — Pharmacy Management Software for Medicine Shops Worldwide",
+    title: "About JedMee — Pharmacy Management Software",
     description:
-      "Learn about JedMee — trusted pharmacy management software for medicine shops, chemists, and pharmaceutical distributors worldwide. Tax-compliant billing, inventory management, and cloud-based operations for pharmacies globally.",
+      "JedMee helps medicine shops and distributors worldwide manage billing, inventory, and orders. Simple, affordable pharmacy software built for real pharmacy workflows.",
     keywords:
-      "about JedMee, pharmacy software company, medicine shop management software, pharmacy management platform, chemist software, pharmaceutical software company, pharmacy billing software",
+      "about JedMee, pharmacy software company, medicine shop management, pharmacy management platform, pharmaceutical software, pharmacy billing, inventory management pharmacy, chemist software",
     canonical: "https://jedmee.com/about",
   });
 
