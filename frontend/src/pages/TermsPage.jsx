@@ -28,7 +28,7 @@ const SECTIONS = [
   {
     num: "02",
     title: "Description of Service",
-    content: `JedMee provides cloud-based pharmacy management software designed for Indian medicine shops and pharmaceutical distributors. The Service includes inventory management, GST billing, purchase and sales invoicing, customer and vendor ledgers, prescription management, and related features. We reserve the right to modify, suspend, or discontinue any part of the Service at any time with reasonable notice.`,
+    content: `JedMee provides cloud-based pharmacy management software designed for medicine shops and pharmaceutical distributors worldwide. The Service includes inventory management, tax billing, purchase and sales invoicing, customer and vendor ledgers, prescription management, and related features. We reserve the right to modify, suspend, or discontinue any part of the Service at any time with reasonable notice.`,
   },
   {
     num: "03",
@@ -38,12 +38,12 @@ const SECTIONS = [
   {
     num: "04",
     title: "Subscription Plans and Billing",
-    content: `JedMee offers multiple subscription tiers including a free Starter plan and paid plans (Growth, Professional, Enterprise). Paid plans are billed monthly or annually as selected at the time of subscription. All prices are in Indian Rupees (INR) and are inclusive of applicable taxes unless stated otherwise. Subscriptions auto-renew unless cancelled before the renewal date. Refunds are provided at our discretion for annual plans cancelled within 7 days of payment.`,
+    content: `JedMee offers multiple subscription tiers including a free Starter plan and paid plans (Growth, Professional, Enterprise). Paid plans are billed monthly or annually as selected at the time of subscription. All prices are displayed in the applicable currency and are inclusive of applicable taxes unless stated otherwise. Subscriptions auto-renew unless cancelled before the renewal date. Refunds are provided at our discretion for annual plans cancelled within 7 days of payment.`,
   },
   {
     num: "05",
     title: "Acceptable Use",
-    content: `You agree to use JedMee only for lawful purposes and in accordance with these Terms. You must not: (a) use the Service to store or transmit unlawful, fraudulent, or harmful content; (b) attempt to gain unauthorised access to any part of the Service or its infrastructure; (c) reverse-engineer, decompile, or disassemble any part of the software; (d) use the Service to violate any applicable law, including the Drugs and Cosmetics Act, 1940, or GST regulations; (e) resell or sublicense access to the Service without written permission.`,
+    content: `You agree to use JedMee only for lawful purposes and in accordance with these Terms. You must not: (a) use the Service to store or transmit unlawful, fraudulent, or harmful content; (b) attempt to gain unauthorised access to any part of the Service or its infrastructure; (c) reverse-engineer, decompile, or disassemble any part of the software; (d) use the Service to violate any applicable law, including pharmaceutical regulations or tax laws in your jurisdiction; (e) resell or sublicense access to the Service without written permission.`,
   },
   {
     num: "06",
@@ -52,8 +52,8 @@ const SECTIONS = [
   },
   {
     num: "07",
-    title: "GST Compliance",
-    content: `JedMee generates GST-compliant invoices based on the information you provide. It is your responsibility to ensure that your GSTIN, HSN/SAC codes, tax rates, and other GST-related details are accurate. JedMee is not a GST filing service and does not file returns on your behalf. We recommend consulting a qualified CA or tax professional for GST compliance advice.`,
+    title: "Tax Compliance",
+    content: `JedMee generates tax-compliant invoices based on the information you provide. It is your responsibility to ensure that your tax registration numbers, product tax codes, tax rates, and other tax-related details are accurate and comply with the laws of your country. JedMee is not a tax filing service and does not file returns on your behalf. We recommend consulting a qualified accountant or tax professional for compliance advice.`,
   },
   {
     num: "08",
@@ -97,11 +97,11 @@ export default function TermsPage() {
   const [active, setActive] = useState(null);
 
   useSeoMeta({
-    title: "Terms of Service — JedMee Pharmacy Management Software India",
+    title: "Terms of Service — JedMee Pharmacy Management Software",
     description:
-      "Read JedMee's Terms of Service for our pharmacy management platform. Understand your rights and responsibilities when using our medicine shop software, GST billing system, and inventory management tools in India.",
+      "Read JedMee's Terms of Service for our pharmacy management platform. Understand your rights and responsibilities when using our medicine shop software, tax billing system, and inventory management tools.",
     keywords:
-      "JedMee terms of service, pharmacy software terms, medicine shop software terms, pharmacy management platform terms India",
+      "JedMee terms of service, pharmacy software terms, medicine shop software terms, pharmacy management platform terms",
     canonical: "https://jedmee.com/terms",
   });
 

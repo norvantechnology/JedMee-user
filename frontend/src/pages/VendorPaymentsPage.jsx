@@ -1,7 +1,7 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { fmtMoney, fmtCurrency } from "../utils/format.js";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AppShell from "../layouts/AppShell.jsx";
@@ -318,7 +318,7 @@ export default function VendorPaymentsPage() {
                     <option value="">Select invoice</option>
                     {invoiceOptions
                       .filter((x) => !form.partyId || String(isRetailer ? x.vendor_id : x.division_id) === String(form.partyId))
-                      .map((x) => <option key={x.id} value={x.id}>{x.invoice_number} (Bal {fmtMoneyINR(x.balance_due || 0)})</option>)}
+                      .map((x) => <option key={x.id} value={x.id}>{x.invoice_number} (Bal {fmtCurrency(x.balance_due || 0)})</option>)}
                   </select>
                   {paySubmitted && !form.purchaseInvoiceId && <div className="mfzErr">Invoice is required.</div>}
                 </div>

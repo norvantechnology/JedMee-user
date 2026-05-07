@@ -1,4 +1,4 @@
-import { fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { fmtMoney, fmtCurrency } from "../utils/format.js";
 import { useSeoMeta } from "../utils/seo.js";
 import { AppButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
 import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
@@ -630,7 +630,7 @@ export default function SalesReturnsPage() {
             )}
 
             <div className="srmTotalBar">
-              Total Return Amount: {fmtMoneyINR(returnTotal || 0)}
+              Total Return Amount: {fmtCurrency(returnTotal || 0)}
             </div>
           </div>
 

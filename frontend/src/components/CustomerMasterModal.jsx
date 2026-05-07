@@ -1,5 +1,6 @@
 import { InlineButtonProgress } from "./ui/buttons.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "../context/LocaleContext.jsx";
 import CommonModal from "./CommonModal.jsx";
 import CommonDatePicker from "./CommonDatePicker.jsx";
 import PhoneInput, { validatePhone } from "./PhoneInput.jsx";
@@ -55,6 +56,7 @@ export default function CustomerMasterModal({
   portalZIndex = 480
 }) {
   const isRetailer = useMemo(() => isRetailerAuth(readAuth()), []);
+  const { taxIdLabel } = useLocale();
   const typeOptions = isRetailer ? RETAILER_TYPES : WHOLESALER_TYPES;
   const [form, setForm] = useState(() => makeEmptyCustomer(isRetailer));
   const [showCompliance, setShowCompliance] = useState(!isRetailer);
@@ -106,7 +108,7 @@ export default function CustomerMasterModal({
   // pattern exactly (e.g. special economic zone registrations, test accounts).
   const GST_REGEX = /^[A-Z0-9]{15}$/;
   const gstError = submitted && gstRaw.length > 0 && !GST_REGEX.test(gstRaw)
-    ? "GSTIN must be exactly 15 alphanumeric characters (letters and digits)."
+    ? `${taxIdLabel} must be exactly 15 alphanumeric characters (letters and digits).`
     : "";
 
   const canSubmit =
@@ -314,11 +316,11 @@ export default function CustomerMasterModal({
                 ) : (
                   <div className="mfzGrid">
                     <div className="mfzField mfz6">
-                      <div className="mfzLabel">GSTIN</div>
+                      <div className="mfzLabel">{taxIdLabel}</div>
                       <input
                         className={`mfzInput${gstError ? " mfzInput_err" : ""}`}
                         value={form.gstNumber}
-                        placeholder="e.g. 22AAAAA0000A1Z5"
+                        placeholder="Tax registration number"
                         disabled={busy}
                         maxLength={15}
                         onChange={(e) => setForm((p) => ({ ...p, gstNumber: e.target.value }))}

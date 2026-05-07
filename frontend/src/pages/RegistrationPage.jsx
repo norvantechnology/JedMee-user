@@ -10,6 +10,7 @@ import { otpRequestSuccessMessage } from "../utils/authUiMessages.js";
 import "./RegistrationPage.css";
 import { APP_DISPLAY_NAME } from "../constants/brand.js";
 import { IconPlus } from "../components/ui/AppIcons.jsx";
+import { useLocale } from "../context/LocaleContext.jsx";
 
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]);
@@ -48,6 +49,7 @@ function FileField({ label, hint = "jpg/png/webp/gif • max 5MB", file, onPick 
 
 export default function RegistrationPage() {
   const navigate = useNavigate();
+  const { taxIdLabel } = useLocale();
   const [busy, setBusy] = useState(false);
   const [role, setRole] = useState("WHOLESALER");
   const [step, setStep] = useState(0); // 0 Basic, 1 Business, 2 Legal, 3 Documents
@@ -121,7 +123,7 @@ export default function RegistrationPage() {
       if (!state.trim()) return "State is required.";
     }
     if (s === 2) {
-      if (!gstNumber.trim() || gstNumber.trim().length !== 15) return "GST number must be 15 characters.";
+      if (!gstNumber.trim() || gstNumber.trim().length !== 15) return `${taxIdLabel} must be 15 characters.`;
       if (!dl1Number.trim()) return "Drug license 1 number is required.";
       if (!dl2Number.trim()) return "Drug license 2 number is required.";
     }
@@ -129,7 +131,7 @@ export default function RegistrationPage() {
       const hasGst = Boolean(gstFile);
       if (!hasGst) {
         const gstErr = pickFileError(gstFile);
-        return `GST Certificate: ${gstErr || "File is required."}`;
+        return `${taxIdLabel} Certificate: ${gstErr || "File is required."}`;
       }
       const hasDl1 = Boolean(dl1File);
       if (!hasDl1) {
@@ -242,7 +244,7 @@ export default function RegistrationPage() {
                   setBusy(false);
                   return;
                 }
-                if (SKIP_S3_UPLOAD) emitToast({ type: "success", message: "GST certificate uploaded (mock)." });
+                if (SKIP_S3_UPLOAD) emitToast({ type: "success", message: `${taxIdLabel} certificate uploaded (mock).` });
                 const up2 = await uploadDoc("DRUG_LICENSE_1", dl1File);
                 if (!up2.ok) {
                   emitToast({ type: "error", message: up2.error });
@@ -380,8 +382,8 @@ export default function RegistrationPage() {
                       <div className="regSectionSub">These must be unique for each account.</div>
                     </div>
                     <div className="field">
-                      <label>GST number (15 chars) <span className="reqMark" aria-hidden="true">*</span></label>
-                      <input className="regInput" value={gstNumber} onChange={(e) => setGstNumber(e.target.value)} placeholder="GSTIN" maxLength={15} />
+                      <label>{taxIdLabel} (15 chars) <span className="reqMark" aria-hidden="true">*</span></label>
+                      <input className="regInput" value={gstNumber} onChange={(e) => setGstNumber(e.target.value)} placeholder="Tax registration number" maxLength={15} />
                     </div>
                     <div className="regGrid2">
                       <div className="field">
@@ -404,11 +406,11 @@ export default function RegistrationPage() {
                     </div>
                     <div className="regDocs">
                       <FileField
-                        label="GST certificate"
+                        label={`${taxIdLabel} certificate`}
                         file={gstFile}
                         onPick={(f) => {
                           setGstFile(f);
-                          if (SKIP_S3_UPLOAD && f) emitToast({ type: "success", message: "GST certificate selected (mock upload success)." });
+                          if (SKIP_S3_UPLOAD && f) emitToast({ type: "success", message: `${taxIdLabel} certificate selected (mock upload success).` });
                         }}
                       />
                       <FileField

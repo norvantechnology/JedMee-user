@@ -1,4 +1,4 @@
-import { fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { fmtMoney, fmtCurrency } from "../utils/format.js";
 import { useSeoMeta } from "../utils/seo.js";
 import { InlineButtonProgress } from "../components/ui/buttons.jsx";
 import { useEffect, useMemo, useState } from "react";
@@ -13,6 +13,7 @@ import { readAuth } from "../services/authStorage.js";
 import { can } from "../utils/access.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
 import { bulkDeleteCustomers, createCustomer, deleteCustomer, listCustomers, printCustomerLedger, updateCustomer } from "../services/customerService.js";
+import { useLocale } from "../context/LocaleContext.jsx";
 import { createCustomerPayment, listCustomerPayments, listSalesInvoices, listSalesReturns } from "../services/salesService.js";
 import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
@@ -63,6 +64,7 @@ function sortLedgerEntries(entries) {
 
 export default function CustomersPage() {
   useSeoMeta({ title: "Customers" });
+  const { taxIdLabel } = useLocale();
   const auth = readAuth();
   const user = auth?.user || null;
   const isRetailer = useMemo(() => isRetailerAuth(auth), [auth]);
@@ -410,7 +412,7 @@ export default function CustomersPage() {
                 sortable: false,
                 render: (r) => <span style={{ color: "var(--color-text-3)" }}>{[r.city || "", r.state || ""].filter(Boolean).join(", ")}</span>
               },
-              { id: "gst_number", header: "GST", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{r.gst_number || ""}</span> },
+              { id: "gst_number", header: taxIdLabel, sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{r.gst_number || ""}</span> },
               { id: "credit_days", header: "Credit days", align: "right", sortable: false, render: (r) => Number(r.credit_days ?? 0) },
               { id: "credit_limit", header: "Credit Limit", align: "right", render: (r) => fmtMoney(r.credit_limit || 0) },
               { id: "discount_percent", header: "Discount %", align: "right", sortable: false, render: (r) => Number(r.discount_percent ?? 0).toFixed(2) },
@@ -545,15 +547,15 @@ export default function CustomersPage() {
         <div className="sfm">
           <div className="sfmSection">
             <div className="sfmGrid">
-              <div className="raField"><label>Total Billed</label><input className="raInput" readOnly value={fmtMoneyINR(ledgerSummary.totalBilled || 0)} /></div>
-              <div className="raField"><label>Total Paid</label><input className="raInput" readOnly value={fmtMoneyINR(ledgerSummary.totalPaid || 0)} /></div>
-              <div className="raField"><label>Balance Due</label><input className="raInput" readOnly value={fmtMoneyINR(ledgerSummary.balanceDue || 0)} /></div>
-              <div className="raField"><label>Advance From Customer</label><input className="raInput" readOnly value={fmtMoneyINR(ledgerSummary.advanceAmount || 0)} /></div>
+              <div className="raField"><label>Total Billed</label><input className="raInput" readOnly value={fmtCurrency(ledgerSummary.totalBilled || 0)} /></div>
+              <div className="raField"><label>Total Paid</label><input className="raInput" readOnly value={fmtCurrency(ledgerSummary.totalPaid || 0)} /></div>
+              <div className="raField"><label>Balance Due</label><input className="raInput" readOnly value={fmtCurrency(ledgerSummary.balanceDue || 0)} /></div>
+              <div className="raField"><label>Advance From Customer</label><input className="raInput" readOnly value={fmtCurrency(ledgerSummary.advanceAmount || 0)} /></div>
               <div className="raField"><label>Oldest Bill</label><input className="raInput" readOnly value={`${Number(ledgerSummary.oldestBillAgeDays || 0)} day(s)`} /></div>
               <div className="sfmFull" style={{ fontSize: 12, fontWeight: 800, color: Number(ledgerSummary.netBalance || 0) >= 0 ? "var(--color-danger)" : "var(--color-success)" }}>
                 {Number(ledgerSummary.netBalance || 0) >= 0
-                  ? `Customer owes you: ${fmtMoneyINR(ledgerSummary.netBalance || 0)}`
-                  : `You hold customer advance: ${fmtMoneyINR(Math.abs(Number(ledgerSummary.netBalance || 0)))}`}
+                  ? `Customer owes you: ${fmtCurrency(ledgerSummary.netBalance || 0)}`
+                  : `You hold customer advance: ${fmtCurrency(Math.abs(Number(ledgerSummary.netBalance || 0)))}`}
               </div>
             </div>
           </div>
@@ -630,7 +632,7 @@ export default function CustomersPage() {
                 if (r.status >= 200 && r.status < 300 && r.json?.ok) {
                   const advApp = Number(r.json?.data?.advance_applied || 0);
                   if (advApp > 0.0001) {
-                    emitToast({ type: "success", message: `Payment recorded. ${fmtMoneyINR(advApp)} applied from customer advance.` });
+                    emitToast({ type: "success", message: `Payment recorded. ${fmtCurrency(advApp)} applied from customer advance.` });
                   } else {
                     emitToast({ type: "success", message: "Payment recorded." });
                   }
@@ -664,7 +666,7 @@ export default function CustomersPage() {
                 onChange={(e) => setPaymentForm((p) => ({ ...p, amount: e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1") }))}
               />
               <div className="sfmHint" style={{ marginTop: 6 }}>
-                With allocations, cash can be ₹0 if customer advance (shown in ledger) covers all lines and “Apply advance first” is on.
+                With allocations, cash can be {fmtCurrency(0)} if customer advance (shown in ledger) covers all lines and "Apply advance first" is on.
               </div>
             </div>
             <div className="raField">
@@ -810,11 +812,11 @@ export default function CustomersPage() {
               <div className="custPayAllocSummary">
                 <div>
                   <span>Allocated</span>
-                  <strong>{fmtMoneyINR(paymentAllocSum)}</strong>
+                  <strong>{fmtCurrency(paymentAllocSum)}</strong>
                 </div>
                 <div>
                   <span>Cash + advance cap{paymentForm.useAdvanceFirst ? "" : " (advance off)"}</span>
-                  <strong>{fmtMoneyINR(paymentEffectiveCap)}</strong>
+                  <strong>{fmtCurrency(paymentEffectiveCap)}</strong>
                 </div>
                 <div style={{ color: paymentAllocOver ? "var(--color-danger)" : undefined }}>
                   <span>
@@ -825,7 +827,7 @@ export default function CustomersPage() {
                         : "Allocated vs cap"}
                   </span>
                   <strong>
-                    {fmtMoneyINR(paymentAllocOver
+                    {fmtCurrency(paymentAllocOver
                       ? paymentAllocSum - paymentEffectiveCap
                       : Math.abs(paymentEffectiveCap - paymentAllocSum))}
                   </strong>

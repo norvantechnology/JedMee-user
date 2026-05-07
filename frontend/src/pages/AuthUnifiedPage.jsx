@@ -1,5 +1,10 @@
 import { AppButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useCurrency } from "../context/CurrencyContext.jsx";
+import { CURRENCY_LIST } from "../utils/currency.js";
+import { useLocale } from "../context/LocaleContext.jsx";
+import { COUNTRIES } from "../utils/locale.js";
+import CountrySelector from "../components/ui/CountrySelector.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import DocumentUploadField from "../components/DocumentUploadField.jsx";
@@ -169,7 +174,7 @@ export default function AuthUnifiedPage() {
     title: activeTab === "register" ? "Create Your Account" : "Sign In",
     description:
       activeTab === "register"
-        ? "Create your JedMee account and start managing your pharmacy or distribution business with GST billing, stock tracking, and more."
+        ? "Create your JedMee account and start managing your pharmacy or distribution business with tax billing, stock tracking, and more."
         : "Sign in to JedMee — your all-in-one pharmacy management platform for stock, billing, orders, and payments.",
   });
 
@@ -182,10 +187,14 @@ export default function AuthUnifiedPage() {
   const [loginBusy, setLoginBusy] = useState(false);
 
   // ── Register state ──
+  const { setCurrency } = useCurrency();
+  const { setCountry, taxIdLabel } = useLocale();
   const [regRole, setRegRole] = useState("WHOLESALER");
   const [regStep, setRegStep] = useState(1);
   const [regBusy, setRegBusy] = useState(false);
   const [regPwVisible, setRegPwVisible] = useState(false);
+  const [regCountry, setRegCountry] = useState("IN");
+  const [regCurrency, setRegCurrency] = useState("INR");
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -236,6 +245,8 @@ export default function AuthUnifiedPage() {
     setGstCertificateUrl("");
     setDrugLicense1Url("");
     setDrugLicense2Url("");
+    setRegCountry("IN");
+    setRegCurrency("INR");
     setRegStep(1);
   }, [regRole]);
 
@@ -261,12 +272,12 @@ export default function AuthUnifiedPage() {
       if (!address.trim()) return "Address is required.";
     }
     if (s === 3) {
-      if (!gstNumber.trim() || gstNumber.trim().length !== 15) return "GST number must be 15 characters.";
+      if (!gstNumber.trim() || gstNumber.trim().length !== 15) return `${taxIdLabel} must be 15 characters.`;
       if (!dl1Number.trim()) return "Drug license 1 number is required.";
       if (!dl2Number.trim()) return "Drug license 2 number is required.";
     }
     if (s === 4) {
-      if (!gstCertificateUrl) return "GST certificate is required.";
+      if (!gstCertificateUrl) return `${taxIdLabel} certificate is required.`;
       if (!drugLicense1Url) return "Drug license 1 is required.";
       if (!drugLicense2Url) return "Drug license 2 is required.";
     }
@@ -362,6 +373,9 @@ export default function AuthUnifiedPage() {
           emitToast({ type: "error", message: parseApiError(otpResp) });
           return;
         }
+        // Apply country + currency preferences chosen during registration
+        setCountry(regCountry, false); // false = don't auto-override currency
+        setCurrency(regCurrency);
         emitToast({ type: "success", message: otpRequestSuccessMessage(otpResp.json?.meta) });
         navigate(`/verify-otp?email=${encodeURIComponent(email)}&role=${encodeURIComponent(regRole)}`, { replace: true });
       } else {
@@ -669,6 +683,30 @@ export default function AuthUnifiedPage() {
                     </div>
 
                     <div className="auField">
+                      <label className="auLabel" htmlFor="au-reg-country">
+                        Country / Region <span className="auOptional" style={{ fontWeight: 400, color: "var(--color-text-muted)", fontSize: "12px" }}>(optional)</span>
+                      </label>
+                      <CountrySelector
+                        id="au-reg-country"
+                        className="auSelect"
+                        value={regCountry}
+                        showFlag
+                        onChange={(code) => {
+                          setRegCountry(code);
+                          const cfg = COUNTRIES[code];
+                          if (cfg) {
+                            // Auto-set currency and phone prefix from country
+                            setRegCurrency(cfg.currencyCode);
+                            setCountryCode(cfg.phoneCode);
+                          }
+                        }}
+                      />
+                      <div className="auFieldHint" style={{ marginTop: 5, fontSize: "12px", color: "var(--color-text-muted)" }}>
+                        Sets your tax label (GST / VAT / Sales Tax) and default currency.
+                      </div>
+                    </div>
+
+                    <div className="auField">
                       <label className="auLabel">Phone <span className="reqMark" aria-hidden="true">*</span></label>
                       <div className="auPhoneRow">
                         <select
@@ -676,10 +714,11 @@ export default function AuthUnifiedPage() {
                           value={countryCode}
                           onChange={(e) => setCountryCode(e.target.value)}
                         >
-                          <option value="+91">🇮🇳 +91</option>
-                          <option value="+1">🇺🇸 +1</option>
-                          <option value="+44">🇬🇧 +44</option>
-                          <option value="+971">🇦🇪 +971</option>
+                          {Object.values(COUNTRIES).map((c) => (
+                            <option key={c.code} value={c.phoneCode}>
+                              {c.flag} {c.phoneCode}
+                            </option>
+                          ))}
                         </select>
                         <input
                           className="auInput"
@@ -689,6 +728,27 @@ export default function AuthUnifiedPage() {
                           inputMode="numeric"
                           maxLength={15}
                         />
+                      </div>
+                    </div>
+
+                    <div className="auField">
+                      <label className="auLabel" htmlFor="au-reg-currency">
+                        Currency <span className="auOptional" style={{ fontWeight: 400, color: "var(--color-text-muted)", fontSize: "12px" }}>(optional)</span>
+                      </label>
+                      <select
+                        id="au-reg-currency"
+                        className="auSelect"
+                        value={regCurrency}
+                        onChange={(e) => setRegCurrency(e.target.value)}
+                      >
+                        {CURRENCY_LIST.map((c) => (
+                          <option key={c.code} value={c.code}>
+                            {c.symbol} — {c.name} ({c.code})
+                          </option>
+                        ))}
+                      </select>
+                      <div className="auFieldHint" style={{ marginTop: 5, fontSize: "12px", color: "var(--color-text-muted)" }}>
+                        Your preferred display currency for all amounts in the app.
                       </div>
                     </div>
                   </div>
@@ -760,16 +820,16 @@ export default function AuthUnifiedPage() {
               {/* Step 3 */}
               {regStep === 3 && (
                 <div className="auSectionCard">
-                  <div className="auSectionTitle">GST & Drug Licenses</div>
+                  <div className="auSectionTitle">{taxIdLabel} & Drug Licenses</div>
                   <div className="auSectionSub">These must be unique for each account.</div>
 
                   <div className="auField">
-                    <label className="auLabel">GST number (15 chars) <span className="reqMark" aria-hidden="true">*</span></label>
+                    <label className="auLabel">{taxIdLabel} (15 chars) <span className="reqMark" aria-hidden="true">*</span></label>
                     <input
                       className="auInput"
                       value={gstNumber}
                       onChange={(e) => setGstNumber(e.target.value)}
-                      placeholder="GSTIN"
+                      placeholder="Tax registration number"
                       maxLength={15}
                     />
                   </div>
@@ -806,7 +866,7 @@ export default function AuthUnifiedPage() {
                   <div className="auDocs">
                     <DocumentUploadField
                       variant="box"
-                      label="GST certificate"
+                      label={`${taxIdLabel} certificate`}
                       docType="GST_CERTIFICATE"
                       url={gstCertificateUrl}
                       onUrlChange={setGstCertificateUrl}

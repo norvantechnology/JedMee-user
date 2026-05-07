@@ -1,7 +1,8 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { clean, fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { clean, fmtMoney, fmtCurrency, getCurrencySymbol } from "../utils/format.js";
+import { useLocale } from "../context/LocaleContext.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import AppShell from "../layouts/AppShell.jsx";
@@ -566,6 +567,7 @@ function emptyItem() {
 
 export default function SalesBillingPage() {
   useSeoMeta({ title: "Sales & Billing" });
+  const { taxLabel, taxRates } = useLocale();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const auth = readAuth();
@@ -1191,7 +1193,7 @@ export default function SalesBillingPage() {
     { key: "mrp", label: "MRP", className: "r" },
     { key: "rate", label: "Rate", className: "r" },
     { key: "disc", label: "Disc%", className: "r" },
-    { key: "gst", label: "GST%", className: "c" },
+    { key: "gst", label: `${taxLabel}%`, className: "c" },
     { key: "amount", label: "Amount", className: "r" },
     { key: "actions", label: "" }
   ]), []);
@@ -1643,7 +1645,7 @@ export default function SalesBillingPage() {
                           const invoiceNo = r.invoice_number || "";
                           const amount = Number(r.grand_total || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                           const date = r.invoice_date ? new Date(r.invoice_date).toLocaleDateString("en-IN") : "";
-                          const msg = `Hello! Your invoice *${invoiceNo}* dated ${date} for ₹${amount} is ready. Thank you for your purchase!`;
+                          const msg = `Hello! Your invoice *${invoiceNo}* dated ${date} for ${fmtCurrency(amount)} is ready. Thank you for your purchase!`;
                           const url = phone
                             ? `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`
                             : `https://wa.me/?text=${encodeURIComponent(msg)}`;
@@ -1914,8 +1916,8 @@ export default function SalesBillingPage() {
                     const color = limit <= 0 ? "var(--color-text-3)" : pct >= 100 ? "var(--color-danger)" : pct >= 80 ? "var(--color-warning)" : "var(--color-success)";
                     return (
                       <span className="sbmCreditLineStrong" style={{ color }}>
-                        Credit {limit > 0 ? `${pct}%` : ""} · O/s {fmtMoneyINR(used)} · Bills {customerOutstanding.outstandingBills} · Oldest {customerOutstanding.oldestBillAgeDays}d
-                        {limit > 0 ? ` · Limit ${fmtMoneyINR(limit)}` : ""}
+                        Credit {limit > 0 ? `${pct}%` : ""} · O/s {fmtCurrency(used)} · Bills {customerOutstanding.outstandingBills} · Oldest {customerOutstanding.oldestBillAgeDays}d
+                        {limit > 0 ? ` · Limit ${fmtCurrency(limit)}` : ""}
                       </span>
                     );
                   })()}
@@ -2008,7 +2010,7 @@ export default function SalesBillingPage() {
             footerRight={(
               <div className="sbmTotalNow">
                 <span className="sbmTotalNow-lbl">Total</span>
-                {fmtMoneyINR(totalAmount || 0)}
+                {fmtCurrency(totalAmount || 0)}
               </div>
             )}
           >
@@ -2226,8 +2228,8 @@ export default function SalesBillingPage() {
                           <CommonSelectField
                             className="sbmLineSelect"
                             value={String(it.gstPercent)}
-                            placeholder="GST"
-                            options={[0, 5, 12, 18, 28].map((v) => ({ value: String(v), label: `${v}%` }))}
+                            placeholder={taxLabel}
+                            options={(taxRates.length ? taxRates : [0, 5, 12, 18, 28]).map((v) => ({ value: String(v), label: `${v}%` }))}
                             onChange={(v) => setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, gstPercent: Number(v) } : x)) }))}
                           />
                         </td>
@@ -2293,7 +2295,7 @@ export default function SalesBillingPage() {
                 <div className="cliSummaryValue cliSummaryValue_sm">{fmtMoney(salesSummary.totalDiscount || 0)}</div>
               </div>
               <div className="cliSummaryCell">
-                <div className="cliSummaryLabel">(+) GST</div>
+                <div className="cliSummaryLabel">(+) {taxLabel}</div>
                 <div className="cliSummaryValue cliSummaryValue_sm">{fmtMoney(salesSummary.totalGst || 0)}</div>
               </div>
               <div className="cliSummaryCell">
@@ -2330,7 +2332,7 @@ export default function SalesBillingPage() {
                   <div
                     className={`sbmCashValue${Number(cashChange) > 0 ? " sbmCashValue_pos" : ""}`}
                   >
-                    ₹{cashChange}
+                    {fmtCurrency(cashChange)}
                   </div>
                 </div>
                 <div className="sbmCashHint sfmFull">
@@ -2388,9 +2390,9 @@ export default function SalesBillingPage() {
             <div className="sfmFull" style={{ border: "1px solid var(--color-border)", borderRadius: 10, padding: 10, background: "var(--color-bg-2)" }}>
               <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 4 }}>Summary</div>
               <div style={{ fontSize: 12, color: "var(--color-text-3)", display: "grid", gap: 2 }}>
-                <div>Due: {fmtMoneyINR(selectedPaymentInvoice?.balance_due || 0)}</div>
-                <div>Advance used: {fmtMoneyINR(paymentForm.useAdvanceFirst ? paymentAdvanceHint.apply || 0 : 0)}</div>
-                <div><strong>Collect now: {fmtMoneyINR(paymentForm.useAdvanceFirst ? paymentAdvanceHint.remaining || 0 : paymentForm.amount || 0)}</strong></div>
+                <div>Due: {fmtCurrency(selectedPaymentInvoice?.balance_due || 0)}</div>
+                <div>Advance used: {fmtCurrency(paymentForm.useAdvanceFirst ? paymentAdvanceHint.apply || 0 : 0)}</div>
+                <div><strong>Collect now: {fmtCurrency(paymentForm.useAdvanceFirst ? paymentAdvanceHint.remaining || 0 : paymentForm.amount || 0)}</strong></div>
               </div>
             </div>
           ) : null}
@@ -2533,7 +2535,7 @@ export default function SalesBillingPage() {
       >
         <div className="sfmGrid">
           <div className="sfmFull sbmBulkPayBanner">
-            <strong>{bulkPaymentConfirm.count || 0}</strong> invoice(s) selected | Total collection: <strong>{fmtMoneyINR(bulkPaymentConfirm.total || 0)}</strong>
+            <strong>{bulkPaymentConfirm.count || 0}</strong> invoice(s) selected | Total collection: <strong>{fmtCurrency(bulkPaymentConfirm.total || 0)}</strong>
           </div>
           <div className="raField">
             <label>Payment Date <span className="reqMark" aria-hidden="true">*</span></label>

@@ -1,7 +1,7 @@
 /**
  * Order detail modal — facts column + retailer fulfillment block.
  */
-import { fmtMoneyINR } from "../../utils/format.js";
+import { fmtCurrency } from "../../utils/format.js";
 export function OrderDetailFacts({ detail, isRetailer }) {
   const partyLabel = isRetailer ? "Wholesaler" : "Retailer";
   const partyName = isRetailer ? detail?.order?.wholesaler_firm_name : detail?.order?.retailer_firm_name;
@@ -21,7 +21,7 @@ export function OrderDetailFacts({ detail, isRetailer }) {
         </div>
         <div className="ordFactRow ordFactRow--total">
           <span className="ordFactLabel">Total</span>
-          <span className="ordFactValue ordFactValueMoney">{fmtMoneyINR(detail?.order?.total_amount || 0)}</span>
+          <span className="ordFactValue ordFactValueMoney">{fmtCurrency(detail?.order?.total_amount || 0)}</span>
         </div>
       </div>
     </section>

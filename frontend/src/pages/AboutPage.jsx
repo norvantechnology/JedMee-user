@@ -56,26 +56,26 @@ export default function AboutPage() {
   const navigate = useNavigate();
 
   useSeoMeta({
-    title: "About JedMee — Pharmacy Software Built for India's Medicine Shops",
+    title: "About JedMee — Pharmacy Management Software for Medicine Shops Worldwide",
     description:
-      "Learn about JedMee — India's trusted pharmacy management software. Built for medicine shops, chemists, and pharmaceutical distributors. GST-compliant billing, inventory management, and cloud-based operations for 500+ pharmacies across India.",
+      "Learn about JedMee — trusted pharmacy management software for medicine shops, chemists, and pharmaceutical distributors worldwide. Tax-compliant billing, inventory management, and cloud-based operations for pharmacies globally.",
     keywords:
-      "about JedMee, pharmacy software company India, medicine shop management company, Indian pharmacy software, chemist software India, pharmaceutical software company",
+      "about JedMee, pharmacy software company, medicine shop management software, pharmacy management platform, chemist software, pharmaceutical software company, pharmacy billing software",
     canonical: "https://jedmee.com/about",
   });
 
   const stats = [
     { num: 500, suffix: "+", label: "Pharmacies Onboarded", sc: "#6b3fa0" },
-    { num: 12,  suffix: "+", label: "States Covered",       sc: "#0ea5e9" },
-    { num: 50,  suffix: "Cr+", label: "Invoices Processed (₹)", sc: "#16a34a" },
+    { num: 15,  suffix: "+", label: "Countries Supported",  sc: "#0ea5e9" },
+    { num: 2,   suffix: "M+", label: "Invoices Processed",  sc: "#16a34a" },
     { num: 99,  suffix: ".9%", label: "Uptime SLA",          sc: "#d97706" },
   ];
 
   const values = [
     {
       icon: <Icon name="globe" size={24} />,
-      title: "India-First Design",
-      desc: "Every feature is built around Indian pharmacy workflows — GST invoicing, GSTIN validation, and support for Indian payment methods.",
+      title: "Pharmacy-First Design",
+      desc: "Every feature is built around real pharmacy workflows — tax invoicing, compliance support, multi-currency billing, and easy stock management.",
       vc: "#0ea5e9",
     },
     {
@@ -93,13 +93,13 @@ export default function AboutPage() {
     {
       icon: <Icon name="heart" size={24} />,
       title: "Customer Success",
-      desc: "We succeed only when you succeed. Our support team speaks Hindi and English, and we offer onboarding help for every new account — free of charge.",
+      desc: "We succeed only when you succeed. Our support team is available in English and we offer free onboarding help for every new account — at no extra charge.",
       vc: "#16a34a",
     },
   ];
 
   const trustItems = [
-    "GST-compliant invoicing",
+    "Tax-compliant invoicing",
     "Cloud-based & mobile-friendly",
     "No credit card required to start",
     "Free onboarding support",
@@ -119,8 +119,8 @@ export default function AboutPage() {
           <div className="ip-hero-inner">
             <span className="ln-section-label">Our Story</span>
             <h1 className="ip-hero-title">
-              Built for India's{" "}
-              <span className="ip-hero-title-accent">Pharmacy Ecosystem</span>
+              Built for the{" "}
+              <span className="ip-hero-title-accent">Global Pharmacy Ecosystem</span>
             </h1>
             <p className="ip-hero-sub">
               JedMee was founded with one goal: make running a medicine shop or pharmaceutical distribution business as simple as possible — without expensive consultants, complex ERP systems, or hours of training.
@@ -155,10 +155,10 @@ export default function AboutPage() {
                 Empowering Every Pharmacy, Big or Small
               </h2>
               <p>
-                India has over 8 lakh registered pharmacies and thousands of pharmaceutical distributors. Most of them still rely on paper registers, disconnected spreadsheets, or outdated desktop software that hasn't been updated in years.
+                There are millions of registered pharmacies and thousands of pharmaceutical distributors worldwide. Most of them still rely on paper registers, disconnected spreadsheets, or outdated desktop software that hasn't been updated in years.
               </p>
               <p>
-                JedMee changes that. We bring cloud-based, GST-compliant, mobile-friendly pharmacy management to every corner of India — from a single-counter medical shop in Jaipur to a multi-branch distributor in Mumbai.
+                JedMee changes that. We bring cloud-based, tax-compliant, mobile-friendly pharmacy management to every pharmacy — from a single-counter medicine shop to a large multi-branch distributor.
               </p>
             </div>
             <div className="ip-stats-grid">
@@ -202,7 +202,7 @@ export default function AboutPage() {
         <div className="ln-container">
           <div style={{ textAlign: "center", marginBottom: "36px" }}>
             <span className="ln-section-label">The Team</span>
-            <h2 className="ln-section-title">Built by Pharmacy Industry Insiders</h2>
+            <h2 className="ln-section-title">Built by Pharmacy & Technology Experts</h2>
           </div>
           <div className="ip-team-card">
             <div style={{ display: "flex", justifyContent: "center", gap: "0", marginBottom: "24px" }}>
@@ -221,7 +221,7 @@ export default function AboutPage() {
               ))}
             </div>
             <p style={{ color: "var(--color-text-muted)", lineHeight: 1.85, fontSize: "var(--text-sm)" }}>
-              Our founding team has direct experience working with pharmaceutical distributors and retail pharmacies across Gujarat, Maharashtra, and Rajasthan. We've seen the pain points firsthand — and we've built JedMee to solve them.
+              Our founding team has direct experience working with pharmaceutical distributors and retail pharmacies across multiple countries. We've seen the pain points firsthand — and we've built JedMee to solve them.
             </p>
             <p style={{ color: "var(--color-text-muted)", lineHeight: 1.85, fontSize: "var(--text-sm)", marginTop: 14 }}>
               We're a lean, focused team of engineers, designers, and pharma domain experts. We don't have a fancy office — we have a product that works, customers who trust us, and a mission that drives us every day.
@@ -236,7 +236,7 @@ export default function AboutPage() {
           <div className="ip-cta-inner">
             <h2 className="ip-cta-title">Ready to Modernise Your Pharmacy?</h2>
             <p className="ip-cta-sub">
-              Join 500+ pharmacies and distributors already using JedMee. Start free — no credit card required.
+              Join thousands of pharmacies and distributors worldwide already using JedMee. Start free — no credit card required.
             </p>
             <div className="ip-cta-btns">
               <button className="ln-btn ln-btn--white ln-btn--lg" onClick={() => navigate("/register")}>

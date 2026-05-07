@@ -1,5 +1,6 @@
 import { InlineButtonProgress } from "./ui/buttons.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "../context/LocaleContext.jsx";
 import CommonModal from "./CommonModal.jsx";
 import "./MasterModalForm.css";
 import MasterSelectWithCreate from "./MasterSelectWithCreate.jsx";
@@ -21,8 +22,6 @@ function toBool(v) {
   return false;
 }
 
-const GST_OPTIONS = ["0", "5", "12", "18", "28"];
-
 export default function ProductMasterModal({
   open,
   mode = "add",
@@ -39,6 +38,8 @@ export default function ProductMasterModal({
 }) {
   const readOnly = mode === "view";
   const isRetailer = useMemo(() => isRetailerAuth(readAuth()), []);
+  const { taxLabel, taxRates } = useLocale();
+  const TAX_OPTIONS = taxRates.length ? taxRates.map(String) : ["0", "5", "12", "18", "28"];
   const [form, setForm] = useState(() => emptyForm());
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -211,8 +212,8 @@ export default function ProductMasterModal({
         ? `“${form.name}” is already in your catalog (${nameCheck.existing.code}).`
         : `“${form.name}” already exists for this manufacturer (${nameCheck.existing.code}).`;
     }
-    if (form.salesGST && !GST_OPTIONS.includes(String(form.salesGST))) out.salesGST = "Choose a valid GST slab.";
-    if (form.purchaseGST && !GST_OPTIONS.includes(String(form.purchaseGST))) out.purchaseGST = "Choose a valid GST slab.";
+    if (form.salesGST && !TAX_OPTIONS.includes(String(form.salesGST))) out.salesGST = `Choose a valid ${taxLabel} rate.`;
+    if (form.purchaseGST && !TAX_OPTIONS.includes(String(form.purchaseGST))) out.purchaseGST = `Choose a valid ${taxLabel} rate.`;
     if (!isRetailer) {
       const freeN = Number(form.schemeQtyFree);
       const paidN = Number(form.schemeQtyPaid);
@@ -442,7 +443,7 @@ export default function ProductMasterModal({
                 {isRetailer ? (
                   <>
                     <div className="mfzField mfz6">
-                      <div className="mfzLabel">HSN</div>
+                      <div className="mfzLabel">HSN / Tax Code</div>
                       <input
                         className="mfzInput"
                         value={form.hsnCode}
@@ -450,7 +451,7 @@ export default function ProductMasterModal({
                         onChange={(e) => setField("hsnCode", e.target.value)}
                         placeholder="e.g. 3004"
                       />
-                      <div className="mfzHelp">4–8 digits for GST returns.</div>
+                      <div className="mfzHelp">Product tax classification code.</div>
                     </div>
                     <div className="mfzField mfz6">
                       <div className="mfzLabel">Rack or shelf</div>
@@ -529,16 +530,16 @@ export default function ProductMasterModal({
           <section className="mfzPanel" aria-label="Tax">
             <div className="mfzPanelHead">
               <div>
-                <div className="mfzHeadKicker">GST</div>
+                <div className="mfzHeadKicker">{taxLabel}</div>
               </div>
             </div>
             <div className="mfzPanelBody">
               <div className="mfzGrid">
                 <div className="mfzField mfz6">
-                  <div className="mfzLabel">Purchase GST %</div>
+                  <div className="mfzLabel">Purchase {taxLabel} %</div>
                   <select className="mfzInput" value={form.purchaseGST} disabled={readOnly} onChange={(e) => setField("purchaseGST", e.target.value)}>
                     <option value="">Select</option>
-                    {GST_OPTIONS.map((g) => (
+                    {TAX_OPTIONS.map((g) => (
                       <option key={g} value={g}>
                         {g}%
                       </option>
@@ -547,10 +548,10 @@ export default function ProductMasterModal({
                   {errors.purchaseGST ? <div className="mfzErr">{errors.purchaseGST}</div> : null}
                 </div>
                 <div className="mfzField mfz6">
-                  <div className="mfzLabel">Sales GST %</div>
+                  <div className="mfzLabel">Sales {taxLabel} %</div>
                   <select className="mfzInput" value={form.salesGST} disabled={readOnly} onChange={(e) => setField("salesGST", e.target.value)}>
                     <option value="">Select</option>
-                    {GST_OPTIONS.map((g) => (
+                    {TAX_OPTIONS.map((g) => (
                       <option key={g} value={g}>
                         {g}%
                       </option>

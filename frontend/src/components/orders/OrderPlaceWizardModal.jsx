@@ -1,6 +1,7 @@
-import { fmtMoney, fmtMoneyINR } from "../../utils/format.js";
+import { fmtMoney, fmtCurrency } from "../../utils/format.js";
 import { AppButton, AsyncButton } from "../ui/buttons.jsx";
 import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "../../context/LocaleContext.jsx";
 import CommonModal from "../CommonModal.jsx";
 import ConfirmDialog from "../ConfirmDialog.jsx";
 import ModalFooterShell from "../ui/ModalFooterShell.jsx";
@@ -49,7 +50,7 @@ function cartMetaSummaryLine(ln, c) {
   const parts = [];
   if (ln.row.product_code) parts.push(String(ln.row.product_code));
   if (ln.row.packing) parts.push(`${ln.row.packing} pack`);
-  parts.push(`${fmtMoneyINR(c.unitPrice)}/unit`);
+  parts.push(`${fmtCurrency(c.unitPrice)}/unit`);
   if (ln.min && ln.max != null) parts.push(`Qty ${ln.min}–${ln.max}`);
   else if (ln.min) parts.push(`Min ${ln.min}`);
   else if (ln.max != null) parts.push(`Max ${ln.max}`);
@@ -91,6 +92,7 @@ export default function OrderPlaceWizardModal({
     return out;
   }, [cartItems, mode, singleRow]);
 
+  const { taxLabel } = useLocale();
   const totals = useMemo(() => {
     const t = { gross: 0, discount: 0, gst: 0, total: 0 };
     for (const ln of lines) {
@@ -345,7 +347,7 @@ export default function OrderPlaceWizardModal({
                                   +
                                 </button>
                               </div>
-                              {showLineTotal ? <div className="cmpOrderCartTotal">{fmtMoneyINR(c.total)}</div> : null}
+                              {showLineTotal ? <div className="cmpOrderCartTotal">{fmtCurrency(c.total)}</div> : null}
                             </div>
                           </div>
                         );
@@ -361,23 +363,23 @@ export default function OrderPlaceWizardModal({
                     <div className="cmpOrderLivePreviewHead">Order total</div>
                     <div className="cmpOrderLiveRow">
                       <span>Subtotal</span>
-                      <span>{fmtMoneyINR(totals.gross)}</span>
+                      <span>{fmtCurrency(totals.gross)}</span>
                     </div>
                     {totals.discount > 0 && (
                       <div className="cmpOrderLiveRow cmpOrderLiveDiscount">
                         <span>Discount</span>
-                        <span>− {fmtMoneyINR(totals.discount)}</span>
+                        <span>− {fmtCurrency(totals.discount)}</span>
                       </div>
                     )}
                     {totals.gst > 0 && (
                       <div className="cmpOrderLiveRow">
-                        <span>GST</span>
-                        <span>{fmtMoneyINR(totals.gst)}</span>
+                        <span>{taxLabel}</span>
+                        <span>{fmtCurrency(totals.gst)}</span>
                       </div>
                     )}
                     <div className="cmpOrderLiveTotal">
                       <span>Total</span>
-                      <span>{fmtMoneyINR(totals.total)}</span>
+                      <span>{fmtCurrency(totals.total)}</span>
                     </div>
                   </div>
                 )}
@@ -411,24 +413,24 @@ export default function OrderPlaceWizardModal({
                 <div className="cmpOrderSummaryCompactTitle">Amounts</div>
                 <div className="cmpOrderSumRow">
                   <span>Subtotal</span>
-                  <span>{fmtMoneyINR(totals.gross)}</span>
+                  <span>{fmtCurrency(totals.gross)}</span>
                 </div>
                 <div className="cmpOrderSumCaption">{lines.length} item{lines.length !== 1 ? "s" : ""}</div>
                 {totals.discount > 0 ? (
                   <div className="cmpOrderSumRow cmpOrderSumRowDiscount">
                     <span>Discount</span>
-                    <span>− {fmtMoneyINR(totals.discount)}</span>
+                    <span>− {fmtCurrency(totals.discount)}</span>
                   </div>
                 ) : null}
                 {totals.gst > 0 ? (
                   <div className="cmpOrderSumRow">
-                    <span>GST</span>
-                    <span>{fmtMoneyINR(totals.gst)}</span>
+                    <span>{taxLabel}</span>
+                    <span>{fmtCurrency(totals.gst)}</span>
                   </div>
                 ) : null}
                 <div className="cmpOrderSumRow cmpOrderSumGrand">
                   <span>Total payable</span>
-                  <span>{fmtMoneyINR(totals.total)}</span>
+                  <span>{fmtCurrency(totals.total)}</span>
                 </div>
               </div>
             </div>
@@ -444,7 +446,7 @@ export default function OrderPlaceWizardModal({
             ? `Place order for "${lines[0]?.row?.product_name || "product"}" from ${safeWholesalerName || "wholesaler"}?`
             : `Place order for ${lines.length} products from ${safeWholesalerName || "wholesaler"}?`
         }
-        hint={`Total payable: ${fmtMoneyINR(totals.total)}`}
+        hint={`Total payable: ${fmtCurrency(totals.total)}`}
         danger={false}
         busy={busy}
         confirmLabel="Confirm"

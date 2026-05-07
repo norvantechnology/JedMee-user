@@ -1,6 +1,7 @@
 import AmountInput from "./ui/AmountInput.jsx";
 import { InlineButtonProgress } from "./ui/buttons.jsx";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale } from "../context/LocaleContext.jsx";
 import CommonModal from "./CommonModal.jsx";
 import { computeProductBatch } from "../utils/productBatchCalc.js";
 import { checkProductBatch } from "../services/productBatchService.js";
@@ -87,6 +88,7 @@ export default function ProductBatchModal({
   onSubmit
 }) {
   const readOnly = mode === "view";
+  const { taxLabel, taxRates } = useLocale();
   const [tab, setTab] = useState("product"); // product | pricing | discount | stock | flags
   const [touched, setTouched] = useState({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
@@ -316,10 +318,10 @@ export default function ProductBatchModal({
 
     const salesGST = numOrEmpty(form.salesGST);
     const purchaseGST = numOrEmpty(form.purchaseGST);
-    const allowedGst = new Set([0, 5, 12, 18, 28]);
-    const gstOk = (v) => v === "" || allowedGst.has(Number(v));
-    if (!gstOk(salesGST)) out.salesGST = "Sales GST must be one of 0, 5, 12, 18, 28.";
-    if (!gstOk(purchaseGST)) out.purchaseGST = "Purchase GST must be one of 0, 5, 12, 18, 28.";
+    const allowedRates = new Set(taxRates.length ? taxRates : [0, 5, 12, 18, 28]);
+    const taxOk = (v) => v === "" || allowedRates.has(Number(v));
+    if (!taxOk(salesGST)) out.salesGST = `Sales ${taxLabel} must be a valid rate.`;
+    if (!taxOk(purchaseGST)) out.purchaseGST = `Purchase ${taxLabel} must be a valid rate.`;
 
     const mrp = numOrEmpty(form.mrp);
     if (mrp === "" || !(Number(mrp) > 0)) {
@@ -487,7 +489,7 @@ export default function ProductBatchModal({
     { label: "Landing cost", value: String(computed.landingCost || 0) },
     { label: "Net rate", value: String(computed.netRate || 0) },
     { label: marginLabel, value: `${marginValue}%` },
-    { label: "Sales with GST", value: String(computed.salesWithGST || 0) }
+    { label: `Sales with ${taxLabel}`, value: String(computed.salesWithGST || 0) }
   ];
   const tabErrorCounts = useMemo(() => {
     const counts = { product: 0, pricing: 0, discount: 0, stock: 0, flags: 0 };
@@ -641,7 +643,7 @@ export default function ProductBatchModal({
                 title={
                   k.label === marginLabel
                     ? "<5 low, 5-15 medium, >15 healthy"
-                    : k.label === "Sales with GST"
+                    : k.label === `Sales with ${taxLabel}`
                       ? "Tax-inclusive sale value"
                       : ""
                 }
@@ -653,7 +655,7 @@ export default function ProductBatchModal({
           </div>
         </div>
         {Number(computed.salesWithGST || 0) > Number(form.mrp || 0) && Number(form.mrp || 0) > 0 ? (
-          <div className="pbmBanner">Sales with GST exceeds MRP.</div>
+          <div className="pbmBanner">Sales with {taxLabel} exceeds MRP.</div>
         ) : null}
 
         <div className="pbmRail" role="tablist" aria-label="Batch form sections">
@@ -717,7 +719,7 @@ export default function ProductBatchModal({
                             </span>
                           ) : null}
                           {form.mfg_company_name && !form.division_name ? <span className="pbmPill">{form.mfg_company_name}</span> : null}
-                          {form.salesGST !== "" && form.salesGST != null ? <span className="pbmPill">GST {form.salesGST}%</span> : null}
+                          {form.salesGST !== "" && form.salesGST != null ? <span className="pbmPill">{taxLabel} {form.salesGST}%</span> : null}
                           {clean(form.packing) ? <span className="pbmPill">{form.packing}</span> : null}
                         </div>
                       </div>
@@ -1032,11 +1034,11 @@ export default function ProductBatchModal({
                 </div>
                 <div className="mfzGrid">
                   <div className="mfzField mfz6">
-                    <label>Purchase GST %</label>
+                    <label>Purchase {taxLabel} %</label>
                     <input className="mfzInput" value={form.purchaseGST === "" || form.purchaseGST == null ? "" : `${form.purchaseGST}%`} readOnly />
                   </div>
                   <div className="mfzField mfz6">
-                    <label>Sales GST %</label>
+                    <label>Sales {taxLabel} %</label>
                     <input className="mfzInput" value={form.salesGST === "" || form.salesGST == null ? "" : `${form.salesGST}%`} readOnly />
                   </div>
                   <div className="mfzField mfz6">
@@ -1044,7 +1046,7 @@ export default function ProductBatchModal({
                     <input className="mfzInput" value={String(computed.landingCost || 0)} readOnly />
                   </div>
                   <div className="mfzField mfz6">
-                    <label>Sales with GST</label>
+                    <label>Sales with {taxLabel}</label>
                     <input className="mfzInput" value={String(computed.salesWithGST || 0)} readOnly />
                   </div>
                 </div>

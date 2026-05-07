@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { getCurrencySymbol } from "../utils/currency.js";
 import { useNavigate, Link } from "react-router-dom";
 import { readAuth } from "../services/authStorage.js";
 import { getPublicPlans } from "../services/plansService.js";
@@ -191,7 +192,7 @@ function HeroSection({ navigate }) {
         <div className="ln-hero-content">
           <div className="ln-hero-badge">
             <Icon name="sparkle" size={14} />
-            <span>Medicine Shop Management</span>
+            <span>Pharmacy Management Software</span>
           </div>
           <h1 className="ln-hero-title">
             Run Your Pharmacy<br />
@@ -219,7 +220,7 @@ function HeroSection({ navigate }) {
             </div>
           </div>
           <div className="ln-hero-trust">
-            {["No credit card required", "GST compliant", "Setup in minutes"].map(t => (
+            {["No credit card required", "Tax compliant", "Setup in minutes"].map(t => (
               <div key={t} className="ln-hero-trust-item">
                 <Icon name="checkMark" size={13} /><span>{t}</span>
               </div>
@@ -242,7 +243,7 @@ function HeroSection({ navigate }) {
             </div>
             <div className="ln-dash-float ln-dash-float--3">
               <Icon name="trending" size={15} className="ln-fi ln-fi--purple" />
-              <div><div className="ln-fl">Today's Sales</div><div className="ln-fv">₹24,850</div></div>
+              <div><div className="ln-fl">Today's Sales</div><div className="ln-fv">$24,850</div></div>
             </div>
           </div>
         </div>
@@ -295,9 +296,9 @@ function DashboardMockup() {
           <div className="ln-mock-page-title">Dashboard</div>
           <div className="ln-mock-kpis">
             {[
-              { label: "Today's Sales", val: "₹24,850", trend: "↑ 12%", up: true, color: "#6b3fa0" },
-              { label: "Purchases", val: "₹8,200", trend: "↓ 3%", up: false, color: "#0ea5e9" },
-              { label: "Net Profit", val: "₹16,650", trend: "↑ 8%", up: true, color: "#22c55e" },
+              { label: "Today's Sales", val: "$24,850", trend: "↑ 12%", up: true, color: "#6b3fa0" },
+              { label: "Purchases", val: "$8,200", trend: "↓ 3%", up: false, color: "#0ea5e9" },
+              { label: "Net Profit", val: "$16,650", trend: "↑ 8%", up: true, color: "#22c55e" },
             ].map((k, i) => (
               <div key={i} className="ln-mock-kpi" style={{ borderTopColor: k.color }}>
                 <div className="ln-mock-kpi-label">{k.label}</div>
@@ -333,7 +334,7 @@ function DashboardMockup() {
           <div className="ln-mock-alerts">
             <div className="ln-mock-alert warn">⚠ 3 batches expiring</div>
             <div className="ln-mock-alert info">📦 2 low stock items</div>
-            <div className="ln-mock-alert ok">✓ GST compliant</div>
+            <div className="ln-mock-alert ok">✓ Tax compliant</div>
           </div>
         </div>
       </div>
@@ -347,13 +348,13 @@ function DashboardMockup() {
 function TrustedBySection() {
   const types = [
     "Retail Pharmacy", "Wholesale Distributor", "Hospital Pharmacy", "Medical Store",
-    "Drug Store", "Pharma Distributor", "Generic Medicine Shop", "Ayurvedic Store",
+    "Drug Store", "Pharma Distributor", "Generic Medicine Shop", "Herbal Medicine Store",
     "Retail Pharmacy", "Wholesale Distributor", "Hospital Pharmacy", "Medical Store",
-    "Drug Store", "Pharma Distributor", "Generic Medicine Shop", "Ayurvedic Store",
+    "Drug Store", "Pharma Distributor", "Generic Medicine Shop", "Herbal Medicine Store",
   ];
   return (
     <section className="ln-trusted">
-      <div className="ln-trusted-label">Trusted by all types of medicine businesses</div>
+      <div className="ln-trusted-label">Trusted by all types of pharmacy businesses worldwide</div>
       <div className="ln-trusted-track">
         <div className="ln-trusted-inner">
           {types.map((t, i) => (
@@ -415,8 +416,8 @@ function ProblemSection() {
     {
       icon: "file", color: "#6b3fa0", num: "03",
       title: "Slow Paper Billing",
-      desc: "Handwritten bills are slow, messy, and hard to find. GST calculations are a headache.",
-      solution: "Make GST bills in seconds — print or share instantly",
+      desc: "Handwritten bills are slow, messy, and hard to find. Tax calculations are a headache.",
+      solution: "Create tax invoices in seconds — print or share instantly",
     },
     {
       icon: "bell", color: "#0ea5e9", num: "04",
@@ -456,7 +457,7 @@ function ProblemSection() {
 function FeaturesSection() {
   const features = [
     { icon: "package", color: "#6b3fa0", title: "Stock Management", desc: "Track all medicines, batches, expiry dates, and stock levels in one place.", wide: true },
-    { icon: "receipt", color: "#0ea5e9", title: "GST Billing", desc: "Create compliant bills in seconds for walk-in or credit customers. Print or share instantly.", wide: true },
+    { icon: "receipt", color: "#0ea5e9", title: "Tax Billing & Invoicing", desc: "Create compliant invoices in seconds for walk-in or credit customers. Print or share instantly.", wide: true },
     { icon: "cart",    color: "#f97316", title: "Order Management", desc: "Retailers order from wholesalers online. Track every order from placement to delivery." },
     { icon: "bell",    color: "#ef4444", title: "Expiry Alerts", desc: "Automatic alerts when medicines are about to expire or run low." },
     { icon: "truck",   color: "#22c55e", title: "Supplier & Purchases", desc: "Record purchases, track payment due dates, and manage all suppliers." },
@@ -495,7 +496,7 @@ function WorkflowSection() {
   const workflows = {
     retailer: [
       { icon: "package",  step: "01", title: "Add Your Medicines",  desc: "Add medicines with batch numbers, expiry dates, and prices." },
-      { icon: "receipt",  step: "02", title: "Create Bills Fast",   desc: "Make GST bills for walk-in or credit customers in seconds." },
+      { icon: "receipt",  step: "02", title: "Create Bills Fast",   desc: "Create tax invoices for walk-in or credit customers in seconds." },
       { icon: "users",    step: "03", title: "Manage Customers",    desc: "Track who owes you money and their full payment history." },
       { icon: "barChart", step: "04", title: "Check Performance",   desc: "See daily sales, stock levels, and expiry alerts at a glance." },
     ],
@@ -553,46 +554,46 @@ function PlatformSection() {
   const tableData = [
     {
       cols: "28px 72px 1fr 88px 44px 88px 56px 88px",
-      headers: ["#", "CODE", "PRODUCT NAME", "DRUG NAME", "GST", "MFG", "TYPE", "CREATED"],
+      headers: ["#", "CODE", "PRODUCT NAME", "DRUG NAME", "TAX", "MFG", "TYPE", "CREATED"],
       rows: [
         ["1", "AUG-001", "Augmentin (Amox+Clav)", "Augmentin", "5%", "GSK Pharma", "OTC", "2026-04-28"],
-        ["2", "DOL-002", "Dolo 650", "Dolo", "5%", "Micro Labs", "OTC", "2026-04-25"],
-        ["3", "PAR-003", "Paracip 500", "Paracip", "--", "Cipla", "OTC", "2026-04-28"],
+        ["2", "IBU-002", "Ibuprofen 400mg", "Ibuprofen", "5%", "PharmaCo", "OTC", "2026-04-25"],
+        ["3", "MET-003", "Metformin 500mg", "Metformin", "--", "MedLabs", "OTC", "2026-04-28"],
         ["4", "CHL-004", "Chloroform", "Chloroform", "5%", "Test Co.", "OTHER", "2026-04-29"],
-        ["5", "PAR-005", "Paracitamall", "Paracitamall", "--", "Apollo", "OTC", "2026-04-26"],
+        ["5", "LIS-005", "Lisinopril 10mg", "Lisinopril", "--", "HealthCorp", "OTC", "2026-04-26"],
       ],
     },
     {
       cols: "28px 96px 90px 82px 82px 62px 62px 82px 72px",
       headers: ["#", "INVOICE NO", "SUPPLIER", "DATE", "DUE DATE", "TOTAL", "BALANCE", "STATUS", "PAYMENT"],
       rows: [
-        ["1", "PI-2026-0014", "Test Pharma", "2026-05-01", "2026-05-02", "₹105", "₹105", "CONFIRMED", "UNPAID"],
-        ["2", "PI-2026-0013", "Dhaval Dist.", "2026-05-01", "2026-05-02", "₹105", "₹105", "CONFIRMED", "UNPAID"],
-        ["3", "PI-2026-0012", "Test Pharma", "2026-05-01", "2026-05-02", "₹105", "₹105", "CONFIRMED", "UNPAID"],
-        ["4", "PI-2026-0011", "Dhaval Dist.", "2026-05-01", "2026-05-02", "₹105", "₹105", "DRAFT", "UNPAID"],
-        ["5", "PI-2026-0010", "Test Pharma", "2026-04-30", "2026-05-01", "₹52.50", "₹52.50", "CONFIRMED", "UNPAID"],
+        ["1", "PI-2026-0014", "MedSupply Co.", "2026-05-01", "2026-05-02", "$105", "$105", "CONFIRMED", "UNPAID"],
+        ["2", "PI-2026-0013", "Global Dist.", "2026-05-01", "2026-05-02", "$105", "$105", "CONFIRMED", "UNPAID"],
+        ["3", "PI-2026-0012", "MedSupply Co.", "2026-05-01", "2026-05-02", "$105", "$105", "CONFIRMED", "UNPAID"],
+        ["4", "PI-2026-0011", "Global Dist.", "2026-05-01", "2026-05-02", "$105", "$105", "DRAFT", "UNPAID"],
+        ["5", "PI-2026-0010", "MedSupply Co.", "2026-04-30", "2026-05-01", "$52.50", "$52.50", "CONFIRMED", "UNPAID"],
       ],
     },
     {
       cols: "28px 90px 1fr 76px 44px 62px 62px 62px 82px 72px",
       headers: ["#", "INVOICE", "CUSTOMER", "DATE", "ITEMS", "TOTAL", "PAID", "BALANCE", "STATUS", "PAYMENT"],
       rows: [
-        ["1", "SI-2026-0005", "Walk-in / Counter", "2026-05-01", "1", "₹315", "₹0", "₹315", "CONFIRMED", "UNPAID"],
-        ["2", "SI-2026-0004", "Mishan", "2026-04-30", "1", "₹300", "₹300", "₹0", "CONFIRMED", "PAID"],
-        ["3", "SI-2026-0003", "Walk-in / Counter", "2026-04-28", "1", "₹200", "₹200", "₹0", "CONFIRMED", "PAID"],
-        ["4", "SI-2026-0002", "Walk-in / Counter", "2026-04-28", "1", "₹1500", "₹1500", "₹0", "CONFIRMED", "PAID"],
-        ["5", "SI-2026-0001", "Mishan", "2026-04-27", "1", "₹200", "₹200", "₹0", "CONFIRMED", "PAID"],
+        ["1", "SI-2026-0005", "Walk-in / Counter", "2026-05-01", "1", "$315", "$0", "$315", "CONFIRMED", "UNPAID"],
+        ["2", "SI-2026-0004", "Alex M.", "2026-04-30", "1", "$300", "$300", "$0", "CONFIRMED", "PAID"],
+        ["3", "SI-2026-0003", "Walk-in / Counter", "2026-04-28", "1", "$200", "$200", "$0", "CONFIRMED", "PAID"],
+        ["4", "SI-2026-0002", "Walk-in / Counter", "2026-04-28", "1", "$1,500", "$1,500", "$0", "CONFIRMED", "PAID"],
+        ["5", "SI-2026-0001", "Alex M.", "2026-04-27", "1", "$200", "$200", "$0", "CONFIRMED", "PAID"],
       ],
     },
     {
       cols: "1fr 90px 100px 90px 56px 52px 44px 64px",
-      headers: ["PRODUCT", "DRUG NAME", "WHOLESALER", "CATALOG PRICE", "MRP", "STOCK", "GST", "MIN/MAX"],
+      headers: ["PRODUCT", "DRUG NAME", "WHOLESALER", "CATALOG PRICE", "MRP", "STOCK", "TAX", "MIN/MAX"],
       rows: [
-        ["Chloroform", "Chloroform", "Test Pharma", "₹100", "₹200", "1001", "5%", "1 / 10"],
-        ["iPhone Med", "iPhone 1", "Test Pharma", "₹100", "₹200", "56", "5%", "1 / 10"],
-        ["Augmentin", "Augmentin", "Dhaval Dist.", "₹85", "₹105", "240", "5%", "1 / 50"],
-        ["Dolo 650", "Dolo", "Apollo Pharma", "₹45", "₹65", "580", "5%", "1 / 100"],
-        ["Paracip 500", "Paracip", "Cipla Direct", "₹30", "₹50", "320", "--", "1 / 200"],
+        ["Amoxicillin 500", "Amoxicillin", "MedSupply Co.", "$12.00", "$18.00", "1001", "5%", "1 / 10"],
+        ["Ibuprofen 400", "Ibuprofen", "MedSupply Co.", "$8.50", "$14.00", "56", "5%", "1 / 10"],
+        ["Augmentin 625", "Augmentin", "Global Dist.", "$22.00", "$30.00", "240", "5%", "1 / 50"],
+        ["Metformin 500", "Metformin", "PharmaDirect", "$6.00", "$10.00", "580", "5%", "1 / 100"],
+        ["Lisinopril 10", "Lisinopril", "HealthSource", "$5.00", "$9.00", "320", "--", "1 / 200"],
       ],
     },
   ];
@@ -672,7 +673,7 @@ function PlatformSection() {
 ───────────────────────────────────────────────────────────── */
 function ComparisonSection() {
   const rows = [
-    { label: "GST Billing",                jedmee: true,  sheet: "partial", manual: false },
+    { label: "Tax Billing",                jedmee: true,  sheet: "partial", manual: false },
     { label: "Batch & Expiry Tracking",    jedmee: true,  sheet: "partial", manual: false },
     { label: "Online Order Management",    jedmee: true,  sheet: false,     manual: false },
     { label: "Customer Credit Management", jedmee: true,  sheet: "partial", manual: false },
@@ -726,23 +727,23 @@ function ComparisonSection() {
 function TestimonialsSection() {
   const testimonials = [
     {
-      quote: "Before JedMee, I was spending nearly 2 hours every evening just on billing and stock entries. Now my entire day's billing is done in under 30 minutes. GST invoices print perfectly, customers get a copy instantly, and I haven't had a single expired batch slip through in over 8 months. I genuinely wish I had switched sooner.",
-      name: "Amit Desai",
-      role: "Proprietor, Desai Medical & General Store · Surat, Gujarat",
+      quote: "Before JedMee, I was spending nearly 2 hours every evening just on billing and stock entries. Now my entire day's billing is done in under 30 minutes. Tax invoices print perfectly, customers get a copy instantly, and I haven't had a single expired batch slip through in over 8 months. I genuinely wish I had switched sooner.",
+      name: "Adam Davis",
+      role: "Proprietor, Davis Medical & General Store · Austin, TX",
       initials: "AD",
       rating: 5,
     },
     {
       quote: "We supply to 60+ retail pharmacies. Managing their orders over phone was a constant mess — wrong quantities, missed items, endless follow-up calls. With JedMee's order catalog, retailers place orders themselves and I confirm in one click. Our dispatch errors dropped to almost zero within the first month.",
-      name: "Vikram Nair",
-      role: "Owner, Nair Pharma Distributors · Kochi, Kerala",
+      name: "Victor Nash",
+      role: "Owner, Nash Pharma Distributors · Toronto, Canada",
       initials: "VN",
       rating: 5,
     },
     {
-      quote: "The expiry tracking alone is worth every rupee. We used to write off ₹15,000–20,000 in expired stock every quarter. Last quarter it was under ₹2,000. JedMee alerts us 60 days before expiry so we have time to return or sell the stock — that's real money saved.",
-      name: "Sunita Agarwal",
-      role: "Manager, Agarwal Medicals · Jaipur, Rajasthan",
+      quote: "The expiry tracking alone is worth every dollar. We used to write off $1,500–2,000 in expired stock every quarter. Last quarter it was under $200. JedMee alerts us 60 days before expiry so we have time to return or sell the stock — that's real money saved.",
+      name: "Sarah Mitchell",
+      role: "Manager, Mitchell Pharmacy · Phoenix, AZ",
       initials: "SA",
       rating: 5,
     },
@@ -752,7 +753,7 @@ function TestimonialsSection() {
       <div className="ln-container">
         <div className="ln-section-label">Customer Stories</div>
         <h2 className="ln-section-title">Real Pharmacies. Real Results.</h2>
-        <p className="ln-section-sub">See how medicine shops and distributors across India are saving time, reducing losses, and growing with JedMee.</p>
+        <p className="ln-section-sub">See how medicine shops and distributors around the world are saving time, reducing losses, and growing with JedMee.</p>
         <div className="ln-testi-layout">
           <div className="ln-testi-featured">
             <div className="ln-testi-stars">{[1,2,3,4,5].map(i => <Icon key={i} name="star" size={14} className="ln-star" />)}</div>
@@ -793,105 +794,48 @@ function TestimonialsSection() {
 /* ─────────────────────────────────────────────────────────────
    PRICING
 ───────────────────────────────────────────────────────────── */
-const FALLBACK_PLANS = [
-  {
-    name: "Starter", price: "Free", period: "14-day trial", highlight: false,
-    badge: null, cta: "Start Free Trial",
-    description: "Try JedMee free for 14 days. No credit card required. Perfect for small medicine shops just getting started.",
-    features: [
-      "Up to 200 products & batches",
-      "GST billing & PDF invoices",
-      "Basic inventory tracking",
-      "Expiry & low stock alerts",
-      "1 user account",
-      "Email support",
-    ],
-  },
-  {
-    name: "Growth", price: "₹499", period: "per month", highlight: false,
-    badge: null, cta: "Get Started",
-    description: "For growing pharmacies that need full billing, stock control, and supplier management in one place.",
-    features: [
-      "Up to 2,000 products & batches",
-      "GST billing & PDF invoices",
-      "Full inventory with batch tracking",
-      "Purchase & supplier management",
-      "Customer credit management",
-      "Day book & sales reports",
-      "Up to 3 user accounts",
-      "Email support",
-    ],
-  },
-  {
-    name: "Professional", price: "₹999", period: "per month", highlight: true,
-    badge: "Most Popular", cta: "Get Started",
-    description: "Everything a busy pharmacy or distributor needs — billing, orders, analytics, and team access, all connected.",
-    features: [
-      "Unlimited products & batches",
-      "Advanced GST billing & invoicing",
-      "Full inventory with expiry tracking",
-      "Online order catalog for retailers",
-      "Customer ledger & credit control",
-      "Supplier & purchase tracking",
-      "Advanced analytics & P&L reports",
-      "PDF invoices with email sharing",
-      "Up to 10 user accounts",
-      "Priority email support",
-    ],
-  },
-  {
-    name: "Enterprise", price: "₹2,499", period: "per month", highlight: false,
-    badge: "Best Value", cta: "Contact Us",
-    description: "For large distributors and multi-branch operations that need unlimited scale, custom branding, and dedicated support.",
-    features: [
-      "Everything in Professional",
-      "Unlimited user accounts",
-      "Multi-branch management",
-      "Custom branding on invoices",
-      "API access for integrations",
-      "Dedicated account manager",
-      "Custom onboarding & training",
-      "SLA-backed 99.9% uptime",
-      "Phone & priority support",
-    ],
-  },
-];
 
-/** Format price/period from either FALLBACK_PLANS (strings) or live API (numerics). */
-function fmtPrice(price, period) {
+/** Currency symbol map keyed by ISO 4217 code — matches backend formatPlan(). */
+const CURRENCY_SYMBOLS = { USD: "$", EUR: "€", GBP: "£", INR: "₹", AUD: "A$", CAD: "C$" };
+
+/** Format price string returned by the API (already pre-formatted by backend).
+ *  Numeric fallback uses currencyCode from plan.currency_code. */
+function fmtPrice(price, period, currencyCode = "USD") {
   if (typeof price === "string") return price;
   const n = parseFloat(price);
   if (n === 0 || period === "free") return "Free";
-  return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+  const sym = CURRENCY_SYMBOLS[currencyCode] ?? "$";
+  return sym + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 }
 function fmtPeriod(period) {
   if (typeof period === "string" && /month|trial|year|time/i.test(period)) return period;
   return { free: "14-day trial", monthly: "per month", yearly: "per year", one_time: "one time" }[period] ?? period;
 }
 function PricingSection({ navigate }) {
-  const [plans, setPlans] = useState(null);   // null = loading
+  const [plans, setPlans] = useState(null);   // null = loading, [] = error
   const [error, setError] = useState(false);
 
   const load = useCallback(async () => {
+    setError(false);
+    setPlans(null);
     try {
       const resp = await getPublicPlans({ toast: "none" });
       if (resp.status >= 200 && resp.status < 300 && resp.json?.ok) {
-        const fetched = resp.json.data?.plans ?? [];
-        setPlans(fetched.length > 0 ? fetched : FALLBACK_PLANS);
+        setPlans(resp.json.data?.plans ?? []);
       } else {
-        setPlans(FALLBACK_PLANS);
+        setPlans([]);
         setError(true);
       }
     } catch {
-      setPlans(FALLBACK_PLANS);
+      setPlans([]);
       setError(true);
     }
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
-  const displayPlans = plans ?? FALLBACK_PLANS;
   const isLoading = plans === null;
+  const displayPlans = plans ?? [];
 
   return (
     <section className="ln-pricing" id="pricing">
@@ -899,34 +843,48 @@ function PricingSection({ navigate }) {
         <div className="ln-section-label">Pricing</div>
         <h2 className="ln-section-title">Simple, Transparent Pricing</h2>
         <p className="ln-section-sub">Start free, upgrade when you're ready. No hidden fees.</p>
-        <div className={`ln-pricing-grid${isLoading ? " ln-pricing-grid--loading" : ""}`}>
-          {displayPlans.map((plan, i) => (
-            <div key={plan.id ?? i} className="ln-plan-wrap">
-              <div className={`ln-plan${plan.highlight ? " ln-plan--hi" : ""}${isLoading ? " ln-plan--skeleton" : ""}`}>
-                {plan.badge && <div className="ln-plan-badge">{plan.badge}</div>}
-                <div className="ln-plan-name">{plan.name}</div>
-                <div className="ln-plan-price">
-                  <span className="ln-plan-amount">{fmtPrice(plan.price, plan.period)}</span>
-                  <span className="ln-plan-period"> / {fmtPeriod(plan.period)}</span>
-                </div>
-                <p className="ln-plan-desc">{plan.description}</p>
-                <div className="ln-plan-divider" />
-                <ul className="ln-plan-features">
-                  {(Array.isArray(plan.features) ? plan.features : []).map((f, j) => (
-                    <li key={j}><Icon name="checkMark" size={13} className="ln-plan-check" /><span>{f}</span></li>
-                  ))}
-                </ul>
-                <button
-                  className={`ln-btn ln-btn--lg ${plan.highlight ? "ln-btn--primary" : "ln-btn--outline"} ln-plan-cta`}
-                  onClick={() => navigate("/login")}>
-                  {plan.cta} <Icon name="arrow" size={15} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+        {error && displayPlans.length === 0 ? (
+          <div className="ln-pricing-error">
+            <p>Pricing is temporarily unavailable. Please try again.</p>
+            <button className="ln-btn ln-btn--outline" onClick={load}>Retry</button>
+          </div>
+        ) : (
+          <div className={`ln-pricing-grid${isLoading ? " ln-pricing-grid--loading" : ""}`}>
+            {isLoading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="ln-plan-wrap">
+                    <div className="ln-plan ln-plan--skeleton" />
+                  </div>
+                ))
+              : displayPlans.map((plan, i) => (
+                  <div key={plan.id ?? i} className="ln-plan-wrap">
+                    <div className={`ln-plan${plan.highlight ? " ln-plan--hi" : ""}`}>
+                      {plan.badge && <div className="ln-plan-badge">{plan.badge}</div>}
+                      <div className="ln-plan-name">{plan.name}</div>
+                      <div className="ln-plan-price">
+                        <span className="ln-plan-amount">{fmtPrice(plan.price, plan.period, plan.currency_code)}</span>
+                        <span className="ln-plan-period"> / {fmtPeriod(plan.period)}</span>
+                      </div>
+                      <p className="ln-plan-desc">{plan.description}</p>
+                      <div className="ln-plan-divider" />
+                      <ul className="ln-plan-features">
+                        {(Array.isArray(plan.features) ? plan.features : []).map((f, j) => (
+                          <li key={j}><Icon name="checkMark" size={13} className="ln-plan-check" /><span>{f}</span></li>
+                        ))}
+                      </ul>
+                      <button
+                        className={`ln-btn ln-btn--lg ${plan.highlight ? "ln-btn--primary" : "ln-btn--outline"} ln-plan-cta`}
+                        onClick={() => navigate("/login")}>
+                        {plan.cta} <Icon name="arrow" size={15} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+            }
+          </div>
+        )}
         <p className="ln-pricing-note">
-          <Icon name="shield" size={14} /> All plans include GST compliance, data security, and automated backups.
+          <Icon name="shield" size={14} /> All plans include tax compliance, data security, and automated backups.
         </p>
       </div>
     </section>
@@ -940,7 +898,7 @@ function FAQSection() {
   const [open, setOpen] = useState(null);
   const faqs = [
     { q: "Can both medicine shops and distributors use JedMee?", a: "Yes. Medicine shops get billing, stock, and order tools. Distributors get a product catalog, order management, and dispatch tracking." },
-    { q: "Does JedMee create proper GST bills?", a: "Yes. JedMee creates fully GST-ready bills automatically. Set the GST rate per medicine and the system calculates tax for you." },
+    { q: "Does JedMee handle tax billing for my country?", a: "Yes. JedMee creates fully tax-compliant invoices automatically. Set the tax rate per product and the system calculates the tax for you. It supports GST, VAT, Sales Tax, and other tax systems." },
     { q: "How does expiry tracking work?", a: "Each medicine can have multiple batches with expiry dates. JedMee alerts you before any batch expires so you can act in time." },
     { q: "Can I add my existing medicines and data?", a: "Yes. Import medicines, batches, customers, and suppliers from a CSV file — no manual entry needed." },
     { q: "How do retailers order from wholesalers?", a: "Wholesalers add medicines to an online catalog. Retailers browse, add to cart, and place orders. The wholesaler confirms inside JedMee." },
@@ -982,7 +940,7 @@ function CTASection({ navigate }) {
       <div className="ln-container ln-cta-inner">
         <div className="ln-cta-badge"><Icon name="sparkle" size={14} /> Ready to simplify your pharmacy?</div>
         <h2 className="ln-cta-title">Start Managing Your Pharmacy<br />the Smart Way — Today</h2>
-        <p className="ln-cta-sub">Join hundreds of medicine shops already using JedMee.</p>
+        <p className="ln-cta-sub">Join thousands of pharmacies worldwide already using JedMee.</p>
         <div className="ln-cta-actions">
           <button className="ln-btn ln-btn--white ln-btn--lg" onClick={() => navigate("/login")}>
             Get Started Free <Icon name="arrow" size={18} />
@@ -1009,9 +967,9 @@ function Footer() {
         <div className="ln-footer-top">
           <div className="ln-footer-brand">
             <img src="/logo.png" alt="JedMee" className="ln-footer-logo" />
-            <p className="ln-footer-tagline">Simple, powerful software for medicine shops and distributors across India.</p>
+            <p className="ln-footer-tagline">Simple, powerful software for pharmacies and distributors worldwide.</p>
             <div className="ln-footer-badges">
-              {[["shield","GST Compliant"],["lock","Secure"],["globe","Cloud-Based"]].map(([icon, label]) => (
+              {[["shield","Tax Compliant"],["lock","Secure"],["globe","Cloud-Based"]].map(([icon, label]) => (
                 <span key={label} className="ln-footer-badge"><Icon name={icon} size={12} />{label}</span>
               ))}
             </div>
@@ -1036,7 +994,7 @@ function Footer() {
         </div>
         <div className="ln-footer-bottom">
           <span>© 2026 JedMee. All rights reserved.</span>
-          <span>Built for Indian pharmaceutical businesses</span>
+          <span>Built for pharmacies worldwide</span>
         </div>
       </div>
     </footer>
@@ -1051,11 +1009,11 @@ export default function LandingPage() {
   const authed = Boolean(readAuth()?.refreshToken);
 
   useSeoMeta({
-    title: "Pharmacy Management Software India | GST Billing & Inventory",
+    title: "Pharmacy Management Software | Billing, Inventory & Stock Control",
     description:
-      "JedMee is India's best pharmacy management software for medicine shops & distributors. GST billing, inventory tracking, expiry alerts, purchase orders & sales invoices. Free plan available — no credit card required.",
+      "JedMee is pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, purchase orders and sales invoices — all in one simple app. Free plan available, no credit card required.",
     keywords:
-      "pharmacy management software India, medicine shop software, GST billing pharmacy, medical store management software, pharmacy inventory software, drug store software India, pharmacy POS software, medicine distributor software, pharmacy billing system India, online pharmacy management system, medical shop billing software, pharmacy stock management, medicine expiry tracking, wholesale pharma software India, chemist shop software, pharmacy ERP India",
+      "pharmacy management software, medicine shop software, pharmacy billing software, medical store management software, pharmacy inventory software, drug store software, pharmacy POS software, medicine distributor software, online pharmacy management system, pharmacy stock management, medicine expiry tracking, wholesale pharma software, chemist shop software, pharmacy ERP, pharmacy invoicing software, pharmacy business software",
     canonical: "https://jedmee.com/",
   });
 

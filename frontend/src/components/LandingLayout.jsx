@@ -135,7 +135,7 @@ function SharedFooter() {
             <img src="/logo.png" alt="JedMee" className="ln-footer-logo" />
             <p className="ln-footer-tagline">Simple, powerful software for medicine shops and distributors across India.</p>
             <div className="ln-footer-badges">
-              {[["shield","GST Compliant"],["lock","Secure"],["globe","Cloud-Based"]].map(([icon, label]) => (
+              {[["shield","Tax Compliant"],["lock","Secure"],["globe","Cloud-Based"]].map(([icon, label]) => (
                 <span key={label} className="ln-footer-badge"><Icon name={icon} size={12} />{label}</span>
               ))}
             </div>

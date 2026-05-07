@@ -1,4 +1,4 @@
-import { fmtMoney } from "../utils/format.js";
+import { fmtMoney, fmtCurrency } from "../utils/format.js";
 import { InlineButtonProgress } from "./ui/buttons.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CommonModal from "./CommonModal.jsx";
@@ -215,7 +215,7 @@ export default function DivisionMasterModal({
                           selectedMfg.sale_lock ? "Sale locked" : "",
                           selectedMfg.purchase_order_lock ? "Purchase locked" : "",
                           selectedMfg.prevent_discount ? "No discount" : "",
-                          Number(selectedMfg.credit_limit || 0) > 0 ? `Credit ₹${fmtMoney(selectedMfg.credit_limit)}` : ""
+                          Number(selectedMfg.credit_limit || 0) > 0 ? `Credit ${fmtCurrency(selectedMfg.credit_limit)}` : ""
                         ]
                           .filter(Boolean)
                           .join(" · ") || "No restriction flags set"}

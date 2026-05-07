@@ -1,11 +1,12 @@
 import { AsyncButton } from "../components/ui/buttons.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { useEffect, useState } from "react";
+import { useLocale } from "../context/LocaleContext.jsx";
 import { can } from "../utils/access.js";
 import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
 import { getDayBookReport } from "../services/reportService.js";
-import { fmtDateIndian, fmtMoneyINR } from "../utils/format.js";
+import { fmtDateIndian, fmtCurrency } from "../utils/format.js";
 import { todayYmdLocal } from "../utils/date.js";
 import {
   ReportShell,
@@ -23,6 +24,7 @@ import "./DayBookReportPage.css";
 
 export default function DayBookReportPage() {
   useSeoMeta({ title: "Day Book Report" });
+  const { taxLabel } = useLocale();
   const canView = can("SALES_INVOICES", "VIEW");
   const [busy, setBusy] = useState(false);
   const [date, setDate] = useState(todayYmdLocal());
@@ -48,7 +50,7 @@ export default function DayBookReportPage() {
   const pay    = data?.payments      || {};
   const cash   = data?.cash_position || {};
   const profit = data?.profit        || {};
-  const money = (v) => fmtMoneyINR(v) || "₹0.00";
+  const money = (v) => fmtCurrency(v) || fmtCurrency(0);
   const pct   = (v) => `${Number(v ?? 0).toFixed(1)}%`;
   const displayDate = fmtDateIndian(data?.date || date);
   const closingNeg  = (cash.closing_cash ?? 0) < 0;
@@ -224,7 +226,7 @@ export default function DayBookReportPage() {
             </div>
             <div className="dbSectionBody">
               <div className="dbRow">
-                <span className="dbRowLabel">Sales Revenue (excl. GST)</span>
+                <span className="dbRowLabel">Sales Revenue (excl. {taxLabel})</span>
                 <span className="dbRowValue">{money(profit.total_revenue)}</span>
               </div>
               <div className="dbRow">
@@ -237,7 +239,7 @@ export default function DayBookReportPage() {
               </div>
             </div>
             <div className="dbProfitNote">
-              Gross profit = sales revenue (excl. GST) − purchase cost of items sold.
+              Gross profit = sales revenue (excl. {taxLabel}) − purchase cost of items sold.
               Does not include overheads, salaries, or other expenses.
             </div>
           </div>

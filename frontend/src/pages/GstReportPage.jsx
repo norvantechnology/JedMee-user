@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./GstReportPage.css";
 import { useSeoMeta } from "../utils/seo.js";
 import AppShell from "../layouts/AppShell.jsx";
+import { useLocale } from "../context/LocaleContext.jsx";
 import { AppButton } from "../components/ui/buttons.jsx";
 import { readAuth } from "../services/authStorage.js";
 import { apiGet } from "../services/apiClient.js";
@@ -30,7 +31,8 @@ function defaultDates() {
 }
 
 export default function GstReportPage() {
-  useSeoMeta({ title: "GSTR-1 Summary Report" });
+  const { taxLabel, taxIdLabel } = useLocale();
+  useSeoMeta({ title: `${taxLabel} Summary Report` });
   const auth = readAuth();
   const user = auth?.user || null;
 
@@ -59,16 +61,16 @@ export default function GstReportPage() {
   function exportCsv() {
     if (!data?.hsn_summary?.length) return;
     const cols = [
-      { key: "hsn_code",      label: "HSN Code" },
-      { key: "gst_rate",      label: "GST Rate %" },
+      { key: "hsn_code",      label: "Tax Code" },
+      { key: "gst_rate",      label: `${taxLabel} Rate %` },
       { key: "invoice_count", label: "Invoices" },
       { key: "taxable_value", label: "Taxable Value" },
-      { key: "cgst",          label: "CGST" },
-      { key: "sgst",          label: "SGST" },
-      { key: "igst",          label: "IGST" },
+      { key: "cgst",          label: "Tax Part 1 (CGST)" },
+      { key: "sgst",          label: "Tax Part 2 (SGST)" },
+      { key: "igst",          label: "Integrated Tax (IGST)" },
       { key: "total_value",   label: "Total Value" },
     ];
-    downloadCsvFile(`GSTR1_${fromDate}_${toDate}.csv`, cols, data.hsn_summary);
+    downloadCsvFile(`TaxReport_${fromDate}_${toDate}.csv`, cols, data.hsn_summary);
   }
 
   const s = data?.summary || {};
@@ -86,8 +88,8 @@ export default function GstReportPage() {
         {/* ── Page header ── */}
         <div className="raTop">
           <div>
-            <div className="raTitle">GSTR-1 Summary Report</div>
-            <div className="raSub">HSN-wise outward supply summary for GST filing</div>
+            <div className="raTitle">{taxLabel} Summary Report</div>
+              <div className="raSub">HSN-wise outward supply summary for {taxLabel} filing</div>
           </div>
         </div>
 
@@ -186,7 +188,7 @@ export default function GstReportPage() {
                     <thead>
                       <tr>
                         <th>HSN Code</th>
-                        <th className="tR">GST Rate</th>
+                        <th className="tR">{taxLabel} Rate</th>
                         <th className="tR">Invoices</th>
                         <th className="tR">Taxable Value</th>
                         <th className="tR">CGST</th>
@@ -219,13 +221,13 @@ export default function GstReportPage() {
               <div className="pageCard gstTableCard">
                 <div className="gstTableHeader">
                   <Building2 size={15} style={{ marginRight: 7, opacity: 0.7, flexShrink: 0 }} />
-                  B2B Supplies — Customers with GSTIN
+                  B2B Supplies — Customers with {taxIdLabel}
                 </div>
                 <div className="gstTableScroll">
                   <table className="gstTable">
                     <thead>
                       <tr>
-                        <th>GSTIN</th>
+                        <th>{taxIdLabel}</th>
                         <th>Customer</th>
                         <th className="tR">Invoices</th>
                         <th className="tR">Total Tax</th>
@@ -235,7 +237,7 @@ export default function GstReportPage() {
                     <tbody>
                       {data.b2b.map((r, i) => (
                         <tr key={i}>
-                          <td><span className="gstCode">{r.gstin}</span></td>
+                          <td><span className="gstCode">{r.gstin || r.tax_id}</span></td>
                           <td>{r.customer_name}</td>
                           <td className="tR">{r.invoice_count}</td>
                           <td className="tR">{fmtMoney(r.total_tax)}</td>
@@ -252,7 +254,7 @@ export default function GstReportPage() {
             <div className="pageCard gstB2cCard">
               <div className="gstTableHeader" style={{ marginBottom: 16 }}>
                 <UsersRound size={15} style={{ marginRight: 7, opacity: 0.7, flexShrink: 0 }} />
-                B2C Supplies — Walk-in / No GSTIN
+                B2C Supplies — Walk-in / No {taxIdLabel}
               </div>
               <div className="gstB2cRow">
                 <div className="gstB2cItem">
@@ -279,7 +281,7 @@ export default function GstReportPage() {
               <BarChart3 size={36} />
             </div>
             <div className="gstEmptyTitle">Select a date range and click Generate Report</div>
-            <div className="gstEmptySub">GSTR-1 summary with HSN-wise breakdown and B2B/B2C split</div>
+            <div className="gstEmptySub">Tax summary with product-code-wise breakdown and B2B/B2C split</div>
           </div>
         )}
 

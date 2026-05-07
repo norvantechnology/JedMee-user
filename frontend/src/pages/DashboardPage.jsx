@@ -8,7 +8,7 @@ import { isRetailerAuth } from "../utils/businessRole.js";
 import "../components/StructuredForm.css";
 import "./DashboardPage.css";
 import { todayYmdLocal } from "../utils/date.js";
-import { daysUntil, fmtMoneyINR, ymd } from "../utils/format.js";
+import { daysUntil, fmtCurrency, ymd } from "../utils/format.js";
 import CommonDatePicker from "../components/CommonDatePicker.jsx";
 import CommonLoading from "../components/CommonLoading.jsx";
 import CommonModal from "../components/CommonModal.jsx";
@@ -18,7 +18,7 @@ import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
 import { useNavigate } from "react-router-dom";
 import {
-  BarChart3, BadgeIndianRupee, CreditCard, FileSpreadsheet,
+  BarChart3, CreditCard, FileSpreadsheet,
   IconAlert, IconChevronsDown, IconChevronsUp, IconChevronRight,
   IconDashZap, IconLedger, IconNonMoving, IconNearExpiry,
   IconPlus, IconStockAlert, Package2, RotateCcw, Search, UsersRound
@@ -319,13 +319,13 @@ export default function DashboardPage() {
                 {[
                   { label: "Near Expiry",      val: data?.alerts?.near_expiry_batches ?? 0,          unit: "batches",  icon: <IconNearExpiry /> },
                   { label: "Non‑Moving Stock", val: data?.alerts?.non_moving_items ?? 0,             unit: "items",    icon: <IconNonMoving /> },
-                  { label: "Receivables",      val: fmtMoneyINR(data?.kpis?.receivables?.value || 0) || "₹0", unit: "pending",  icon: <BadgeIndianRupee aria-hidden="true" /> },
+                  { label: "Receivables",      val: fmtCurrency(data?.kpis?.receivables?.value || 0) || fmtCurrency(0), unit: "pending",  icon: <CreditCard aria-hidden="true" /> },
                   { label: "Low Stock",        val: data?.alerts?.low_stock_products ?? 0,           unit: "products", icon: <IconStockAlert /> },
                   { label: "Overdue Payables", val: data?.alerts?.overdue_payables_invoices ?? 0,    unit: "invoices", icon: <IconLedger /> },
                   /* duplicate for seamless loop */
                   { label: "Near Expiry",      val: data?.alerts?.near_expiry_batches ?? 0,          unit: "batches",  icon: <IconNearExpiry /> },
                   { label: "Non‑Moving Stock", val: data?.alerts?.non_moving_items ?? 0,             unit: "items",    icon: <IconNonMoving /> },
-                  { label: "Receivables",      val: fmtMoneyINR(data?.kpis?.receivables?.value || 0) || "₹0", unit: "pending",  icon: <BadgeIndianRupee aria-hidden="true" /> },
+                  { label: "Receivables",      val: fmtCurrency(data?.kpis?.receivables?.value || 0) || fmtCurrency(0), unit: "pending",  icon: <CreditCard aria-hidden="true" /> },
                   { label: "Low Stock",        val: data?.alerts?.low_stock_products ?? 0,           unit: "products", icon: <IconStockAlert /> },
                   { label: "Overdue Payables", val: data?.alerts?.overdue_payables_invoices ?? 0,    unit: "invoices", icon: <IconLedger /> },
                 ].map(({ label, val, unit, icon }, i) => (
@@ -457,13 +457,13 @@ export default function DashboardPage() {
                           <FileSpreadsheet aria-hidden="true" size={16} strokeWidth={2.2} />
                         </div>
                       </div>
-                      <div className="kpi-card-value">{fmtMoneyINR(data.kpis?.today_sales?.value || 0) || "₹0.00"}</div>
+                      <div className="kpi-card-value">{fmtCurrency(data.kpis?.today_sales?.value || 0) || fmtCurrency(0)}</div>
                       <div className="kpi-card-footer">
                         <span className="kpi-badge kpi-badge-up">
                           <IconChevronsUp />
                           {data.kpis?.today_sales?.delta_pct != null ? `${Number(data.kpis.today_sales.delta_pct).toFixed(1)}%` : ""}
                         </span>
-                        <span className="kpi-card-sub">vs {fmtMoneyINR(data.kpis?.today_sales?.prev_value || 0) || "₹0"} yesterday</span>
+                        <span className="kpi-card-sub">vs {fmtCurrency(data.kpis?.today_sales?.prev_value || 0) || fmtCurrency(0)} yesterday</span>
                       </div>
                       {kpiSparklines.todaySales.length >= 2 && (
                         <div className="kpi-sparkline">
@@ -482,7 +482,7 @@ export default function DashboardPage() {
                           <BarChart3 aria-hidden="true" size={16} strokeWidth={2.2} />
                         </div>
                       </div>
-                      <div className="kpi-card-value kpi-val-success">{fmtMoneyINR(data.kpis?.range_sales?.value || 0) || "₹0.00"}</div>
+                      <div className="kpi-card-value kpi-val-success">{fmtCurrency(data.kpis?.range_sales?.value || 0) || fmtCurrency(0)}</div>
                       <div className="kpi-card-footer">
                         <span className="kpi-badge kpi-badge-neutral">{ymd(data.meta?.range?.from)} → {ymd(data.meta?.range?.to)}</span>
                         <span className="kpi-card-sub">selected range</span>
@@ -501,10 +501,10 @@ export default function DashboardPage() {
                       <div className="kpi-card-header">
                         <span className="kpi-card-label">Receivables</span>
                         <div className="kpi-card-icon">
-                          <BadgeIndianRupee aria-hidden="true" size={16} strokeWidth={2.2} />
+                          <CreditCard aria-hidden="true" size={16} strokeWidth={2.2} />
                         </div>
                       </div>
-                      <div className="kpi-card-value kpi-val-warning">{fmtMoneyINR(data.kpis?.receivables?.value || 0) || "₹0.00"}</div>
+                      <div className="kpi-card-value kpi-val-warning">{fmtCurrency(data.kpis?.receivables?.value || 0) || fmtCurrency(0)}</div>
                       <div className="kpi-card-footer">
                         <span className="kpi-badge kpi-badge-down">
                           <IconChevronsDown />
@@ -524,7 +524,7 @@ export default function DashboardPage() {
                           <Package2 aria-hidden="true" size={16} strokeWidth={2.2} />
                         </div>
                       </div>
-                      <div className="kpi-card-value">{fmtMoneyINR(data.kpis?.today_purchases?.value || 0) || "₹0.00"}</div>
+                      <div className="kpi-card-value">{fmtCurrency(data.kpis?.today_purchases?.value || 0) || fmtCurrency(0)}</div>
                       <div className="kpi-card-footer">
                         <span className="kpi-badge kpi-badge-neutral">{Number(data.kpis?.today_purchases?.invoices || 0)} invoices</span>
                         <span className="kpi-card-sub">today</span>
@@ -605,9 +605,9 @@ export default function DashboardPage() {
                     </div>
                     <div className="panel-body">
                       {trendChartType === "BAR" ? (
-                        <BarChart height={200} groups={trendChartData.barGroups} variant="GROUPED" yFormatter={(v) => fmtMoneyINR(v) || "₹0"} />
+                        <BarChart height={200} groups={trendChartData.barGroups} variant="GROUPED" yFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)} />
                       ) : (
-                        <LineAreaChart height={200} series={trendChartData.lineSeries} variant={trendChartType === "AREA" ? "AREA" : "LINE"} yFormatter={(v) => fmtMoneyINR(v) || "₹0"} />
+                        <LineAreaChart height={200} series={trendChartData.lineSeries} variant={trendChartType === "AREA" ? "AREA" : "LINE"} yFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)} />
                       )}
                       <div className="chart-axis-labels">
                         <span>{ymd(data.meta?.range?.from)}</span>
@@ -676,7 +676,7 @@ export default function DashboardPage() {
                             }))
                           }]}
                           variant="LINE"
-                          yFormatter={(v) => fmtMoneyINR(v) || "₹0"}
+                          yFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)}
                         />
                       ) : (
                         <BarChart
@@ -686,7 +686,7 @@ export default function DashboardPage() {
                             series: [{ id: "sales", label: "Sales", color: "var(--color-primary)", y: Number(r.sales_total || 0) }]
                           }))}
                           variant="GROUPED"
-                          yFormatter={(v) => fmtMoneyINR(v) || "₹0"}
+                          yFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)}
                         />
                       )}
                     </div>
@@ -707,11 +707,11 @@ export default function DashboardPage() {
                     </div>
                     <div className="panel-body">
                       {payChartType === "BAR" ? (
-                        <BarChart height={180} groups={payMode.rows.map((x) => ({ xLabel: String(x.mode), series: [{ id: String(x.mode), label: String(x.mode), color: payColor(x.mode), y: Number(x.total || 0) }] }))} variant="GROUPED" yFormatter={(v) => fmtMoneyINR(v) || "₹0"} />
+                        <BarChart height={180} groups={payMode.rows.map((x) => ({ xLabel: String(x.mode), series: [{ id: String(x.mode), label: String(x.mode), color: payColor(x.mode), y: Number(x.total || 0) }] }))} variant="GROUPED" yFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)} />
                       ) : payChartType === "STACKED" ? (
-                        <BarChart height={180} groups={[{ xLabel: "Total", series: payMode.rows.map((x) => ({ id: String(x.mode), label: String(x.mode), color: payColor(x.mode), y: Number(x.total || 0) })) }]} variant="STACKED" yFormatter={(v) => fmtMoneyINR(v) || "₹0"} />
+                        <BarChart height={180} groups={[{ xLabel: "Total", series: payMode.rows.map((x) => ({ id: String(x.mode), label: String(x.mode), color: payColor(x.mode), y: Number(x.total || 0) })) }]} variant="STACKED" yFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)} />
                       ) : (
-                        <DonutChart height={180} slices={payMode.rows.map((x) => ({ id: String(x.mode), label: String(x.mode), value: Number(x.total || 0), color: payColor(x.mode) }))} centerLabel={fmtMoneyINR(payMode.total || 0) || "₹0"} valueFormatter={(v) => fmtMoneyINR(v) || "₹0"} />
+                        <DonutChart height={180} slices={payMode.rows.map((x) => ({ id: String(x.mode), label: String(x.mode), value: Number(x.total || 0), color: payColor(x.mode) }))} centerLabel={fmtCurrency(payMode.total || 0) || fmtCurrency(0)} valueFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)} />
                       )}
                     </div>
                   </div>
@@ -743,13 +743,13 @@ export default function DashboardPage() {
                     </div>
                     <div className="panel-body">
                       {profitChartType === "AREA" ? (
-                        <LineAreaChart height={180} series={trendChartData.lineSeries} variant="AREA" yFormatter={(v) => fmtMoneyINR(v) || "₹0"} />
+                        <LineAreaChart height={180} series={trendChartData.lineSeries} variant="AREA" yFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)} />
                       ) : (
                         <BarChart
                           height={180}
                           groups={trendChartData.barGroups}
                           variant={profitChartType === "STACKED" ? "STACKED" : "GROUPED"}
-                          yFormatter={(v) => fmtMoneyINR(v) || "₹0"}
+                          yFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)}
                         />
                       )}
                       <div className="chart-axis-labels">
@@ -777,7 +777,7 @@ export default function DashboardPage() {
                         <div key={String(p.product_id || idx)} className="prod-bar-row" style={{ "--delay": `${idx * 60}ms` }}>
                           <div className="prod-bar-meta">
                             <span className="prod-bar-name">{p.product_name}</span>
-                            <span className="prod-bar-val">{fmtMoneyINR(p.total) || "₹0.00"}</span>
+                            <span className="prod-bar-val">{fmtCurrency(p.total) || fmtCurrency(0)}</span>
                           </div>
                           <div className="prod-bar-track">
                             <div
@@ -813,8 +813,8 @@ export default function DashboardPage() {
                           {filteredTopCustomers.slice(0, 5).map((c) => (
                             <tr key={String(c.customer_id)}>
                               <td className="td-bold">{c.customer_name}</td>
-                              <td className="r">{fmtMoneyINR(c.billed) || "₹0.00"}</td>
-                              <td className="r">{fmtMoneyINR(c.balance) || "₹0.00"}</td>
+                              <td className="r">{fmtCurrency(c.billed) || fmtCurrency(0)}</td>
+                              <td className="r">{fmtCurrency(c.balance) || fmtCurrency(0)}</td>
                               <td>
                                 <span className={`status-pill ${String(c.pay_status||"").toUpperCase()==="PAID"?"green":String(c.pay_status||"").toUpperCase()==="UNPAID"?"red":"amber"}`}>
                                   {c.pay_status ? (String(c.pay_status)[0] + String(c.pay_status).slice(1).toLowerCase()) : ""}
@@ -902,9 +902,9 @@ export default function DashboardPage() {
                             <td>{x.customer_name || x.vendor_name || x.party_name || ""}</td>
                             <td>{ymd(x.invoice_date || x.return_date)}</td>
                             <td>{Number(x.item_count || 0)}</td>
-                            <td className="r">{fmtMoneyINR(x.total_amount || x.total_return_amount || 0) || "₹0.00"}</td>
-                            <td className="r">{fmtMoneyINR(x.amount_paid || 0) || "₹0.00"}</td>
-                            <td className="r">{fmtMoneyINR(x.balance_due || 0) || "₹0.00"}</td>
+                            <td className="r">{fmtCurrency(x.total_amount || x.total_return_amount || 0) || fmtCurrency(0)}</td>
+                            <td className="r">{fmtCurrency(x.amount_paid || 0) || fmtCurrency(0)}</td>
+                            <td className="r">{fmtCurrency(x.balance_due || 0) || fmtCurrency(0)}</td>
                             <td><span className={`status-pill ${pillClassForStatus(x.status)}`}>{String(x.status || "")}</span></td>
                             <td><span className={`status-pill ${pillClassForStatus(x.payment_status)}`}>{String(x.payment_status || "")}</span></td>
                           </tr>
@@ -967,8 +967,8 @@ export default function DashboardPage() {
                           {(Array.isArray(data.widgets?.supplier_payables) ? data.widgets.supplier_payables : []).slice(0, 5).map((r) => (
                             <tr key={String(r.vendor_id)}>
                               <td className="td-bold">{r.vendor_name || ""}</td>
-                              <td className="r">{fmtMoneyINR(r.outstanding) || "₹0.00"}</td>
-                              <td className="r">{fmtMoneyINR(r.overdue) || "₹0.00"}</td>
+                              <td className="r">{fmtCurrency(r.outstanding) || fmtCurrency(0)}</td>
+                              <td className="r">{fmtCurrency(r.overdue) || fmtCurrency(0)}</td>
                               <td><span className={`status-pill ${Number(r.overdue||0)>0?"red":"green"}`}>{Number(r.overdue||0)>0?"Overdue":"Clear"}</span></td>
                             </tr>
                           ))}

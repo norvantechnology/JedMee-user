@@ -1,7 +1,8 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { AppButton, AsyncButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { clean, fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { clean, fmtMoney, fmtCurrency } from "../utils/format.js";
+import { useLocale } from "../context/LocaleContext.jsx";
 import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -222,6 +223,7 @@ function computeLineParts(it) {
 
 export default function PurchaseInvoicesPage() {
   useSeoMeta({ title: "Purchase Invoices" });
+  const { taxLabel, taxRates } = useLocale();
   const auth = readAuth();
   const user = auth?.user || null;
   const isRetailer = useMemo(() => isRetailerAuth(auth), [auth]);
@@ -747,7 +749,7 @@ export default function PurchaseInvoicesPage() {
       { key: "mrp", label: <>MRP {req}</>, className: "num", required: true },
       { key: "salesRate", label: "Sales Rate", className: "num" },
       { key: "disc", label: "Disc %", className: "num" },
-      { key: "gst", label: "GST %", className: "center" },
+      { key: "gst", label: `${taxLabel} %`, className: "center" },
       { key: "amount", label: "Amount", className: "num" },
       { key: "actions", label: "" }
     ];
@@ -1721,7 +1723,7 @@ export default function PurchaseInvoicesPage() {
                       .filter((x) => String(x.division_id) === String(d.id) && String(x.status) === "CONFIRMED" && ["UNPAID", "PARTIAL"].includes(String(x.payment_status)))
                       .reduce((s, x) => s + Number(x.balance_due || 0), 0);
                     const phone = d.phone_number && d.phone_country_code ? `${d.phone_country_code} ${d.phone_number}`.trim() : d.phone_number || "";
-                    return `Division: ${d.name || ""}${d.code ? ` (${d.code})` : ""}${phone ? ` | Phone: ${phone}` : ""}${outstanding > 0 ? ` | Outstanding: ₹${money(outstanding)}` : ""}`;
+                    return `Division: ${d.name || ""}${d.code ? ` (${d.code})` : ""}${phone ? ` | Phone: ${phone}` : ""}${outstanding > 0 ? ` | Outstanding: ${fmtCurrency(outstanding)}` : ""}`;
                   })()}
                 </div>
               ) : null}
@@ -1881,8 +1883,8 @@ export default function PurchaseInvoicesPage() {
                         <CommonSelectField
                           className="piLineSelect"
                           value={String(it.gstPercent)}
-                          placeholder="GST %"
-                          options={[0, 5, 12, 18, 28].map((v) => ({ value: String(v), label: `${v}%` }))}
+                          placeholder={`${taxLabel} %`}
+                          options={(taxRates.length ? taxRates : [0, 5, 12, 18, 28]).map((v) => ({ value: String(v), label: `${v}%` }))}
                           onChange={(v) => setItem(idx, { gstPercent: Number(v) })}
                         />
                       </td>
@@ -1939,7 +1941,7 @@ export default function PurchaseInvoicesPage() {
                                 <th className="num">Stock</th>
                                 <th className="num">P.Rate</th>
                                 <th className="num">MRP</th>
-                                <th className="num">GST</th>
+                                <th className="num">{taxLabel}</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1971,7 +1973,7 @@ export default function PurchaseInvoicesPage() {
                       <div className="piInsightsCardHead">
                         Suppliers for this product
                         <span className="piCardHeadMeta">
-                          {`${supplierSnapshot.supplierCount} supplier(s)${batchSnapshot.bestBatchByRate ? ` · Best batch rate: ₹${money(batchSnapshot.bestBatchByRate.purchase_rate)}` : ""}`}
+                          {`${supplierSnapshot.supplierCount} supplier(s)${batchSnapshot.bestBatchByRate ? ` · Best batch rate: ${fmtCurrency(batchSnapshot.bestBatchByRate.purchase_rate)}` : ""}`}
                         </span>
                       </div>
                       <div className="piInsightsBody">
@@ -2020,8 +2022,8 @@ export default function PurchaseInvoicesPage() {
                                   </div>
                                   <div className="piSupplierMeta">
                                     <span>Last Purchase: {s.last_purchase_date ? String(s.last_purchase_date).slice(0, 10) : ""}</span>
-                                    <span>Last rate: {s.last_purchase_rate != null ? fmtMoneyINR(s.last_purchase_rate) : ""}</span>
-                                    <span>Last amount: {s.last_purchase_line_total != null ? fmtMoneyINR(s.last_purchase_line_total) : ""}</span>
+                                    <span>Last rate: {s.last_purchase_rate != null ? fmtCurrency(s.last_purchase_rate) : ""}</span>
+                                    <span>Last amount: {s.last_purchase_line_total != null ? fmtCurrency(s.last_purchase_line_total) : ""}</span>
                                   </div>
                                 </div>
                               ))}
@@ -2090,7 +2092,7 @@ export default function PurchaseInvoicesPage() {
                 <div className="cliSummaryValue">{money(totals.totalDiscount)}</div>
               </div>
               <div className="cliSummaryCell">
-                <div className="cliSummaryLabel">(+) GST</div>
+                <div className="cliSummaryLabel">(+) {taxLabel}</div>
                 <div className="cliSummaryValue">{money(totals.totalGst)}</div>
               </div>
               <div className="cliSummaryCell cliSummaryCell_total">
@@ -2470,7 +2472,7 @@ export default function PurchaseInvoicesPage() {
       >
         <div className="sfmGrid">
           <div className="sfmFull piBulkPayBanner">
-            <strong>{bulkPaymentConfirm.count || 0}</strong> invoice(s) selected | Total settlement: <strong>₹{money(bulkPaymentConfirm.total)}</strong>
+            <strong>{bulkPaymentConfirm.count || 0}</strong> invoice(s) selected | Total settlement: <strong>{fmtCurrency(bulkPaymentConfirm.total)}</strong>
           </div>
           <div className="raField">
             <label>Payment Date <span className="reqMark" aria-hidden="true">*</span></label>

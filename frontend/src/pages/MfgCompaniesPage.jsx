@@ -1,3 +1,4 @@
+import { fmtCurrency } from "../utils/format.js";
 import { useEffect, useMemo, useState } from "react";
 import { useSeoMeta } from "../utils/seo.js";
 import AppShell from "../layouts/AppShell.jsx";
@@ -254,7 +255,7 @@ export default function MfgCompaniesPage() {
                   const parts = [];
                   if (bill > 0) parts.push(`Bills ${bill}`);
                   if (day > 0) parts.push(`Days ${day}`);
-                  if (credit > 0) parts.push(`Credit ₹${credit}`);
+                  if (credit > 0) parts.push(`Credit ${fmtCurrency(credit)}`);
                   return <span style={{ color: "var(--color-text-3)" }}>{parts.join(" · ")}</span>;
                 }
               },

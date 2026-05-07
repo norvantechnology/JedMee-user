@@ -8,20 +8,45 @@
 export function clean(v) {
   return String(v ?? "").trim();
 }
-import { formatIndianAmount } from "./amountFormat.js";
 
-/** Two-decimal fixed money string with Indian comma separation. Returns "" for non-finite input. */
+// ─── Currency helpers ──────────────────────────────────────────────────────
+// Re-exported from currency.js so existing imports from format.js keep working.
+// Prefer importing directly from currency.js in new code.
+
+import { fmtAmount as _fmtAmount } from "./currency.js";
+
+export {
+  fmtCurrency,
+  fmtCurrencySafe,
+  fmtCurrencyOrZero,
+  fmtAmount,
+  getCurrencySymbol,
+  getActiveCurrency,
+} from "./currency.js";
+
+/**
+ * Two-decimal plain number string using the active currency's locale grouping.
+ * Returns "" for non-finite input.
+ *
+ * Use fmtCurrency() when you need the symbol prefix.
+ *
+ * fmtMoney(1234.5)   → "1,234.50"    (USD/EUR active)
+ * fmtMoney(100000)   → "1,00,000.00" (INR active — Indian grouping)
+ */
 export function fmtMoney(value) {
   const n = Number(value);
   if (!Number.isFinite(n)) return "";
-  return formatIndianAmount(n.toFixed(2));
+  return _fmtAmount(n);
 }
 
-/** "₹1,23,456.78" style display; empty string for non-finite input. */
-export function fmtMoneyINR(value) {
-  const s = fmtMoney(value);
-  return s === "" ? "" : `₹${s}`;
-}
+/**
+ * @deprecated Use fmtCurrency() instead.
+ * Kept for backward compatibility — delegates to fmtCurrency() so it now
+ * respects the active currency rather than always prepending "₹".
+ */
+export { fmtCurrency as fmtMoneyINR } from "./currency.js";
+
+// ─── Quantity ──────────────────────────────────────────────────────────────
 
 /** Quantity formatter. Integers when whole, up to 3 decimals otherwise. */
 export function fmtQty(value) {
@@ -30,6 +55,8 @@ export function fmtQty(value) {
   if (Number.isInteger(n)) return String(n);
   return String(Number(n.toFixed(3)));
 }
+
+// ─── Date helpers ──────────────────────────────────────────────────────────
 
 /** ISO date → YYYY-MM-DD (first 10 chars). "" for empty/null. */
 export function ymd(value) {
@@ -46,7 +73,7 @@ export function fmtDateDMY(value) {
   return `${d}/${m}/${y}`;
 }
 
-/** ISO date -> Indian short date (e.g., "27 Apr 2026"). */
+/** ISO date -> locale short date (e.g., "27 Apr 2026"). */
 export function fmtDateIndian(value) {
   const s = ymd(value);
   if (!s) return "-";
@@ -65,6 +92,8 @@ export function fmtDateTime(value) {
   const d = new Date(ms);
   return d.toLocaleString();
 }
+
+// ─── Misc ──────────────────────────────────────────────────────────────────
 
 /** Left-pad an integer to a given width (default 2). */
 export function pad(n, width = 2) {

@@ -6,6 +6,11 @@ import { onAuthChanged, readAuth, saveAuthUser } from "../services/authStorage.j
 import DocumentUploadField from "../components/DocumentUploadField.jsx";
 import { updateMe } from "../services/userService.js";
 import { clean } from "../utils/format.js";
+import { useCurrency } from "../context/CurrencyContext.jsx";
+import { CURRENCY_LIST } from "../utils/currency.js";
+import { useLocale } from "../context/LocaleContext.jsx";
+import { COUNTRIES } from "../utils/locale.js";
+import CountrySelector from "../components/ui/CountrySelector.jsx";
 import "./ProfileSettingsPage.css";
 import { IconPsBell, IconPsBuilding, IconPsCalendar, IconPsCheck, IconPsChevronDown, IconPsFileText, IconPsFolder, IconPsMail, IconPsMapPin, IconPsPencil, IconPsPhone, IconPsSettings, IconPsUser } from "../components/ui/AppIcons.jsx";
 
@@ -40,8 +45,13 @@ export default function ProfileSettingsPage() {
     personal: false,
     business: false,
     docs: false,
-    address: false
+    address: false,
+    preferences: false,
   });
+  const { code: activeCurrencyCode, config: activeCurrencyConfig, setCurrency } = useCurrency();
+  const { countryCode, countryConfig, setCountry, taxIdLabel } = useLocale();
+  const [currencyPending, setCurrencyPending] = useState(null);
+  const [countryPending, setCountryPending] = useState(null);
 
   useEffect(() => {
     return onAuthChanged(() => setAuthTick((t) => t + 1));
@@ -285,7 +295,7 @@ export default function ProfileSettingsPage() {
                 </div>
                 <div>
                   <div className="section-title">Business</div>
-                  <div className="section-desc">Firm name, GST and drug license details</div>
+                  <div className="section-desc">Firm name, {taxIdLabel} and drug license details</div>
                 </div>
               </div>
               <div className="section-chevron">
@@ -317,7 +327,7 @@ export default function ProfileSettingsPage() {
               <div className="form-grid cols-2">
                 <div className="form-field">
                   <label className="form-label" htmlFor="gst">
-                    GST number
+                    {taxIdLabel}
                   </label>
                   <div className="input-wrap">
                     <span className="input-icon">
@@ -333,7 +343,7 @@ export default function ProfileSettingsPage() {
                       disabled={busy}
                     />
                   </div>
-                  {!gstOk ? <div className="psInlineErr">GST must be 15 characters</div> : null}
+                  {!gstOk ? <div className="psInlineErr">{taxIdLabel} must be 15 characters</div> : null}
                 </div>
                 <div className="form-field">
                   <label className="form-label">Status</label>
@@ -407,7 +417,7 @@ export default function ProfileSettingsPage() {
             <div className="section-body">
               <div className="doc-list">
                 <DocumentUploadField
-                  label="GST certificate"
+                  label={`${taxIdLabel} certificate`}
                   docType="GST_CERTIFICATE"
                   url={form.gstCertificateUrl}
                   disabled={busy}
@@ -530,6 +540,97 @@ export default function ProfileSettingsPage() {
               </div>
             </div>
           </div>
+
+          {/* ── Preferences ── */}
+          <div className={`section-card ${collapsed.preferences ? "collapsed" : ""}`} id="s-preferences">
+            <div
+              className="section-hdr"
+              role="button"
+              tabIndex={0}
+              onClick={() => setCollapsed((p) => ({ ...p, preferences: !p.preferences }))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") setCollapsed((p) => ({ ...p, preferences: !p.preferences }));
+              }}
+            >
+              <div className="section-hdr-left">
+                <div className="section-icon">
+                  <IconPsSettings size={18} strokeWidth={1.75} />
+                </div>
+                <div>
+                  <div className="section-title">Preferences</div>
+                  <div className="section-desc">Country, tax region and display currency</div>
+                </div>
+              </div>
+              <div className="section-chevron">
+                <IconPsChevronDown />
+              </div>
+            </div>
+            <div className="section-body">
+              {/* ── Country selector ── */}
+              <div className="psCurrencyBlock" style={{ marginBottom: 24 }}>
+                <div className="psCurrencyTopRow">
+                  <div className="psCurrencyLabel">Country / Tax region</div>
+                  <div className="psCurrencyCurrentCard">
+                    <span className="psCurrencySymbolBig">{countryConfig?.flag}</span>
+                    <div className="psCurrencyNameGroup">
+                      <span className="psCurrencyName">{countryConfig?.name}</span>
+                      <span className="psCurrencyCode">{countryConfig?.taxLabel} · {countryConfig?.taxIdLabel}</span>
+                    </div>
+                  </div>
+                  <p className="psCurrencyHint">Sets the tax label (GST / VAT / Sales Tax) and default currency for your region.</p>
+                </div>
+                <div className="psCurrencyChangeWrap">
+                  <label className="form-label" htmlFor="ps-country">Change country / tax region</label>
+                  <CountrySelector
+                    id="ps-country"
+                    className="form-select"
+                    value={countryCode}
+                    showFlag
+                    onChange={(code) => {
+                      if (code !== countryCode) {
+                        setCountryPending(code);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* ── Currency selector ── */}
+              <div className="psCurrencyBlock">
+                <div className="psCurrencyTopRow">
+                  <div className="psCurrencyLabel">Current display currency</div>
+                  <div className="psCurrencyCurrentCard">
+                    <span className="psCurrencySymbolBig">{activeCurrencyConfig?.symbol}</span>
+                    <div className="psCurrencyNameGroup">
+                      <span className="psCurrencyName">{activeCurrencyConfig?.name}</span>
+                      <span className="psCurrencyCode">{activeCurrencyCode}</span>
+                    </div>
+                  </div>
+                  <p className="psCurrencyHint">All monetary amounts across the app are shown in this currency.</p>
+                </div>
+                <div className="psCurrencyChangeWrap">
+                  <label className="form-label" htmlFor="ps-currency">Change to a different currency</label>
+                  <select
+                    id="ps-currency"
+                    className="form-select"
+                    value={activeCurrencyCode}
+                    onChange={(e) => {
+                      const code = e.target.value;
+                      if (code !== activeCurrencyCode) {
+                        setCurrencyPending(CURRENCY_LIST.find((c) => c.code === code) || null);
+                      }
+                    }}
+                  >
+                    {CURRENCY_LIST.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.symbol} — {c.name} ({c.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="save-bar">
@@ -575,6 +676,70 @@ export default function ProfileSettingsPage() {
             </button>
           </div>
         </div>
+
+        {/* ── Country change confirmation popup ── */}
+        {countryPending && (
+          <div className="psCurrencyOverlay" role="dialog" aria-modal="true" aria-label="Confirm country change">
+            <div className="psCurrencyConfirmCard">
+              <div className="psCurrencyConfirmIconWrap">
+                <IconPsSettings size={26} strokeWidth={1.6} />
+              </div>
+              <div className="psCurrencyConfirmTitle">Change country?</div>
+              <div className="psCurrencyConfirmBody">
+                Switch to <strong>{COUNTRIES[countryPending]?.name || countryPending}</strong>?
+                This will update the tax label and suggest a new default currency.
+              </div>
+              <div className="psCurrencyConfirmBtns">
+                <button className="btn-cancel" type="button" onClick={() => setCountryPending(null)}>
+                  Cancel
+                </button>
+                <button
+                  className="btn-save"
+                  type="button"
+                  onClick={() => {
+                    setCountry(countryPending);
+                    setCountryPending(null);
+                  }}
+                >
+                  <IconPsCheck />
+                  Yes, change
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Currency change confirmation popup ── */}
+        {currencyPending && (
+          <div className="psCurrencyOverlay" role="dialog" aria-modal="true" aria-label="Confirm currency change">
+            <div className="psCurrencyConfirmCard">
+              <div className="psCurrencyConfirmIconWrap">
+                <IconPsSettings size={26} strokeWidth={1.6} />
+              </div>
+              <div className="psCurrencyConfirmTitle">Change currency?</div>
+              <div className="psCurrencyConfirmBody">
+                Switch to <strong>{currencyPending.name}</strong> ({currencyPending.symbol})?
+                All amounts across the app will be displayed in {currencyPending.name}.
+              </div>
+              <div className="psCurrencyConfirmBtns">
+                <button className="btn-cancel" type="button" onClick={() => setCurrencyPending(null)}>
+                  Cancel
+                </button>
+                <button
+                  className="btn-save"
+                  type="button"
+                  onClick={() => {
+                    setCurrency(currencyPending.code);
+                    setCurrencyPending(null);
+                  }}
+                >
+                  <IconPsCheck />
+                  Yes, change
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AppShell>
   );

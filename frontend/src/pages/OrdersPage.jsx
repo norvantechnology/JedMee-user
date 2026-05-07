@@ -1,4 +1,4 @@
-import { fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { fmtMoney, fmtCurrency } from "../utils/format.js";
 import { useSeoMeta } from "../utils/seo.js";
 import { AppButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
 import { useEffect, useMemo, useState } from "react";
@@ -410,7 +410,7 @@ export default function OrdersPage() {
                       <div className="opCardDiv" aria-hidden="true" />
                       <div className="opCardInfo">
                         <div className="opCardInfoL">Total</div>
-                        <div className="opCardInfoV opCardInfoV_amt">₹{amount}</div>
+                        <div className="opCardInfoV opCardInfoV_amt">{fmtCurrency(row.total_amount || 0)}</div>
                       </div>
                     </div>
 
@@ -515,7 +515,7 @@ export default function OrdersPage() {
               <div className="opMetaBox">
                 <div className="opMetaLbl">💰 Total</div>
                 <div className="opMetaVal opMetaVal_big">
-                  {fmtMoneyINR(detail.order?.total_amount || 0)}
+                  {fmtCurrency(detail.order?.total_amount || 0)}
                 </div>
               </div>
             </div>
@@ -565,7 +565,7 @@ export default function OrdersPage() {
                       )}
                     </div>
                   </div>
-                  <div className="opItemTotal">{fmtMoneyINR(it.line_total || 0)}</div>
+                  <div className="opItemTotal">{fmtCurrency(it.line_total || 0)}</div>
                 </div>
               ))}
             </div>

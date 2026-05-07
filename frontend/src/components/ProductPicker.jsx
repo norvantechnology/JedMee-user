@@ -1,5 +1,6 @@
 import { AppButton } from "./ui/buttons.jsx";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useLocale } from "../context/LocaleContext.jsx";
 import { IconChevronRight, IconPlus, IconProducts, Search } from "./ui/AppIcons.jsx";
 import "./MasterModalForm.css";
 import "./ProductPicker.css";
@@ -42,6 +43,7 @@ export default function ProductPicker({
   allowCreate = true,
   autoFocus = false
 }) {
+  const { taxLabel } = useLocale();
   const idBase = useId();
   const labelId = `${idBase}-label`;
   const hintId = `${idBase}-hint`;
@@ -234,7 +236,7 @@ export default function ProductPicker({
                         p.division_name
                           ? `${p.division_name}${p.mfg_short_name || p.mfg_company_name ? ` · ${p.mfg_short_name || p.mfg_company_name}` : ""}`
                           : p.mfg_company_name || "",
-                        p.sales_gst != null && p.sales_gst !== "" ? `GST ${p.sales_gst}%` : "",
+                        p.sales_gst != null && p.sales_gst !== "" ? `${taxLabel} ${p.sales_gst}%` : "",
                         p.active_batch_count != null ? `${p.active_batch_count} batches` : ""
                       ]
                         .filter(Boolean)

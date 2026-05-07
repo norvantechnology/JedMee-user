@@ -2,16 +2,22 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
+import { CurrencyProvider } from "./context/CurrencyContext.jsx";
+import { LocaleProvider } from "./context/LocaleContext.jsx";
 import { ToastProvider } from "./components/ToastProvider.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <BrowserRouter>
-      <ScrollToTop />
-      <ToastProvider>
-        <App />
-      </ToastProvider>
-    </BrowserRouter>
+    <CurrencyProvider>
+      <LocaleProvider>
+        <BrowserRouter>
+          <ScrollToTop />
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </BrowserRouter>
+      </LocaleProvider>
+    </CurrencyProvider>
   </StrictMode>
 );

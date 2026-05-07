@@ -33,11 +33,11 @@ export default function ContactPage() {
   const [status, setStatus] = useState("idle"); // idle | sending | sent
 
   useSeoMeta({
-    title: "Contact JedMee — Pharmacy Software Support & Sales India",
+    title: "Contact JedMee — Pharmacy Software Support & Sales",
     description:
-      "Contact JedMee for pharmacy management software support, pricing, or a free demo. We help Indian medicine shops, chemists, and pharmaceutical distributors get started with GST billing and inventory management.",
+      "Contact JedMee for pharmacy management software support, pricing, or a free demo. We help medicine shops, chemists, and pharmaceutical distributors worldwide get started with tax billing and inventory management.",
     keywords:
-      "contact JedMee, pharmacy software support India, medicine shop software help, pharmacy billing software demo, JedMee support, pharmacy management software contact",
+      "contact JedMee, pharmacy software support, medicine shop software help, pharmacy billing software demo, JedMee support, pharmacy management software contact",
     canonical: "https://jedmee.com/contact",
   });
 
@@ -71,8 +71,8 @@ export default function ContactPage() {
     {
       icon: <Icon name="clock" size={22} />,
       title: "Support Hours",
-      detail: "Mon – Sat, 9 AM – 7 PM IST",
-      sub: "We're available across all Indian time zones",
+      detail: "Mon – Sat, 9 AM – 7 PM (UTC+5:30)",
+      sub: "We're available for customers worldwide",
       href: null,
       cc: "#16a34a",
     },
@@ -80,7 +80,7 @@ export default function ContactPage() {
 
   const infoItems = [
     { icon: <Icon name="clock" size={16} />, text: "Response within 24 hours on business days" },
-    { icon: <Icon name="globe" size={16} />, text: "Support in Hindi and English" },
+    { icon: <Icon name="globe" size={16} />, text: "Support in English (more languages coming soon)" },
     { icon: <Icon name="check" size={16} />, text: "Free onboarding help for all new accounts" },
     { icon: <Icon name="phone" size={16} />, text: "Phone support for Professional & Enterprise plans" },
     { icon: <Icon name="mail" size={16} />, text: "Email us anytime at supportjedmee@gmail.com" },
@@ -89,7 +89,7 @@ export default function ContactPage() {
   const faqs = [
     {
       q: "How long does onboarding take?",
-      a: "Most pharmacies are fully set up within a single afternoon. Our onboarding team will guide you through importing your inventory, setting up GST details, and training your staff.",
+      a: "Most pharmacies are fully set up within a single afternoon. Our onboarding team will guide you through importing your inventory, setting up your tax details, and training your staff.",
     },
     {
       q: "Do you offer a free trial?",
@@ -100,8 +100,8 @@ export default function ContactPage() {
       a: "Yes. We support data import from Excel/CSV files and can assist with migration from common pharmacy software. Contact our team for a migration consultation.",
     },
     {
-      q: "Is JedMee compliant with Indian GST regulations?",
-      a: "Yes. JedMee generates GST-compliant invoices with GSTIN, HSN codes, CGST/SGST/IGST breakdowns, and e-invoice support. We stay updated with GST rule changes.",
+      q: "Does JedMee support tax compliance in my country?",
+      a: "Yes. JedMee supports GST, VAT, Sales Tax, and other tax systems. You can set the correct tax rates for your country and JedMee will generate compliant invoices automatically.",
     },
   ];
 
@@ -197,7 +197,7 @@ export default function ContactPage() {
                   <div className="ip-form-row">
                     <div className="ip-form-group" style={{ marginBottom: 0 }}>
                       <label className="ip-form-label">Phone (optional)</label>
-                      <input className="ip-form-input" name="phone" value={form.phone} onChange={handleChange} placeholder="+91 98765 43210" />
+                      <input className="ip-form-input" name="phone" value={form.phone} onChange={handleChange} placeholder="+1 555 000 0000" />
                     </div>
                     <div className="ip-form-group" style={{ marginBottom: 0 }}>
                       <label className="ip-form-label">Subject</label>

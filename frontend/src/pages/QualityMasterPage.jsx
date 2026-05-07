@@ -16,6 +16,7 @@ import { parseApiError } from "../utils/api.js";
 import { toDivisionOption } from "../utils/divisionLabel.js";
 import { bulkDeleteProducts, createProduct, deleteProduct, listProducts, updateProduct } from "../services/productService.js";
 import { bulkDeleteProductBatches, createProductBatch, deleteProductBatch, listProductBatches, updateProductBatch } from "../services/productBatchService.js";
+import { useLocale } from "../context/LocaleContext.jsx";
 import { listDivisions } from "../services/divisionService.js";
 import { listMfgCompanies } from "../services/mfgCompanyService.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
@@ -51,6 +52,7 @@ const QM_ICON_STROKE = 2.25;
 
 export default function QualityMasterPage() {
   useSeoMeta({ title: "Quality Master" });
+  const { taxLabel } = useLocale();
   const [searchParams, setSearchParams] = useSearchParams();
   const stockDivisionFilter = clean(searchParams.get("divisionId") || "");
   const auth = readAuth();
@@ -848,7 +850,7 @@ export default function QualityMasterPage() {
                   ]),
               {
                 id: "gst",
-                header: "GST",
+                header: taxLabel,
                 sortable: false,
                 render: (r) => {
                   const s = r.sales_gst != null && r.sales_gst !== "" ? Number(r.sales_gst) : null;
@@ -988,7 +990,7 @@ export default function QualityMasterPage() {
                 const pieces = [
                   `Code ${p.code || ""}`,
                   p.division_name ? `Division: ${p.division_name}${p.mfg_short_name || p.mfg_company_name ? ` (${p.mfg_short_name || p.mfg_company_name})` : ""}` : p.mfg_company_name ? `Mfg: ${p.mfg_company_name}` : "",
-                  p.sales_gst != null && p.sales_gst !== "" ? `GST: ${p.sales_gst}%` : "",
+                  p.sales_gst != null && p.sales_gst !== "" ? `${taxLabel}: ${p.sales_gst}%` : "",
                   p.sales_scheme ? `Scheme: ${p.sales_scheme}` : "",
                   p.packing ? `Packing: ${p.packing}` : "",
                   `${batchRows.length} lot(s)`

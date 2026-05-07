@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { formatIndianAmount, parseAmount, handleAmountInput } from "../../utils/amountFormat.js";
+import { fmtInputAmount, parseInputAmount } from "../../utils/currency.js";
+import { parseAmount } from "../../utils/amountFormat.js";
 
 /**
- * AmountInput — controlled input that formats numbers with Indian comma separation
- * while typing (1000 → 1,000 / 100000 → 1,00,000).
+ * AmountInput — controlled input that formats numbers with locale-aware comma
+ * separation while typing (respects the active currency's locale).
+ *
+ * INR active:  1000 → "1,000" / 100000 → "1,00,000"
+ * USD active:  1000 → "1,000" / 100000 → "100,000"
  *
  * The `value` prop and `onChange` callback both work with the RAW numeric string
  * (no commas), so the parent state stays clean for arithmetic / API calls.
@@ -27,9 +31,9 @@ export default function AmountInput({
   name,
   ...rest
 }) {
-  // Display state holds the formatted string (with commas).
+  // Display state holds the formatted string (with locale-aware commas).
   const [display, setDisplay] = useState(() =>
-    value != null && value !== "" ? formatIndianAmount(String(value)) : ""
+    value != null && value !== "" ? fmtInputAmount(String(value)) : ""
   );
 
   // Track whether the last change came from the user (to avoid cursor-jump loops).
@@ -42,18 +46,26 @@ export default function AmountInput({
       return;
     }
     const incoming = String(value ?? "");
-    const currentRaw = parseAmount(display);
+    // Strip grouping separators from current display to compare raw values
+    const currentRaw = parseInputAmount(display);
     if (incoming !== currentRaw) {
-      setDisplay(incoming !== "" ? formatIndianAmount(incoming) : "");
+      setDisplay(incoming !== "" ? fmtInputAmount(incoming) : "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   function handleChange(e) {
     userEditRef.current = true;
-    const formatted = handleAmountInput(e.target.value);
+    const raw = e.target.value;
+    // Strip everything except digits and dot
+    const stripped = raw.replace(/[^0-9.]/g, "");
+    // Prevent multiple decimal points
+    const parts = stripped.split(".");
+    const clean =
+      parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : stripped;
+    const formatted = fmtInputAmount(clean);
     setDisplay(formatted);
-    onChange?.(parseAmount(formatted));
+    onChange?.(parseInputAmount(formatted));
   }
 
   return (

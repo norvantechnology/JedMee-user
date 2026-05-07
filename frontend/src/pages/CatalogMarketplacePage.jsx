@@ -1,7 +1,7 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { AsyncButton } from "../components/ui/buttons.jsx";
-import { fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { fmtMoney, fmtCurrency, getCurrencySymbol } from "../utils/format.js";
 import { useEffect, useMemo, useState } from "react";
 import { Check, Users } from "lucide-react";
 import AppShell from "../layouts/AppShell.jsx";
@@ -13,6 +13,7 @@ import {
   IconChevronRight, IconChevronLeft, IconCheck,
 } from "../components/ui/AppIcons.jsx";
 import OrderPlaceWizardModal from "../components/orders/OrderPlaceWizardModal.jsx";
+import { useLocale } from "../context/LocaleContext.jsx";
 import OrderCatalogProductDetailsModal from "../components/orders/OrderCatalogProductDetailsModal.jsx";
 import QtyStepper from "../components/ui/QtyStepper.jsx";
 import { readAuth } from "../services/authStorage.js";
@@ -37,6 +38,7 @@ function ToggleCard({ label, sub, value, onChange }) {
 
 export default function CatalogMarketplacePage() {
   useSeoMeta({ title: "Catalog & Marketplace" });
+  const { taxLabel } = useLocale();
   const auth = readAuth();
   const isRetailer = useMemo(() => isRetailerAuth(auth), [auth]);
   const [rows, setRows] = useState([]);
@@ -235,13 +237,13 @@ export default function CatalogMarketplacePage() {
                         </div>
                         <div className="cmpCardPills">
                           {row.packing && <span className="cmpPill cmpPill_pack">Pack {row.packing}</span>}
-                          {row.sales_gst != null && row.sales_gst !== "" && Number(row.sales_gst) > 0 && <span className="cmpPill cmpPill_gst">GST {row.sales_gst}%</span>}
+                          {row.sales_gst != null && row.sales_gst !== "" && Number(row.sales_gst) > 0 && <span className="cmpPill cmpPill_gst">{taxLabel} {row.sales_gst}%</span>}
                           {row.drug_name && <span className="cmpPill cmpPill_drug">{row.drug_name}</span>}
                         </div>
                         <div className="cmpCardPrices">
-                          <div className="cmpCardPriceItem"><div className="cmpCardPriceLabel">Catalog</div><div className="cmpCardPriceValue cmpCardPriceValue_cat">{fmtMoneyINR(row.catalog_price || 0)}</div></div>
+                          <div className="cmpCardPriceItem"><div className="cmpCardPriceLabel">Catalog</div><div className="cmpCardPriceValue cmpCardPriceValue_cat">{fmtCurrency(row.catalog_price || 0)}</div></div>
                           <div className="cmpCardPriceDivider" />
-                          <div className="cmpCardPriceItem"><div className="cmpCardPriceLabel">MRP</div><div className="cmpCardPriceValue">{row.mrp != null && row.mrp !== "" ? fmtMoneyINR(row.mrp) : "—"}</div></div>
+                          <div className="cmpCardPriceItem"><div className="cmpCardPriceLabel">MRP</div><div className="cmpCardPriceValue">{row.mrp != null && row.mrp !== "" ? fmtCurrency(row.mrp) : "—"}</div></div>
                           <div className="cmpCardPriceDivider" />
                           <div className="cmpCardPriceItem"><div className="cmpCardPriceLabel">Stock</div><div className="cmpCardPriceValue">{stock}</div></div>
                         </div>
@@ -327,9 +329,9 @@ export default function CatalogMarketplacePage() {
                           {row.hide_when_out_of_stock && <span className="mcPill mcPill_hideoos">Auto-hide OOS</span>}
                         </div>
                         <div className="mcPrices">
-                          <div className="mcPrice"><div className="mcPriceLabel">Catalog</div><div className="mcPriceValue mcPriceValue_cat">{fmtMoneyINR(row.catalog_price || 0)}</div></div>
+                          <div className="mcPrice"><div className="mcPriceLabel">Catalog</div><div className="mcPriceValue mcPriceValue_cat">{fmtCurrency(row.catalog_price || 0)}</div></div>
                           <div className="mcPriceDivider" />
-                          <div className="mcPrice"><div className="mcPriceLabel">MRP</div><div className="mcPriceValue">{row.mrp != null && row.mrp !== "" ? fmtMoneyINR(row.mrp) : "—"}</div></div>
+                          <div className="mcPrice"><div className="mcPriceLabel">MRP</div><div className="mcPriceValue">{row.mrp != null && row.mrp !== "" ? fmtCurrency(row.mrp) : "—"}</div></div>
                           <div className="mcPriceDivider" />
                           <div className="mcPrice"><div className="mcPriceLabel">Stock</div><div className="mcPriceValue">{stock}</div></div>
                         </div>
@@ -420,11 +422,11 @@ export default function CatalogMarketplacePage() {
                 <div className="mcFieldRow mcFieldRow_col2">
                   <div className="mcField">
                     <label>Catalog Price <span style={{ color: "var(--color-danger)" }}>*</span></label>
-                    <div className="mcFieldGroup"><span className="mcFieldPfx">₹</span><AmountInput value={String(form.catalog_price ?? "")} onChange={(raw) => setForm((f) => ({ ...f, catalog_price: raw }))} placeholder="0.00" inputMode="decimal" /></div>
+                    <div className="mcFieldGroup"><span className="mcFieldPfx">{getCurrencySymbol()}</span><AmountInput value={String(form.catalog_price ?? "")} onChange={(raw) => setForm((f) => ({ ...f, catalog_price: raw }))} placeholder="0.00" inputMode="decimal" /></div>
                   </div>
                   <div className="mcField">
                     <label>MRP</label>
-                    <div className="mcFieldGroup"><span className="mcFieldPfx">₹</span><AmountInput value={String(form.mrp ?? "")} onChange={(raw) => setForm((f) => ({ ...f, mrp: raw }))} placeholder="0.00" inputMode="decimal" /></div>
+                    <div className="mcFieldGroup"><span className="mcFieldPfx">{getCurrencySymbol()}</span><AmountInput value={String(form.mrp ?? "")} onChange={(raw) => setForm((f) => ({ ...f, mrp: raw }))} placeholder="0.00" inputMode="decimal" /></div>
                   </div>
                 </div>
                 <div className="mcSecLabel">Order Limits</div>
@@ -471,11 +473,11 @@ export default function CatalogMarketplacePage() {
             <div className="mcFieldRow mcFieldRow_col2">
               <div className="mcField">
                 <label>Catalog Price <span style={{ color: "var(--color-danger)" }}>*</span></label>
-                <div className="mcFieldGroup"><span className="mcFieldPfx">₹</span><AmountInput value={String(editForm.catalog_price ?? "")} onChange={(raw) => setEditForm((f) => ({ ...f, catalog_price: raw }))} placeholder="0.00" inputMode="decimal" /></div>
+                <div className="mcFieldGroup"><span className="mcFieldPfx">{getCurrencySymbol()}</span><AmountInput value={String(editForm.catalog_price ?? "")} onChange={(raw) => setEditForm((f) => ({ ...f, catalog_price: raw }))} placeholder="0.00" inputMode="decimal" /></div>
               </div>
               <div className="mcField">
                 <label>MRP</label>
-                <div className="mcFieldGroup"><span className="mcFieldPfx">₹</span><AmountInput value={String(editForm.mrp ?? "")} onChange={(raw) => setEditForm((f) => ({ ...f, mrp: raw }))} placeholder="0.00" inputMode="decimal" /></div>
+                <div className="mcFieldGroup"><span className="mcFieldPfx">{getCurrencySymbol()}</span><AmountInput value={String(editForm.mrp ?? "")} onChange={(raw) => setEditForm((f) => ({ ...f, mrp: raw }))} placeholder="0.00" inputMode="decimal" /></div>
               </div>
             </div>
             <div className="mcSecLabel">Order Limits</div>

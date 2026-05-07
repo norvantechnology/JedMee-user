@@ -12,6 +12,7 @@ import {
 import "./MasterModalForm.css";
 import "./StructuredForm.css";
 import "./UserDetailPanel.css";
+import { useLocale } from "../context/LocaleContext.jsx";
 
 function initials(name = "") {
   const parts = String(name || "")
@@ -69,6 +70,7 @@ export default function UserDetailPanel({
   onEdit,
   onBlock
 }) {
+  const { taxIdLabel } = useLocale();
   const [status, setStatus] = useState(String(user?.status || "PENDING").toUpperCase());
   const [copied, setCopied] = useState(false);
   const panelRef = useRef(null);
@@ -225,14 +227,14 @@ export default function UserDetailPanel({
                   ) : null}
                   {ui?.gstNumber ? (
                     <li className="udpLedgerItem">
-                      <span className="udpLedgerKey">GST number</span>
+                      <span className="udpLedgerKey">{taxIdLabel}</span>
                       <span className="udpLedgerVal">{ui.gstNumber}</span>
                     </li>
                   ) : null}
                 </ul>
                 {ui?.gstCertificateUrl ? (
                   <div className="udpAttach udpAttach_first">
-                    <div className="udpAttachKicker">GST certificate</div>
+                    <div className="udpAttachKicker">{taxIdLabel} certificate</div>
                     <p className="udpAttachLead">Supporting document</p>
                     <a className="udpAttachLink" href={ui.gstCertificateUrl} target="_blank" rel="noreferrer">
                       <span className="udpAttachLinkIco" aria-hidden="true">

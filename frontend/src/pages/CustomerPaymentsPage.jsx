@@ -1,7 +1,7 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { fmtMoney, fmtCurrency } from "../utils/format.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AppShell from "../layouts/AppShell.jsx";
@@ -243,7 +243,7 @@ export default function CustomerPaymentsPage() {
             const inv = (invoicesPayable || []).find((x) => String(x.id) === String(invoiceId));
             const balance = Number(inv?.balance_due || 0);
             setForm((p) => ({ ...p, salesInvoiceId: invoiceId, amount: Number(p.useAdvanceFirst ? Math.max(0, balance - Number(advanceHint.apply || 0)) : balance).toFixed(2) }));
-          }}><option value="">On Account / Advance</option>{invoicesPayable.filter((x) => !form.customerId || String(x.customer_id) === String(form.customerId)).map((inv) => <option key={inv.id} value={inv.id}>{inv.invoice_number} (Bal {fmtMoneyINR(inv.balance_due || 0)})</option>)}</select></div>
+          }}><option value="">On Account / Advance</option>{invoicesPayable.filter((x) => !form.customerId || String(x.customer_id) === String(form.customerId)).map((inv) => <option key={inv.id} value={inv.id}>{inv.invoice_number} (Bal {fmtCurrency(inv.balance_due || 0)})</option>)}</select></div>
           {form.salesInvoiceId ? (
             <label className="sfmCheck">
               <input
@@ -266,9 +266,9 @@ export default function CustomerPaymentsPage() {
             <div className="sfmFull" style={{ border: "1px solid var(--color-border)", borderRadius: 10, padding: 10, background: "var(--color-bg-2)" }}>
               <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 4 }}>Summary</div>
               <div style={{ fontSize: 12, color: "var(--color-text-3)", display: "grid", gap: 2 }}>
-                <div>Due: {fmtMoneyINR(selectedFormInvoice?.balance_due || 0)}</div>
-                <div>Advance used: {fmtMoneyINR(form.useAdvanceFirst ? advanceHint.apply || 0 : 0)}</div>
-                <div><strong>Collect now: {fmtMoneyINR(form.useAdvanceFirst ? advanceHint.remaining || 0 : form.amount || 0)}</strong></div>
+                <div>Due: {fmtCurrency(selectedFormInvoice?.balance_due || 0)}</div>
+                <div>Advance used: {fmtCurrency(form.useAdvanceFirst ? advanceHint.apply || 0 : 0)}</div>
+                <div><strong>Collect now: {fmtCurrency(form.useAdvanceFirst ? advanceHint.remaining || 0 : form.amount || 0)}</strong></div>
               </div>
             </div>
           ) : null}
@@ -277,7 +277,7 @@ export default function CustomerPaymentsPage() {
             <label>Cash received now <span className="reqMark" aria-hidden="true">*</span></label>
             <AmountInput className={`raInput${paySubmitted && (paymentKind === "ON_ACCOUNT" || !form.salesInvoiceId) && !(Number(form.amount) > 0) ? " mfzInput_err" : ""}`} value={String(form.amount ?? "")} disabled={Boolean(form.salesInvoiceId) && Boolean(form.useAdvanceFirst)} onChange={(raw) => setForm((p) => ({ ...p, amount: raw }))} inputMode="decimal" />
             {form.salesInvoiceId && form.useAdvanceFirst ? (
-              <div className="sfmHint" style={{ marginTop: 6 }}>If advance fully covers the due, cash can stay ₹0.</div>
+              <div className="sfmHint" style={{ marginTop: 6 }}>If advance fully covers the due, cash can stay {fmtCurrency(0)}.</div>
             ) : null}
             {paySubmitted && (paymentKind === "ON_ACCOUNT" || !form.salesInvoiceId) && !(Number(form.amount) > 0) && <div className="mfzErr">Amount is required.</div>}
           </div>

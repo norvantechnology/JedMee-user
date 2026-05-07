@@ -1,6 +1,7 @@
 import { fmtMoney } from "../utils/format.js";
 import { AppButton } from "./ui/buttons.jsx";
 import { useEffect, useMemo, useState } from "react";
+import { useLocale } from "../context/LocaleContext.jsx";
 import CommonModal from "./CommonModal.jsx";
 import { BadgeIndianRupee, BarChart3, Layers, IconAlert } from "./ui/AppIcons.jsx";
 import "./MasterModalForm.css";
@@ -11,6 +12,7 @@ import "./SchemeDiscountPopup.css";
  * Parent owns line state; `onApply` receives discount % and free qty.
  */
 export default function SchemeDiscountPopup({ open, onClose, item, onApply, lineNumber }) {
+  const { taxLabel } = useLocale();
   const [discountPercent, setDiscountPercent] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [freeQty, setFreeQty] = useState(0);
@@ -183,7 +185,7 @@ export default function SchemeDiscountPopup({ open, onClose, item, onApply, line
               <span className="sdpKpiTileVal">{fmtMoney(item.mrp || 0)}</span>
             </div>
             <div className="sdpKpiTile">
-              <span className="sdpKpiTileLab">GST</span>
+              <span className="sdpKpiTileLab">{taxLabel}</span>
               <span className="sdpKpiTileVal">{Number(item.gstPercent || 0)}%</span>
             </div>
           </div>
@@ -310,7 +312,7 @@ export default function SchemeDiscountPopup({ open, onClose, item, onApply, line
               <strong>{fmtMoney(computed.taxable)}</strong>
             </li>
             <li className="sdpLedgerRow">
-              <span>GST ({Number(item.gstPercent || 0)}%)</span>
+              <span>{taxLabel} ({Number(item.gstPercent || 0)}%)</span>
               <strong>{fmtMoney(computed.gst)}</strong>
             </li>
             <li className="sdpLedgerRow sdpLedgerRow_net">

@@ -7,7 +7,7 @@ import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
 import { listCustomers, printCustomerLedger, sendCustomerLedgerEmail, getCustomer, updateCustomer } from "../services/customerService.js";
 import { EMAIL_RE, customerToUpdatePayload } from "../utils/customerContactPayload.js";
-import { fmtDateIndian, fmtMoney, fmtMoneyINR } from "../utils/format.js";
+import { fmtDateIndian, fmtMoney, fmtCurrency } from "../utils/format.js";
 import {
   ReportShell,
   ReportDenied,
@@ -202,8 +202,8 @@ export function CustomerLedgerReportContent({ embedded = false } = {}) {
         <div style={{ padding: 12 }}>
           {doc?.summary ? (
             <div className="raSub" style={{ marginBottom: 8 }}>
-              Net: {fmtMoneyINR(doc.summary.netBalance || 0)} | Due: {fmtMoneyINR(doc.summary.balanceDue || 0)}{" "}
-              | Advance: {fmtMoneyINR(doc.summary.advanceAmount || 0)}
+              Net: {fmtCurrency(doc.summary.netBalance || 0)} | Due: {fmtCurrency(doc.summary.balanceDue || 0)}{" "}
+              | Advance: {fmtCurrency(doc.summary.advanceAmount || 0)}
             </div>
           ) : null}
           <ReportTableScroll>

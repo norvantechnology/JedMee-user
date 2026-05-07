@@ -1,14 +1,23 @@
 const { ok, fail } = require("../../shared/response");
 const { query } = require("../../shared/db");
 
-/** Format numeric price + period into display strings for the landing page. */
+/** Map ISO 4217 currency codes to display symbols. */
+const CURRENCY_SYMBOLS = {
+  USD: "$", EUR: "€", GBP: "£", INR: "₹",
+  AUD: "A$", CAD: "C$", SGD: "S$", AED: "AED ",
+};
+
+/** Format numeric price + period into display strings for the landing page.
+ *  Uses currency_code from the DB row — defaults to USD if absent. */
 function formatPlan(row) {
-  const price = parseFloat(row.price);
-  const isFree = row.period === "free" || price === 0;
+  const price       = parseFloat(row.price);
+  const isFree      = row.period === "free" || price === 0;
+  const currency    = (row.currency_code || "USD").toUpperCase();
+  const sym         = CURRENCY_SYMBOLS[currency] ?? "$";
 
   const displayPrice = isFree
     ? "Free"
-    : "₹" + price.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+    : sym + price.toLocaleString("en-US", { maximumFractionDigits: 0 });
 
   const displayPeriod = {
     free:     "14-day trial",
@@ -18,16 +27,17 @@ function formatPlan(row) {
   }[row.period] ?? row.period;
 
   return {
-    id:          row.id,
-    name:        row.name,
-    price:       displayPrice,
-    period:      displayPeriod,
-    description: row.description,
-    features:    row.features,
-    highlight:   row.highlight,
-    badge:       row.badge,
-    cta:         row.cta,
-    sort_order:  row.sort_order,
+    id:            row.id,
+    name:          row.name,
+    price:         displayPrice,
+    period:        displayPeriod,
+    description:   row.description,
+    features:      row.features,
+    highlight:     row.highlight,
+    badge:         row.badge,
+    cta:           row.cta,
+    sort_order:    row.sort_order,
+    currency_code: currency,
   };
 }
 
@@ -39,7 +49,8 @@ async function handler(_event) {
   try {
     const res = await query(
       `select id, name, price, period, description, features,
-              highlight, badge, cta, sort_order
+              highlight, badge, cta, sort_order,
+              coalesce(currency_code, 'USD') as currency_code
        from pricing_plans
        where is_active = true
        order by sort_order asc, id asc`,

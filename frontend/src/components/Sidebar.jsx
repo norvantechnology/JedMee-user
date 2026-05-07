@@ -5,6 +5,7 @@ import { logout } from "../services/authService.js";
 import { APP_DISPLAY_NAME, sidebarNavScrollStorageKey } from "../constants/brand.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
+import { useLocale } from "../context/LocaleContext.jsx";
 import {
   BadgeIndianRupee,
   Building2,
@@ -63,6 +64,7 @@ export default function Sidebar({
   businessName,
   gstNumber
 }) {
+  const { taxLabel } = useLocale();
   const [authTick, setAuthTick] = useState(0);
   const auth = readAuth();
   const access = auth?.access || null;
@@ -156,7 +158,7 @@ export default function Sidebar({
     const reportItems = [
       ...(canQuality || canMfg ? [{ to: "/reports/inventory", label: "Inventory Reports", icon: <Layers /> }] : []),
       ...(canSales ? [{ to: "/reports/day-book", label: "Day Book", icon: <IconDayBook /> }] : []),
-      ...(canSales ? [{ to: "/reports/gst-r1", label: "GST Report (R1)", icon: <IconDayBook /> }] : []),
+      ...(canSales ? [{ to: "/reports/gst-r1", label: `${taxLabel} Report (R1)`, icon: <IconDayBook /> }] : []),
       ...(canCustomers || canDivisions ? [{ to: "/reports/ledger", label: "Ledger", icon: <IconLedger /> }] : [])
     ];
     if (reportItems.length) out.push({ title: "REPORTS", items: reportItems });

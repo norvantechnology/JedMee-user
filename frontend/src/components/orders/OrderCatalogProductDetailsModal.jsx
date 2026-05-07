@@ -1,11 +1,13 @@
-import { fmtMoney, fmtMoneyINR } from "../../utils/format.js";
+import { fmtMoney, fmtCurrency } from "../../utils/format.js";
 import { AppButton } from "../ui/buttons.jsx";
 import CommonModal from "../CommonModal.jsx";
 import ModalFooterShell from "../ui/ModalFooterShell.jsx";
 import { IconChevronsDown, IconChevronsUp, IconPill, IconStore } from "../ui/AppIcons.jsx";
+import { useLocale } from "../../context/LocaleContext.jsx";
 import "./OrderCatalogProductDetailsModal.css";
 
 export default function OrderCatalogProductDetailsModal({ open, onClose, row }) {
+  const { taxLabel, taxIdLabel } = useLocale();
   const wholesalerName = row?.wholesaler_name || "";
   const addressLines = [
     row?.wholesaler_address_line1,
@@ -65,7 +67,7 @@ export default function OrderCatalogProductDetailsModal({ open, onClose, row }) 
             </div>
 
             <div className="cpd_field cpd_span6">
-              <div className="cpd_label">GST Number</div>
+              <div className="cpd_label">{taxIdLabel}</div>
               <div className="cpd_value cpd_mono">{row?.wholesaler_gst_number || ""}</div>
             </div>
 
@@ -111,16 +113,16 @@ export default function OrderCatalogProductDetailsModal({ open, onClose, row }) 
           <div className="cpd_statsRow">
             <div className="cpd_statChip cpd_chipPrimary">
               <div className="cpd_statLabel">Catalog Price</div>
-              <div className="cpd_statValue">{fmtMoneyINR(row?.catalog_price || 0)}</div>
+              <div className="cpd_statValue">{fmtCurrency(row?.catalog_price || 0)}</div>
             </div>
             <div className="cpd_statChip">
               <div className="cpd_statLabel">MRP</div>
               <div className="cpd_statValue">
-                {row?.mrp == null ? "" : fmtMoneyINR(row?.mrp || 0)}
+                {row?.mrp == null ? "" : fmtCurrency(row?.mrp || 0)}
               </div>
             </div>
             <div className="cpd_statChip">
-              <div className="cpd_statLabel">GST</div>
+              <div className="cpd_statLabel">{taxLabel}</div>
               <div className="cpd_statValue">
                 {row?.sales_gst == null ? "" : `${Number(row?.sales_gst || 0)}%`}
               </div>

@@ -1,4 +1,4 @@
-import { fmtMoneyINR } from "../utils/format.js";
+import { fmtCurrency } from "../utils/format.js";
 import { useSeoMeta } from "../utils/seo.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -13,6 +13,7 @@ import { formatExpiryShort, expiryStatus } from "../components/reports/reportExp
 import { formatBatchExpiryRelativePhrase } from "../utils/batchExpiryDisplay.js";
 import CommonLoading from "../components/CommonLoading.jsx";
 import { IconAlert, IconPsrChevronDown, IconPsrGrid, IconPsrOutOfStock, IconPsrPackage, IconPsrSearch, IconPsrSuppliers, IconX } from "../components/ui/AppIcons.jsx";
+import { useLocale } from "../context/LocaleContext.jsx";
 import "./ProductSupplierReportPage.css";
 
 const DD_PAGE = 4;
@@ -148,7 +149,7 @@ function HighlightChunks({ text, query }) {
 }
 
 function formatRs(n) {
-  return fmtMoneyINR(n) || "";
+  return fmtCurrency(n) || "";
 }
 
 function formatDateChip(d) {
@@ -312,7 +313,7 @@ function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
             <div className="psrBFval">{Number(b.loose_stock || 0) > 0 ? Number(b.loose_stock).toFixed(2) : ""}</div>
           </div>
           <div>
-            <div className="psrBLbl">GST</div>
+            <div className="psrBLbl">{taxLabel}</div>
             <div className="psrBFval">{b.sales_gst != null ? `${Number(b.sales_gst).toFixed(2)}%` : ""}</div>
           </div>
           <div style={{ gridColumn: "1 / -1" }}>
@@ -420,7 +421,7 @@ function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
                         <th className="psrR">Sp. Rate 2</th>
                         <th className="psrR">Stock</th>
                         <th className="psrR">Loose</th>
-                        <th className="psrR">GST %</th>
+                        <th className="psrR">{taxLabel} %</th>
                         <th>Supplier</th>
                       </tr>
                     </thead>
@@ -692,5 +693,6 @@ export function ProductSupplierReportContent({ embedded = false } = {}) {
 
 export default function ProductSupplierReportPage() {
   useSeoMeta({ title: "Product Supplier Report" });
+  const { taxLabel } = useLocale();
   return <ProductSupplierReportContent embedded={false} />;
 }

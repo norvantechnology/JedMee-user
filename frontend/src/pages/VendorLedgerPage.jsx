@@ -8,7 +8,7 @@ import { emitToast } from "../services/toastBus.js";
 import { listVendors, updateVendor } from "../services/vendorService.js";
 import { getVendorLedger, sendVendorLedgerEmail } from "../services/purchaseService.js";
 import { EMAIL_RE } from "../utils/customerContactPayload.js";
-import { fmtDateIndian, fmtMoney } from "../utils/format.js";
+import { fmtDateIndian, fmtMoney, fmtCurrency } from "../utils/format.js";
 import {
   ReportShell,
   ReportDenied,
@@ -94,9 +94,9 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
         <td>${String(e.date || "").slice(0, 10)}</td>
         <td class="td-type">${String(e.type || "").replace(/_/g, " ")}</td>
         <td class="td-ref">${e.reference || "—"}</td>
-        <td class="num td-dr">${isDr ? `Rs.${fmtMoney(e.debit)}` : ""}</td>
-        <td class="num td-cr">${isCr ? `Rs.${fmtMoney(e.credit)}` : ""}</td>
-        <td class="num td-bal">Rs.${fmtMoney(e.balance || 0)}</td>
+        <td class="num td-dr">${isDr ? fmtCurrency(e.debit) : ""}</td>
+        <td class="num td-cr">${isCr ? fmtCurrency(e.credit) : ""}</td>
+        <td class="num td-bal">${fmtCurrency(e.balance || 0)}</td>
       </tr>`;
     }).join("\n");
     return `<!DOCTYPE html>
@@ -156,15 +156,15 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
     <div class="stats">
       <div class="stat stat--dr">
         <div class="stat-label">Total Purchases</div>
-        <div class="stat-value">Rs.${fmtMoney(stats.totalDr)}</div>
+        <div class="stat-value">${fmtCurrency(stats.totalDr)}</div>
       </div>
       <div class="stat stat--cr">
         <div class="stat-label">Total Payments</div>
-        <div class="stat-value">Rs.${fmtMoney(stats.totalCr)}</div>
+        <div class="stat-value">${fmtCurrency(stats.totalCr)}</div>
       </div>
       <div class="stat ${netClass}">
         <div class="stat-label">Net Balance</div>
-        <div class="stat-value">Rs.${fmtMoney(Math.abs(stats.net))}<span class="stat-badge">${netType}</span></div>
+        <div class="stat-value">${fmtCurrency(Math.abs(stats.net))}<span class="stat-badge">${netType}</span></div>
       </div>
     </div>
     <table>
@@ -331,16 +331,16 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
           <div className="vlStats">
             <div className="vlStat vlStat--dr">
               <span className="vlStatLabel">Total Purchases</span>
-              <span className="vlStatValue">₹{fmtMoney(stats.totalDr)}</span>
+              <span className="vlStatValue">{fmtCurrency(stats.totalDr)}</span>
             </div>
             <div className="vlStat vlStat--cr">
               <span className="vlStatLabel">Total Payments</span>
-              <span className="vlStatValue">₹{fmtMoney(stats.totalCr)}</span>
+              <span className="vlStatValue">{fmtCurrency(stats.totalCr)}</span>
             </div>
             <div className={`vlStat vlStat--net ${stats.net > 0 ? "vlStat--netDr" : stats.net < 0 ? "vlStat--netCr" : ""}`}>
               <span className="vlStatLabel">Net Balance</span>
               <span className="vlStatValue">
-                ₹{fmtMoney(Math.abs(stats.net))}
+                {fmtCurrency(Math.abs(stats.net))}
                 <span className="vlStatBadge">{stats.netType}</span>
               </span>
             </div>
