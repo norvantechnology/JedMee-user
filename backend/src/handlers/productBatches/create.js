@@ -179,12 +179,12 @@ async function handler(event) {
          account_id, code, name, drug_name,
          division_id, mfg_company_id,
          packing, bulk_pack, case_pack, conversion_unit,
-         stockable, is_discount_enabled, is_control, is_half_scheme,
+         stockable, is_discount_enabled, is_control, is_half_scheme, is_otc,
          sales_gst, purchase_gst,
          sales_scheme, scheme_qty_paid, scheme_qty_free,
          created_by_user_id
        )
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
        RETURNING *`,
       [
         ctx.accountId,
@@ -201,6 +201,7 @@ async function handler(event) {
         pvals.is_discount_enabled ?? true,
         pvals.is_control ?? false,
         pvals.is_half_scheme ?? false,
+        pvals.is_otc !== undefined ? pvals.is_otc : true,
         pvals.sales_gst ?? null,
         pvals.purchase_gst ?? null,
         pvals.sales_scheme ?? null,
@@ -299,6 +300,7 @@ async function handler(event) {
         is_net,
         is_non_editable_free_qty,
         is_control,
+        is_otc,
         low_stock_alert_enabled,
         low_stock_threshold,
         special_rate_1,
@@ -308,7 +310,7 @@ async function handler(event) {
         created_by_user_id
       )
       VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48
       )
       RETURNING id
       `,
@@ -353,6 +355,7 @@ async function handler(event) {
         Boolean(mergedForValidation.isNet),
         Boolean(input.isNonEditableFreeQty),
         Boolean(product.is_control ?? false),
+        product.is_otc !== undefined ? Boolean(product.is_otc) : true,
         Boolean(input.lowStockAlertEnabled),
         lowStockThresholdParsed.value,
         n(input.specialRate1) || null,

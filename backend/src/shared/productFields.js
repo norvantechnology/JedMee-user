@@ -242,6 +242,7 @@ const SNAPSHOT_COLUMNS = [
   "stockable",
   "is_discount_enabled",
   "is_control",
+  "is_otc",
   "sales_gst",
   "purchase_gst",
   "sales_scheme",

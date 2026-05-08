@@ -228,6 +228,15 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
       if (existing.rows?.[0]?.id) {
         batchId = String(existing.rows[0].id);
       } else {
+        // Load product flags so the batch snapshot reflects the actual product settings
+        const prodFlagsRes = await q(
+          "load-product-flags",
+          `SELECT is_control, is_otc, is_discount_enabled, is_half_scheme, stockable
+           FROM products WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`,
+          [it.product_id, accountId]
+        );
+        const prodFlags = prodFlagsRes.rows?.[0] || {};
+
         const ins = await q(
           "insert-new-batch",
           `INSERT INTO product_batches (
@@ -236,7 +245,7 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
              mrp, purchase_rate, sales_rate, retail_rate, net_rate, landing_cost,
              discount_sales, sales_gst, purchase_gst,
              opening_stock, open_stock_free_qty, stockable,
-             is_discount_enabled, is_hold, is_half_scheme, is_net, is_non_editable_free_qty, is_control,
+             is_discount_enabled, is_hold, is_half_scheme, is_net, is_non_editable_free_qty, is_control, is_otc,
              created_by_user_id, updated_by_user_id
            )
            VALUES (
@@ -244,8 +253,8 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
              $8,$9,$10,
              $11::numeric,$12::numeric,$13::numeric,$13::numeric,$13::numeric,$14::numeric,
              0::numeric,$15::numeric,$15::numeric,
-             0::numeric,0::numeric,true,
-             true,false,false,false,false,false,
+             0::numeric,0::numeric,$17,
+             $18,false,$19,false,false,$20,$21,
              $16,$16
            )
            RETURNING id`,
@@ -265,7 +274,12 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
             lineSales,
             lineLanding,
             gstSlab,
-            actorId
+            actorId,
+            Boolean(prodFlags.stockable ?? true),
+            Boolean(prodFlags.is_discount_enabled ?? true),
+            Boolean(prodFlags.is_half_scheme ?? false),
+            Boolean(prodFlags.is_control ?? false),
+            prodFlags.is_otc !== undefined ? Boolean(prodFlags.is_otc) : true
           ]
         );
         batchId = String(ins.rows?.[0]?.id || "");

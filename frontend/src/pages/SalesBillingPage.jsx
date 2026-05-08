@@ -94,7 +94,7 @@ const LS_SALES_INVOICE_DEFAULTS = "medico_sales_invoice_defaults_v1";
 
 function loadSalesFormDefaults() {
   try {
-    const raw = localStorage.getItem(LS_SALES_INVOICE_DEFAULTS);
+    const raw = localStorage.getItem(salesInvoiceDefaultsStorageKey());
     if (!raw) return { customerId: "", divisionId: "" };
     const j = JSON.parse(raw);
     return { customerId: String(j.customerId || ""), divisionId: String(j.divisionId || "") };

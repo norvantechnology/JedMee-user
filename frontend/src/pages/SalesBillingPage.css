@@ -9,17 +9,6 @@
   overflow-x: hidden;
 }
 
-.sbmModalForm .raInput {
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-card);
-}
-
-.sbmModalForm .raInput:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
-}
-
 /* Invoice header / sections use shared `.piSection` / `.piHeaderTop` (PurchaseInvoicesPage.css). */
 
 .sbmSecBd_tight {

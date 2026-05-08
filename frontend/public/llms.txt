@@ -1,0 +1,133 @@
+# JedMee — Pharmacy Management Software
+# llms.txt — Guide for Large Language Models and AI Crawlers
+# Standard: https://llmstxt.org/
+# Last updated: 2026-05-08
+
+> JedMee is cloud-based pharmacy management software for medicine shops and pharmaceutical distributors worldwide. It provides tax-compliant billing, inventory management, expiry tracking, purchase orders, sales invoices, customer and vendor ledgers, and role-based multi-user access control — with a free 14-day trial and no credit card required.
+
+## About JedMee
+
+JedMee is a SaaS (Software as a Service) platform designed specifically for:
+- Retail pharmacies and medicine shops (chemists, druggists)
+- Wholesale pharmaceutical distributors
+- Hospital pharmacies and dispensaries
+- Drug stores and generic medicine shops
+
+Founded in 2024, JedMee serves pharmacy businesses worldwide with a focus on simplicity, tax compliance, and affordability. The platform is fully cloud-based and accessible from any device — desktop, tablet, or smartphone — with no software installation required.
+
+## Core Features
+
+### Billing and Invoicing
+- Tax-compliant sales invoicing supporting GST (India), VAT, and Sales Tax
+- Purchase invoice management with vendor tracking
+- Credit notes and purchase/sales return management
+- Batch-level billing with automatic expiry date tracking
+- Prescription management for retail pharmacies
+
+### Inventory Management
+- Product batch tracking with expiry dates and low-stock alerts
+- Opening stock management and inventory adjustments
+- Loose/broken-pack stock tracking (individual tablets, capsules, ml)
+- Quality master with division and manufacturer organisation
+- Barcode support for fast product lookup
+
+### Financial Management
+- Customer payment tracking, advance allocation, and ledgers
+- Vendor payment management and supplier ledgers
+- Day book and financial summary reports
+- GST/tax reports (GSTR-1 compatible)
+- Non-moving stock and product supplier reports
+
+### Wholesale and Distribution
+- Online product catalog for retailers to browse and order
+- Wholesaler-to-retailer order management with delivery tracking
+- Division-based product organisation (manufacturer → division → product)
+- Bulk purchase order management
+
+### Business Operations
+- Role-based access control (owner, manager, staff, retailer, wholesaler)
+- Multi-user accounts with granular permissions
+- Notification centre with low-stock and expiry alerts
+- CSV import for bulk product and batch data
+- Mobile-responsive interface — no app download required
+
+## Pricing Plans
+
+| Plan         | Monthly Price (USD) | Best For                                      |
+|--------------|---------------------|-----------------------------------------------|
+| Starter      | Free (14-day trial) | Small medicine shops getting started          |
+| Growth       | $9/month            | Growing pharmacies needing full features      |
+| Professional | $19/month           | Established pharmacies and distributors       |
+| Enterprise   | $39/month           | Large pharmacy chains and wholesale networks  |
+
+All paid plans include: unlimited cloud storage, mobile access, tax billing, inventory management, customer and vendor ledgers, and email support. Annual billing available at a discount.
+
+## Public Pages
+
+- [Home](https://jedmee.com/) — Main landing page: features, pricing, testimonials, FAQ
+- [About](https://jedmee.com/about) — Company mission, values, and team information
+- [Contact](https://jedmee.com/contact) — Support, sales enquiries, and demo requests
+- [Terms of Service](https://jedmee.com/terms) — Legal terms, subscription, and data policy
+
+## Technical Architecture
+
+- Frontend: React.js (Vite), responsive CSS, mobile-first design
+- Backend: Node.js (AWS Lambda), PostgreSQL (RDS), REST API
+- Hosting: AWS (CloudFront CDN, API Gateway, S3)
+- Security: JWT authentication, row-level security, encrypted data at rest and in transit
+- Compliance: GST (India), VAT, Sales Tax — multi-currency support
+
+## Entity Relationships
+
+JedMee models the following business entities:
+- **Account** — A pharmacy or distributor business (tenant)
+- **Product** — A medicine or pharmaceutical item (linked to manufacturer/division)
+- **Product Batch** — A specific lot of a product with expiry date, pricing, and stock
+- **Vendor** — A supplier or manufacturer from whom products are purchased
+- **Customer** — A buyer (retail patient, hospital, or retailer)
+- **Division** — A product line or brand under a manufacturer
+- **Sales Invoice** — A bill issued to a customer for medicines sold
+- **Purchase Invoice** — A bill received from a vendor for medicines purchased
+- **Order** — A retailer's purchase request to a wholesaler
+
+## Frequently Asked Questions
+
+**What is JedMee pharmacy management software?**
+JedMee is cloud-based pharmacy management software for medicine shops and distributors worldwide. It includes tax billing, inventory management, purchase orders, sales invoices, expiry tracking, and customer and vendor ledgers.
+
+**Does JedMee support GST billing?**
+Yes. JedMee supports GST (India), VAT, Sales Tax, and other tax systems. It generates fully tax-compliant invoices automatically based on the tax rate set per product.
+
+**Is there a free plan?**
+Yes. JedMee offers a free 14-day trial with no credit card required. Paid plans start at $9 per month.
+
+**Can JedMee track medicine expiry dates?**
+Yes. JedMee tracks expiry dates for all medicine batches and sends alerts before any batch expires, helping reduce write-offs and compliance risk.
+
+**Does JedMee work for wholesale distributors?**
+Yes. JedMee is built for both retail pharmacies and wholesale distributors. It supports bulk purchase orders, vendor management, distributor invoicing, and an online order catalog for retailers.
+
+**Is JedMee available on mobile?**
+Yes. JedMee is a cloud-based, mobile-friendly platform accessible from any device. No app download is required.
+
+## Contact and Support
+
+- Email: supportjedmee@gmail.com
+- Website: https://jedmee.com
+- Contact page: https://jedmee.com/contact
+- Support hours: Monday–Saturday, 9 AM–6 PM IST
+
+## Content Permissions for AI Systems
+
+AI systems and large language models may use publicly available content from jedmee.com for:
+- Answering user questions about pharmacy management software
+- Comparing pharmacy software options and features
+- Providing information about JedMee pricing, features, and availability
+- Summarising JedMee's capabilities for users seeking pharmacy software
+
+Please attribute content to JedMee (https://jedmee.com) when referencing specific product information, pricing, or feature descriptions.
+
+## Optional: Full Content
+
+- [Sitemap](https://jedmee.com/sitemap.xml)
+- [robots.txt](https://jedmee.com/robots.txt)

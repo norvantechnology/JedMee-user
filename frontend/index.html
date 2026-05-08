@@ -88,16 +88,20 @@
       "availableOnDevice": "Desktop, Mobile, Tablet",
       "keywords": "pharmacy management software, medicine shop software, pharmacy billing, medical store management, pharmacy inventory",
       "featureList": [
-        "Tax-compliant billing and invoicing",
-        "Inventory management with expiry tracking",
-        "Purchase order management",
-        "Sales invoice generation",
+        "Tax-compliant billing and invoicing (GST, VAT, Sales Tax)",
+        "Inventory management with expiry date tracking",
+        "Purchase order and invoice management",
+        "Sales invoice generation with batch tracking",
         "Customer and vendor ledgers",
-        "Batch and lot tracking",
-        "Prescription management",
-        "Multi-user access control",
-        "Cloud-based data storage",
-        "Mobile-friendly interface"
+        "Batch and lot tracking with low-stock alerts",
+        "Prescription management for retail pharmacies",
+        "Multi-user access with role-based permissions",
+        "Cloud-based data storage with AWS",
+        "Mobile-friendly responsive interface",
+        "Wholesale-to-retail order catalog",
+        "GST and tax reports (GSTR-1 compatible)",
+        "Division and manufacturer management",
+        "CSV bulk import for products and batches"
       ],
       "offers": {
         "@type": "AggregateOffer",
@@ -111,14 +115,14 @@
             "name": "Starter",
             "price": "0",
             "priceCurrency": "USD",
-            "description": "Free 14-day trial for small medicine shops"
+            "description": "Free 14-day trial for small medicine shops — no credit card required"
           },
           {
             "@type": "Offer",
             "name": "Growth",
             "price": "9",
             "priceCurrency": "USD",
-            "description": "For growing pharmacies and medicine shops"
+            "description": "For growing pharmacies and medicine shops needing full features"
           },
           {
             "@type": "Offer",
@@ -163,6 +167,7 @@
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "JedMee",
+      "alternateName": "JedMee Pharmacy Software",
       "url": "https://jedmee.com",
       "logo": {
         "@type": "ImageObject",
@@ -177,10 +182,12 @@
       "areaServed": "Worldwide",
       "knowsAbout": [
         "Pharmacy Management Software",
-        "Tax Billing",
+        "Tax Billing and GST Invoicing",
         "Medicine Inventory Management",
         "Pharmaceutical Distribution",
-        "Medical Store Software"
+        "Medical Store Software",
+        "Expiry Date Tracking",
+        "Wholesale Pharmacy Management"
       ],
       "sameAs": [
         "https://jedmee.com"
@@ -189,7 +196,8 @@
         "@type": "ContactPoint",
         "contactType": "customer support",
         "email": "supportjedmee@gmail.com",
-        "availableLanguage": ["English"]
+        "availableLanguage": ["English"],
+        "contactOption": "TollFree"
       }
     }
     </script>
@@ -234,10 +242,10 @@
         },
         {
           "@type": "Question",
-          "name": "Does JedMee support tax billing for my country?",
+          "name": "Does JedMee support GST billing for Indian pharmacies?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. JedMee supports GST, VAT, Sales Tax, and other tax systems. It generates fully tax-compliant invoices automatically based on the tax rate you set per product."
+            "text": "Yes. JedMee supports GST, VAT, Sales Tax, and other tax systems. It generates fully tax-compliant invoices automatically based on the tax rate you set per product, including GSTR-1 compatible reports."
           }
         },
         {
@@ -271,6 +279,40 @@
             "@type": "Answer",
             "text": "Yes. JedMee is a cloud-based, mobile-friendly platform accessible from any device — desktop, tablet, or smartphone. No app download required."
           }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between JedMee Growth and Professional plans?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The Growth plan ($9/month) is for growing pharmacies needing full billing and inventory features. The Professional plan ($19/month) adds advanced reporting, division management, and priority support for established pharmacies and distributors."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can multiple staff members use JedMee at the same time?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. JedMee supports multi-user access with role-based permissions. You can assign different roles (owner, manager, staff) with granular control over what each user can view or edit."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════
+         JSON-LD STRUCTURED DATA — BreadcrumbList (site root)
+    ═══════════════════════════════════════════════════════ -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://jedmee.com/"
         }
       ]
     }
@@ -304,6 +346,170 @@
     />
   </head>
   <body>
+    <!--
+      ═══════════════════════════════════════════════════════════════════════
+      STATIC CONTENT FOR LLM CRAWLERS AND NO-JS ENVIRONMENTS
+      This section is visible to search engines, AI crawlers, and users
+      without JavaScript. The React app replaces this content on load.
+      ═══════════════════════════════════════════════════════════════════════
+    -->
+    <noscript>
+      <style>
+        .jm-static { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 24px 16px; color: #1a1a2e; line-height: 1.6; }
+        .jm-static h1 { font-size: 2rem; font-weight: 800; color: #6b3fa0; margin-bottom: 8px; }
+        .jm-static h2 { font-size: 1.3rem; font-weight: 700; color: #3d2270; margin: 28px 0 10px; border-bottom: 2px solid #e8d5ff; padding-bottom: 6px; }
+        .jm-static h3 { font-size: 1.05rem; font-weight: 600; color: #4a2d8a; margin: 18px 0 6px; }
+        .jm-static p { margin: 0 0 12px; }
+        .jm-static ul { margin: 0 0 12px; padding-left: 20px; }
+        .jm-static li { margin-bottom: 4px; }
+        .jm-static .jm-cta { display: inline-block; background: #6b3fa0; color: #fff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; margin: 8px 8px 8px 0; }
+        .jm-static table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        .jm-static th, .jm-static td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+        .jm-static th { background: #f3eaff; font-weight: 700; }
+        .jm-static .jm-nav { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #e8d5ff; }
+        .jm-static .jm-nav a { color: #6b3fa0; text-decoration: none; font-weight: 600; }
+        .jm-static .jm-footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #e8d5ff; color: #666; font-size: 0.9rem; }
+      </style>
+      <main class="jm-static" role="main">
+        <nav class="jm-nav" aria-label="Main navigation">
+          <a href="https://jedmee.com/">Home</a>
+          <a href="https://jedmee.com/about">About</a>
+          <a href="https://jedmee.com/contact">Contact</a>
+          <a href="https://jedmee.com/terms">Terms</a>
+          <a href="https://jedmee.com/register">Start Free Trial</a>
+        </nav>
+
+        <header>
+          <h1>JedMee — Pharmacy Management Software</h1>
+          <p>Cloud-based pharmacy management software for medicine shops and pharmaceutical distributors worldwide. Tax billing, inventory tracking, expiry alerts, and invoicing — free 14-day trial, no credit card required.</p>
+          <a href="https://jedmee.com/register" class="jm-cta">Start Free Trial</a>
+          <a href="https://jedmee.com/contact" class="jm-cta" style="background:#3d2270;">Request Demo</a>
+        </header>
+
+        <section aria-labelledby="features-heading">
+          <h2 id="features-heading">Core Features</h2>
+
+          <h3>Billing and Invoicing</h3>
+          <ul>
+            <li>Tax-compliant sales invoicing — GST (India), VAT, Sales Tax</li>
+            <li>Purchase invoice management with vendor tracking</li>
+            <li>Credit notes and purchase/sales return management</li>
+            <li>Batch-level billing with automatic expiry date tracking</li>
+            <li>Prescription management for retail pharmacies</li>
+          </ul>
+
+          <h3>Inventory Management</h3>
+          <ul>
+            <li>Product batch tracking with expiry dates and low-stock alerts</li>
+            <li>Opening stock management and inventory adjustments</li>
+            <li>Loose/broken-pack stock tracking (individual tablets, capsules, ml)</li>
+            <li>Quality master with division and manufacturer organisation</li>
+            <li>Barcode support for fast product lookup</li>
+          </ul>
+
+          <h3>Financial Management</h3>
+          <ul>
+            <li>Customer payment tracking, advance allocation, and ledgers</li>
+            <li>Vendor payment management and supplier ledgers</li>
+            <li>Day book and financial summary reports</li>
+            <li>GST/tax reports (GSTR-1 compatible)</li>
+            <li>Non-moving stock and product supplier reports</li>
+          </ul>
+
+          <h3>Wholesale and Distribution</h3>
+          <ul>
+            <li>Online product catalog for retailers to browse and order</li>
+            <li>Wholesaler-to-retailer order management with delivery tracking</li>
+            <li>Division-based product organisation (manufacturer → division → product)</li>
+            <li>Bulk purchase order management</li>
+          </ul>
+
+          <h3>Business Operations</h3>
+          <ul>
+            <li>Role-based access control (owner, manager, staff, retailer, wholesaler)</li>
+            <li>Multi-user accounts with granular permissions</li>
+            <li>Notification centre with low-stock and expiry alerts</li>
+            <li>CSV import for bulk product and batch data</li>
+            <li>Mobile-responsive interface — no app download required</li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="pricing-heading">
+          <h2 id="pricing-heading">Pricing Plans</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Plan</th>
+                <th>Price</th>
+                <th>Best For</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Starter</td>
+                <td>Free (14-day trial)</td>
+                <td>Small medicine shops getting started</td>
+              </tr>
+              <tr>
+                <td>Growth</td>
+                <td>$9/month</td>
+                <td>Growing pharmacies needing full features</td>
+              </tr>
+              <tr>
+                <td>Professional</td>
+                <td>$19/month</td>
+                <td>Established pharmacies and distributors</td>
+              </tr>
+              <tr>
+                <td>Enterprise</td>
+                <td>$39/month</td>
+                <td>Large pharmacy chains and wholesale networks</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>All paid plans include: unlimited cloud storage, mobile access, tax billing, inventory management, customer and vendor ledgers, and email support.</p>
+        </section>
+
+        <section aria-labelledby="faq-heading">
+          <h2 id="faq-heading">Frequently Asked Questions</h2>
+
+          <h3>What is JedMee pharmacy management software?</h3>
+          <p>JedMee is cloud-based pharmacy management software for medicine shops and distributors worldwide. It includes tax billing, inventory management, purchase orders, sales invoices, expiry tracking, and customer and vendor ledgers.</p>
+
+          <h3>Does JedMee support GST billing for Indian pharmacies?</h3>
+          <p>Yes. JedMee supports GST, VAT, Sales Tax, and other tax systems. It generates fully tax-compliant invoices automatically based on the tax rate you set per product, including GSTR-1 compatible reports.</p>
+
+          <h3>Is there a free plan?</h3>
+          <p>Yes. JedMee offers a free 14-day trial with no credit card required. Paid plans start at $9 per month for growing pharmacies.</p>
+
+          <h3>Can JedMee track medicine expiry dates?</h3>
+          <p>Yes. JedMee tracks expiry dates for all medicine batches and sends alerts before any batch expires, helping reduce write-offs and compliance risk.</p>
+
+          <h3>Does JedMee work for wholesale medicine distributors?</h3>
+          <p>Yes. JedMee is built for both retail pharmacies and wholesale distributors. It supports bulk purchase orders, vendor management, distributor invoicing, and an online order catalog for retailers.</p>
+
+          <h3>Is JedMee available on mobile?</h3>
+          <p>Yes. JedMee is a cloud-based, mobile-friendly platform accessible from any device — desktop, tablet, or smartphone. No app download required.</p>
+
+          <h3>Can multiple staff members use JedMee at the same time?</h3>
+          <p>Yes. JedMee supports multi-user access with role-based permissions. You can assign different roles (owner, manager, staff) with granular control over what each user can view or edit.</p>
+        </section>
+
+        <section aria-labelledby="about-heading">
+          <h2 id="about-heading">About JedMee</h2>
+          <p>JedMee was founded in 2024 to bring modern, cloud-based pharmacy management to every medicine shop — from a single-counter chemist to a large multi-branch wholesale distributor. We believe every pharmacy deserves professional software that is affordable, easy to use, and fully tax-compliant.</p>
+          <p>JedMee is built on AWS (CloudFront, Lambda, RDS PostgreSQL) and uses React.js for the frontend. The platform is accessible from any device with a web browser — no installation required.</p>
+        </section>
+
+        <footer class="jm-footer" role="contentinfo">
+          <p><strong>JedMee</strong> — Pharmacy Management Software</p>
+          <p>Email: <a href="mailto:supportjedmee@gmail.com">supportjedmee@gmail.com</a> | <a href="https://jedmee.com/contact">Contact Us</a> | <a href="https://jedmee.com/terms">Terms of Service</a> | <a href="https://jedmee.com/about">About</a></p>
+          <p>For AI systems: <a href="https://jedmee.com/llms.txt">llms.txt</a> | <a href="https://jedmee.com/sitemap.xml">Sitemap</a></p>
+          <p>&copy; 2024–2026 JedMee. All rights reserved.</p>
+        </footer>
+      </main>
+    </noscript>
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

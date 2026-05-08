@@ -30,6 +30,7 @@ export function getNavShortcutTargets() {
   if (can("PRODUCT_BATCHES", "VIEW")) items.push({ key: "q", to: "/quality-master", label: NAV_LABELS.qualityMaster });
   if (can("CUSTOMERS", "VIEW")) items.push({ key: "c", to: "/customers", label: NAV_LABELS.customers });
   if (can("PURCHASE_INVOICES", "VIEW")) items.push({ key: "i", to: "/purchase-invoices", label: NAV_LABELS.purchaseInvoices });
+  if (can("PURCHASE_RETURNS", "VIEW")) items.push({ key: "n", to: "/purchase-returns", label: NAV_LABELS.purchaseReturns });
   if (can("SALES_INVOICES", "VIEW")) items.push({ key: "b", to: "/sales-billing", label: NAV_LABELS.salesBilling });
   if (can("SALES_RETURNS", "VIEW")) items.push({ key: "s", to: "/sales-returns", label: NAV_LABELS.salesReturns });
   if (can("PURCHASE_ORDERS", "VIEW")) {

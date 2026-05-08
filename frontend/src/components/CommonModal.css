@@ -121,8 +121,8 @@
      without affecting child sizing the way `overflow: hidden` could. */
   overflow: clip;
 
-  /* Flat header (common theme colors only) */
-  background: var(--color-card);
+  /* Header uses surface-2 so it visually separates from the body */
+  background: var(--color-surface-2);
 
   border-bottom: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
 }
@@ -321,13 +321,13 @@
   line-height: 1.2;
 }
 
-/* Inputs inside modal  slightly elevated appearance */
+/* Inputs inside modal — field background uses surface token */
 .mcmBody input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .mcmBody select,
 .mcmBody textarea,
 .mcmBody .raInput,
 .mcmBody .cdpInput {
-  background: color-mix(in srgb, var(--color-card) 94%, var(--color-primary) 3%);
+  background: var(--color-surface);
   border-color: color-mix(in srgb, var(--color-border) 90%, var(--color-primary) 5%);
   transition: border-color 0.16s, box-shadow 0.16s, background 0.16s;
 }
@@ -342,7 +342,7 @@
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--color-primary) 14%, transparent),
     0 1px 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
-  background: var(--color-card);
+  background: var(--color-surface);
 }
 
 .mcmBody input:disabled,
@@ -354,18 +354,24 @@
 }
 
 /* Section cards inside modal body */
-.mcmBody .sfmSection,
-.mcmBody .piSection,
-.mcmBody .sbmSec {
+.mcmBody .sfmSection {
   border-color: color-mix(in srgb, var(--color-border) 70%, transparent);
-  background: var(--color-card);
+  background: var(--color-surface-2);
+  box-shadow: none;
+}
+
+.mcmBody .piSection,
+.mcmBody .sbmSec,
+.mcmBody .cliSection {
+  border-color: color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: var(--color-surface);
   box-shadow: none;
 }
 
 .mcmBody .piSectionHead,
 .mcmBody .sbmSecHd,
-.mcmBody .sfmSectionHead {
-  background: color-mix(in srgb, var(--color-surface-2) 50%, var(--color-card));
+.mcmBody .cliSectionHead {
+  background: var(--color-surface-2);
   border-bottom-color: color-mix(in srgb, var(--color-border) 55%, transparent);
 }
 

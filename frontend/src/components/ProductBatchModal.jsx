@@ -237,13 +237,19 @@ export default function ProductBatchModal({
     return (mfgCompanyOptions || []).find((c) => String(c.id) === id) || null;
   }, [form.mfgCompanyId, mfgCompanyOptions]);
 
+  // Keep a ref so the reset effect can read the latest initialValue without
+  // re-firing every time the parent re-renders with a new object reference.
+  const initialValueRef = useRef(initialValue);
+  initialValueRef.current = initialValue;
+
   useEffect(() => {
     if (!open) return;
     if (overlayClosedRef.current) {
       overlayClosedRef.current = false;
       return;
     }
-    const seed = initialValue ? { ...empty, ...initialValue } : empty;
+    const iv = initialValueRef.current;
+    const seed = iv ? { ...empty, ...iv } : empty;
     setForm(seed);
     setTab("product");
     setTouched({});
@@ -254,7 +260,8 @@ export default function ProductBatchModal({
       salesRate: Boolean(clean(seed?.salesRate)),
       retailRate: Boolean(clean(seed?.retailRate))
     });
-  }, [open, empty, initialValue, mode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, empty, mode]);
 
   function handleOverlayClose() {
     if (busy) return;

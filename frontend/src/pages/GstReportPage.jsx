@@ -5,6 +5,7 @@ import AppShell from "../layouts/AppShell.jsx";
 import { useLocale } from "../context/LocaleContext.jsx";
 import { AppButton } from "../components/ui/buttons.jsx";
 import { readAuth } from "../services/authStorage.js";
+import { can } from "../utils/access.js";
 import { apiGet } from "../services/apiClient.js";
 import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
@@ -35,6 +36,7 @@ export default function GstReportPage() {
   useSeoMeta({ title: `${taxLabel} Summary Report` });
   const auth = readAuth();
   const user = auth?.user || null;
+  const canView = can("REPORTS", "VIEW");
 
   const def = defaultDates();
   const [fromDate, setFromDate] = useState(def.from);
@@ -74,6 +76,25 @@ export default function GstReportPage() {
   }
 
   const s = data?.summary || {};
+
+  if (!canView) {
+    return (
+      <AppShell
+        userName={user?.full_name || "User"}
+        userEmail={user?.email || auth?.email || ""}
+        userBusinessName={user?.firm_name || ""}
+        userGstNumber={user?.gst_number || ""}
+        variant="user"
+      >
+        <div className="pageWrap">
+          <div className="pageCard">
+            <div className="raTitle">{taxLabel} Summary Report</div>
+            <div className="raSub">You don&apos;t have permission to view this report.</div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell

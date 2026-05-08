@@ -493,20 +493,24 @@
 
 /* ── MOBILE ── */
 @media (max-width: 720px) {
-  /* Overlay: full-screen backdrop with blur */
+  /* Overlay: starts below the sticky header so header stays tappable */
   .overlay {
+    top: 50px;
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     background: color-mix(in srgb, var(--color-text) 48%, transparent);
   }
 
-  /* Sidebar drawer */
+  /* Sidebar drawer — starts below header, never covers it */
   .sidebar {
+    top: 50px;
+    height: calc(100vh - 50px);
     transform: translateX(-110%);
     width: min(82vw, 288px);
     min-width: 0;
     transition: transform .28s cubic-bezier(.4,0,.2,1);
     border-right: 1px solid var(--nav-border);
+    z-index: 195;   /* below header (210) so header stays on top */
   }
   .sidebar.mobile-open {
     transform: translateX(0);
@@ -516,10 +520,10 @@
   /* Hide desktop toggle */
   .toggle-btn { display: none; }
 
-  /* Logo bar: show close button */
+  /* Logo bar: same as desktop — show full logo + close button */
   .sidebar-logo {
-    min-height: 68px;
-    padding: 0 12px;
+    min-height: 64px;
+    padding: 0 14px;
     gap: 8px;
   }
   .sb-mobile-close {

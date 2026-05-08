@@ -8,6 +8,44 @@ const BASE_KEYWORDS =
 const BASE_URL = "https://jedmee.com";
 
 /**
+ * injectJsonLd — inject a page-specific JSON-LD <script> block into <head>
+ * and remove it on unmount. Call inside a useEffect or use the useJsonLd hook.
+ *
+ * @param {object|object[]} schema  — one or more schema.org objects
+ * @returns {() => void}            — cleanup function that removes the tag
+ */
+export function injectJsonLd(schema) {
+  const el = document.createElement("script");
+  el.setAttribute("type", "application/ld+json");
+  el.setAttribute("data-page-schema", "true");
+  el.textContent = JSON.stringify(Array.isArray(schema) ? schema : [schema]);
+  document.head.appendChild(el);
+  return () => { if (el.parentNode) el.parentNode.removeChild(el); };
+}
+
+/**
+ * useJsonLd — React hook that injects page-specific JSON-LD on mount
+ * and removes it on unmount.
+ *
+ * @param {object|object[]} schema — one or more schema.org objects
+ *
+ * @example
+ *   useJsonLd({
+ *     "@context": "https://schema.org",
+ *     "@type": "WebPage",
+ *     "name": "About JedMee",
+ *     "url": "https://jedmee.com/about"
+ *   });
+ */
+export function useJsonLd(schema) {
+  useEffect(() => {
+    if (!schema) return;
+    return injectJsonLd(schema);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+}
+
+/**
  * useSeoMeta — comprehensive SEO hook (no react-helmet dependency).
  *
  * Updates document.title, meta description, meta keywords, canonical,

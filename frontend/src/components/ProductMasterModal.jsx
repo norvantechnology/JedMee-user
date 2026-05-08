@@ -402,7 +402,7 @@ export default function ProductMasterModal({
                     value={form.name}
                     readOnly={readOnly}
                     onBlur={() => setTouched((t) => ({ ...t, name: true }))}
-                    onChange={(e) => setField("name", e.target.value)}
+                    onChange={(e) => { setNameError(""); setField("name", e.target.value); }}
                   />
                   {nameError ? <div className="mfzErr">{nameError}</div> : null}
                   {!nameError && displayErrors.name ? <div className="mfzErr">{displayErrors.name}</div> : null}
@@ -413,31 +413,27 @@ export default function ProductMasterModal({
                   <input className="mfzInput" value={form.drugName} readOnly={readOnly} onChange={(e) => setField("drugName", e.target.value)} />
                 </div>
 
-                {isRetailer ? (
-                  <>
-                    <div className="mfzField mfz6">
-                      <div className="mfzLabel">HSN / Tax Code</div>
-                      <input
-                        className="mfzInput"
-                        value={form.hsnCode}
-                        readOnly={readOnly}
-                        onChange={(e) => setField("hsnCode", e.target.value)}
-                        placeholder="e.g. 3004"
-                      />
-                      <div className="mfzHelp">Product tax classification code.</div>
-                    </div>
-                    <div className="mfzField mfz6">
-                      <div className="mfzLabel">Rack or shelf</div>
-                      <input
-                        className="mfzInput"
-                        value={form.rackLocation}
-                        readOnly={readOnly}
-                        onChange={(e) => setField("rackLocation", e.target.value)}
-                        placeholder="e.g. A-3, cold chain"
-                      />
-                    </div>
-                  </>
-                ) : null}
+                <div className="mfzField mfz6">
+                  <div className="mfzLabel">HSN / Tax Code</div>
+                  <input
+                    className="mfzInput"
+                    value={form.hsnCode}
+                    readOnly={readOnly}
+                    onChange={(e) => setField("hsnCode", e.target.value)}
+                    placeholder="e.g. 3004"
+                  />
+                  <div className="mfzHelp">Product tax classification code.</div>
+                </div>
+                <div className="mfzField mfz6">
+                  <div className="mfzLabel">Rack or shelf</div>
+                  <input
+                    className="mfzInput"
+                    value={form.rackLocation}
+                    readOnly={readOnly}
+                    onChange={(e) => setField("rackLocation", e.target.value)}
+                    placeholder="e.g. A-3, cold chain"
+                  />
+                </div>
               </div>
             </div>
           </section>
@@ -600,6 +596,7 @@ export default function ProductMasterModal({
                       ["stockable", "Stockable", "Track inventory."],
                       ["isDiscountEnabled", "Allow discounts", "Retail and net discounts."],
                       ["isControl", "Controlled (Rx)", "Prescription required in sales."],
+                      ["isOtc", "OTC", "Sold without prescription when allowed."],
                       ["isHalfScheme", "Half scheme", "Free units at 50% taxable value."]
                     ]
                 ).map(([k, label, tip]) => (

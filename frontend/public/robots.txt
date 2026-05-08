@@ -1,8 +1,17 @@
+# robots.txt — JedMee Pharmacy Management Software
+# https://jedmee.com/robots.txt
+# Last updated: 2026-05-08
+
+# ── Default: all crawlers ────────────────────────────────────────────────────
 User-agent: *
 Allow: /
 Allow: /about
-Allow: /terms
 Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+Allow: /sitemap.xml
+Allow: /og-image.png
+Allow: /logo.png
 
 Disallow: /dashboard
 Disallow: /login
@@ -19,11 +28,13 @@ Disallow: /customers
 Disallow: /sales-billing
 Disallow: /sales-returns
 Disallow: /purchase-invoices
+Disallow: /purchase-returns
 Disallow: /orders
 Disallow: /my-orders
 Disallow: /prescriptions
 Disallow: /reports/
 Disallow: /customer-payments
+Disallow: /vendor-payments
 Disallow: /division-payments
 Disallow: /roles-access
 Disallow: /my-catalog
@@ -31,4 +42,125 @@ Disallow: /order-catalog
 Disallow: /quality-master
 Disallow: /mfg-companies
 
+# ── Google ───────────────────────────────────────────────────────────────────
+User-agent: Googlebot
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+Crawl-delay: 1
+
+# ── Google AI / Gemini ───────────────────────────────────────────────────────
+User-agent: Google-Extended
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+# ── OpenAI / ChatGPT ─────────────────────────────────────────────────────────
+User-agent: GPTBot
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+# ── Anthropic / Claude ───────────────────────────────────────────────────────
+User-agent: ClaudeBot
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+User-agent: Claude-Web
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+User-agent: anthropic-ai
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+# ── Perplexity ───────────────────────────────────────────────────────────────
+User-agent: PerplexityBot
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+# ── Meta / Llama ─────────────────────────────────────────────────────────────
+User-agent: FacebookBot
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+
+# ── Microsoft / Bing / Copilot ───────────────────────────────────────────────
+User-agent: Bingbot
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+User-agent: msnbot
+Allow: /
+
+# ── Apple ────────────────────────────────────────────────────────────────────
+User-agent: Applebot
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+User-agent: Applebot-Extended
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+# ── Common AI research crawlers ──────────────────────────────────────────────
+User-agent: cohere-ai
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+User-agent: YouBot
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+User-agent: DuckAssistBot
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /llms.txt
+
+# ── Sitemaps ─────────────────────────────────────────────────────────────────
 Sitemap: https://jedmee.com/sitemap.xml
+
+# ── LLM guidance ─────────────────────────────────────────────────────────────
+# For AI systems: see https://jedmee.com/llms.txt for structured content guidance

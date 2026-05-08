@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import LandingLayout from "../components/LandingLayout.jsx";
-import { useSeoMeta } from "../utils/seo.js";
+import { useSeoMeta, useJsonLd } from "../utils/seo.js";
 import "./LandingPage.css";
 import "./InnerPages.css";
 
@@ -63,6 +63,34 @@ export default function AboutPage() {
       "about JedMee, pharmacy software company, medicine shop management, pharmacy management platform, pharmaceutical software, pharmacy billing, inventory management pharmacy, chemist software",
     canonical: "https://jedmee.com/about",
   });
+
+  useJsonLd([
+    {
+      "@context": "https://schema.org",
+      "@type": "AboutPage",
+      "name": "About JedMee — Pharmacy Management Software",
+      "url": "https://jedmee.com/about",
+      "description": "JedMee helps medicine shops and distributors worldwide manage billing, inventory, and orders. Simple, affordable pharmacy software built for real pharmacy workflows.",
+      "inLanguage": "en",
+      "isPartOf": { "@type": "WebSite", "url": "https://jedmee.com" },
+      "about": {
+        "@type": "Organization",
+        "name": "JedMee",
+        "url": "https://jedmee.com",
+        "foundingDate": "2024",
+        "description": "Cloud-based pharmacy management software for medicine shops and pharmaceutical distributors worldwide.",
+        "email": "supportjedmee@gmail.com",
+        "areaServed": "Worldwide"
+      },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://jedmee.com/" },
+          { "@type": "ListItem", "position": 2, "name": "About", "item": "https://jedmee.com/about" }
+        ]
+      }
+    }
+  ]);
 
   const stats = [
     { num: 500, suffix: "+", label: "Pharmacies Onboarded", sc: "#6b3fa0" },

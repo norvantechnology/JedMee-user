@@ -79,6 +79,7 @@ async function handler(event) {
             actorId
           ]
         );
+        lowStockBatches.add(String(it.batch_id));
       }
 
       await q(

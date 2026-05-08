@@ -449,6 +449,7 @@
   .hdr {
     padding: 6px 8px;
     min-height: 50px;
+    z-index: 210;   /* above sidebar drawer (195) and overlay (190) */
   }
 
   .hdrCenter {

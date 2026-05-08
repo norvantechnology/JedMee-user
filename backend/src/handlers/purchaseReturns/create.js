@@ -21,6 +21,14 @@ async function handler(event) {
   const items = Array.isArray(body.items) ? body.items : [];
   if (!purchaseInvoiceId) return fail(400, "VALIDATION_ERROR", "purchaseInvoiceId is required.");
   if (!returnDate) return fail(400, "VALIDATION_ERROR", "returnDate is required.");
+  // Validate returnDate is not in the future
+  const todayStr = new Date().toISOString().slice(0, 10);
+  if (returnDate > todayStr) return fail(400, "VALIDATION_ERROR", "Return date cannot be in the future.");
+  // Validate returnReason enum
+  const VALID_RETURN_REASONS = ["EXPIRED", "DAMAGED", "WRONG_PRODUCT", "EXCESS", "QUALITY_ISSUE", "OTHER"];
+  if (!VALID_RETURN_REASONS.includes(returnReason)) {
+    return fail(400, "VALIDATION_ERROR", `Invalid return reason. Must be one of: ${VALID_RETURN_REASONS.join(", ")}.`);
+  }
   if (!items.length) return fail(400, "VALIDATION_ERROR", "At least one return item is required.");
 
   try {

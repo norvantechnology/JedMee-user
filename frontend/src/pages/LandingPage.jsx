@@ -3,7 +3,7 @@ import { getCurrencySymbol } from "../utils/currency.js";
 import { useNavigate, Link } from "react-router-dom";
 import { readAuth } from "../services/authStorage.js";
 import { getPublicPlans } from "../services/plansService.js";
-import { useSeoMeta } from "../utils/seo.js";
+import { useSeoMeta, useJsonLd } from "../utils/seo.js";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./LandingPage.css";
@@ -1016,6 +1016,34 @@ export default function LandingPage() {
       "pharmacy management software, pharmacy software, pharmacy billing software, pharmacy management system, medical store software, medicine shop software, free pharmacy software, cloud pharmacy software, pharmacy inventory management, pharmacy stock management, pharmacy POS, drug store software, chemist software, pharmacy invoicing software, wholesale pharmacy software",
     canonical: "https://jedmee.com/",
   });
+
+  useJsonLd([
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "JedMee — Pharmacy Management Software",
+      "url": "https://jedmee.com/",
+      "description": "Cloud-based pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial.",
+      "inLanguage": "en",
+      "isPartOf": { "@type": "WebSite", "url": "https://jedmee.com" },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://jedmee.com/" }]
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Can both medicine shops and distributors use JedMee?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Medicine shops get billing, stock, and order tools. Distributors get a product catalog, order management, and dispatch tracking." } },
+        { "@type": "Question", "name": "Does JedMee handle tax billing for my country?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. JedMee creates fully tax-compliant invoices automatically. Set the tax rate per product and the system calculates the tax for you. It supports GST, VAT, Sales Tax, and other tax systems." } },
+        { "@type": "Question", "name": "How does expiry tracking work?", "acceptedAnswer": { "@type": "Answer", "text": "Each medicine can have multiple batches with expiry dates. JedMee alerts you before any batch expires so you can act in time." } },
+        { "@type": "Question", "name": "Can I add my existing medicines and data?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Import medicines, batches, customers, and suppliers from a CSV file — no manual entry needed." } },
+        { "@type": "Question", "name": "How do retailers order from wholesalers?", "acceptedAnswer": { "@type": "Answer", "text": "Wholesalers add medicines to an online catalog. Retailers browse, add to cart, and place orders. The wholesaler confirms inside JedMee." } },
+        { "@type": "Question", "name": "Is my business data safe?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. All data is encrypted and stored securely. We maintain 99.9% uptime and take regular backups." } }
+      ]
+    }
+  ]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
