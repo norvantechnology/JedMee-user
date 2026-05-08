@@ -95,6 +95,7 @@ export default function OrdersPage() {
   const [rows, setRows]                   = useState([]);
   const [search, setSearch]               = useState("");
   const [statusFilter, setStatusFilter]   = useState("");
+  const [retailerFilter, setRetailerFilter] = useState("");
   const [selected, setSelected]           = useState(null);
   const [detail, setDetail]               = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -135,9 +136,10 @@ export default function OrdersPage() {
       const party = (r.wholesaler_firm_name || r.retailer_firm_name || "").toLowerCase();
       const matchQ = !q || (r.order_number || "").toLowerCase().includes(q) || party.includes(q);
       const matchS = !statusFilter || r.status === statusFilter;
-      return matchQ && matchS;
+      const matchR = isRetailer || !retailerFilter || r.retailer_firm_name === retailerFilter;
+      return matchQ && matchS && matchR;
     });
-  }, [rows, search, statusFilter]);
+  }, [rows, search, statusFilter, retailerFilter, isRetailer]);
 
   /* ── Stat counts ────────────────────────────────────────── */
   const statCounts = useMemo(() => {
@@ -147,6 +149,12 @@ export default function OrdersPage() {
     });
     return c;
   }, [rows]);
+
+  /* ── Unique retailer names for wholesaler filter ─────────── */
+  const retailerOptions = useMemo(() => {
+    if (isRetailer) return [];
+    return [...new Set(rows.map((r) => r.retailer_firm_name).filter(Boolean))].sort();
+  }, [rows, isRetailer]);
 
   /* ── Open detail modal ──────────────────────────────────── */
   async function openView(row) {
@@ -172,6 +180,11 @@ export default function OrdersPage() {
     setSelected(null);
     setDetail(null);
     setDetailLoading(false);
+  }
+
+  /* ── Patch a single row in-place (avoids full list reload) ── */
+  function patchRow(id, updates) {
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...updates } : r)));
   }
 
   /* ── Quick actions ──────────────────────────────────────── */
@@ -204,7 +217,9 @@ export default function OrdersPage() {
         return;
       }
       if (r && r.status >= 200 && r.status < 300 && r.json?.ok) {
-        refresh();
+        const statusMap = { dispatch: "DISPATCHED", reject: "REJECTED", confirm: "DELIVERED" };
+        const newStatus = statusMap[type];
+        if (newStatus) patchRow(row.id, { status: newStatus });
         const successMsg =
           type === "dispatch" ? "Order dispatched." :
           type === "reject"   ? "Order rejected." :
@@ -227,7 +242,7 @@ export default function OrdersPage() {
     try {
       const r = await cancelOrderRetailer(cancelTarget.id, {});
       if (r.status >= 200 && r.status < 300 && r.json?.ok) {
-        refresh();
+        patchRow(cancelTarget.id, { status: "CANCELLED" });
         emitToast({ type: "success", message: `Order ${cancelTarget.order_number} cancelled.` });
         setCancelTarget(null);
         closeView();
@@ -259,8 +274,8 @@ export default function OrdersPage() {
         emitToast({ type: "success", message: "Order accepted." });
         setAcceptNotes("");
         setOverrides({});
+        patchRow(selected.id, { status: "ACCEPTED" });
         closeView();
-        refresh();
         return;
       }
       emitToast({ type: "error", message: parseApiError(r) });
@@ -279,7 +294,6 @@ export default function OrdersPage() {
         setOpenPurchaseModal(false);
         setPurchaseItems([]);
         setSelected(null);
-        refresh();
         emitToast({ type: "success", message: "Purchase invoice created." });
         return;
       }
@@ -367,6 +381,18 @@ export default function OrdersPage() {
               <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
             ))}
           </select>
+          {!isRetailer && retailerOptions.length > 0 && (
+            <select
+              className="opStatusSel"
+              value={retailerFilter}
+              onChange={(e) => setRetailerFilter(e.target.value)}
+            >
+              <option value="">All Retailers</option>
+              {retailerOptions.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* ── Result meta ── */}

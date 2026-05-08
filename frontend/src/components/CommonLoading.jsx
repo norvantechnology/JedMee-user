@@ -1,12 +1,12 @@
 import "./CommonLoading.css";
-import { IconPill } from "./ui/AppIcons.jsx";
+import { IconLoadingRing } from "./ui/AppIcons.jsx";
 
 /**
- * Central loading primitive  3D motion language.
+ * Central loading primitive.
  *
  * Variants:
- *   - "page"   : 3D pill capsule tumbling inside an orbital ring.
- *                Use inside modals and page-level data fetches.
+ *   - "page"   : Clean arc spinner inside a card. Use inside modals and
+ *                page-level data fetches.
  *   - "inline" : 3D coin-flip disc + optional text. Default; flows with text.
  *   - "button" : 3D coin disc sized for buttons. Prefer `InlineButtonProgress`
  *                or `AsyncButton` instead of using this variant directly.
@@ -27,13 +27,9 @@ export default function CommonLoading({
   if (variant === "page") {
     return (
       <div className={cls("cl--page")} role="status" aria-label={ariaText} aria-live="polite">
-        <div className="cl__scene3d" aria-hidden="true">
-          <span className="cl__orbit" />
-          <span className="cl__pill3d">
-            <IconPill />
-          </span>
-          <span className="cl__floor" />
-        </div>
+        <span className="cl__pageSpinner" aria-hidden="true">
+          <IconLoadingRing />
+        </span>
         {text ? <span className="cl__label">{text}</span> : null}
       </div>
     );

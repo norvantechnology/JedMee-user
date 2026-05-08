@@ -23,91 +23,55 @@
 
 /* ── Page / section loader ──────────────────────────────── */
 .cl--page {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: clamp(24px, 5.6vw, 38px) clamp(20px, 5vw, 32px);
+  gap: 14px;
+  padding: clamp(28px, 5.6vw, 42px) clamp(24px, 5vw, 36px);
   border-radius: 16px;
   border: 1px solid var(--cl-border);
   background: var(--cl-surface);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-card) 60%, transparent) inset;
-  overflow: hidden;
 }
 
-/* 3D scene wrapper */
-.cl__scene3d {
-  position: relative;
-  width: clamp(72px, 11vw, 96px);
-  height: clamp(72px, 11vw, 96px);
-  perspective: 520px;
-  transform-style: preserve-3d;
-  display: grid;
-  place-items: center;
+/* Arc spinner wrapper */
+.cl__pageSpinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
 }
 
-/* Tilted orbital ring around the pill (rotates on its own axis) */
-.cl__orbit {
-  position: absolute;
-  inset: 4%;
-  border-radius: 50%;
-  border: 1.5px solid color-mix(in srgb, var(--cl-accent) 38%, transparent);
-  border-top-color: var(--cl-accent);
-  border-right-color: color-mix(in srgb, var(--cl-accent) 70%, transparent);
-  transform: rotateX(68deg) rotateZ(0deg);
-  transform-style: preserve-3d;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cl-accent) 6%, transparent) inset;
-}
-
-.cl__orbit::before {
-  content: "";
-  position: absolute;
-  inset: 14%;
-  border-radius: 50%;
-  border: 1px dashed color-mix(in srgb, var(--cl-accent) 22%, transparent);
-}
-
-/* The pill capsule  uses currentColor; we recolor via accent */
-.cl__pill3d {
-  position: relative;
-  width: 56%;
-  height: 56%;
-  display: grid;
-  place-items: center;
-  color: var(--cl-accent);
-  transform-style: preserve-3d;
-  transform: translateZ(0);
-  filter: drop-shadow(0 8px 14px color-mix(in srgb, var(--cl-accent) 22%, transparent));
-}
-
-.cl__pill3d svg {
-  width: 100%;
-  height: 100%;
+.cl__pageSpinner svg {
+  width: 52px;
+  height: 52px;
   display: block;
+  /* Spin the whole SVG — track is symmetric so only the arc appears to move */
+  animation: clArcSpin 0.9s linear infinite;
   transform-origin: center;
 }
 
-/* Soft floor shadow puddle that breathes with the float */
-.cl__floor {
-  position: absolute;
-  bottom: 6%;
-  left: 50%;
-  width: 58%;
-  height: 8px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center,
-    color-mix(in srgb, var(--cl-accent) 30%, transparent) 0%,
-    transparent 65%);
-  transform: translateX(-50%);
-  filter: blur(2px);
-  z-index: -1;
+/* Track circle — faint ring */
+.cl__pageSpinner .cl__track {
+  fill: none;
+  stroke: color-mix(in srgb, var(--cl-accent) 16%, var(--cl-border));
+  stroke-width: 3.5;
+}
+
+/* Arc — primary color, rounded caps, partial dash */
+.cl__pageSpinner .cl__arc {
+  fill: none;
+  stroke: var(--cl-accent);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 60 80;
 }
 
 .cl__label {
   font-size: clamp(12px, 2.6vw, 13.5px);
-  font-weight: 650;
+  font-weight: 600;
   color: var(--cl-text);
   letter-spacing: 0.01em;
   text-align: center;
@@ -264,14 +228,19 @@
 /* ── Mobile density ────────────────────────────────────── */
 @media (max-width: 720px) {
   .cl--page {
-    gap: 13px;
-    padding: 22px 16px;
+    gap: 12px;
+    padding: 22px 18px;
     border-radius: 14px;
   }
 
-  .cl__scene3d {
-    width: 70px;
-    height: 70px;
+  .cl__pageSpinner {
+    width: 44px;
+    height: 44px;
+  }
+
+  .cl__pageSpinner svg {
+    width: 44px;
+    height: 44px;
   }
 
   .cl__btnSpin {

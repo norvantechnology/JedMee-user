@@ -17,18 +17,13 @@
 
 /* ── Stat pills ─────────────────────────────────────────────── */
 .opStatsScroll {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
   margin-bottom: 18px;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
 }
-.opStatsScroll::-webkit-scrollbar { display: none; }
 
 .opStat {
-  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -38,7 +33,8 @@
   padding: 10px 14px;
   transition: box-shadow 0.15s, border-color 0.15s;
   cursor: pointer;
-  min-width: 110px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .opStat:hover {
   border-color: var(--color-primary);
@@ -1452,7 +1448,9 @@
 @media (max-width: 640px) {
   .opTitle { font-size: 18px; }
 
-  .opStat { padding: 8px 10px; gap: 8px; min-width: 90px; }
+  /* 3 cards per row on small screens */
+  .opStatsScroll { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .opStat { padding: 8px 10px; gap: 8px; }
   .opStatIc { width: 28px; height: 28px; }
   .opStatIc svg { width: 13px; height: 13px; }
   .opStatN { font-size: 16px; }
@@ -1471,6 +1469,11 @@
   .opPartyName { font-size: 14px; }
 
   .opMetaGrid { grid-template-columns: 1fr 1fr; }
+
+  /* 2 cards per row on very small phones */
+  @media (max-width: 380px) {
+    .opStatsScroll { grid-template-columns: repeat(2, 1fr); }
+  }
 
   /* Info grid: stack party card + notes vertically */
   .opInfoGrid { grid-template-columns: 1fr; }
