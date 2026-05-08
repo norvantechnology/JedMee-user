@@ -42,7 +42,9 @@ async function handler(event) {
     const totalR = await query(`SELECT COUNT(*)::int AS c FROM orders WHERE ${wh.join(" AND ")}`, ps);
     const rows = await query(
       `
-      SELECT *
+      SELECT
+        orders.*,
+        (SELECT COUNT(*)::int FROM order_items oi WHERE oi.order_id = orders.id) AS item_count
       FROM orders
       WHERE ${wh.join(" AND ")}
       ORDER BY placed_at DESC

@@ -67,6 +67,7 @@ async function handler(event) {
       `
       SELECT
         o.*,
+        (SELECT COUNT(*)::int FROM order_items oi WHERE oi.order_id = o.id) AS item_count,
         (w.is_blocked = true OR UPPER(COALESCE(w.status, '')) IN ('PENDING', 'REJECTED')) AS wholesaler_unavailable
       FROM orders o
       JOIN app_users w ON w.id = o.wholesaler_account_id
