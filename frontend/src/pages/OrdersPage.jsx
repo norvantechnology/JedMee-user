@@ -1,7 +1,7 @@
-import { fmtMoney, fmtCurrency } from "../utils/format.js";
+import { fmtCurrency } from "../utils/format.js";
 import { useSeoMeta } from "../utils/seo.js";
 import { AppButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AppShell from "../layouts/AppShell.jsx";
 import CommonModal from "../components/CommonModal.jsx";
 import { readAuth } from "../services/authStorage.js";
@@ -32,6 +32,16 @@ import {
   IconOpDelivered,
   IconOpRejected,
   IconOpCancelled,
+  Zap,
+  Package2,
+  Building2,
+  Store,
+  Phone,
+  MapPin,
+  MessageSquare,
+  Check,
+  BadgeCheck,
+  Printer,
 } from "../components/ui/AppIcons.jsx";
 import "../components/MasterModalForm.css";
 import "./OrdersPage.css";
@@ -88,6 +98,7 @@ export default function OrdersPage() {
   const [selected, setSelected]           = useState(null);
   const [detail, setDetail]               = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const printRef = useRef(null);
   const [cancelTarget, setCancelTarget]   = useState(null);
   const [cancelBusy, setCancelBusy]       = useState(false);
   const [rejectReason, setRejectReason]   = useState("");
@@ -278,6 +289,17 @@ export default function OrdersPage() {
     }
   }
 
+  /* ── Print invoice (wholesaler only) ───────────────────────── */
+  function printOrder() {
+    if (!printRef.current) return;
+    const el = printRef.current;
+    el.style.display = "block";
+    // Reset after the print dialog closes (afterprint fires on both Print and Cancel)
+    const cleanup = () => { el.style.display = "none"; };
+    window.addEventListener("afterprint", cleanup, { once: true });
+    window.print();
+  }
+
   const partyKey   = isRetailer ? "wholesaler_firm_name" : "retailer_firm_name";
   const partyLabel = isRetailer ? "Wholesaler" : "Retailer";
 
@@ -370,10 +392,8 @@ export default function OrdersPage() {
         ) : (
           <div className="opList">
             {filteredRows.map((row) => {
-              const cfg = STATUS_CFG[row.status] || {};
               const party = row[partyKey] || "—";
-              const itemCount = row.item_count ?? row.items?.length ?? "—";
-              const amount = fmtMoney(row.total_amount || 0);
+              const itemCount = row.item_count ?? row.total_items ?? row.items?.length ?? null;
               const placedAt = row.placed_at
                 ? new Date(row.placed_at).toLocaleString()
                 : row.created_at
@@ -402,9 +422,9 @@ export default function OrdersPage() {
                       <div className="opCardInfo">
                         <div className="opCardInfoL">Items</div>
                         <div className="opCardInfoV">
-                          {typeof itemCount === "number"
+                          {itemCount !== null
                             ? `${itemCount} item${itemCount !== 1 ? "s" : ""}`
-                            : itemCount}
+                            : "—"}
                         </div>
                       </div>
                       <div className="opCardDiv" aria-hidden="true" />
@@ -426,6 +446,9 @@ export default function OrdersPage() {
                           Cancel
                         </button>
                       )}
+                      {!isRetailer && row.status === "PENDING" && (
+                        <span className="opCardUrgent"><Zap size={12} />Needs Action</span>
+                      )}
                       {!isRetailer && row.status === "ACCEPTED" && (
                         <button
                           type="button"
@@ -433,17 +456,8 @@ export default function OrdersPage() {
                           disabled={actionBusyKey === `dispatch:${row.id}`}
                           onClick={() => quickAction("dispatch", row)}
                         >
+                          <Package2 size={14} />
                           {actionBusyKey === `dispatch:${row.id}` ? "Dispatching…" : "Dispatch"}
-                        </button>
-                      )}
-                      {!isRetailer && row.status === "DISPATCHED" && (
-                        <button
-                          type="button"
-                          className="opBtn opBtn_action"
-                          disabled={actionBusyKey === `confirm:${row.id}`}
-                          onClick={() => quickAction("confirm", row)}
-                        >
-                          {actionBusyKey === `confirm:${row.id}` ? "Confirming…" : "Confirm Delivery"}
                         </button>
                       )}
                     </div>
@@ -464,199 +478,299 @@ export default function OrdersPage() {
         ariaLabel="orders-detail"
         onClose={closeView}
         title={selected?.order_number || "Order Details"}
-        subtitle="Line items, totals & delivery milestones"
+        subtitle={isRetailer ? "Track your order status and delivery" : "Review retailer order and take action"}
         size="lg"
         icon={<IconPurchaseOrder />}
         loading={detailLoading}
         loadingText="Loading order…"
         footer={
           detail ? (
-            <div className="opModalFoot">
-              <AppButton variant="ghost" onClick={closeView}>Close</AppButton>
-              {isRetailer && detail?.order?.status === "PENDING" && (
-                <AppButton variant="danger" onClick={() => { closeView(); setCancelTarget(selected); }}>
-                  Cancel Order
-                </AppButton>
-              )}
-              {!isRetailer && detail?.order?.status === "DELIVERED" && (
-                <AppButton
-                  variant="primary"
-                  disabled={actionBusyKey === `purchase:${selected?.id}`}
-                  onClick={() => quickAction("purchase", selected)}
-                >
-                  Create Purchase Invoice
-                </AppButton>
-              )}
-            </div>
-          ) : null
-        }
-      >
-        {detail && (
-          <div className="opDetail">
-
-            {/* Meta grid */}
-            <div className="opMetaGrid">
-              <div className="opMetaBox">
-                <div className="opMetaLbl">📅 Placed on</div>
-                <div className="opMetaVal">
-                  {detail.order?.placed_at ? new Date(detail.order.placed_at).toLocaleString() : "—"}
-                </div>
-              </div>
-              <div className="opMetaBox">
-                <div className="opMetaLbl">{isRetailer ? "🏭 Wholesaler" : "🏪 Retailer"}</div>
-                <div className="opMetaVal">
-                  {(isRetailer ? detail.order?.wholesaler_firm_name : detail.order?.retailer_firm_name) || "—"}
-                </div>
-              </div>
-              <div className="opMetaBox">
-                <div className="opMetaLbl">📋 Status</div>
-                <div className="opMetaVal"><StatusBadge status={detail.order?.status} /></div>
-              </div>
-              <div className="opMetaBox">
-                <div className="opMetaLbl">💰 Total</div>
-                <div className="opMetaVal opMetaVal_big">
-                  {fmtCurrency(detail.order?.total_amount || 0)}
-                </div>
-              </div>
-            </div>
-
-            {/* Fulfillment track */}
-            <div className="opSecTitle">Delivery Progress</div>
-            <div className="opFulfil">
-              {FULFILLMENT_STEPS.map(({ key, label, getAt }) => {
-                const at = getAt(detail.order);
-                return (
-                  <div key={key} className={`opFulStep${at ? " opFulStep_done" : ""}`}>
-                    <div className="opFulLabel">
-                      <span className={`opFulDot${at ? " opFulDot_done" : ""}`} />
-                      {label}
-                    </div>
-                    <div className={`opFulVal${at ? "" : " opFulVal_pend"}`}>
-                      {at ? new Date(at).toLocaleString() : "Not yet"}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Items list */}
-            <div className="opSecTitle">
-              Order Items
-              <span className="opSecCnt">{detail.items?.length || 0}</span>
-            </div>
-            <div className="opItemsList">
-              {(detail.items || []).map((it) => (
-                <div key={it.id} className="opItemRow">
-                  <div className="opItemLeft">
-                    <div className="opItemName">{it.product_name || "—"}</div>
-                    <div className="opItemMeta">
-                      {it.packing && <span className="opPill opPill_pack">Pack {it.packing}</span>}
-                      <span className="opPill opPill_ord">Ordered: {Number(it.ordered_qty || 0)}</span>
-                      {Number(it.accepted_qty || 0) > 0 && (
-                        <span className="opPill opPill_acc">Accepted: {Number(it.accepted_qty)}</span>
-                      )}
-                      {it.batch_id && (
-                        <span className="opPill opPill_batch" title={String(it.batch_id)}>
-                          Batch: {String(it.batch_id).slice(0, 16)}{String(it.batch_id).length > 16 ? "…" : ""}
-                        </span>
-                      )}
-                      {!isRetailer && (
-                        <span className="opPill opPill_stock">Stock: {Number(it.available_stock || 0)}</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="opItemTotal">{fmtCurrency(it.line_total || 0)}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Wholesaler: accept / reject form */}
-            {!isRetailer && detail?.order?.status === "PENDING" && (
-              <div className="opAcceptBox">
-
-                {/* Section title */}
-                <div className="opSecTitle">Accept Order</div>
-
-                {/* Column headers */}
-                <div className="opAcceptHeader">
-                  <div className="opAcceptHProduct">Product</div>
-                  <div className="opAcceptHField">Accept Qty</div>
-                  <div className="opAcceptHField">Free Qty</div>
-                  <div className="opAcceptHField">Batch ID</div>
-                </div>
-
-                {/* Item rows */}
-                {(detail.items || []).map((it) => (
-                  <div key={it.id} className="opOverrideRow">
-                    <div className="opOverrideName">
-                      {it.product_name}
-                      <span className="opOverrideStock">
-                        Stock: {Number(it.available_stock || 0)}
-                      </span>
-                    </div>
-                    <input
-                      className="mfzInput"
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      value={overrides[it.id]?.accepted_qty ?? it.ordered_qty}
-                      onChange={(e) => setOverride(it.id, "accepted_qty", e.target.value.replace(/[^0-9]/g, ""))}
-                    />
-                    <input
-                      className="mfzInput"
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      value={overrides[it.id]?.free_qty ?? it.free_qty ?? 0}
-                      onChange={(e) => setOverride(it.id, "free_qty", e.target.value.replace(/[^0-9]/g, ""))}
-                    />
-                    <input
-                      className="mfzInput"
-                      placeholder="Optional"
-                      value={overrides[it.id]?.batch_id || ""}
-                      onChange={(e) => setOverride(it.id, "batch_id", e.target.value)}
-                    />
-                  </div>
-                ))}
-
-                {/* Notes + Accept button */}
-                <textarea
-                  className="mfzTextarea"
-                  placeholder="Add a note for the retailer (optional)"
-                  value={acceptNotes}
-                  onChange={(e) => setAcceptNotes(e.target.value)}
-                />
+            !isRetailer && detail?.order?.status === "PENDING" ? (
+              /* ── Wholesaler PENDING: Accept / Reject footer ── */
+              <div className="opDFooter">
                 <AppButton
                   variant="primary"
                   disabled={acceptBusy}
                   onClick={onAcceptSubmit}
-                  style={{ width: "100%", justifyContent: "center" }}
+                  className="opDAcceptBtn"
+                  icon={!acceptBusy ? <Check size={14} /> : undefined}
                 >
-                  {acceptBusy ? <InlineButtonProgress label="Accepting…" /> : "✓ Accept Order"}
+                  {acceptBusy ? <InlineButtonProgress label="Accepting…" /> : "Accept Order"}
                 </AppButton>
+                <div className="opDOrDivider"><span className="opDOrText">or reject</span></div>
+                <div className="opDRejectRow">
+                  <input
+                    className="opDRejectInput"
+                    type="text"
+                    placeholder="Reason for rejection (required)"
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                  />
+                  <AppButton
+                    variant="danger"
+                    disabled={actionBusyKey === `reject:${selected?.id}`}
+                    onClick={() => quickAction("reject", selected)}
+                  >
+                    {actionBusyKey === `reject:${selected?.id}` ? <InlineButtonProgress label="Rejecting…" /> : "Reject"}
+                  </AppButton>
+                </div>
+              </div>
+            ) : (
+              /* ── All other states: standard footer ── */
+              <div className="opModalFoot">
+                <AppButton variant="ghost" onClick={closeView}>Close</AppButton>
+                {!isRetailer && ["ACCEPTED", "DISPATCHED", "DELIVERED"].includes(detail?.order?.status) && (
+                  <AppButton variant="secondary" icon={<Printer size={14} />} onClick={printOrder}>
+                    Print Invoice
+                  </AppButton>
+                )}
+                {isRetailer && detail?.order?.status === "PENDING" && (
+                  <AppButton variant="danger" onClick={() => { closeView(); setCancelTarget(selected); }}>
+                    Cancel Order
+                  </AppButton>
+                )}
+                {isRetailer && detail?.order?.status === "DISPATCHED" && (
+                  <AppButton
+                    variant="primary"
+                    disabled={actionBusyKey === `confirm:${selected?.id}`}
+                    onClick={() => quickAction("confirm", selected)}
+                  >
+                    Confirm Delivery
+                  </AppButton>
+                )}
+                {isRetailer && detail?.order?.status === "DELIVERED" && !detail?.order?.retailer_purchase_invoice_id && (
+                  <AppButton
+                    variant="primary"
+                    disabled={actionBusyKey === `purchase:${selected?.id}`}
+                    onClick={() => quickAction("purchase", selected)}
+                  >
+                    Create Purchase Invoice
+                  </AppButton>
+                )}
+              </div>
+            )
+          ) : null
+        }
+      >
+        {detail && (
+          <div className="opDetail opDetail_sectioned">
 
-                {/* Reject section — separated */}
-                <div className="opRejectBox">
-                  <div className="opRejectLabel">Reject this order</div>
-                  <div className="opRejectRow">
-                    <input
-                      className="mfzInput"
-                      placeholder="Reason for rejection (required)"
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                    />
-                    <AppButton
-                      variant="danger"
-                      disabled={actionBusyKey === `reject:${selected?.id}`}
-                      onClick={() => quickAction("reject", selected)}
-                    >
-                      {actionBusyKey === `reject:${selected?.id}` ? <InlineButtonProgress label="Rejecting…" /> : "Reject"}
-                    </AppButton>
+            {/* ── Section 1: Order Summary + Delivery Progress (inline) ── */}
+            <div className="opDSection">
+              <div className="opDSummaryRow">
+                <div className="opDSummaryBlock">
+                  <div className="opDSummaryLabel">Order Total</div>
+                  <div className="opDSummaryValue">{fmtCurrency(detail.order?.total_amount || 0)}</div>
+                </div>
+                <div className="opDSummaryDiv" />
+                <div className="opDSummaryBlock">
+                  <div className="opDSummaryLabel">Items</div>
+                  <div className="opDSummaryValue opDSummaryValue_items">{detail.items?.length || 0}</div>
+                </div>
+                <div className="opDSummaryDiv" />
+                <div className="opDProgressWrap">
+                  <div className="opDProgressLabel">Delivery Progress</div>
+                  <div className="opDProgressTrack">
+                    {FULFILLMENT_STEPS.map(({ key, label, getAt }, idx) => {
+                      const at = getAt(detail.order);
+                      const isDone = Boolean(at);
+                      const isLast = idx === FULFILLMENT_STEPS.length - 1;
+                      return (
+                        <div key={key} className="opDProgressStep">
+                          <div className="opDProgressStepTop">
+                            <div className={`opDStepCircle${isDone ? " opDStepCircle_done" : ""}`}>
+                              {isDone && (
+                                <svg width="10" height="10" fill="white" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                                </svg>
+                              )}
+                            </div>
+                            {!isLast && <div className={`opDStepLine${isDone ? " opDStepLine_done" : ""}`} />}
+                          </div>
+                          <div className="opDStepLabel">{label}</div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
+              </div>
+            </div>
 
+            {/* ── Section 2: Party card ── */}
+            <div className="opDSection">
+              <div className="opDSecLabel">{partyLabel}</div>
+              <div className="opPartyCard">
+                <div className="opPartyIcon">
+                  {isRetailer ? <Building2 size={18} /> : <Store size={18} />}
+                </div>
+                <div className="opPartyBody">
+                  <div className="opPartyName">
+                    {(isRetailer ? detail.order?.wholesaler_firm_name : detail.order?.retailer_firm_name) || "—"}
+                  </div>
+                  <div className="opPartyMeta">
+                    {!isRetailer && detail.order?.delivery_phone && (
+                      <span className="opPartyChip"><Phone size={11} />{detail.order.delivery_phone}</span>
+                    )}
+                    {!isRetailer && detail.order?.retailer_gst_number && (
+                      <span className="opPartyChip"><BadgeCheck size={11} />GST: {detail.order.retailer_gst_number}</span>
+                    )}
+                    {isRetailer && detail.order?.wholesaler_phone && (
+                      <span className="opPartyChip"><Phone size={11} />{detail.order.wholesaler_phone}</span>
+                    )}
+                    {isRetailer && detail.order?.wholesaler_gst_number && (
+                      <span className="opPartyChip"><BadgeCheck size={11} />GST: {detail.order.wholesaler_gst_number}</span>
+                    )}
+                  </div>
+                  {!isRetailer && (detail.order?.delivery_address || detail.order?.delivery_city || detail.order?.delivery_state) && (
+                    <div className="opPartyAddress">
+                      <MapPin size={11} className="opPartyAddressIcon" />
+                      <div className="opPartyAddressLines">
+                        {detail.order?.delivery_address && (
+                          <div className="opPartyAddressLine">{detail.order.delivery_address}</div>
+                        )}
+                        {(detail.order?.delivery_city || detail.order?.delivery_pincode) && (
+                          <div className="opPartyAddressLine">
+                            {[detail.order.delivery_city, detail.order.delivery_pincode].filter(Boolean).join(" – ")}
+                          </div>
+                        )}
+                        {(detail.order?.delivery_state || detail.order?.delivery_country) && (
+                          <div className="opPartyAddressLine">
+                            {[detail.order.delivery_state, detail.order.delivery_country].filter(Boolean).join(", ")}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── Section 3: Order Items ── */}
+            <div className="opDSection">
+              <div className="opDSecLabel">
+                Order Items{" "}
+                <span className="opDSecCnt">{detail.items?.length || 0}</span>
+              </div>
+              <div className="opItemsList">
+                {(detail.items || []).map((it) => {
+                  const batchLabel = it.batch_number || (it.batch_id ? `#${String(it.batch_id).slice(0, 8)}` : null);
+                  const unitPrice = it.unit_price ?? it.price_per_unit ?? null;
+                  const freeQty = Number(it.free_qty || 0);
+                  const acceptedQty = Number(it.accepted_qty || 0);
+                  const orderedQty = Number(it.ordered_qty || 0);
+                  return (
+                    <div key={it.id} className="opItemRow">
+                      <div className="opItemLeft">
+                        <div className="opItemName">{it.product_name || "—"}</div>
+                        <div className="opItemMeta">
+                          {it.packing && <span className="opPill opPill_pack">Pack {it.packing}</span>}
+                          <span className="opPill opPill_ord">Ordered: {orderedQty}</span>
+                          {acceptedQty > 0 && (
+                            <span className={`opPill ${acceptedQty < orderedQty ? "opPill_partial" : "opPill_acc"}`}>
+                              Accepted: {acceptedQty}{acceptedQty < orderedQty ? ` / ${orderedQty}` : ""}
+                            </span>
+                          )}
+                          {freeQty > 0 && <span className="opPill opPill_free">Free: {freeQty}</span>}
+                          {batchLabel && (
+                            <span className="opPill opPill_batch" title={it.batch_id ? String(it.batch_id) : batchLabel}>
+                              Batch: {batchLabel}
+                            </span>
+                          )}
+                          {!isRetailer && (
+                            <span className="opPill opPill_stock">Stock: {Number(it.available_stock || 0)}</span>
+                          )}
+                          {unitPrice !== null && (
+                            <span className="opPill opPill_price">{fmtCurrency(unitPrice)} / unit</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="opItemTotal">{fmtCurrency(it.line_total || 0)}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── Section 4: Accept Order Form (wholesaler PENDING only) ── */}
+            {!isRetailer && detail?.order?.status === "PENDING" && (
+              <div className="opDSection opDSection_last">
+                <div className="opDSecLabel">Accept Order</div>
+                <table className="opDAcceptTable">
+                  <thead>
+                    <tr>
+                      <th>Product · Stock</th>
+                      <th>Accept</th>
+                      <th>Free</th>
+                      <th>Batch</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(detail.items || []).map((it) => (
+                      <tr key={it.id}>
+                        <td>
+                          <div className="opDProdCellName">{it.product_name}</div>
+                          <div className="opDProdCellStock">Stock: <span>{Number(it.available_stock || 0)}</span></div>
+                        </td>
+                        <td>
+                          <input
+                            className="opDNumInput"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={overrides[it.id]?.accepted_qty ?? it.ordered_qty}
+                            onChange={(e) => setOverride(it.id, "accepted_qty", e.target.value.replace(/[^0-9]/g, ""))}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            className="opDNumInput"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            value={overrides[it.id]?.free_qty ?? it.free_qty ?? 0}
+                            onChange={(e) => setOverride(it.id, "free_qty", e.target.value.replace(/[^0-9]/g, ""))}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            className="opDBatchInput"
+                            placeholder="Optional"
+                            value={overrides[it.id]?.batch_id || ""}
+                            onChange={(e) => setOverride(it.id, "batch_id", e.target.value)}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                <textarea
+                  className="opDNoteInput"
+                  placeholder="Note for retailer (optional)…"
+                  value={acceptNotes}
+                  onChange={(e) => setAcceptNotes(e.target.value)}
+                />
               </div>
             )}
+
+            {/* ── Section 5: Notes (if any) ── */}
+            {(detail.order?.retailer_notes || detail.order?.wholesaler_notes) && (
+              <div className="opDSection opDSection_last">
+                <div className="opDSecLabel">Notes</div>
+                {detail.order?.retailer_notes && (
+                  <div className="opNoteBox opNoteBox_retailer">
+                    <div className="opNoteLbl"><MessageSquare size={11} />Retailer Note</div>
+                    <div className="opNoteText">{detail.order.retailer_notes}</div>
+                  </div>
+                )}
+                {detail.order?.wholesaler_notes && (
+                  <div className="opNoteBox opNoteBox_wholesaler" style={{ marginTop: detail.order?.retailer_notes ? "8px" : 0 }}>
+                    <div className="opNoteLbl"><MessageSquare size={11} />Wholesaler Note</div>
+                    <div className="opNoteText">{detail.order.wholesaler_notes}</div>
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         )}
       </CommonModal>
@@ -732,6 +846,160 @@ export default function OrdersPage() {
           })}
         </div>
       </CommonModal>
+
+      {/* ══════════════════════════════════════════════════════
+          PRINT INVOICE (hidden; shown only via @media print)
+      ══════════════════════════════════════════════════════ */}
+      <div ref={printRef} className="opPrintInvoice" style={{ display: "none" }} aria-hidden="true">
+        {detail && !isRetailer && (
+          <>
+            {/* ── Header: firm info left · INVOICE label right ── */}
+            <div className="opPrintHeader">
+              <div className="opPrintHeaderLeft">
+                <div className="opPrintBizName">{auth?.user?.firm_name || "Wholesaler"}</div>
+                {auth?.user?.address && <div className="opPrintBizMeta">{auth.user.address}</div>}
+                {auth?.user?.gst_number && <div className="opPrintBizMeta">GSTIN: {auth.user.gst_number}</div>}
+                {auth?.user?.phone_number && <div className="opPrintBizMeta">Ph: {auth.user.phone_number}</div>}
+              </div>
+              <div className="opPrintHeaderRight">
+                <div className="opPrintInvoiceLabel">INVOICE</div>
+              </div>
+            </div>
+
+            <div className="opPrintDivider" />
+
+            {/* ── Bill To (left) + Invoice Details (right) ── */}
+            <div className="opPrintBillRow">
+              <div className="opPrintBillTo">
+                <div className="opPrintBillLabel">BILL TO</div>
+                <div className="opPrintBillName">{detail.order?.retailer_firm_name || "—"}</div>
+                {detail.order?.delivery_phone && (
+                  <div className="opPrintBillLine">
+                    <span className="opPrintBillKey">Ph:</span> {detail.order.delivery_phone}
+                  </div>
+                )}
+                {detail.order?.retailer_gst_number && (
+                  <div className="opPrintBillLine">
+                    <span className="opPrintBillKey">GSTIN:</span> {detail.order.retailer_gst_number}
+                  </div>
+                )}
+                {detail.order?.delivery_address && (
+                  <div className="opPrintBillLine">{detail.order.delivery_address}</div>
+                )}
+                {(detail.order?.delivery_city || detail.order?.delivery_pincode) && (
+                  <div className="opPrintBillLine">
+                    {[detail.order.delivery_city, detail.order.delivery_pincode].filter(Boolean).join(" – ")}
+                  </div>
+                )}
+                {(detail.order?.delivery_state || detail.order?.delivery_country) && (
+                  <div className="opPrintBillLine">
+                    {[detail.order.delivery_state, detail.order.delivery_country].filter(Boolean).join(", ")}
+                  </div>
+                )}
+              </div>
+              <div className="opPrintInvoiceBox">
+                <div className="opPrintBillLabel">INVOICE DETAILS</div>
+                <div className="opPrintInvoiceRow">
+                  <span className="opPrintInvoiceKey">Order No</span>
+                  <span className="opPrintInvoiceVal">{detail.order?.order_number || "—"}</span>
+                </div>
+                <div className="opPrintInvoiceRow">
+                  <span className="opPrintInvoiceKey">Date</span>
+                  <span className="opPrintInvoiceVal">
+                    {detail.order?.placed_at ? new Date(detail.order.placed_at).toLocaleDateString() : "—"}
+                  </span>
+                </div>
+                <div className="opPrintInvoiceRow">
+                  <span className="opPrintInvoiceKey">Status</span>
+                  <span className="opPrintInvoiceVal opPrintInvoiceVal_status">{detail.order?.status || "—"}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="opPrintDivider" />
+
+            {/* ── Items table ── */}
+            <table className="opPrintTable">
+              <thead>
+                <tr>
+                  <th className="opPrintTh opPrintThProduct">Product</th>
+                  <th className="opPrintTh opPrintThNum">Qty</th>
+                  <th className="opPrintTh opPrintThNum">Free</th>
+                  <th className="opPrintTh opPrintThNum">Rate</th>
+                  <th className="opPrintTh opPrintThNum">Disc%</th>
+                  <th className="opPrintTh opPrintThNum">GST%</th>
+                  <th className="opPrintTh opPrintThNum opPrintThRight">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(detail.items || []).map((it) => (
+                  <tr key={it.id} className="opPrintTr">
+                    <td className="opPrintTd">
+                      <div className="opPrintProdName">{it.product_name}</div>
+                      {it.packing && <div className="opPrintProdMeta">Pack: {it.packing}</div>}
+                      {it.batch_no && <div className="opPrintProdMeta">Batch: {it.batch_no}</div>}
+                    </td>
+                    <td className="opPrintTd opPrintTdNum">{it.accepted_qty ?? it.ordered_qty}</td>
+                    <td className="opPrintTd opPrintTdNum">{it.free_qty || 0}</td>
+                    <td className="opPrintTd opPrintTdNum">{fmtCurrency(it.unit_price || 0)}</td>
+                    <td className="opPrintTd opPrintTdNum">{Number(it.discount_percent || 0).toFixed(1)}%</td>
+                    <td className="opPrintTd opPrintTdNum">{Number(it.gst_percent || 0).toFixed(1)}%</td>
+                    <td className="opPrintTd opPrintTdNum opPrintTdRight">{fmtCurrency(it.line_total || 0)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            <div className="opPrintDivider" />
+
+            {/* ── Totals ── */}
+            <div className="opPrintTotals">
+              <div className="opPrintTotalsBox">
+                {Number(detail.order?.total_discount || 0) > 0 && (
+                  <div className="opPrintTotalRow">
+                    <span className="opPrintTotalLabel">Subtotal</span>
+                    <span className="opPrintTotalValue">{fmtCurrency(detail.order?.subtotal || 0)}</span>
+                  </div>
+                )}
+                {Number(detail.order?.total_discount || 0) > 0 && (
+                  <div className="opPrintTotalRow">
+                    <span className="opPrintTotalLabel">Discount</span>
+                    <span className="opPrintTotalValue">− {fmtCurrency(detail.order?.total_discount || 0)}</span>
+                  </div>
+                )}
+                {Number(detail.order?.total_gst || 0) > 0 && (
+                  <div className="opPrintTotalRow">
+                    <span className="opPrintTotalLabel">GST</span>
+                    <span className="opPrintTotalValue">{fmtCurrency(detail.order?.total_gst || 0)}</span>
+                  </div>
+                )}
+                <div className="opPrintTotalRow opPrintGrand">
+                  <span className="opPrintTotalLabel">Grand Total</span>
+                  <span className="opPrintTotalValue">{fmtCurrency(detail.order?.total_amount || 0)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Notes ── */}
+            {(detail.order?.retailer_notes || detail.order?.wholesaler_notes) && (
+              <div className="opPrintNotes">
+                {detail.order?.retailer_notes && (
+                  <div>
+                    <span className="opPrintNotesLabel">Retailer Note:</span> {detail.order.retailer_notes}
+                  </div>
+                )}
+                {detail.order?.wholesaler_notes && (
+                  <div>
+                    <span className="opPrintNotesLabel">Note:</span> {detail.order.wholesaler_notes}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="opPrintFooter">Thank you for your business.</div>
+          </>
+        )}
+      </div>
 
     </AppShell>
   );

@@ -31,6 +31,9 @@ export async function listMyOrders(params) {
 export async function listIncomingOrders(params) {
   return await apiGet("/orders/incoming", { params });
 }
+export async function getPendingOrderCount() {
+  return await apiGet("/orders/incoming", { toast: "none", params: { status: "PENDING", limit: 1, page: 1 } });
+}
 export async function getOrderById(id) {
   return await apiGet(`/orders/${encodeURIComponent(String(id))}`);
 }

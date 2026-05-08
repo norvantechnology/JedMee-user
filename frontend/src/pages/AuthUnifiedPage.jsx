@@ -182,7 +182,7 @@ export default function AuthUnifiedPage() {
   const [loginRole, setLoginRole] = useState("WHOLESALER");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [loginRemember, setLoginRemember] = useState(false);
+  const [loginRemember, setLoginRemember] = useState(true);
   const [loginPwVisible, setLoginPwVisible] = useState(false);
   const [loginBusy, setLoginBusy] = useState(false);
 

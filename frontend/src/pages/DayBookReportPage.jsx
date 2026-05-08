@@ -18,7 +18,8 @@ import {
   IconPayment,
   IconWallet,
   IconReceipt,
-  IconTrendUp
+  IconTrendUp,
+  AlertTriangle,
 } from "../components/ui/AppIcons.jsx";
 import "./DayBookReportPage.css";
 
@@ -280,7 +281,8 @@ export default function DayBookReportPage() {
               </div>
               {closingNeg && (
                 <div className="dbCashWarning">
-                  ⚠ Closing cash is negative — cash paid out exceeds cash received today.
+                  <AlertTriangle size={14} aria-hidden="true" />
+                  Closing cash is negative — cash paid out exceeds cash received today.
                 </div>
               )}
             </div>

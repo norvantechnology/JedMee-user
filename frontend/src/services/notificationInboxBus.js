@@ -3,6 +3,8 @@
  * browser tab can refresh the bell count immediately by dispatching this event after
  * the mutating API returns successfully  no full page refresh.
  */
+import { requestOrderBadgeRefresh } from "./orderBadgeBus.js";
+
 const EVENT = "medico-notification-inbox-refresh";
 
 /**
@@ -11,6 +13,9 @@ const EVENT = "medico-notification-inbox-refresh";
 export function requestNotificationInboxRefresh(detail = {}) {
   try {
     window.dispatchEvent(new CustomEvent(EVENT, { detail }));
+    // Also refresh the order badge whenever notifications change (a new order
+    // notification may have arrived).
+    requestOrderBadgeRefresh();
   } catch {
     // ignore (non-browser tests)
   }
@@ -63,6 +68,11 @@ export function shouldRefreshNotificationInboxFromRequest(method, requestUrl) {
   if (m === "PUT" || m === "PATCH") {
     if (/\/api\/product-batches\/[^/]+$/.test(p)) return true;
     if (/\/products\/[^/]+$/.test(p)) return true;
+  }
+
+  // Order status changes (accept, reject, dispatch, cancel, confirm-delivery)
+  if (m === "POST") {
+    if (/\/orders\/[^/]+\/(accept|reject|dispatch|cancel|cancel-by-wholesaler|confirm-delivery)$/.test(p)) return true;
   }
 
   return false;

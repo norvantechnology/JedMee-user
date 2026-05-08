@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page Not Found — JedMee</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/webp" href="/favicon-192.webp" />
+    <link rel="icon" type="image/png" href="/favicon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --brand: #6b3fa0;
+        --brand-light: #8b5cf6;
+        --bg: #0f0a1a;
+        --surface: #1a1030;
+        --text: #f1f0f5;
+        --muted: #9b8db8;
+        --border: rgba(107, 63, 160, 0.25);
+      }
+
+      html, body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 24px;
+        text-align: center;
+      }
+
+      .logo-wrap {
+        margin-bottom: 40px;
+      }
+
+      .logo-wrap img {
+        height: 40px;
+        width: auto;
+      }
+
+      .code {
+        font-size: clamp(80px, 18vw, 140px);
+        font-weight: 700;
+        line-height: 1;
+        background: linear-gradient(135deg, var(--brand-light) 0%, var(--brand) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -4px;
+        margin-bottom: 16px;
+        user-select: none;
+      }
+
+      h1 {
+        font-size: clamp(20px, 4vw, 28px);
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 12px;
+      }
+
+      p {
+        font-size: 15px;
+        color: var(--muted);
+        max-width: 400px;
+        line-height: 1.6;
+        margin-bottom: 36px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 22px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity 0.15s, transform 0.15s;
+        border: none;
+      }
+
+      .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+      .btn:active { transform: translateY(0); }
+
+      .btn-primary {
+        background: var(--brand);
+        color: #fff;
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border);
+      }
+
+      .divider {
+        width: 48px;
+        height: 3px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, var(--brand-light), var(--brand));
+        margin: 0 auto 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="logo-wrap">
+      <picture>
+        <source srcset="/logo.webp" type="image/webp" />
+        <img src="/logo.png" alt="JedMee" height="40" />
+      </picture>
+    </div>
+
+    <div class="code" aria-hidden="true">404</div>
+    <div class="divider"></div>
+
+    <h1>Page not found</h1>
+    <p>The page you're looking for doesn't exist or may have been moved. Head back to the dashboard or the home page.</p>
+
+    <div class="actions">
+      <a href="/" class="btn btn-primary">Go to home</a>
+      <button class="btn btn-ghost" onclick="history.back()">Go back</button>
+    </div>
+  </body>
+</html>

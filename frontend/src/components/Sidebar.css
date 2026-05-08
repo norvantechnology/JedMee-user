@@ -57,7 +57,14 @@
   transition: width var(--tr);
   overflow: hidden;
 }
-.sidebar.collapsed { width: var(--sidebar-collapsed); min-width: var(--sidebar-collapsed); }
+/* After the collapse animation finishes, allow overflow so tooltips can escape */
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed);
+  min-width: var(--sidebar-collapsed);
+  overflow: visible;
+  /* Delay overflow:visible until after the width transition (0.18s) completes */
+  transition: width var(--tr), overflow 0s 0.18s;
+}
 
 /* ── Logo ── */
 .sidebar-logo {
@@ -109,6 +116,7 @@
   flex-shrink: 0;
 }
 
+.sidebar-logo-full { display: contents; }
 .sidebar-logo-img {
   width: 96px;
   height: auto;
@@ -116,6 +124,16 @@
   display: block;
   filter: brightness(0) invert(1);
   transition: width var(--tr), opacity var(--tr);
+}
+
+/* Favicon icon — shown only when sidebar is collapsed */
+.sidebar-logo-favicon { display: none; }
+.sidebar-logo-favicon-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+  border-radius: 6px;
 }
 
 /* Branded tagline below logo */
@@ -137,7 +155,8 @@
 .logo-text { display: none; }
 
 /* Collapsed state */
-.sidebar.collapsed .sidebar-logo-img { width: 32px; }
+.sidebar.collapsed .sidebar-logo-full { display: none; }
+.sidebar.collapsed .sidebar-logo-favicon { display: contents; }
 .sidebar.collapsed .sidebar-logo-tagline { display: none; }
 .sidebar.collapsed .sidebar-logo { min-height: 60px; justify-content: center; padding: 0 8px; }
 .sidebar.collapsed .sidebar-logo-inner { align-items: center; }
@@ -172,6 +191,8 @@
   scrollbar-width: none;
   position: relative;
 }
+/* When collapsed, allow overflow so tooltips can escape the scroll container */
+.sidebar.collapsed .nav-scroll { overflow: visible; }
 .nav-scroll::-webkit-scrollbar { display: none; }
 
 /* Top-of-scroll shadow fade — fades in when scrolled, invisible at top */
@@ -289,6 +310,25 @@
 .nav-label { font-size: 14.5px; font-weight: 650; flex: 1; overflow: hidden; text-overflow: ellipsis; opacity: 1; transition: opacity var(--tr); }
 .sidebar.collapsed .nav-label { opacity: 0; width: 0; }
 
+/* Pending-order badge on sidebar nav items */
+.nav-badge {
+  flex-shrink: 0;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  letter-spacing: 0;
+  margin-left: 4px;
+  transition: opacity var(--tr);
+}
+.sidebar.collapsed .nav-badge { opacity: 0; width: 0; min-width: 0; padding: 0; overflow: hidden; }
+
 /* Subtle "3D" treatment (no size changes) */
 .nav-link:hover .nav-icon {
   background: radial-gradient(120% 120% at 30% 25%, color-mix(in srgb, var(--brand-lt) 24%, transparent), transparent 65%);
@@ -321,26 +361,53 @@
 .nav-link.nav-link_kbd { background: color-mix(in srgb, var(--brand) 18%, transparent); color: var(--text-primary); border-color: color-mix(in srgb, var(--brand-lt) 35%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand) 22%, transparent); }
 
 /* ── Tooltip for collapsed state ── */
+.nav-item { position: relative; }
+
 .nav-item .nav-tooltip {
   position: absolute;
-  left: calc(100% + 10px);
+  left: calc(100% + 12px);
   top: 50%;
   transform: translateY(-50%);
-  background: var(--nav-surface);
+  background: color-mix(in srgb, var(--nav-surface) 96%, white);
   color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 500;
-  padding: 5px 10px;
-  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
   white-space: nowrap;
   pointer-events: none;
   opacity: 0;
   border: 1px solid var(--nav-border);
-  box-shadow: var(--shadow-pop);
-  z-index: 300;
-  transition: opacity .12s ease;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-text) 28%, transparent);
+  z-index: 9999;
+  transition: opacity .14s ease, transform .14s ease;
+  transform: translateY(-50%) translateX(-4px);
 }
-.sidebar.collapsed .nav-item:hover .nav-tooltip { opacity: 1; }
+
+/* Arrow caret pointing left */
+.nav-item .nav-tooltip::before {
+  content: "";
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: var(--nav-border);
+}
+.nav-item .nav-tooltip::after {
+  content: "";
+  position: absolute;
+  right: calc(100% - 1px);
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: color-mix(in srgb, var(--nav-surface) 96%, white);
+}
+
+.sidebar.collapsed .nav-item:hover .nav-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
 
 /* ── Sub-menu ── */
 .sub-menu { overflow: hidden; max-height: 0; transition: max-height .28s cubic-bezier(.4,0,.2,1); }

@@ -34,9 +34,13 @@
   white-space: nowrap;
 }
 .vlBtnIcon {
-  font-size: 14px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
 }
+.vlBtnIcon svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.8; }
 
 /* ── Summary stats bar ──────────────────────────────────────────────────── */
 .vlStats {
@@ -122,10 +126,18 @@
   text-align: center;
 }
 .vlEmptyIcon {
-  font-size: 40px;
-  margin-bottom: 12px;
-  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  margin-bottom: 14px;
+  color: var(--color-text-3);
 }
+.vlEmptyIcon svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 1.5; }
 .vlEmptyTitle {
   margin: 0 0 6px;
   font-size: 15px;

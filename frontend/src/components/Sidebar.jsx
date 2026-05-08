@@ -2,6 +2,8 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { clearAuth, onAuthChanged, readAuth } from "../services/authStorage.js";
 import { logout } from "../services/authService.js";
+import { getPendingOrderCount } from "../services/orderService.js";
+import { subscribeOrderBadgeRefresh } from "../services/orderBadgeBus.js";
 import { APP_DISPLAY_NAME, sidebarNavScrollStorageKey } from "../constants/brand.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
@@ -66,6 +68,7 @@ export default function Sidebar({
 }) {
   const { taxLabel } = useLocale();
   const [authTick, setAuthTick] = useState(0);
+  const [pendingOrderCount, setPendingOrderCount] = useState(0);
   const auth = readAuth();
   const access = auth?.access || null;
   const isRetailer = isRetailerAuth(auth);
@@ -89,6 +92,23 @@ export default function Sidebar({
   useEffect(() => {
     return onAuthChanged(() => setAuthTick((t) => t + 1));
   }, []);
+
+  // Fetch pending order count for the sidebar badge (wholesaler only).
+  const refreshOrderBadge = useCallback(async () => {
+    if (!canOrders || isRetailer) return;
+    const r = await getPendingOrderCount();
+    if (r.status >= 200 && r.status < 300 && r.json?.ok) {
+      setPendingOrderCount(Number(r.json?.data?.pagination?.total ?? 0));
+    }
+  }, [canOrders, isRetailer]);
+
+  useEffect(() => {
+    refreshOrderBadge();
+    const t = window.setInterval(refreshOrderBadge, 60_000);
+    return () => window.clearInterval(t);
+  }, [refreshOrderBadge]);
+
+  useEffect(() => subscribeOrderBadgeRefresh(refreshOrderBadge), [refreshOrderBadge]);
 
   const sections = useMemo(() => {
     const out = [
@@ -147,7 +167,8 @@ export default function Sidebar({
               to: isRetailer ? "/my-orders" : "/orders",
               label: isRetailer ? NAV_LABELS.myOrders : NAV_LABELS.orders,
               icon: <IconOrder />,
-              shortcut: "Alt+O"
+              shortcut: "Alt+O",
+              badge: !isRetailer && pendingOrderCount > 0 ? (pendingOrderCount > 99 ? "99+" : String(pendingOrderCount)) : null
             }
           ]
         : []),
@@ -176,7 +197,7 @@ export default function Sidebar({
     if (userManagementItems.length) out.push({ title: "USER MANAGEMENT", items: userManagementItems });
 
     return out;
-  }, [canUsers, canRoles, canDivisions, canQuality, canMfg, canPurchase, canCustomers, canSales, canSalesReturns, canPurchaseReturns, canOrders, canPrescriptions, canDivisionPayments, canCustomerPayments, isRetailer, authTick]);
+  }, [canUsers, canRoles, canDivisions, canQuality, canMfg, canPurchase, canCustomers, canSales, canSalesReturns, canPurchaseReturns, canOrders, canPrescriptions, canDivisionPayments, canCustomerPayments, isRetailer, authTick, pendingOrderCount, taxLabel]);
 
   const flatNavItems = useMemo(() => sections.flatMap((s) => s.items), [sections]);
 
@@ -375,7 +396,16 @@ export default function Sidebar({
         <div className="sidebar-logo">
           <div className="sidebar-logo-inner">
             <div className="logo-mark" aria-hidden="true">
-              <img src="/logo.png" alt="JedMee" className="sidebar-logo-img" />
+              {/* Full logo — visible when expanded */}
+              <picture className="sidebar-logo-full">
+                <source srcSet="/logo.webp" type="image/webp" />
+                <img src="/logo.png" alt="JedMee" className="sidebar-logo-img" />
+              </picture>
+              {/* Favicon icon — visible when collapsed */}
+              <picture className="sidebar-logo-favicon">
+                <source srcSet="/favicon-192.webp" type="image/webp" />
+                <img src="/favicon-192.png" alt="JedMee" className="sidebar-logo-favicon-img" />
+              </picture>
             </div>
             <div className="sidebar-logo-tagline">Pharmacy Platform</div>
           </div>
@@ -436,6 +466,9 @@ export default function Sidebar({
                           {it.icon}
                         </span>
                         <span className="nav-label">{it.label}</span>
+                        {it.badge ? (
+                          <span className="nav-badge" aria-label={`${it.badge} pending`}>{it.badge}</span>
+                        ) : null}
                       </NavLink>
 
                       {collapsed ? <span className="nav-tooltip">{it.label}</span> : null}

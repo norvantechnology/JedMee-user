@@ -10,7 +10,7 @@ import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
 import {
   IconEdit, IconPlaceOrder, IconPlus, Search, Trash2,
   IconMcProduct, IconMcVisible, IconMcHidden, IconMcOos, IconMcTotal,
-  IconChevronRight, IconChevronLeft, IconCheck,
+  IconChevronRight, IconChevronLeft, IconCheck, MessageSquare,
 } from "../components/ui/AppIcons.jsx";
 import OrderPlaceWizardModal from "../components/orders/OrderPlaceWizardModal.jsx";
 import { useLocale } from "../context/LocaleContext.jsx";
@@ -339,7 +339,7 @@ export default function CatalogMarketplacePage() {
                           <div className="mcQtyGroup"><span className="mcQtyLabel">Min Order:</span><span className="mcQtyValue">{row.min_order_qty || 1}</span></div>
                           <div className="mcQtyGroup"><span className="mcQtyLabel">Max Order:</span><span className="mcQtyValue">{row.max_order_qty || "—"}</span></div>
                         </div>
-                        {row.catalog_notes && <div className="mcNote">📝 {row.catalog_notes}</div>}
+                        {row.catalog_notes && <div className="mcNote"><MessageSquare size={12} aria-hidden="true" />{row.catalog_notes}</div>}
                         <div className="mcCardFoot">
                           <button type="button" className="mcBtn mcBtn_ghost mcBtn_sm mcBtn_flex" onClick={() => onEditOpen(row)}><IconEdit width={13} height={13} />Edit</button>
                           <button type="button" className={`mcBtn mcBtn_sm mcBtn_flex${row.is_visible ? " mcBtn_ghost" : " mcBtn_ok"}`} onClick={() => toggleSingleVisible(row)}>

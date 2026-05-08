@@ -8,9 +8,12 @@ const MAX_RECENT = 50;
 
 function toastKey(t) {
   const type = String(t?.type || "");
-  const title = String(t?.title || "");
-  const msg = String(t?.message || "");
-  return `${type}::${title}::${msg}`;
+  // Normalise: use title if present, otherwise message.
+  // This deduplicates the common pattern where apiClient emits
+  // { title: "X", message: "sub" } and page code emits { message: "X" }
+  // for the same underlying error — both collapse to the same key.
+  const primary = String(t?.title || t?.message || "");
+  return `${type}::${primary}`;
 }
 
 function shouldEmitToast(t) {

@@ -5,9 +5,10 @@ import { useLocale } from "../../context/LocaleContext.jsx";
 import CommonModal from "../CommonModal.jsx";
 import ConfirmDialog from "../ConfirmDialog.jsx";
 import ModalFooterShell from "../ui/ModalFooterShell.jsx";
-import { IconChevronRight, IconPlaceOrder } from "../ui/AppIcons.jsx";
+import { IconChevronRight, IconPlaceOrder, Phone, MapPin, Building2 } from "../ui/AppIcons.jsx";
 import { emitToast } from "../../services/toastBus.js";
 import { parseApiError } from "../../utils/api.js";
+import { readAuth } from "../../services/authStorage.js";
 import "./OrderPlaceWizardModal.css";
 
 function round2(v) {
@@ -74,6 +75,12 @@ export default function OrderPlaceWizardModal({
   const [busy, setBusy] = useState(false);
   const [lines, setLines] = useState([]);
   const [notes, setNotes] = useState("");
+  const [deliveryPhone, setDeliveryPhone] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryCity, setDeliveryCity] = useState("");
+  const [deliveryPincode, setDeliveryPincode] = useState("");
+  const [deliveryState, setDeliveryState] = useState("");
+  const [deliveryCountry, setDeliveryCountry] = useState("");
 
   const safeWholesalerAccountId = useMemo(() => clean(wholesalerAccountId), [wholesalerAccountId]);
   const safeWholesalerName = useMemo(() => clean(wholesalerName), [wholesalerName]);
@@ -118,14 +125,27 @@ export default function OrderPlaceWizardModal({
     setBusy(false);
     setLines([]);
     setNotes("");
+    setDeliveryPhone("");
+    setDeliveryAddress("");
+    setDeliveryCity("");
+    setDeliveryPincode("");
+    setDeliveryState("");
+    setDeliveryCountry("");
   }
 
   useEffect(() => {
     if (!open) return;
+    const auth = readAuth();
     setStep(1);
     setConfirmOpen(false);
     setBusy(false);
     setNotes("");
+    setDeliveryPhone(auth?.user?.phone_number || "");
+    setDeliveryAddress(auth?.user?.address || "");
+    setDeliveryCity(auth?.user?.city || "");
+    setDeliveryPincode(auth?.user?.pin_code || "");
+    setDeliveryState(auth?.user?.state || "");
+    setDeliveryCountry(auth?.user?.preferred_country_code || "");
     setLines(normalized);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, normalized.length]);
@@ -146,7 +166,13 @@ export default function OrderPlaceWizardModal({
       const payload = {
         wholesaler_account_id: safeWholesalerAccountId,
         items,
-        retailer_notes: notes ? notes : null,
+        retailer_notes:   notes            ? notes.trim()            : null,
+        delivery_phone:   deliveryPhone    ? deliveryPhone.trim()    : null,
+        delivery_address: deliveryAddress  ? deliveryAddress.trim()  : null,
+        delivery_city:    deliveryCity     ? deliveryCity.trim()     : null,
+        delivery_pincode: deliveryPincode  ? deliveryPincode.trim()  : null,
+        delivery_state:   deliveryState    ? deliveryState.trim()    : null,
+        delivery_country: deliveryCountry  ? deliveryCountry.trim()  : null,
       };
       const r = await onPlaceOrder?.(payload);
       if (r?.status >= 200 && r?.status < 300 && r?.json?.ok) {
@@ -408,6 +434,97 @@ export default function OrderPlaceWizardModal({
                   <div className="cmpOrderNotesReadonlyText">{notes}</div>
                 </div>
               ) : null}
+
+              {/* ── Delivery details (editable) ── */}
+              <div className="cmpOrderDeliveryBlock">
+                <div className="cmpOrderDeliveryTitle">
+                  <MapPin size={13} /> Delivery Details
+                </div>
+
+                {/* Phone */}
+                <div className="cmpOrderDeliveryRow">
+                  <label className="cmpOrderDeliveryLabel">
+                    <Phone size={12} /> Mobile
+                  </label>
+                  <input
+                    className="cmpOrderDeliveryInput"
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="Mobile number for delivery"
+                    value={deliveryPhone}
+                    onChange={(e) => setDeliveryPhone(e.target.value)}
+                    disabled={busy}
+                  />
+                </div>
+
+                {/* Address Line 1 */}
+                <div className="cmpOrderDeliveryRow">
+                  <label className="cmpOrderDeliveryLabel">
+                    <Building2 size={12} /> Address Line 1
+                  </label>
+                  <input
+                    className="cmpOrderDeliveryInput"
+                    type="text"
+                    placeholder="House / Shop No., Street, Area"
+                    value={deliveryAddress}
+                    onChange={(e) => setDeliveryAddress(e.target.value)}
+                    disabled={busy}
+                  />
+                </div>
+
+                {/* City + Pincode (side by side on wider screens) */}
+                <div className="cmpOrderDeliveryGrid2">
+                  <div className="cmpOrderDeliveryRow">
+                    <label className="cmpOrderDeliveryLabel">City</label>
+                    <input
+                      className="cmpOrderDeliveryInput"
+                      type="text"
+                      placeholder="City"
+                      value={deliveryCity}
+                      onChange={(e) => setDeliveryCity(e.target.value)}
+                      disabled={busy}
+                    />
+                  </div>
+                  <div className="cmpOrderDeliveryRow">
+                    <label className="cmpOrderDeliveryLabel">Pincode</label>
+                    <input
+                      className="cmpOrderDeliveryInput"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="Pincode / ZIP"
+                      value={deliveryPincode}
+                      onChange={(e) => setDeliveryPincode(e.target.value.replace(/[^0-9A-Za-z\s-]/g, ""))}
+                      disabled={busy}
+                    />
+                  </div>
+                </div>
+
+                {/* State + Country (side by side on wider screens) */}
+                <div className="cmpOrderDeliveryGrid2">
+                  <div className="cmpOrderDeliveryRow">
+                    <label className="cmpOrderDeliveryLabel">State</label>
+                    <input
+                      className="cmpOrderDeliveryInput"
+                      type="text"
+                      placeholder="State / Province"
+                      value={deliveryState}
+                      onChange={(e) => setDeliveryState(e.target.value)}
+                      disabled={busy}
+                    />
+                  </div>
+                  <div className="cmpOrderDeliveryRow">
+                    <label className="cmpOrderDeliveryLabel">Country</label>
+                    <input
+                      className="cmpOrderDeliveryInput"
+                      type="text"
+                      placeholder="Country"
+                      value={deliveryCountry}
+                      onChange={(e) => setDeliveryCountry(e.target.value)}
+                      disabled={busy}
+                    />
+                  </div>
+                </div>
+              </div>
 
               <div className="cmpOrderSummaryCompact">
                 <div className="cmpOrderSummaryCompactTitle">Amounts</div>

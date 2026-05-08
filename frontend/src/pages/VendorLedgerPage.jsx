@@ -20,6 +20,7 @@ import {
   ReportTableScroll
 } from "../components/reports/index.js";
 import { IconEmail } from "../components/TableActionKit.jsx";
+import { Printer, Store } from "../components/ui/AppIcons.jsx";
 import "./VendorLedgerPage.css";
 
 export function VendorLedgerReportContent({ embedded = false } = {}) {
@@ -31,8 +32,14 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
   const [vendors, setVendors] = useState([]);
   const [vendorId, setVendorId] = useState(routeId || "");
   const [doc, setDoc] = useState(null);
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  });
+  const [dateTo, setDateTo] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  });
   const [sendContact, setSendContact] = useState({ open: false, vendorName: "" });
   const [sendContactForm, setSendContactForm] = useState({ email: "" });
   const [savingSendContact, setSavingSendContact] = useState(false);
@@ -311,7 +318,7 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
               disabled={!vendorId || busy}
               onClick={handlePrint}
             >
-              <span className="vlBtnIcon">🖨</span>
+              <Printer size={15} aria-hidden="true" />
               <span>Print PDF</span>
             </button>
             <button
@@ -356,7 +363,7 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
         {/* Empty state */}
         {!vendorId && !busy ? (
           <div className="vlEmpty">
-            <div className="vlEmptyIcon">🏪</div>
+            <div className="vlEmptyIcon"><Store size={40} aria-hidden="true" /></div>
             <p className="vlEmptyTitle">Select a supplier</p>
             <p className="vlEmptyHint">Choose a supplier from the dropdown above to view their ledger.</p>
           </div>

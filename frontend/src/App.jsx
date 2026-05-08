@@ -5,7 +5,7 @@ import "./styles/app.css";
 import "./styles/buttons-responsive.css";
 import { useEffect, useState } from "react";
 import { APP_DOCUMENT_TITLE } from "./constants/brand.js";
-import { bootstrapAuth } from "./services/authBootstrap.js";
+import { bootstrapAuth, startTokenRefreshTimer, stopTokenRefreshTimer } from "./services/authBootstrap.js";
 
 export default function App() {
   const [authHydrated, setAuthHydrated] = useState(false);
@@ -19,8 +19,11 @@ export default function App() {
         if (!cancelled) setAuthHydrated(true);
       }
     })();
+    // Start the background proactive refresh timer.
+    startTokenRefreshTimer();
     return () => {
       cancelled = true;
+      stopTokenRefreshTimer();
     };
   }, []);
 

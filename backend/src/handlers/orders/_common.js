@@ -102,15 +102,15 @@ async function nextOrderNumber(q, wholesalerAccountId) {
   return `ORD-${activeFy}-${String(next).padStart(4, "0")}`;
 }
 
-async function createInAppNotification(q, accountId, userId, type, title, body, payload = null) {
+async function createInAppNotification(q, accountId, userId, type, title, body, payload = null, actionPath = null, actionLabel = null) {
   await q(
     `
     INSERT INTO user_notifications (
-      account_id, user_id, type, title, body, payload, created_by_user_id
+      account_id, user_id, type, title, body, payload, action_path, action_label, created_by_user_id
     )
-    VALUES ($1,$2,$3,$4,$5,$6::jsonb,$2)
+    VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$2)
     `,
-    [accountId, userId, type, title, body, JSON.stringify(payload || {})]
+    [accountId, userId, type, title, body, JSON.stringify(payload || {}), actionPath || null, actionLabel || null]
   );
 }
 

@@ -10,6 +10,7 @@ import { isRetailerAuth } from "../utils/businessRole.js";
 import { readAuth } from "../services/authStorage.js";
 import { IconProductMark } from "./ui/AppIcons.jsx";
 import ModalFooterShell from "./ui/ModalFooterShell.jsx";
+import { useDebounce } from "../utils/useDebounce.js";
 
 function clean(v) {
   return String(v ?? "").trim();
@@ -43,6 +44,8 @@ export default function ProductMasterModal({
   const [form, setForm] = useState(() => emptyForm());
   const [touched, setTouched] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [checking, setChecking] = useState(false);
   const casePackManualRef = useRef(false);
 
   function emptyForm() {
@@ -74,7 +77,7 @@ export default function ProductMasterModal({
   }
 
   useEffect(() => {
-    if (!open) { setSubmitted(false); return; }
+    if (!open) { setSubmitted(false); setNameError(""); setChecking(false); return; }
     casePackManualRef.current = false;
     if (initialValue) {
       setForm({
@@ -166,40 +169,6 @@ export default function ProductMasterModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDivision?.id]);
 
-  const [nameCheck, setNameCheck] = useState({ loading: false, available: true, existing: null });
-  const checkTimer = useRef(null);
-  useEffect(() => {
-    if (!open || readOnly) return;
-    const name = clean(form.name);
-    const mfg = derivedMfgCompanyId;
-    if (!name || name.length < 2 || (!isRetailer && !mfg)) {
-      setNameCheck({ loading: false, available: true, existing: null });
-      return;
-    }
-    if (checkTimer.current) clearTimeout(checkTimer.current);
-    setNameCheck((p) => ({ ...p, loading: true }));
-    checkTimer.current = setTimeout(async () => {
-      try {
-        const res = await checkProductName({
-          name,
-          mfgCompanyId: mfg || "",
-          excludeId: initialValue?.id || ""
-        });
-        const data = res?.json?.data || {};
-        setNameCheck({
-          loading: false,
-          available: Boolean(data.available ?? true),
-          existing: data.existing_product || null
-        });
-      } catch {
-        setNameCheck({ loading: false, available: true, existing: null });
-      }
-    }, 300);
-    return () => {
-      if (checkTimer.current) clearTimeout(checkTimer.current);
-    };
-  }, [open, readOnly, form.name, derivedMfgCompanyId, initialValue?.id, isRetailer]);
-
   const thresholdNum = Number(form.lowStockThreshold);
   const thresholdInvalid = form.lowStockAlertEnabled && (!Number.isFinite(thresholdNum) || thresholdNum < 0);
 
@@ -207,11 +176,7 @@ export default function ProductMasterModal({
     const out = {};
     if (clean(form.name).length < 2) out.name = "Enter a product name (at least 2 characters).";
     if (!isRetailer && !clean(form.divisionId)) out.divisionId = "Choose a division.";
-    if (nameCheck.existing) {
-      out.name = isRetailer
-        ? `“${form.name}” is already in your catalog (${nameCheck.existing.code}).`
-        : `“${form.name}” already exists for this manufacturer (${nameCheck.existing.code}).`;
-    }
+    if (isRetailer && !clean(form.mfgCompanyId)) out.mfgCompanyId = "Please select a brand or company.";
     if (form.salesGST && !TAX_OPTIONS.includes(String(form.salesGST))) out.salesGST = `Choose a valid ${taxLabel} rate.`;
     if (form.purchaseGST && !TAX_OPTIONS.includes(String(form.purchaseGST))) out.purchaseGST = `Choose a valid ${taxLabel} rate.`;
     if (!isRetailer) {
@@ -226,10 +191,15 @@ export default function ProductMasterModal({
     }
     if (thresholdInvalid) out.lowStockThreshold = "Enter zero or a positive number.";
     return out;
-  }, [form, nameCheck.existing, thresholdInvalid, isRetailer]);
+  }, [form, thresholdInvalid, isRetailer]);
 
   const hasErrors = Object.keys(errors).length > 0;
   const canSubmit = !busy && !readOnly && !hasErrors;
+
+  // Debounced errors for display only — prevents error messages from flickering
+  // on every keystroke. canSubmit still uses the live `errors` above so the
+  // submit button is always accurate.
+  const displayErrors = useDebounce(errors, 500);
 
   const title = mode === "add" ? "Add product" : mode === "edit" ? "Edit product" : "Product";
 
@@ -274,15 +244,6 @@ export default function ProductMasterModal({
     return payload;
   }
 
-  const nameHintClass =
-    (isRetailer || derivedMfgCompanyId) && clean(form.name).length >= 2
-      ? nameCheck.loading
-        ? "mfzHelp"
-        : nameCheck.existing
-          ? "mfzErr"
-          : "mfzHelp"
-      : "mfzHelp";
-
   return (
     <CommonModal
       open={open}
@@ -298,7 +259,28 @@ export default function ProductMasterModal({
             {readOnly ? "Close" : "Cancel"}
           </button>
           {!readOnly ? (
-            <button className="mfzBtn appBtn appBtn_primary appBtn_md" type="button" data-cm-primary="true" disabled={busy} onClick={() => { setSubmitted(true); if (hasErrors) return; onSubmit?.(buildPayload()); }}>
+            <button className="mfzBtn appBtn appBtn_primary appBtn_md" type="button" data-cm-primary="true" disabled={busy || checking} onClick={async () => {
+              setSubmitted(true);
+              if (hasErrors) return;
+              const name = clean(form.name);
+              const mfg = derivedMfgCompanyId;
+              if (name.length >= 2 && (isRetailer || mfg)) {
+                setChecking(true);
+                try {
+                  const res = await checkProductName({ name, mfgCompanyId: mfg || "", excludeId: initialValue?.id || "" });
+                  const data = res?.json?.data || {};
+                  if (!data.available && data.existing_product) {
+                    setNameError(isRetailer
+                      ? `"${name}" is already in your catalog (${data.existing_product.code}).`
+                      : `"${name}" already exists for this manufacturer (${data.existing_product.code}).`);
+                    return;
+                  }
+                } catch { /* ignore — let backend handle */ }
+                finally { setChecking(false); }
+              }
+              setNameError("");
+              onSubmit?.(buildPayload());
+            }}>
               {busy ? (
                 <InlineButtonProgress label="Saving…" />
               ) : mode === "add" ? (
@@ -348,7 +330,7 @@ export default function ProductMasterModal({
                         placeholder="Select division"
                         options={(divisionOptions || []).map((d) => ({ ...toDivisionOption(d), value: String(d.id) }))}
                       />
-                      {errors.divisionId && (submitted || touched.divisionId || clean(form.name).length > 0) ? <div className="mfzErr">{errors.divisionId}</div> : null}
+                      {displayErrors.divisionId ? <div className="mfzErr">{displayErrors.divisionId}</div> : null}
                     </div>
 
                     <div className="mfzField mfz12">
@@ -374,10 +356,10 @@ export default function ProductMasterModal({
                   </>
                 ) : (
                   <div className="mfzField mfz12">
-                    <div className="mfzLabel">Manufacturer</div>
+                    <div className="mfzLabel">Brand / Company <span className="mfzRequired">*</span></div>
                     <MasterSelectWithCreate
                       kind="mfgCompany"
-                      selectClassName="mfzInput"
+                      selectClassName={`mfzInput${displayErrors.mfgCompanyId ? " mfzInputErr" : ""}`}
                       value={String(form.mfgCompanyId || "")}
                       disabled={busy || readOnly}
                       onChange={(v, createdRow) => {
@@ -390,12 +372,13 @@ export default function ProductMasterModal({
                       onListsRefresh={async () => {
                         if (onRefreshMfg) await onRefreshMfg();
                       }}
-                      placeholder="Optional  brand or company"
+                      placeholder="Select brand or company"
                       options={(mfgCompanyOptions || []).map((m) => ({
                         value: String(m.id),
                         label: `${m.name || ""}${m.short_name ? ` (${m.short_name})` : ""}`
                       }))}
                     />
+                    {displayErrors.mfgCompanyId ? <div className="mfzErr">{displayErrors.mfgCompanyId}</div> : null}
                   </div>
                 )}
 
@@ -421,18 +404,8 @@ export default function ProductMasterModal({
                     onBlur={() => setTouched((t) => ({ ...t, name: true }))}
                     onChange={(e) => setField("name", e.target.value)}
                   />
-                  {(isRetailer || derivedMfgCompanyId) && clean(form.name).length >= 2 ? (
-                    <div className={nameHintClass}>
-                      {nameCheck.loading
-                        ? "Checking availability…"
-                        : nameCheck.existing
-                          ? `Already used by ${nameCheck.existing.code}`
-                          : isRetailer
-                            ? "Available in your catalog"
-                            : "Available for this manufacturer"}
-                    </div>
-                  ) : null}
-                  {errors.name && (submitted || touched.name || clean(form.name).length > 0) ? <div className="mfzErr">{errors.name}</div> : null}
+                  {nameError ? <div className="mfzErr">{nameError}</div> : null}
+                  {!nameError && displayErrors.name ? <div className="mfzErr">{displayErrors.name}</div> : null}
                 </div>
 
                 <div className="mfzField mfz12">
@@ -545,7 +518,7 @@ export default function ProductMasterModal({
                       </option>
                     ))}
                   </select>
-                  {errors.purchaseGST ? <div className="mfzErr">{errors.purchaseGST}</div> : null}
+                  {displayErrors.purchaseGST ? <div className="mfzErr">{displayErrors.purchaseGST}</div> : null}
                 </div>
                 <div className="mfzField mfz6">
                   <div className="mfzLabel">Sales {taxLabel} %</div>
@@ -557,7 +530,7 @@ export default function ProductMasterModal({
                       </option>
                     ))}
                   </select>
-                  {errors.salesGST ? <div className="mfzErr">{errors.salesGST}</div> : null}
+                  {displayErrors.salesGST ? <div className="mfzErr">{displayErrors.salesGST}</div> : null}
                 </div>
               </div>
             </div>
@@ -588,7 +561,7 @@ export default function ProductMasterModal({
                       readOnly={readOnly}
                       onChange={(e) => setField("schemeQtyPaid", e.target.value.replace(/[^0-9]/g, ""))}
                     />
-                    {errors.schemeQtyPaid ? <div className="mfzErr">{errors.schemeQtyPaid}</div> : null}
+                    {displayErrors.schemeQtyPaid ? <div className="mfzErr">{displayErrors.schemeQtyPaid}</div> : null}
                   </div>
                   <div className="mfzField mfz6">
                     <div className="mfzLabel">Free qty</div>
@@ -680,13 +653,19 @@ export default function ProductMasterModal({
                     pattern="[0-9]*\.?[0-9]*"
                     placeholder="0"
                     value={form.lowStockThreshold}
-                    readOnly={readOnly || !form.lowStockAlertEnabled}
+                    readOnly={readOnly}
+                    onClick={() => {
+                      if (!readOnly && !form.lowStockAlertEnabled) setField("lowStockAlertEnabled", true);
+                    }}
+                    onFocus={() => {
+                      if (!readOnly && !form.lowStockAlertEnabled) setField("lowStockAlertEnabled", true);
+                    }}
                     onChange={(e) => {
                       const val = e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1");
                       setField("lowStockThreshold", val);
                     }}
                   />
-                  {errors.lowStockThreshold ? <div className="mfzErr">{errors.lowStockThreshold}</div> : null}
+                  {displayErrors.lowStockThreshold ? <div className="mfzErr">{displayErrors.lowStockThreshold}</div> : null}
                 </div>
               </div>
             </div>

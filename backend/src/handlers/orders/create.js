@@ -19,7 +19,13 @@ async function handler(event) {
   const body = parseJsonBody(event);
   const wholesalerAccountId = clean(body.wholesaler_account_id || body.wholesalerAccountId);
   const items = Array.isArray(body.items) ? body.items : [];
-  const retailerNotes = clean(body.retailer_notes || body.retailerNotes) || null;
+  const retailerNotes      = clean(body.retailer_notes    || body.retailerNotes)   || null;
+  const deliveryAddressRaw = clean(body.delivery_address  || body.deliveryAddress) || null;
+  const deliveryPhoneRaw   = clean(body.delivery_phone    || body.deliveryPhone)   || null;
+  const deliveryCityRaw    = clean(body.delivery_city     || body.deliveryCity)    || null;
+  const deliveryPincodeRaw = clean(body.delivery_pincode  || body.deliveryPincode) || null;
+  const deliveryStateRaw   = clean(body.delivery_state    || body.deliveryState)   || null;
+  const deliveryCountryRaw = clean(body.delivery_country  || body.deliveryCountry) || null;
 
   if (!wholesalerAccountId) return fail(400, "VALIDATION_ERROR", "wholesaler_account_id is required.");
   if (String(wholesalerAccountId) === String(perms.accountId)) return fail(400, "VALIDATION_ERROR", "Wholesaler cannot be same as retailer.");
@@ -108,6 +114,15 @@ async function handler(event) {
   const totalGst = round2(out.reduce((s, x) => s + n(x.gst_amount), 0));
   const totalAmount = round2(out.reduce((s, x) => s + n(x.line_total), 0));
 
+  // Fallback delivery fields to retailer's profile values
+  const deliveryAddress = deliveryAddressRaw || clean(actor?.address)                   || null;
+  const deliveryPhone   = deliveryPhoneRaw   || clean(actor?.phone_number)              || null;
+  const deliveryCity    = deliveryCityRaw    || clean(actor?.city)                      || null;
+  const deliveryPincode = deliveryPincodeRaw || clean(actor?.pin_code)                  || null;
+  const deliveryState   = deliveryStateRaw   || clean(actor?.state)                     || null;
+  const deliveryCountry = deliveryCountryRaw || clean(actor?.preferred_country_code)    || null;
+  const retailerGstNumber = clean(actor?.gst_number) || null;
+
   try {
     const data = await withTransaction(async (q) => {
       const orderNumber = await nextOrderNumber(q, wholesalerAccountId);
@@ -116,9 +131,11 @@ async function handler(event) {
         INSERT INTO orders (
           order_number, retailer_account_id, retailer_firm_name,
           wholesaler_account_id, wholesaler_firm_name, status,
-          subtotal, total_discount, total_gst, total_amount, retailer_notes
+          subtotal, total_discount, total_gst, total_amount, retailer_notes,
+          delivery_address, delivery_phone, retailer_gst_number,
+          delivery_city, delivery_pincode, delivery_state, delivery_country
         )
-        VALUES ($1,$2,$3,$4,$5,'PENDING',$6,$7,$8,$9,$10)
+        VALUES ($1,$2,$3,$4,$5,'PENDING',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
         RETURNING *
         `,
         [
@@ -131,7 +148,14 @@ async function handler(event) {
           totalDiscount,
           totalGst,
           totalAmount,
-          retailerNotes
+          retailerNotes,
+          deliveryAddress,
+          deliveryPhone,
+          retailerGstNumber,
+          deliveryCity,
+          deliveryPincode,
+          deliveryState,
+          deliveryCountry
         ]
       );
       const order = orderIns.rows?.[0];
@@ -174,7 +198,9 @@ async function handler(event) {
         "NEW_ORDER",
         `New order ${order.order_number}`,
         `${clean(actor?.firm_name) || clean(actor?.full_name) || "Retailer"} placed an order of ₹${totalAmount.toFixed(2)}.`,
-        { order_id: order.id }
+        { order_id: order.id },
+        "/orders",
+        "View orders"
       );
       return { order };
     });

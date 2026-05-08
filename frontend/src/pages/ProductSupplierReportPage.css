@@ -962,6 +962,11 @@
   color: var(--color-danger);
 }
 
+.psrStkNeg {
+  color: var(--color-danger, #ef4444);
+  font-weight: 700;
+}
+
 .psrSupPill {
   background: var(--color-primary-light);
   color: var(--color-primary);

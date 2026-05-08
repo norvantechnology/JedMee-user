@@ -1,6 +1,6 @@
 import AmountInput from "./ui/AmountInput.jsx";
 import { InlineButtonProgress } from "./ui/buttons.jsx";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "../context/LocaleContext.jsx";
 import CommonModal from "./CommonModal.jsx";
 import { computeProductBatch } from "../utils/productBatchCalc.js";
@@ -151,7 +151,11 @@ export default function ProductBatchModal({
   );
 
   const [form, setForm] = useState(empty);
+  // Deferred form: inputs update immediately; expensive computations (computed, errors)
+  // run in the background so every keystroke stays smooth.
+  const deferredForm = useDeferredValue(form);
   const [batchCheck, setBatchCheck] = useState({ loading: false, exists: false, batch: null });
+  const [checkingBatch, setCheckingBatch] = useState(false);
   const [pendingProductId, setPendingProductId] = useState("");
   const isProductLocked = mode === "add" && Boolean(clean(initialValue?.productId || initialValue?.product_id));
   // Draft preservation: overlay close keeps form data; explicit close resets it.
@@ -245,6 +249,7 @@ export default function ProductBatchModal({
     setTouched({});
     setSubmitAttempted(false);
     setPendingProductId("");
+    setBatchCheck({ loading: false, exists: false, batch: null });
     setManual({
       salesRate: Boolean(clean(seed?.salesRate)),
       retailRate: Boolean(clean(seed?.retailRate))
@@ -263,41 +268,13 @@ export default function ProductBatchModal({
     onClose?.();
   }
 
-  useEffect(() => {
-    if (!open || readOnly) return;
-    const productId = clean(form.productId || form.product_id || "");
-    const productCode = clean(form.productCode);
-    const batchNo = clean(form.batchNo);
-    if ((!productId && !productCode) || !batchNo) {
-      setBatchCheck({ loading: false, exists: false, batch: null });
-      return;
-    }
-    let active = true;
-    const timer = setTimeout(async () => {
-      setBatchCheck((p) => ({ ...p, loading: true }));
-      try {
-        const res = await checkProductBatch(productId, batchNo, form.id, productCode);
-        if (!active) return;
-        const data = res?.json?.data || {};
-        setBatchCheck({ loading: false, exists: Boolean(data?.exists), batch: data?.batch || null });
-      } catch {
-        if (!active) return;
-        setBatchCheck({ loading: false, exists: false, batch: null });
-      }
-    }, 250);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [open, readOnly, form.productId, form.product_id, form.productCode, form.batchNo, form.id]);
-
   const computed = useMemo(
     () =>
-      computeProductBatch(form, {
+      computeProductBatch(deferredForm, {
         manualSalesRate: manual.salesRate,
         manualRetailRate: manual.retailRate
       }),
-    [form, manual.salesRate, manual.retailRate]
+    [deferredForm, manual.salesRate, manual.retailRate]
   );
 
   const displaySalesRate = readOnly || manual.salesRate ? form.salesRate : String(computed.salesRate || "");
@@ -308,6 +285,9 @@ export default function ProductBatchModal({
   );
 
   const errors = useMemo(() => {
+    // Shadow `form` with the deferred value so validation runs off the main thread
+    // and doesn't block keystrokes.
+    const form = deferredForm;
     const out = {};
     if (!clean(form.productId)) out.productId = "Select a product from the list or create a new one.";
     else if (clean(form.productName).length < 2) out.productName = "Product name is required.";
@@ -416,20 +396,24 @@ export default function ProductBatchModal({
       }
     }
     return out;
-  }, [existingRows, form, manual, computed, batchCheck.exists, openingStockLocked]);
+  }, [existingRows, deferredForm, manual, computed, batchCheck.exists, openingStockLocked]);
 
   const warnings = useMemo(() => {
     const out = {};
-    if (clean(form.mfgDate) && clean(form.expiryDate) && !isBeforeYmd(form.mfgDate, form.expiryDate)) {
+    if (clean(deferredForm.mfgDate) && clean(deferredForm.expiryDate) && !isBeforeYmd(deferredForm.mfgDate, deferredForm.expiryDate)) {
       out.mfgDate = "Mfg date is after expiry date.";
     }
     return out;
-  }, [form.expiryDate, form.mfgDate]);
+  }, [deferredForm.expiryDate, deferredForm.mfgDate]);
 
   const canSubmit = !readOnly && !busy && Object.keys(errors).length === 0;
 
   function setField(k, v) {
     setForm((p) => ({ ...p, [k]: v }));
+    // Clear stale batch-exists error whenever the user edits the batch number or product
+    if (["batchNo", "productId", "product_id", "productCode"].includes(k)) {
+      setBatchCheck({ loading: false, exists: false, batch: null });
+    }
   }
 
   function markTouched(k) {
@@ -554,12 +538,32 @@ export default function ProductBatchModal({
                 className="mfzBtn appBtn appBtn_primary appBtn_md"
                 type="button"
                 data-cm-primary="true"
-                disabled={busy}
+                disabled={busy || checkingBatch}
                 onClick={async () => {
                   setSubmitAttempted(true);
                   if (errorCount > 0) {
                     setTab(tabForErrorKey(firstError?.key || ""));
                     return;
+                  }
+                  // Check batch uniqueness on save (no live API calls while typing)
+                  const productId = clean(form.productId || form.product_id || "");
+                  const productCode = clean(form.productCode);
+                  const batchNo = clean(form.batchNo);
+                  if ((productId || productCode) && batchNo) {
+                    setCheckingBatch(true);
+                    try {
+                      const res = await checkProductBatch(productId, batchNo, form.id, productCode);
+                      const data = res?.json?.data || {};
+                      if (data?.exists) {
+                        setBatchCheck({ loading: false, exists: true, batch: data?.batch || null });
+                        return; // errors useMemo will now show the duplicate error
+                      }
+                      setBatchCheck({ loading: false, exists: false, batch: null });
+                    } catch {
+                      setBatchCheck({ loading: false, exists: false, batch: null });
+                    } finally {
+                      setCheckingBatch(false);
+                    }
                   }
                   const payload = {
                     productId: clean(form.productId) || null,
@@ -618,7 +622,7 @@ export default function ProductBatchModal({
                   await onSubmit?.(payload);
                 }}
               >
-                {busy ? <InlineButtonProgress label="Saving…" /> : mode === "add" ? "Create batch" : "Save changes"}
+                {(busy || checkingBatch) ? <InlineButtonProgress label={checkingBatch ? "Checking…" : "Saving…"} /> : mode === "add" ? "Create batch" : "Save changes"}
               </button>
             ) : null}
           </div>

@@ -65,6 +65,9 @@ export {
   CreditCard, Users, Upload, Download, ChevronLeft, ChevronDown, Search, Calendar,
   ChevronRight, MessageSquare, Settings, FileSpreadsheet, Loader2,
   Keyboard, Layers, Trash2, Flag, Store, BadgeCheck, Lock,
+  // Additional icons for transaction/report pages
+  Phone, MapPin, Check, Zap, Printer, AlertTriangle, FileText, Mail,
+  Eye, Pencil, BookOpenText, TrendingUp, Banknote,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

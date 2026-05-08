@@ -172,6 +172,7 @@ function groupByFirstLetter(items) {
 // (moved to shared icons) IconPsrPackage in `components/ui/AppIcons.jsx`
 
 function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
+  const { taxLabel } = useLocale();
   const [show, setShow] = useState(false);
   const closeTimer = useRef(null);
 
@@ -245,7 +246,7 @@ function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
           <span className="psrRateSoft">{b.special_rate_2 != null ? formatRs(b.special_rate_2) : ""}</span>
         </td>
         <td className="psrR">
-          <span className={`psrStkVal${Number(b.current_stock || 0) === 0 ? " psrStkZero" : ""}`}>
+          <span className={`psrStkVal${Number(b.current_stock || 0) < 0 ? " psrStkNeg" : Number(b.current_stock || 0) === 0 ? " psrStkZero" : ""}`}>
             {Number(b.current_stock || 0).toFixed(0)}
           </span>
         </td>
@@ -304,7 +305,7 @@ function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
           </div>
           <div>
             <div className="psrBLbl">Stock</div>
-            <div className={`psrBFval${Number(b.current_stock || 0) === 0 ? " psrStkZero" : ""}`}>
+            <div className={`psrBFval${Number(b.current_stock || 0) < 0 ? " psrStkNeg" : Number(b.current_stock || 0) === 0 ? " psrStkZero" : ""}`}>
               {Number(b.current_stock || 0).toFixed(0)}
             </div>
           </div>

@@ -116,10 +116,8 @@ export default function MfgCompanyMasterModal({
   portalZIndex = 480
 }) {
   const [form, setForm] = useState(emptyMfg);
-  const [uniqueState, setUniqueState] = useState({
-    code: { status: "idle", message: "" },
-    name: { status: "idle", message: "" }
-  });
+  const [submitErrors, setSubmitErrors] = useState({});
+  const [checking, setChecking] = useState(false);
   const [saleLockPrompt, setSaleLockPrompt] = useState({ open: false, activeBatchCount: 0, productCount: 0 });
   const [submitted, setSubmitted] = useState(false);
   // Draft preservation: when user closes via overlay, keep form data for next open.
@@ -131,6 +129,8 @@ export default function MfgCompanyMasterModal({
   useEffect(() => {
     if (!open) {
       setSubmitted(false);
+      setSubmitErrors({});
+      setChecking(false);
       return;
     }
     // If closed via overlay, restore draft instead of re-initialising.
@@ -143,7 +143,7 @@ export default function MfgCompanyMasterModal({
     } else {
       setForm({ ...emptyMfg });
     }
-    setUniqueState({ code: { status: "idle", message: "" }, name: { status: "idle", message: "" } });
+    setSubmitErrors({});
     setSubmitted(false);
   }, [open, isEdit, initialValue]);
 
@@ -172,39 +172,7 @@ export default function MfgCompanyMasterModal({
     return out;
   }, [form]);
 
-  const hasUniqBlock = uniqueState.code.status === "exists" || uniqueState.name.status === "exists";
-  const isUniqChecking = uniqueState.code.status === "checking" || uniqueState.name.status === "checking";
-  const canSubmit = Object.keys(formErrors).length === 0 && !busy && !hasUniqBlock && !isUniqChecking;
-
-  async function runUniqueCheck(field) {
-    const value = clean(field === "code" ? form.code : form.name);
-    if (!value) {
-      setUniqueState((prev) => ({ ...prev, [field]: { status: "idle", message: "" } }));
-      return;
-    }
-    setUniqueState((prev) => ({ ...prev, [field]: { status: "checking", message: "Checking..." } }));
-    const params = {
-      exclude_id: editingId || "",
-      ...(field === "code" ? { code: value } : { name: value })
-    };
-    const r = await checkMfgCompanyUnique(params);
-    if (!(r.status >= 200 && r.status < 300 && r.json?.ok)) {
-      setUniqueState((prev) => ({ ...prev, [field]: { status: "idle", message: "" } }));
-      return;
-    }
-    const exists = Boolean(r.json?.data?.[field]?.exists);
-    const shown = field === "code" ? value.toUpperCase() : value;
-    setUniqueState((prev) => ({
-      ...prev,
-      [field]: exists
-        ? { status: "exists", message: `${field === "code" ? "Code" : "Name"} "${shown}" is already used.` }
-        : { status: "available", message: `${field === "code" ? "Code" : "Name"} is available.` }
-    }));
-  }
-
-  function clearUniqueField(field) {
-    setUniqueState((prev) => ({ ...prev, [field]: { status: "idle", message: "" } }));
-  }
+  const canSubmit = Object.keys(formErrors).length === 0 && !busy;
 
   async function requestSaleLockEnable() {
     if (form.saleLock) return;
@@ -279,7 +247,7 @@ export default function MfgCompanyMasterModal({
         portal={portal}
         portalZIndex={portalZIndex}
         footer={
-          <ModalFooterShell meta={hasUniqBlock ? "Duplicate code or name." : isUniqChecking ? "Checking…" : ""}>
+          <ModalFooterShell meta={submitted && (Object.keys(formErrors).length > 0 || Object.keys(submitErrors).length > 0) ? "Fix errors to save." : ""}>
             <button className="mfzBtn appBtn appBtn_secondary appBtn_md" type="button" data-cm-cancel="true" onClick={handleExplicitClose} disabled={busy}>
               Close
             </button>
@@ -287,8 +255,30 @@ export default function MfgCompanyMasterModal({
               className="mfzBtn appBtn appBtn_primary appBtn_md"
               type="button"
               data-cm-primary="true"
-              disabled={busy || hasUniqBlock || isUniqChecking}
-              onClick={() => { setSubmitted(true); if (!canSubmit) return; onSubmit?.(buildPayload()); }}
+              disabled={busy || checking}
+              onClick={async () => {
+                setSubmitted(true);
+                if (!canSubmit) return;
+                setChecking(true);
+                const newSubmitErrors = {};
+                try {
+                  const codeVal = clean(form.code);
+                  const nameVal = clean(form.name);
+                  const params = { exclude_id: editingId || "" };
+                  if (codeVal) params.code = codeVal;
+                  if (nameVal) params.name = nameVal;
+                  const r = await checkMfgCompanyUnique(params);
+                  if (r.status >= 200 && r.status < 300 && r.json?.ok) {
+                    const data = r.json.data || {};
+                    if (data.code?.exists) newSubmitErrors.code = `Code "${codeVal.toUpperCase()}" is already used.`;
+                    if (data.name?.exists) newSubmitErrors.name = `Name "${nameVal}" is already used.`;
+                  }
+                } catch { /* ignore — let backend handle */ }
+                finally { setChecking(false); }
+                setSubmitErrors(newSubmitErrors);
+                if (Object.keys(newSubmitErrors).length > 0) return;
+                onSubmit?.(buildPayload());
+              }}
             >
               {busy ? (
                 <InlineButtonProgress label={isEdit ? "Saving…" : "Creating…"} />
@@ -304,12 +294,9 @@ export default function MfgCompanyMasterModal({
         <MfgCompanyFormV2
           form={form}
           setForm={setForm}
-          errors={submitted ? formErrors : {}}
+          errors={submitted ? { ...formErrors, ...submitErrors } : {}}
           mainCompanyOptions={mainCompanyOptions}
           isEdit={isEdit}
-          uniqueState={uniqueState}
-          onCheckUnique={runUniqueCheck}
-          onClearUnique={clearUniqueField}
           onRequestSaleLockEnable={requestSaleLockEnable}
         />
       </CommonModal>
@@ -343,9 +330,6 @@ function MfgCompanyFormV2({
   errors,
   mainCompanyOptions,
   isEdit = false,
-  uniqueState,
-  onCheckUnique,
-  onClearUnique,
   onRequestSaleLockEnable
 }) {
   const setField = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
@@ -372,17 +356,10 @@ function MfgCompanyFormV2({
                 <input
                   className="mfzInput"
                   value={form.code}
-                  onChange={(e) => {
-                    setField("code", e.target.value);
-                    onClearUnique?.("code");
-                  }}
-                  onBlur={() => onCheckUnique?.("code")}
+                  onChange={(e) => setField("code", e.target.value)}
                   placeholder="Auto-generated if empty"
                 />
                 {errors.code ? <div className="mfzErr">{errors.code}</div> : null}
-                {!errors.code && uniqueState?.code?.message ? (
-                  <div className={uniqueState.code.status === "exists" ? "mfzErr" : "mfzHelp"}>{uniqueState.code.message}</div>
-                ) : null}
               </div>
 
               <div className="mfzField mfz8">
@@ -392,17 +369,10 @@ function MfgCompanyFormV2({
                 <input
                   className="mfzInput"
                   value={form.name}
-                  onChange={(e) => {
-                    setField("name", e.target.value);
-                    onClearUnique?.("name");
-                  }}
-                  onBlur={() => onCheckUnique?.("name")}
+                  onChange={(e) => setField("name", e.target.value)}
                   placeholder="Full company name"
                 />
                 {errors.name ? <div className="mfzErr">{errors.name}</div> : null}
-                {!errors.name && uniqueState?.name?.message ? (
-                  <div className={uniqueState.name.status === "exists" ? "mfzErr" : "mfzHelp"}>{uniqueState.name.message}</div>
-                ) : null}
               </div>
 
               <div className="mfzField mfz4">

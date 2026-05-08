@@ -226,6 +226,17 @@
   font-weight: 750;
 }
 
+.mfzRequired {
+  color: var(--color-danger);
+  font-weight: 800;
+  margin-left: 2px;
+}
+
+.mfzInputErr {
+  border-color: var(--color-danger) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-danger) 18%, transparent) !important;
+}
+
 .mfzNote {
   border-radius: 14px;
   border: 1px solid var(--mfz-border);
