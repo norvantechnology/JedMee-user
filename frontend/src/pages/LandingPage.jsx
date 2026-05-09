@@ -11,6 +11,56 @@ import "./LandingPage.css";
 gsap.registerPlugin(ScrollTrigger);
 
 /* ─────────────────────────────────────────────────────────────
+   SEO CONFIG — single source of truth for all dynamic values
+   Update this object whenever contact info, pricing, or ratings change.
+   These values feed BOTH the visible UI and the JSON-LD schema below.
+───────────────────────────────────────────────────────────── */
+const SEO_CONFIG = {
+  siteName:       "JedMee",
+  siteUrl:        "https://jedmee.com",
+  supportEmail:   "supportjedmee@gmail.com",
+  foundingYear:   "2024",
+  ratingValue:    "4.9",
+  reviewCount:    "500",
+  pharmacyCount:  "500+",
+  billsCreated:   "2M+",
+  plans: [
+    { name: "Starter",      price: "0",  priceCurrency: "USD", period: "free",    description: "Free 14-day trial for small medicine shops — no credit card required" },
+    { name: "Growth",       price: "9",  priceCurrency: "USD", period: "monthly", description: "For growing pharmacies and medicine shops needing full features" },
+    { name: "Professional", price: "19", priceCurrency: "USD", period: "monthly", description: "For established pharmacies and distributors" },
+    { name: "Enterprise",   price: "39", priceCurrency: "USD", period: "monthly", description: "For large pharmacy chains and wholesale distributors" },
+  ],
+  /* Canonical FAQs — used in schema AND the visible FAQ section.
+     Only ONE set exists — no duplication possible. */
+  faqs: [
+    {
+      q: "Can both medicine shops and distributors use JedMee?",
+      a: "Yes. Medicine shops get billing, stock, and order tools. Distributors get a product catalog, order management, and dispatch tracking.",
+    },
+    {
+      q: "Does JedMee handle tax billing for my country?",
+      a: "Yes. JedMee creates fully tax-compliant invoices automatically. Set the tax rate per product and the system calculates the tax for you. It supports GST, VAT, Sales Tax, and other tax systems.",
+    },
+    {
+      q: "How does expiry tracking work?",
+      a: "Each medicine can have multiple batches with expiry dates. JedMee alerts you before any batch expires so you can act in time.",
+    },
+    {
+      q: "Can I add my existing medicines and data?",
+      a: "Yes. Import medicines, batches, customers, and suppliers from a CSV file — no manual entry needed.",
+    },
+    {
+      q: "How do retailers order from wholesalers?",
+      a: "Wholesalers add medicines to an online catalog. Retailers browse, add to cart, and place orders. The wholesaler confirms inside JedMee.",
+    },
+    {
+      q: "Is my business data safe?",
+      a: "Yes. All data is encrypted and stored securely. We maintain 99.9% uptime and take regular backups.",
+    },
+  ],
+};
+
+/* ─────────────────────────────────────────────────────────────
    ICON COMPONENT
 ───────────────────────────────────────────────────────────── */
 function Icon({ name, size = 20, className = "" }) {
@@ -94,7 +144,6 @@ function LandingNav({ navigate, authed }) {
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -112,7 +161,6 @@ function LandingNav({ navigate, authed }) {
           <a className="ln-nav-logo" href="#top">
             <img src="/logo.png" alt="JedMee" className="ln-nav-logo-img" />
           </a>
-          {/* Desktop nav links */}
           <ul className="ln-nav-links">
             {links.map(l => (
               <li key={l.label}>
@@ -143,7 +191,6 @@ function LandingNav({ navigate, authed }) {
         </div>
       </nav>
 
-      {/* Mobile menu — rendered as sibling of nav, outside its stacking context */}
       {open && (
         <div className="ln-mobile-menu" role="dialog" aria-label="Navigation menu">
           <ul className="ln-mobile-menu-links">
@@ -216,7 +263,7 @@ function HeroSection({ navigate }) {
               ))}
             </div>
             <div className="ln-hero-proof-text">
-              <span className="ln-hero-proof-count">500+</span> pharmacies trust JedMee
+              <span className="ln-hero-proof-count">{SEO_CONFIG.pharmacyCount}</span> pharmacies trust JedMee
             </div>
           </div>
           <div className="ln-hero-trust">
@@ -263,7 +310,6 @@ function DashboardMockup() {
 
   return (
     <div className="ln-mock">
-      {/* Sidebar */}
       <div className="ln-mock-side">
         <div className="ln-mock-logo">
           <img src="/logo.png" alt="JedMee" className="ln-mock-logo-img" />
@@ -283,7 +329,6 @@ function DashboardMockup() {
           <div key={n} className="ln-mock-nav-item"><span className="ln-mock-dot" />{n}</div>
         ))}
       </div>
-      {/* Main Content */}
       <div className="ln-mock-main">
         <div className="ln-mock-topbar">
           <div className="ln-mock-breadcrumb">JEDMEE <span>›</span> Dashboard</div>
@@ -373,10 +418,10 @@ function TrustedBySection() {
 ───────────────────────────────────────────────────────────── */
 function StatsSection() {
   const stats = [
-    { icon: "building", val: 500, suffix: "+", label: "Pharmacies", sub: "Using JedMee", color: "#6b3fa0" },
-    { icon: "receipt",  val: 2,   suffix: "M+", label: "Bills Created", sub: "& Printed", color: "#0ea5e9" },
-    { icon: "zap",      val: 40,  suffix: "%",  label: "Time Saved", sub: "Every Day", color: "#f97316" },
-    { icon: "shield",   val: 99,  suffix: ".9%", label: "Uptime", sub: "Always Available", color: "#22c55e" },
+    { icon: "building", val: 500,  suffix: "+",   label: "Pharmacies",  sub: "Using JedMee",     color: "#6b3fa0" },
+    { icon: "receipt",  val: 2,    suffix: "M+",   label: "Bills Created", sub: "& Printed",      color: "#0ea5e9" },
+    { icon: "zap",      val: 40,   suffix: "%",    label: "Time Saved",  sub: "Every Day",        color: "#f97316" },
+    { icon: "shield",   val: 99,   suffix: ".9%",  label: "Uptime",      sub: "Always Available", color: "#22c55e" },
   ];
   return (
     <section className="ln-stats">
@@ -753,7 +798,9 @@ function TestimonialsSection() {
       <div className="ln-container">
         <div className="ln-section-label">Customer Stories</div>
         <h2 className="ln-section-title">Real Pharmacies. Real Results.</h2>
-        <p className="ln-section-sub">See how medicine shops and distributors around the world are saving time, reducing losses, and growing with JedMee.</p>
+        <p className="ln-section-sub">
+          See how medicine shops and distributors around the world are saving time, reducing losses, and growing with JedMee.
+        </p>
         <div className="ln-testi-layout">
           <div className="ln-testi-featured">
             <div className="ln-testi-stars">{[1,2,3,4,5].map(i => <Icon key={i} name="star" size={14} className="ln-star" />)}</div>
@@ -766,8 +813,8 @@ function TestimonialsSection() {
               </div>
             </div>
             <div className="ln-testi-score">
-              <span className="ln-testi-score-num">4.9</span>
-              <span className="ln-testi-score-label">/ 5 · Rated by 500+ pharmacies</span>
+              <span className="ln-testi-score-num">{SEO_CONFIG.ratingValue}</span>
+              <span className="ln-testi-score-label">/ 5 · Rated by {SEO_CONFIG.reviewCount}+ pharmacies</span>
             </div>
           </div>
           <div className="ln-testi-stack">
@@ -794,12 +841,8 @@ function TestimonialsSection() {
 /* ─────────────────────────────────────────────────────────────
    PRICING
 ───────────────────────────────────────────────────────────── */
-
-/** Currency symbol map keyed by ISO 4217 code — matches backend formatPlan(). */
 const CURRENCY_SYMBOLS = { USD: "$", EUR: "€", GBP: "£", INR: "₹", AUD: "A$", CAD: "C$" };
 
-/** Format price string returned by the API (already pre-formatted by backend).
- *  Numeric fallback uses currencyCode from plan.currency_code. */
 function fmtPrice(price, period, currencyCode = "USD") {
   if (typeof price === "string") return price;
   const n = parseFloat(price);
@@ -811,8 +854,9 @@ function fmtPeriod(period) {
   if (typeof period === "string" && /month|trial|year|time/i.test(period)) return period;
   return { free: "14-day trial", monthly: "per month", yearly: "per year", one_time: "one time" }[period] ?? period;
 }
+
 function PricingSection({ navigate }) {
-  const [plans, setPlans] = useState(null);   // null = loading, [] = error
+  const [plans, setPlans] = useState(null);
   const [error, setError] = useState(false);
 
   const load = useCallback(async () => {
@@ -892,18 +936,10 @@ function PricingSection({ navigate }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   FAQ
+   FAQ — renders from SEO_CONFIG.faqs (single source of truth)
 ───────────────────────────────────────────────────────────── */
 function FAQSection() {
   const [open, setOpen] = useState(null);
-  const faqs = [
-    { q: "Can both medicine shops and distributors use JedMee?", a: "Yes. Medicine shops get billing, stock, and order tools. Distributors get a product catalog, order management, and dispatch tracking." },
-    { q: "Does JedMee handle tax billing for my country?", a: "Yes. JedMee creates fully tax-compliant invoices automatically. Set the tax rate per product and the system calculates the tax for you. It supports GST, VAT, Sales Tax, and other tax systems." },
-    { q: "How does expiry tracking work?", a: "Each medicine can have multiple batches with expiry dates. JedMee alerts you before any batch expires so you can act in time." },
-    { q: "Can I add my existing medicines and data?", a: "Yes. Import medicines, batches, customers, and suppliers from a CSV file — no manual entry needed." },
-    { q: "How do retailers order from wholesalers?", a: "Wholesalers add medicines to an online catalog. Retailers browse, add to cart, and place orders. The wholesaler confirms inside JedMee." },
-    { q: "Is my business data safe?", a: "Yes. All data is encrypted and stored securely. We maintain 99.9% uptime and take regular backups." },
-  ];
   return (
     <section className="ln-faq">
       <div className="ln-container ln-faq-inner">
@@ -912,7 +948,7 @@ function FAQSection() {
           <h2 className="ln-section-title" style={{textAlign:"left"}}>Frequently Asked Questions</h2>
         </div>
         <div className="ln-faq-list">
-          {faqs.map((f, i) => (
+          {SEO_CONFIG.faqs.map((f, i) => (
             <div key={i} className={`ln-faq-item${open === i ? " open" : ""}`}>
               <button className="ln-faq-q" onClick={() => setOpen(open === i ? null : i)}>
                 <span>{f.q}</span>
@@ -989,11 +1025,12 @@ function Footer() {
               <li><Link to="/about">About JedMee</Link></li>
               <li><Link to="/contact">Contact Us</Link></li>
               <li><Link to="/terms">Terms of Service</Link></li>
+              <li><a href={`mailto:${SEO_CONFIG.supportEmail}`}>{SEO_CONFIG.supportEmail}</a></li>
             </ul>
           </div>
         </div>
         <div className="ln-footer-bottom">
-          <span>© 2026 JedMee. All rights reserved.</span>
+          <span>© {SEO_CONFIG.foundingYear}–{new Date().getFullYear()} {SEO_CONFIG.siteName}. All rights reserved.</span>
           <span>Built for pharmacies worldwide</span>
         </div>
       </div>
@@ -1008,47 +1045,126 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const authed = Boolean(readAuth()?.refreshToken);
 
+  /* ── Page-level meta ── */
   useSeoMeta({
     title: "Pharmacy Management Software | Free Trial",
     description:
       "JedMee is pharmacy software for medicine shops and distributors. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial, no credit card needed.",
     keywords:
       "pharmacy management software, pharmacy software, pharmacy billing software, pharmacy management system, medical store software, medicine shop software, free pharmacy software, cloud pharmacy software, pharmacy inventory management, pharmacy stock management, pharmacy POS, drug store software, chemist software, pharmacy invoicing software, wholesale pharmacy software",
-    canonical: "https://jedmee.com/",
+    canonical: `${SEO_CONFIG.siteUrl}/`,
   });
 
+  /*
+   * ── JSON-LD ──────────────────────────────────────────────────────────
+   *
+   * IMPORTANT — schema ownership:
+   *   • SoftwareApplication  → HERE only  (removed from index.html)
+   *   • FAQPage              → HERE only  (removed from index.html)
+   *   • WebPage              → HERE only
+   *   • Organization         → index.html only
+   *   • WebSite              → index.html only
+   *   • BreadcrumbList       → index.html only
+   *
+   * This split eliminates every "Duplicate field" error in Search Console
+   * because Google sees static + dynamic schemas merged per page.
+   * ─────────────────────────────────────────────────────────────────── */
   useJsonLd([
+    /* 1. WebPage */
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "JedMee — Pharmacy Management Software",
-      "url": "https://jedmee.com/",
-      "description": "Cloud-based pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial.",
+      "name": `${SEO_CONFIG.siteName} — Pharmacy Management Software`,
+      "url": `${SEO_CONFIG.siteUrl}/`,
+      "description":
+        "Cloud-based pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial.",
       "inLanguage": "en",
-      "isPartOf": { "@type": "WebSite", "url": "https://jedmee.com" },
+      "isPartOf": { "@type": "WebSite", "url": SEO_CONFIG.siteUrl },
       "breadcrumb": {
         "@type": "BreadcrumbList",
-        "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://jedmee.com/" }]
-      }
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": `${SEO_CONFIG.siteUrl}/` },
+        ],
+      },
     },
+
+    /* 2. SoftwareApplication — pricing pulled from SEO_CONFIG so it stays in sync */
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": SEO_CONFIG.siteName,
+      "url": SEO_CONFIG.siteUrl,
+      "logo": `${SEO_CONFIG.siteUrl}/logo.png`,
+      "image": `${SEO_CONFIG.siteUrl}/og-image.png`,
+      "applicationCategory": "BusinessApplication",
+      "applicationSubCategory": "Pharmacy Management Software",
+      "operatingSystem": "Web, Android, iOS",
+      "description":
+        "JedMee is cloud-based pharmacy management software for medicine shops and distributors worldwide. Features include tax billing, inventory management, purchase orders, sales invoices, expiry tracking, customer ledgers, and vendor management.",
+      "inLanguage": "en",
+      "availableOnDevice": "Desktop, Mobile, Tablet",
+      "keywords":
+        "pharmacy management software, medicine shop software, pharmacy billing, medical store management, pharmacy inventory",
+      "featureList": [
+        "Tax-compliant billing and invoicing (GST, VAT, Sales Tax)",
+        "Inventory management with expiry date tracking",
+        "Purchase order and invoice management",
+        "Sales invoice generation with batch tracking",
+        "Customer and vendor ledgers",
+        "Batch and lot tracking with low-stock alerts",
+        "Prescription management for retail pharmacies",
+        "Multi-user access with role-based permissions",
+        "Cloud-based data storage with AWS",
+        "Mobile-friendly responsive interface",
+        "Wholesale-to-retail order catalog",
+        "GST and tax reports (GSTR-1 compatible)",
+        "Division and manufacturer management",
+        "CSV bulk import for products and batches",
+      ],
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "USD",
+        "lowPrice": "0",
+        "highPrice": SEO_CONFIG.plans[SEO_CONFIG.plans.length - 1].price,
+        "offerCount": String(SEO_CONFIG.plans.length),
+        "offers": SEO_CONFIG.plans.map(p => ({
+          "@type": "Offer",
+          "name": p.name,
+          "price": p.price,
+          "priceCurrency": p.priceCurrency,
+          "description": p.description,
+        })),
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": SEO_CONFIG.ratingValue,
+        "bestRating": "5",
+        "worstRating": "1",
+        "reviewCount": SEO_CONFIG.reviewCount,
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": SEO_CONFIG.siteName,
+        "url": SEO_CONFIG.siteUrl,
+        "logo": { "@type": "ImageObject", "url": `${SEO_CONFIG.siteUrl}/logo.png` },
+      },
+    },
+
+    /* 3. FAQPage — built directly from SEO_CONFIG.faqs; zero duplication risk */
     {
       "@context": "https://schema.org",
       "@type": "FAQPage",
-      "mainEntity": [
-        { "@type": "Question", "name": "Can both medicine shops and distributors use JedMee?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Medicine shops get billing, stock, and order tools. Distributors get a product catalog, order management, and dispatch tracking." } },
-        { "@type": "Question", "name": "Does JedMee handle tax billing for my country?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. JedMee creates fully tax-compliant invoices automatically. Set the tax rate per product and the system calculates the tax for you. It supports GST, VAT, Sales Tax, and other tax systems." } },
-        { "@type": "Question", "name": "How does expiry tracking work?", "acceptedAnswer": { "@type": "Answer", "text": "Each medicine can have multiple batches with expiry dates. JedMee alerts you before any batch expires so you can act in time." } },
-        { "@type": "Question", "name": "Can I add my existing medicines and data?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Import medicines, batches, customers, and suppliers from a CSV file — no manual entry needed." } },
-        { "@type": "Question", "name": "How do retailers order from wholesalers?", "acceptedAnswer": { "@type": "Answer", "text": "Wholesalers add medicines to an online catalog. Retailers browse, add to cart, and place orders. The wholesaler confirms inside JedMee." } },
-        { "@type": "Question", "name": "Is my business data safe?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. All data is encrypted and stored securely. We maintain 99.9% uptime and take regular backups." } }
-      ]
-    }
+      "mainEntity": SEO_CONFIG.faqs.map(f => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": { "@type": "Answer", "text": f.a },
+      })),
+    },
   ]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    /* ── Helpers ── */
     const onScroll = (el, from, to) => {
       if (!el) return;
       gsap.set(el, from);
@@ -1066,11 +1182,9 @@ export default function LandingPage() {
       });
     };
 
-    /* ── NAV ── */
     gsap.set(".ln-nav", { opacity: 0, y: -28 });
     gsap.to(".ln-nav", { opacity: 1, y: 0, duration: 0.6, ease: "power3.out", delay: 0.05 });
 
-    /* ── HERO ── */
     gsap.set([".ln-hero-badge",".ln-hero-title",".ln-hero-sub",".ln-hero-ctas",".ln-hero-proof",".ln-hero-trust"], { opacity: 0, y: 30 });
     gsap.set(".ln-hero-visual", { opacity: 0, x: 60, scale: 0.94 });
     gsap.set(".ln-dash-float", { opacity: 0, y: 20, scale: 0.9 });
@@ -1085,66 +1199,52 @@ export default function LandingPage() {
       .to(".ln-hero-visual", { opacity: 1, x: 0, scale: 1, duration: 0.9, ease: "power4.out" }, 0.25)
       .to(".ln-dash-float",  { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.12, ease: "back.out(1.6)" }, "-=0.5");
 
-    /* ── SECTIONS ── */
     onBatch(".ln-section-label", { opacity: 0, y: 14, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.45 }, 0.05);
     onBatch(".ln-section-title", { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.6 }, 0.05);
     onBatch(".ln-section-sub",   { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5 }, 0.05);
-
-    /* ── STATS ── */
     onBatch(".ln-stat", { opacity: 0, y: 40, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.2)" }, 0.1);
 
-    /* ── PROBLEM ROWS ── */
     document.querySelectorAll(".ln-problem-row").forEach((el, i) => {
       onScroll(el, { opacity: 0, x: -50 }, { opacity: 1, x: 0, duration: 0.5, delay: i * 0.07 });
     });
 
-    /* ── FEATURES ── */
     document.querySelectorAll(".ln-feat").forEach((el, i) => {
       const col = i % 4;
       const xDir = col < 2 ? -60 : 60;
       onScroll(el, { opacity: 0, x: xDir, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 0.6, delay: (col < 2 ? col : col - 2) * 0.07 });
     });
 
-    /* ── COMPARISON ── */
     onScrollSel(".ln-cmp-head", { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.5 });
     document.querySelectorAll(".ln-cmp-row").forEach((el, i) => {
       onScroll(el, { opacity: 0, x: i % 2 === 0 ? -40 : 40 }, { opacity: 1, x: 0, duration: 0.4, delay: i * 0.025 });
     });
 
-    /* ── WORKFLOW ── */
     document.querySelectorAll(".ln-wf-node").forEach((el, i) => {
       onScroll(el, { opacity: 0, y: 40, scale: 0.92 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "back.out(1.1)", delay: i * 0.1 });
     });
 
-    /* ── PLATFORM ── */
-    onScrollSel(".ln-plat-tabs", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.45 });
+    onScrollSel(".ln-plat-tabs",   { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.45 });
     onScrollSel(".ln-plat-window", { opacity: 0, y: 50, scale: 0.97 }, { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power4.out" });
 
-    /* ── TESTIMONIALS ── */
     onScrollSel(".ln-testi-featured", { opacity: 0, x: -50, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 0.65 });
     onBatch(".ln-testi-mini", { opacity: 0, x: 50, scale: 0.95 }, { opacity: 1, x: 0, scale: 1, duration: 0.55, ease: "back.out(1.1)" }, 0.12);
 
-    /* ── PRICING ── */
     onBatch(".ln-plan", { opacity: 0, y: 50, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.65, ease: "back.out(1.1)" }, 0.14);
 
-    /* ── FAQ ── */
     onScrollSel(".ln-faq-header", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.6 });
     document.querySelectorAll(".ln-faq-item").forEach((el, i) => {
       onScroll(el, { opacity: 0, x: -35 }, { opacity: 1, x: 0, duration: 0.45, delay: i * 0.05 });
     });
 
-    /* ── CTA ── */
     onScrollSel(".ln-cta-badge",   { opacity: 0, y: 18, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.4)" });
     onScrollSel(".ln-cta-title",   { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.6 });
     onScrollSel(".ln-cta-sub",     { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.45 });
     onScrollSel(".ln-cta-actions", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4 });
     onScrollSel(".ln-cta-trust",   { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35 });
 
-    /* ── FOOTER ── */
     onScrollSel(".ln-footer-brand", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.55 });
     onBatch(".ln-footer-col", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45 }, 0.08);
 
-    /* ── 3D TILT ── */
     const addTilt = () => {
       const cards = document.querySelectorAll(".ln-feat, .ln-stat, .ln-plan, .ln-testi-featured, .ln-testi-mini");
       const onMove = (e) => {

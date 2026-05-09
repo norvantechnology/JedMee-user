@@ -6,7 +6,6 @@
 
     <!-- ═══════════════════════════════════════════════════════
          PRIMARY META TAGS
-         Title: ≤55 chars / ≤580px  |  Description: ≤155 chars / ≤1000px
     ═══════════════════════════════════════════════════════ -->
     <title>Pharmacy Management Software | Free Trial — JedMee</title>
     <meta name="title" content="Pharmacy Management Software | Free Trial — JedMee" />
@@ -61,7 +60,6 @@
 
     <!-- ═══════════════════════════════════════════════════════
          FAVICON & TOUCH ICONS
-         Priority: ICO (legacy) → WebP (modern) → PNG (fallback)
     ═══════════════════════════════════════════════════════ -->
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/webp" href="/favicon-192.webp" />
@@ -70,97 +68,11 @@
     <link rel="manifest" href="/manifest.json" />
 
     <!-- ═══════════════════════════════════════════════════════
-         JSON-LD STRUCTURED DATA — SoftwareApplication
-    ═══════════════════════════════════════════════════════ -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "JedMee",
-      "url": "https://jedmee.com",
-      "logo": "https://jedmee.com/logo.png",
-      "image": "https://jedmee.com/og-image.png",
-      "applicationCategory": "BusinessApplication",
-      "applicationSubCategory": "Pharmacy Management Software",
-      "operatingSystem": "Web, Android, iOS",
-      "description": "JedMee is cloud-based pharmacy management software for medicine shops and distributors worldwide. Features include tax billing, inventory management, purchase orders, sales invoices, expiry tracking, customer ledgers, and vendor management.",
-      "inLanguage": "en",
-      "availableOnDevice": "Desktop, Mobile, Tablet",
-      "keywords": "pharmacy management software, medicine shop software, pharmacy billing, medical store management, pharmacy inventory",
-      "featureList": [
-        "Tax-compliant billing and invoicing (GST, VAT, Sales Tax)",
-        "Inventory management with expiry date tracking",
-        "Purchase order and invoice management",
-        "Sales invoice generation with batch tracking",
-        "Customer and vendor ledgers",
-        "Batch and lot tracking with low-stock alerts",
-        "Prescription management for retail pharmacies",
-        "Multi-user access with role-based permissions",
-        "Cloud-based data storage with AWS",
-        "Mobile-friendly responsive interface",
-        "Wholesale-to-retail order catalog",
-        "GST and tax reports (GSTR-1 compatible)",
-        "Division and manufacturer management",
-        "CSV bulk import for products and batches"
-      ],
-      "offers": {
-        "@type": "AggregateOffer",
-        "priceCurrency": "USD",
-        "lowPrice": "0",
-        "highPrice": "39",
-        "offerCount": "4",
-        "offers": [
-          {
-            "@type": "Offer",
-            "name": "Starter",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free 14-day trial for small medicine shops — no credit card required"
-          },
-          {
-            "@type": "Offer",
-            "name": "Growth",
-            "price": "9",
-            "priceCurrency": "USD",
-            "description": "For growing pharmacies and medicine shops needing full features"
-          },
-          {
-            "@type": "Offer",
-            "name": "Professional",
-            "price": "19",
-            "priceCurrency": "USD",
-            "description": "For established pharmacies and distributors"
-          },
-          {
-            "@type": "Offer",
-            "name": "Enterprise",
-            "price": "39",
-            "priceCurrency": "USD",
-            "description": "For large pharmacy chains and wholesale distributors"
-          }
-        ]
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.9",
-        "bestRating": "5",
-        "worstRating": "1",
-        "reviewCount": "500"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "JedMee",
-        "url": "https://jedmee.com",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://jedmee.com/logo.png"
-        }
-      }
-    }
-    </script>
-
-    <!-- ═══════════════════════════════════════════════════════
-         JSON-LD STRUCTURED DATA — Organization
+         JSON-LD — Organization (static, never duplicated by React)
+         NOTE: SoftwareApplication, FAQPage, and WebPage are injected
+         dynamically by LandingPage.jsx via useJsonLd() so they are
+         NOT defined here. Defining them in both places causes the
+         "Duplicate field" error in Google Search Console.
     ═══════════════════════════════════════════════════════ -->
     <script type="application/ld+json">
     {
@@ -203,7 +115,7 @@
     </script>
 
     <!-- ═══════════════════════════════════════════════════════
-         JSON-LD STRUCTURED DATA — WebSite with SearchAction
+         JSON-LD — WebSite with SearchAction (static, safe here)
     ═══════════════════════════════════════════════════════ -->
     <script type="application/ld+json">
     {
@@ -225,83 +137,7 @@
     </script>
 
     <!-- ═══════════════════════════════════════════════════════
-         JSON-LD STRUCTURED DATA — FAQPage
-    ═══════════════════════════════════════════════════════ -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is JedMee pharmacy management software?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "JedMee is cloud-based pharmacy management software for medicine shops and distributors worldwide. It includes tax billing, inventory management, purchase orders, sales invoices, expiry tracking, and customer and vendor ledgers."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Does JedMee support GST billing for Indian pharmacies?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. JedMee supports GST, VAT, Sales Tax, and other tax systems. It generates fully tax-compliant invoices automatically based on the tax rate you set per product, including GSTR-1 compatible reports."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is there a free plan for JedMee pharmacy software?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, JedMee offers a free 14-day trial with no credit card required. Paid plans start at $9 per month for growing pharmacies."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can JedMee track medicine expiry dates?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. JedMee tracks expiry dates for all medicine batches and sends alerts before any batch expires, so you can act in time and reduce write-offs."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Does JedMee work for wholesale medicine distributors?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. JedMee is built for both retail pharmacies and wholesale distributors. It supports bulk purchase orders, vendor management, distributor invoicing, and an online order catalog for retailers."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is JedMee available on mobile?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. JedMee is a cloud-based, mobile-friendly platform accessible from any device — desktop, tablet, or smartphone. No app download required."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What is the difference between JedMee Growth and Professional plans?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "The Growth plan ($9/month) is for growing pharmacies needing full billing and inventory features. The Professional plan ($19/month) adds advanced reporting, division management, and priority support for established pharmacies and distributors."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can multiple staff members use JedMee at the same time?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. JedMee supports multi-user access with role-based permissions. You can assign different roles (owner, manager, staff) with granular control over what each user can view or edit."
-          }
-        }
-      ]
-    }
-    </script>
-
-    <!-- ═══════════════════════════════════════════════════════
-         JSON-LD STRUCTURED DATA — BreadcrumbList (site root)
+         JSON-LD — BreadcrumbList (static, safe here)
     ═══════════════════════════════════════════════════════ -->
     <script type="application/ld+json">
     {
@@ -321,7 +157,6 @@
     <!-- ═══════════════════════════════════════════════════════
          GOOGLE ANALYTICS 4
          Replace G-XXXXXXXXXX with your actual GA4 Measurement ID
-         (Google Analytics → Admin → Data Streams → Measurement ID)
     ═══════════════════════════════════════════════════════ -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
     <script>
@@ -331,13 +166,6 @@
       gtag('config', 'G-XXXXXXXXXX');
     </script>
 
-    <!--
-      Global fonts (project-wide)
-      - DM Sans: modern, highly readable UI font (app shell, components)
-      - Instrument Serif: elegant serif accent font
-      - Plus Jakarta Sans: premium geometric display font (landing page headings)
-      - Inter: clean, highly readable body font (landing page body text)
-    -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -349,8 +177,6 @@
     <!--
       ═══════════════════════════════════════════════════════════════════════
       STATIC CONTENT FOR LLM CRAWLERS AND NO-JS ENVIRONMENTS
-      This section is visible to search engines, AI crawlers, and users
-      without JavaScript. The React app replaces this content on load.
       ═══════════════════════════════════════════════════════════════════════
     -->
     <noscript>
