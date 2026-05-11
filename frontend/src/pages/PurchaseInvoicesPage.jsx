@@ -47,11 +47,7 @@ import { sortBatchesByExpiryAsc } from "../utils/batchSort.js";
 import { batchExpiryDaysInlineSuffix, formatBatchExpiryRelativePhrase } from "../utils/batchExpiryDisplay.js";
 import { toDivisionOption } from "../utils/divisionLabel.js";
 import { formatProductLabel, toProductOption } from "../utils/productLabel.js";
-import {
-  focusAdjacentModalField,
-  isCmPanelTopStackLayer,
-  PURCHASE_MODAL_FOCUS_BUTTON_ATTR
-} from "../utils/modalFocusNav.js";
+import { isCmPanelTopStackLayer } from "../utils/modalFocusNav.js";
 import { openFocusedDropdown } from "../utils/dropdownKeyboard.js";
 import { emitToast } from "../services/toastBus.js";
 import { printViaHiddenIframe } from "../print/printDocument.js";
@@ -59,7 +55,6 @@ import medico from "../shared/print/medicoPrintDocuments.cjs";
 import { NAV_LABELS } from "../constants/navLabels.js";
 import "../components/StructuredForm.css";
 import "./PurchaseInvoicesPage.css";
-import KeyboardShortcutsModal, { KeyboardShortcutsTrigger } from "../components/KeyboardShortcutsModal.jsx";
 import { IconReceipt, IconRotateBox, IconWallet } from "../components/ui/AppIcons.jsx";
 import CommonLoading from "../components/CommonLoading.jsx";
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
@@ -81,10 +76,11 @@ import {
   IconView
 } from "../components/TableActionKit.jsx";
 
-/** Keyboard help entries for the purchase invoice editor (via KeyboardShortcutsModal). */
+/** Keyboard help entries for the purchase invoice editor (CommonModal `shortcutsItems`). */
 const PURCHASE_EDITOR_SHORTCUTS = [
-  { description: "Next field", keys: "Enter" },
-  { description: "Previous field", keys: "Shift+Enter" },
+  { description: "Next field (required first when marked)", keys: "Enter" },
+  { description: "Primary submit / save", keys: "Shift+Enter" },
+  { description: "Previous field", keys: "Shift+Tab" },
   { description: "Open focused dropdown", keys: "↓" },
   { description: "Change dropdown option", keys: "↑ / ↓" },
   { description: "Add line item", keys: "Alt+L" },
@@ -296,7 +292,7 @@ export default function PurchaseInvoicesPage() {
   const [returnOpen, setReturnOpen] = useState(false);
   const [returnForm, setReturnForm] = useState({ invoiceId: "", returnDate: localCalendarYmd(), returnReason: "OTHER", notes: "", items: [] });
   const [batchModalOpen, setBatchModalOpen] = useState(false);
-  const [shortcutsHelpOpen, setShortcutsHelpOpen] = useState(false);
+  const [batchModalDepsLoading, setBatchModalDepsLoading] = useState(false);
   const [batchModalBusy, setBatchModalBusy] = useState(false);
   const [batchModalLineIdx, setBatchModalLineIdx] = useState(-1);
   const [batchModalSeed, setBatchModalSeed] = useState(null);
@@ -736,17 +732,16 @@ export default function PurchaseInvoicesPage() {
     };
   }, [activeBatches, activeLine?.purchaseRate, batchSnapshot.bestBatchByRate?.purchase_rate]);
   const purchaseLineColumns = useMemo(() => {
-    const req = <span className="reqMark" aria-hidden="true">*</span>;
     return [
       { key: "row", label: "#" },
-      { key: "product", label: <>Product {req}</>, required: true },
-      { key: "batch", label: <>Batch No {req}</>, required: true },
+      { key: "product", label: "Product" },
+      { key: "batch", label: "Batch No" },
       { key: "expiry", label: "Expiry Date" },
       { key: "stock", label: "Stock", className: "center" },
-      { key: "qty", label: <>Qty {req}</>, className: "num", required: true },
+      { key: "qty", label: "Qty", className: "num" },
       { key: "free", label: "Free", className: "num" },
-      { key: "purchaseRate", label: <>Purchase Rate {req}</>, className: "num", required: true },
-      { key: "mrp", label: <>MRP {req}</>, className: "num", required: true },
+      { key: "purchaseRate", label: "Purchase Rate", className: "num" },
+      { key: "mrp", label: "MRP", className: "num" },
       { key: "salesRate", label: "Sales Rate", className: "num" },
       { key: "disc", label: "Disc %", className: "num" },
       { key: "gst", label: `${taxLabel} %`, className: "center" },
@@ -857,33 +852,6 @@ export default function PurchaseInvoicesPage() {
     if (!open) return;
     function onKeyDown(e) {
       if (!isCmPanelTopStackLayer(modalBodyRef.current)) return;
-      // Enter behavior in modal:
-      // - Enter => next field
-      // - Shift+Enter => previous field
-      // - Never submit/confirm on plain Enter
-      if (e.key === "Enter" && !e.altKey && !e.ctrlKey && !e.metaKey) {
-        const tag = document.activeElement?.tagName;
-        if (tag === "TEXTAREA") return;
-        if ((tag === "INPUT" || tag === "SELECT") && e.shiftKey) {
-          e.preventDefault();
-          e.stopPropagation();
-          focusAdjacentModalField(modalBodyRef.current, document.activeElement, -1, {
-            buttonDataAttr: PURCHASE_MODAL_FOCUS_BUTTON_ATTR
-          });
-          return;
-        }
-        if ((tag === "INPUT" || tag === "SELECT") && !e.shiftKey) {
-          e.preventDefault();
-          e.stopPropagation();
-          focusAdjacentModalField(modalBodyRef.current, document.activeElement, 1, {
-            buttonDataAttr: PURCHASE_MODAL_FOCUS_BUTTON_ATTR
-          });
-          return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
       if (!e.ctrlKey && !e.shiftKey && e.key === "ArrowDown") {
         const el = document.activeElement;
         if (el?.tagName === "SELECT" && Number(el.size) <= 1) {
@@ -940,7 +908,7 @@ export default function PurchaseInvoicesPage() {
     setForm({ invoiceNumber: "", vendorInvoiceNumber: "", divisionId: "", vendorId: "", invoiceDate: localCalendarYmd(), dueDate: "", notes: "", items: [emptyLine()] });
   }
 
-  function openAddBatchForLine(lineIdx) {
+  async function openAddBatchForLine(lineIdx) {
     const line = (form.items || [])[lineIdx];
     const productId = String(line?.productId || "");
     if (!productId) {
@@ -957,7 +925,13 @@ export default function PurchaseInvoicesPage() {
       divisionId: p?.division_id || form.divisionId || "",
       mfgCompanyId: p?.mfg_company_id || ""
     });
+    setBatchModalDepsLoading(true);
     setBatchModalOpen(true);
+    try {
+      await refreshMasterDropdowns();
+    } finally {
+      setBatchModalDepsLoading(false);
+    }
   }
 
   function openPaymentFromInvoice(source) {
@@ -1571,14 +1545,15 @@ export default function PurchaseInvoicesPage() {
         title={modalLoading && loadingEditId ? "Opening invoice…" : editing?.id ? (isRetailer ? "Edit Purchase" : "Edit Purchase Invoice") : (isRetailer ? "Add Purchase" : "Add Purchase Invoice")}
         subtitle={modalLoading && loadingEditId ? "Loading lines and stock options" : ""}
         icon={<IconReceipt />}
-        loading={modalLoading}
-        loadingText="Loading invoice and product batches…"
-        headerTools={<KeyboardShortcutsTrigger onClick={() => setShortcutsHelpOpen(true)} />}
+        loading={modalLoading || saveBusy || busy}
+        loadingText={
+          saveBusy ? "Saving invoice…" : busy ? "Working…" : "Loading invoice and product batches…"
+        }
+        shortcutsItems={PURCHASE_EDITOR_SHORTCUTS}
         onClose={() => {
           purchaseInvoiceLoadGenRef.current += 1;
           setModalLoading(false);
           setLoadingEditId(null);
-          setShortcutsHelpOpen(false);
           setOpen(false);
         }}
         size={1100}
@@ -1639,7 +1614,7 @@ export default function PurchaseInvoicesPage() {
             <div className="piSectionBody">
               <div className="piHeaderTop">
                 <div className="raField piHeadField piHeadField_party" data-pi-focus="party">
-                  <label>{isRetailer ? "Supplier" : "Division"} <span className="reqMark" aria-hidden="true">*</span></label>
+                  <label>{isRetailer ? "Supplier" : "Division"} </label>
                   {isRetailer ? (
                     <MasterSelectWithCreate
                       kind="vendor"
@@ -1681,7 +1656,7 @@ export default function PurchaseInvoicesPage() {
                   {submitted && !form.divisionId && !form.vendorId && <div className="mfzErr">{isRetailer ? "Supplier" : "Division"} is required.</div>}
                 </div>
                 <div className="raField piHeadField piHeadField_invDate">
-                  <label>Invoice Date <span className="reqMark" aria-hidden="true">*</span></label>
+                  <label>Invoice Date </label>
                   <CommonDatePicker
                     value={form.invoiceDate}
                     onChange={(v) =>
@@ -1742,7 +1717,7 @@ export default function PurchaseInvoicesPage() {
                   {(form.items || []).map((it, idx) => (
                     <tr key={idx} className={`piItemRow ${idx === activeLineIdx ? "cliItemRow_active" : ""}`} onClick={() => setActiveLineIdx(idx)}>
                       <td><div className="piRowNum">{idx + 1}</div></td>
-                      <td data-required="true">
+                      <td>
                         <MasterSelectWithCreate
                           kind="product"
                           selectClassName={`piLineSelect${submitted && !clean(it.productId) ? " piLineSelect_err" : ""}`}
@@ -1803,7 +1778,7 @@ export default function PurchaseInvoicesPage() {
                           }}
                         />
                       </td>
-                      <td data-required="true">
+                      <td>
                         <div className="piBatchCell">
                           <CommonSelectField
                             className={`piLineSelect${submitted && !clean(it.batchId) && !it.isNewBatch ? " piLineSelect_err" : ""}`}
@@ -1871,12 +1846,12 @@ export default function PurchaseInvoicesPage() {
                           <span className="piStockDash"></span>
                         )}
                       </td>
-                      <td data-required="true">
+                      <td>
                         <input className={`raInput piNum${submitted && !(Number(it.qty || 0) > 0) ? " piInput_err" : ""}`} type="text" inputMode="numeric" pattern="[0-9]*" value={it.qty} onChange={(e) => setItem(idx, { qty: e.target.value.replace(/[^0-9]/g, "") })} />
                       </td>
                       <td><input className="raInput piNum" type="text" inputMode="numeric" pattern="[0-9]*" value={it.freeQty} onChange={(e) => setItem(idx, { freeQty: e.target.value.replace(/[^0-9]/g, "") })} /></td>
-                      <td data-required="true"><AmountInput className={`raInput piNum${submitted && !(Number(it.purchaseRate || 0) > 0) ? " piInput_err" : ""}`} value={String(it.purchaseRate ?? "")} onChange={(raw) => setItem(idx, { purchaseRate: raw })} inputMode="decimal" /></td>
-                      <td data-required="true"><AmountInput className={`raInput piNum${submitted && !(Number(it.mrp || 0) > 0) ? " piInput_err" : ""}`} value={String(it.mrp ?? "")} onChange={(raw) => setItem(idx, { mrp: raw })} inputMode="decimal" /></td>
+                      <td><AmountInput className={`raInput piNum${submitted && !(Number(it.purchaseRate || 0) > 0) ? " piInput_err" : ""}`} value={String(it.purchaseRate ?? "")} onChange={(raw) => setItem(idx, { purchaseRate: raw })} inputMode="decimal" /></td>
+                      <td><AmountInput className={`raInput piNum${submitted && !(Number(it.mrp || 0) > 0) ? " piInput_err" : ""}`} value={String(it.mrp ?? "")} onChange={(raw) => setItem(idx, { mrp: raw })} inputMode="decimal" /></td>
                       <td><AmountInput className="raInput piNum" value={String(it.salesRate ?? "")} onChange={(raw) => setItem(idx, { salesRate: raw })} inputMode="decimal" /></td>
                       <td><input className="raInput piNum" type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={it.discountPercent} onChange={(e) => setItem(idx, { discountPercent: e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1") })} /></td>
                       <td>
@@ -2107,13 +2082,6 @@ export default function PurchaseInvoicesPage() {
           </div>
       </CommonModal>
 
-      <KeyboardShortcutsModal
-        open={shortcutsHelpOpen && open}
-        onClose={() => setShortcutsHelpOpen(false)}
-        title="Keyboard shortcuts"
-        items={PURCHASE_EDITOR_SHORTCUTS}
-      />
-
       <PartyContactEmailModal
         open={sendVendorContact.open}
         title="Supplier email for invoice"
@@ -2135,6 +2103,7 @@ export default function PurchaseInvoicesPage() {
         open={batchModalOpen}
         mode="add"
         busy={batchModalBusy}
+        depsLoading={batchModalDepsLoading}
         initialValue={batchModalSeed}
         existingRows={[]}
         productOptions={products}
@@ -2142,7 +2111,7 @@ export default function PurchaseInvoicesPage() {
         mfgCompanyOptions={mfgCompanies}
         onRefreshDivisionMfg={refreshMasterDropdowns}
         onClose={() => {
-          if (batchModalBusy) return;
+          if (batchModalBusy || batchModalDepsLoading) return;
           setBatchModalOpen(false);
           setBatchModalLineIdx(-1);
           setBatchModalSeed(null);
@@ -2182,6 +2151,8 @@ export default function PurchaseInvoicesPage() {
         icon={<IconWallet />}
         onClose={() => setPaymentOpen(false)}
         size="md"
+        loading={paymentSaveBusy}
+        loadingText="Saving payment…"
         footer={
           <div className="piModalFooter sfmModalFooter">
             <button className="piGhostBtn sfmBtnGhost" type="button" onClick={() => setPaymentOpen(false)} disabled={busy || paymentSaveBusy}>Cancel</button>
@@ -2222,8 +2193,8 @@ export default function PurchaseInvoicesPage() {
         }
       >
         <div className="sfmGrid">
-          <div className="raField"><label>Date <span className="reqMark" aria-hidden="true">*</span></label><CommonDatePicker value={paymentForm.paymentDate} onChange={(v) => setPaymentForm((p) => ({ ...p, paymentDate: v }))} ariaLabel="Payment date" /></div>
-          <div className="raField"><label>Amount <span className="reqMark" aria-hidden="true">*</span></label><AmountInput className="raInput" value={String(paymentForm.amount ?? "")} onChange={(raw) => setPaymentForm((p) => ({ ...p, amount: raw }))} inputMode="decimal" /></div>
+          <div className="raField"><label>Date </label><CommonDatePicker value={paymentForm.paymentDate} onChange={(v) => setPaymentForm((p) => ({ ...p, paymentDate: v }))} ariaLabel="Payment date" /></div>
+          <div className="raField"><label>Amount </label><AmountInput className="raInput" value={String(paymentForm.amount ?? "")} onChange={(raw) => setPaymentForm((p) => ({ ...p, amount: raw }))} inputMode="decimal" /></div>
           <div className="raField"><label>Mode</label><select className="raInput" value={paymentForm.paymentMode} onChange={(e) => setPaymentForm((p) => ({ ...p, paymentMode: e.target.value }))}><option>CASH</option><option>CHEQUE</option><option>NEFT</option><option>UPI</option><option>OTHER</option></select></div>
           <div className="raField"><label>Reference</label><input className="raInput" value={paymentForm.referenceNumber} onChange={(e) => setPaymentForm((p) => ({ ...p, referenceNumber: e.target.value }))} /></div>
         </div>
@@ -2235,6 +2206,8 @@ export default function PurchaseInvoicesPage() {
         icon={<IconRotateBox />}
         onClose={() => { setReturnOpen(false); setReturnLoadingItems(false); }}
         size="lg"
+        loading={returnLoadingItems || returnBusy}
+        loadingText={returnBusy ? "Creating return…" : "Loading invoice lines…"}
         footer={
           <ModalFooterShell>
             <AppButton variant="secondary" type="button" onClick={() => { setReturnOpen(false); setReturnLoadingItems(false); }} disabled={busy || returnBusy}>Cancel</AppButton>
@@ -2454,6 +2427,8 @@ export default function PurchaseInvoicesPage() {
         icon={<IconWallet />}
         onClose={() => (bulkPaymentBusy ? null : setBulkPaymentConfirm({ open: false, ids: [], count: 0, total: 0, paymentDate: "", paymentMode: "" }))}
         size="md"
+        loading={bulkPaymentBusy}
+        loadingText="Completing payments…"
         footer={
           <div className="piModalFooter sfmModalFooter">
             <button
@@ -2475,7 +2450,7 @@ export default function PurchaseInvoicesPage() {
             <strong>{bulkPaymentConfirm.count || 0}</strong> invoice(s) selected | Total settlement: <strong>{fmtCurrency(bulkPaymentConfirm.total)}</strong>
           </div>
           <div className="raField">
-            <label>Payment Date <span className="reqMark" aria-hidden="true">*</span></label>
+            <label>Payment Date </label>
             <CommonDatePicker
               value={bulkPaymentConfirm.paymentDate || localCalendarYmd()}
               onChange={(v) => setBulkPaymentConfirm((p) => ({ ...p, paymentDate: v }))}
@@ -2483,7 +2458,7 @@ export default function PurchaseInvoicesPage() {
             />
           </div>
           <div className="raField">
-            <label>Payment Mode <span className="reqMark" aria-hidden="true">*</span></label>
+            <label>Payment Mode </label>
             <select
               className="raInput"
               value={bulkPaymentConfirm.paymentMode || "NEFT"}

@@ -1,4 +1,4 @@
-import { InlineButtonProgress } from "../components/ui/buttons.jsx";
+import { AppButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "../layouts/AppShell.jsx";
@@ -15,11 +15,20 @@ import {
 import { emitToast } from "../services/toastBus.js";
 import { parseApiError } from "../utils/api.js";
 import CommonTable from "../components/CommonTable.jsx";
-import CommonModal from "../components/CommonModal.jsx";
+import CommonModal, {
+  ModalFormBody,
+  ModalFormField,
+  ModalFormGrid,
+  ModalFormPanel,
+  ModalFormPanelBody,
+  ModalFormPanelHead,
+  ModalFormSectionTitle,
+  ModalFormShell
+} from "../components/CommonModal.jsx";
+import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
 import "./RolesAccessPage.css";
 import { can } from "../utils/access.js";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
-import "../components/StructuredForm.css";
 import { IconShieldKey } from "../components/ui/AppIcons.jsx";
 import { NAV_LABELS } from "../constants/navLabels.js";
 import { IconBtn, IconSettings, IconTrash } from "../components/TableActionKit.jsx";
@@ -288,13 +297,25 @@ export default function RolesAccessPage() {
         title="Add Role"
         onClose={() => { setCreateOpen(false); setCreateSubmitted(false); setCreateName(""); }}
         icon={<IconShieldKey />}
+        loading={busy}
+        loadingText="Saving role…"
         footer={
-          <div className="raModalFooter sfmModalFooter">
-            <button className="raBtnGhost sfmBtnGhost" type="button" data-cm-cancel="true" onClick={() => { setCreateOpen(false); setCreateSubmitted(false); setCreateName(""); }} disabled={busy}>
+          <ModalFooterShell>
+            <AppButton
+              variant="secondary"
+              type="button"
+              data-cm-cancel="true"
+              onClick={() => {
+                setCreateOpen(false);
+                setCreateSubmitted(false);
+                setCreateName("");
+              }}
+              disabled={busy}
+            >
               Cancel
-            </button>
-            <button
-              className="raBtn sfmBtnPrimary"
+            </AppButton>
+            <AppButton
+              variant="primary"
               type="button"
               data-cm-primary="true"
               disabled={!canAdd || busy}
@@ -314,33 +335,36 @@ export default function RolesAccessPage() {
               }}
             >
               {busy ? <InlineButtonProgress label="Working…" /> : "Create Role"}
-            </button>
-          </div>
+            </AppButton>
+          </ModalFooterShell>
         }
       >
-        <div className="sfm">
-          <div className="sfmSection">
-            <div className="sfmSectionHead">
-              <div className="sfmTitle">Role</div>
-            </div>
-            <div className="sfmGrid">
-              <div className="raField sfmFull">
-                <label>
-                  Role name <span className="reqMark" aria-hidden="true">*</span>
-                </label>
-                <input
-                  className={`raInput${createSubmitted && String(createName || "").trim().length < 2 ? " raInput_err" : ""}`}
-                  value={createName}
-                  onChange={(e) => setCreateName(e.target.value)}
-                  placeholder="e.g. Manager"
-                />
-                {createSubmitted && String(createName || "").trim().length < 2 && (
-                  <div className="mfzErr">Role name is required (min 2 characters).</div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        <ModalFormShell>
+          <ModalFormBody>
+            <ModalFormPanel aria-label="Role">
+              <ModalFormPanelHead>
+                <ModalFormSectionTitle kicker="Role" />
+              </ModalFormPanelHead>
+              <ModalFormPanelBody>
+                <ModalFormGrid>
+                  <ModalFormField
+                    span={12}
+                    label="Role name"
+                    required
+                    error={createSubmitted && String(createName || "").trim().length < 2 ? "Role name is required (min 2 characters)." : null}
+                  >
+                    <input
+                      className={`mfzInput${createSubmitted && String(createName || "").trim().length < 2 ? " mfzInput_err" : ""}`}
+                      value={createName}
+                      onChange={(e) => setCreateName(e.target.value)}
+                      placeholder="e.g. Manager"
+                    />
+                  </ModalFormField>
+                </ModalFormGrid>
+              </ModalFormPanelBody>
+            </ModalFormPanel>
+          </ModalFormBody>
+        </ModalFormShell>
       </CommonModal>
 
       <CommonModal
@@ -349,14 +373,16 @@ export default function RolesAccessPage() {
         onClose={() => setEditOpen(false)}
         size="lg"
         icon={<IconShieldKey />}
+        loading={busy}
+        loadingText="Saving role…"
         footer={
-          <div className="raModalFooter sfmModalFooter">
-            <button className="raBtnGhost sfmBtnGhost" type="button" data-cm-cancel="true" onClick={() => setEditOpen(false)} disabled={busy}>
+          <ModalFooterShell>
+            <AppButton variant="secondary" type="button" data-cm-cancel="true" onClick={() => setEditOpen(false)} disabled={busy}>
               Cancel
-            </button>
+            </AppButton>
             {canUpdate ? (
-              <button
-                className="raBtn sfmBtnPrimary"
+              <AppButton
+                variant="primary"
                 type="button"
                 data-cm-primary="true"
                 disabled={busy}
@@ -377,66 +403,69 @@ export default function RolesAccessPage() {
                 }}
               >
                 {busy ? <InlineButtonProgress label="Saving…" /> : "Save Changes"}
-              </button>
+              </AppButton>
             ) : null}
-          </div>
+          </ModalFooterShell>
         }
       >
-        <div className="sfm">
-          <div className="sfmSection">
-            <div className="sfmSectionHead">
-              <div className="sfmTitle">Role</div>
-            </div>
-            <div className="sfmGrid">
-              <div className="raField sfmFull">
-                <label>
-                  Role name <span className="reqMark" aria-hidden="true">*</span>
-                </label>
-                <input className="raInput" value={editName} onChange={(e) => setEditName(e.target.value)} disabled={!canUpdate} />
-              </div>
-            </div>
-          </div>
+        <ModalFormShell>
+          <ModalFormBody>
+            <ModalFormPanel aria-label="Role">
+              <ModalFormPanelHead>
+                <ModalFormSectionTitle kicker="Role" />
+              </ModalFormPanelHead>
+              <ModalFormPanelBody>
+                <ModalFormGrid>
+                  <ModalFormField span={12} label="Role name" required>
+                    <input className="mfzInput" value={editName} onChange={(e) => setEditName(e.target.value)} disabled={!canUpdate} />
+                  </ModalFormField>
+                </ModalFormGrid>
+              </ModalFormPanelBody>
+            </ModalFormPanel>
 
-          <div className="sfmSection">
-            <div className="sfmSectionHead">
-              <div className="sfmTitle">Permissions</div>
-            </div>
-            <div className="raMatrix">
-              {(resources || []).map((res) => {
-                const resKey = String(res?.resource || "").toUpperCase();
-                if (!resKey) return null;
-                const p = editPerms?.[resKey] || { add: false, view: true, update: false, delete: false };
-                const label = String(res?.display_name || resKey.replace(/_/g, " "));
-                return (
-                  <div className="raPermRow" key={resKey}>
-                    <div className="raPermRes">{label}</div>
-                    {[
-                      ["add", "Add"],
-                      ["view", "View"],
-                      ["update", "Update"],
-                      ["delete", "Delete"]
-                    ].map(([k, label]) => (
-                      <label className="raCheck" key={k}>
-                        <input
-                          type="checkbox"
-                          checked={Boolean(p[k])}
-                          onChange={(ev) => {
-                            setEditPerms((prev) => ({
-                              ...(prev || {}),
-                              [resKey]: { ...(prev?.[resKey] || {}), [k]: ev.target.checked }
-                            }));
-                          }}
-                          disabled={!canUpdate}
-                        />
-                        <span>{label}</span>
-                      </label>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+            <ModalFormPanel aria-label="Permissions">
+              <ModalFormPanelHead>
+                <ModalFormSectionTitle kicker="Permissions" />
+              </ModalFormPanelHead>
+              <ModalFormPanelBody>
+                <div className="raMatrix">
+                  {(resources || []).map((res) => {
+                    const resKey = String(res?.resource || "").toUpperCase();
+                    if (!resKey) return null;
+                    const p = editPerms?.[resKey] || { add: false, view: true, update: false, delete: false };
+                    const label = String(res?.display_name || resKey.replace(/_/g, " "));
+                    return (
+                      <div className="raPermRow" key={resKey}>
+                        <div className="raPermRes">{label}</div>
+                        {[
+                          ["add", "Add"],
+                          ["view", "View"],
+                          ["update", "Update"],
+                          ["delete", "Delete"]
+                        ].map(([k, label]) => (
+                          <label className="raCheck" key={k}>
+                            <input
+                              type="checkbox"
+                              checked={Boolean(p[k])}
+                              onChange={(ev) => {
+                                setEditPerms((prev) => ({
+                                  ...(prev || {}),
+                                  [resKey]: { ...(prev?.[resKey] || {}), [k]: ev.target.checked }
+                                }));
+                              }}
+                              disabled={!canUpdate}
+                            />
+                            <span>{label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              </ModalFormPanelBody>
+            </ModalFormPanel>
+          </ModalFormBody>
+        </ModalFormShell>
       </CommonModal>
 
       <ConfirmDialog

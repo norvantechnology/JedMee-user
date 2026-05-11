@@ -1,14 +1,15 @@
 import { fmtMoney, fmtCurrency } from "../utils/format.js";
 import { useSeoMeta } from "../utils/seo.js";
-import { InlineButtonProgress } from "../components/ui/buttons.jsx";
+import { AppButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
+import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
 import { useEffect, useMemo, useState } from "react";
 import AppShell from "../layouts/AppShell.jsx";
 import CommonTable from "../components/CommonTable.jsx";
-import CommonModal from "../components/CommonModal.jsx";
+import CommonModal, { useCustomerModalForm, CustomerModalFormBody, CustomerModalFooter } from "../components/CommonModal.jsx";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import CommonDatePicker from "../components/CommonDatePicker.jsx";
 import CommonLoading from "../components/CommonLoading.jsx";
-import CustomerMasterModal from "../components/CustomerMasterModal.jsx";
+import { IconCustomerMark } from "../components/ui/AppIcons.jsx";
 import { readAuth } from "../services/authStorage.js";
 import { can } from "../utils/access.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
@@ -101,6 +102,16 @@ export default function CustomersPage() {
   /** invoice id → allocate amount string */
   const [paymentAllocations, setPaymentAllocations] = useState({});
   const [ledgerPrintBusy, setLedgerPrintBusy] = useState(false);
+
+  const customerMode = editing?.id ? "edit" : "add";
+  const customerForm = useCustomerModalForm({
+    open,
+    mode: customerMode,
+    initialValue: editing,
+    isRetailer,
+    busy,
+    onClose: () => setOpen(false)
+  });
 
   async function refresh() {
     setBusy(true);
@@ -453,25 +464,54 @@ export default function CustomersPage() {
         onCompleted={() => refresh()}
       />
 
-      <CustomerMasterModal
+      <CommonModal
         open={open}
-        mode={editing?.id ? "edit" : "add"}
-        busy={busy}
-        initialValue={editing}
-        onClose={() => !busy && setOpen(false)}
-        onSubmit={async (payload) => {
-          setBusy(true);
-          const noAutoToast = { toast: "none" };
-          const r = editing?.id
-            ? await updateCustomer(editing.id, payload, noAutoToast)
-            : await createCustomer(payload, noAutoToast);
-          if (r.status >= 200 && r.status < 300 && r.json?.ok) {
-            setOpen(false);
-            await refresh();
-          } else if (r.status !== 401) emitToast({ type: "error", message: parseApiError(r) });
-          setBusy(false);
-        }}
-      />
+        title={customerMode === "edit" ? "Edit Customer" : "Add Customer"}
+        subtitle=""
+        icon={<IconCustomerMark />}
+        onClose={customerForm.handleExplicitClose}
+        onOverlayClose={customerForm.handleOverlayClose}
+        loading={busy}
+        loadingText="Saving customer…"
+        footer={
+          <CustomerModalFooter
+            busy={busy}
+            mode={customerMode}
+            canSubmit={customerForm.canSubmit}
+            form={customerForm.form}
+            setSubmitted={customerForm.setSubmitted}
+            onCancel={customerForm.handleExplicitClose}
+            onSubmit={async (payload) => {
+              setBusy(true);
+              const noAutoToast = { toast: "none" };
+              const r = editing?.id
+                ? await updateCustomer(editing.id, payload, noAutoToast)
+                : await createCustomer(payload, noAutoToast);
+              if (r.status >= 200 && r.status < 300 && r.json?.ok) {
+                setOpen(false);
+                await refresh();
+              } else if (r.status !== 401) emitToast({ type: "error", message: parseApiError(r) });
+              setBusy(false);
+            }}
+          />
+        }
+      >
+        <CustomerModalFormBody
+          form={customerForm.form}
+          setForm={customerForm.setForm}
+          busy={busy}
+          submitted={customerForm.submitted}
+          showCompliance={customerForm.showCompliance}
+          setShowCompliance={customerForm.setShowCompliance}
+          isRetailer={isRetailer}
+          taxIdLabel={customerForm.taxIdLabel}
+          typeOptions={customerForm.typeOptions}
+          gstError={customerForm.gstError}
+          phoneClean={customerForm.phoneClean}
+          phoneRequired={customerForm.phoneRequired}
+          phone={customerForm.phone}
+        />
+      </CommonModal>
 
       <ConfirmDialog
         open={confirm.open}
@@ -499,11 +539,14 @@ export default function CustomersPage() {
         icon={<IconUser />}
         onClose={() => setLedgerOpen(false)}
         size="lg"
+        drawer={true}
         footer={
-          <div className="sfmModalFooter">
-            <button className="sfmBtnGhost" type="button" onClick={() => setLedgerOpen(false)}>Close</button>
-            <button
-              className="sfmBtnGhost"
+          <ModalFooterShell>
+            <AppButton variant="secondary" type="button" onClick={() => setLedgerOpen(false)}>
+              Close
+            </AppButton>
+            <AppButton
+              variant="secondary"
               type="button"
               disabled={ledgerPrintBusy || !ledgerCustomer?.id}
               onClick={async () => {
@@ -519,9 +562,9 @@ export default function CustomersPage() {
               }}
             >
               {ledgerPrintBusy ? <CommonLoading variant="inline" text="Preparing..." /> : "Print Ledger"}
-            </button>
-            <button
-              className="sfmBtnPrimary"
+            </AppButton>
+            <AppButton
+              variant="primary"
               type="button"
               onClick={() => {
                 if (!ledgerCustomer?.id) return;
@@ -540,8 +583,8 @@ export default function CustomersPage() {
               }}
             >
               Record Payment
-            </button>
-          </div>
+            </AppButton>
+          </ModalFooterShell>
         }
       >
         <div className="sfm">
@@ -585,13 +628,16 @@ export default function CustomersPage() {
         icon={<IconUser />}
         size={920}
         onClose={() => setPaymentOpen(false)}
+        drawer={true}
+        loading={busy}
+        loadingText="Saving payment…"
         footer={
-          <div className="sfmModalFooter">
-            <button className="sfmBtnGhost" type="button" onClick={() => setPaymentOpen(false)} disabled={busy}>
+          <ModalFooterShell>
+            <AppButton variant="secondary" type="button" onClick={() => setPaymentOpen(false)} disabled={busy}>
               Cancel
-            </button>
-            <button
-              className="sfmBtnPrimary"
+            </AppButton>
+            <AppButton
+              variant="primary"
               type="button"
               disabled={
                 busy ||
@@ -645,14 +691,14 @@ export default function CustomersPage() {
               }}
             >
               {busy ? <InlineButtonProgress label="Working..." /> : "Record Payment"}
-            </button>
-          </div>
+            </AppButton>
+          </ModalFooterShell>
         }
       >
         <div className="sfm">
           <div className="sfmGrid">
             <div className="raField">
-              <label>Date <span className="reqMark" aria-hidden="true">*</span></label>
+              <label>Date </label>
               <CommonDatePicker value={paymentForm.paymentDate} onChange={(v) => setPaymentForm((p) => ({ ...p, paymentDate: v }))} ariaLabel="Payment date" />
             </div>
             <div className="raField">

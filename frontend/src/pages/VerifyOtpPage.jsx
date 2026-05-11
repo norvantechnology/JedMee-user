@@ -120,8 +120,7 @@ export default function VerifyOtpPage() {
             >
               <div className="field">
                 <label htmlFor="otp-input">
-                  Verification code <span className="reqMark" aria-hidden="true">*</span>
-                </label>
+                  Verification code                 </label>
                 <div className="input-wrap">
                   <svg className="ico" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round"/>

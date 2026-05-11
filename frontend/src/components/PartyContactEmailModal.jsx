@@ -1,8 +1,18 @@
 import { useEffect, useState } from "react";
-import CommonModal from "./CommonModal.jsx";
+import CommonModal, {
+  ModalFormBody,
+  ModalFormField,
+  ModalFormGrid,
+  ModalFormPanel,
+  ModalFormPanelBody,
+  ModalFormPanelHead,
+  ModalFormSectionTitle,
+  ModalFormShell
+} from "./CommonModal.jsx";
 import { AppButton, InlineButtonProgress } from "./ui/buttons.jsx";
 import ModalFooterShell from "./ui/ModalFooterShell.jsx";
 import { IconEmail } from "./TableActionKit.jsx";
+import PhoneInput from "./PhoneInput.jsx";
 
 /**
  * Shared “add email (and optional phone) then retry send” dialog used for invoice / ledger emails.
@@ -28,13 +38,17 @@ export default function PartyContactEmailModal({
   permissionWarning
 }) {
   const [submitted, setSubmitted] = useState(false);
-  useEffect(() => { if (!open) setSubmitted(false); }, [open]);
+  useEffect(() => {
+    if (!open) setSubmitted(false);
+  }, [open]);
 
   return (
     <CommonModal
       open={open}
       title={title}
       icon={icon}
+      loading={saving}
+      loadingText="Saving contact…"
       onClose={() => {
         if (saving) return;
         onClose?.();
@@ -51,50 +65,44 @@ export default function PartyContactEmailModal({
         </ModalFooterShell>
       }
     >
-      <div className="sfm">
-        {partySubtitle ? <div className="raSub" style={{ marginBottom: 8 }}>{partySubtitle}</div> : null}
-        {permissionWarning ? <div className="psErr">{permissionWarning}</div> : null}
-        {footerHint ? <div className="raSub" style={{ marginBottom: 8 }}>{footerHint}</div> : null}
-        <div className="raField">
-          <label>
-            Email <span className="reqMark" aria-hidden="true">*</span>
-          </label>
-          <input
-            className={`raInput${submitted && !email ? " mfzInput_err" : ""}`}
-            type="email"
-            value={email}
-            onChange={(e) => onEmailChange?.(e.target.value)}
-            placeholder="party@email.com"
-            autoComplete="email"
-          />
-          {submitted && !email && <div className="mfzErr">Email is required.</div>}
-        </div>
-        {showPhoneFields ? (
-          <div className="raField">
-            <label>Phone</label>
-            <div className="sbmPhoneRow">
-              <select
-                className="raInput"
-                value={phoneCountryCode || "+91"}
-                onChange={(e) => onPhoneCountryChange?.(e.target.value)}
-                aria-label="Phone country"
-              >
-                <option value="+91">+91</option>
-                <option value="+1">+1</option>
-                <option value="+44">+44</option>
-              </select>
-              <input
-                className="raInput"
-                type="tel"
-                value={phone}
-                onChange={(e) => onPhoneChange?.(e.target.value)}
-                placeholder="10 digit mobile (optional for email)"
-                autoComplete="tel"
-              />
-            </div>
-          </div>
-        ) : null}
-      </div>
+      <ModalFormShell>
+        <ModalFormBody>
+          <ModalFormPanel aria-label="Contact">
+            <ModalFormPanelHead>
+              <ModalFormSectionTitle kicker="Contact" />
+            </ModalFormPanelHead>
+            <ModalFormPanelBody>
+              {partySubtitle ? <div className="raSub" style={{ marginBottom: 10 }}>{partySubtitle}</div> : null}
+              {permissionWarning ? <div className="psErr" style={{ marginBottom: 10 }}>{permissionWarning}</div> : null}
+              {footerHint ? <div className="raSub" style={{ marginBottom: 10 }}>{footerHint}</div> : null}
+              <ModalFormGrid>
+                <ModalFormField span={12} label="Email" required error={submitted && !email ? "Email is required." : null}>
+                  <input
+                    className={`mfzInput${submitted && !email ? " mfzInput_err" : ""}`}
+                    type="email"
+                    value={email}
+                    onChange={(e) => onEmailChange?.(e.target.value)}
+                    placeholder="party@email.com"
+                    autoComplete="email"
+                  />
+                </ModalFormField>
+                {showPhoneFields ? (
+                  <ModalFormField span={12} label="Phone">
+                    <PhoneInput
+                      compact
+                      phonePlaceholder="7–15 digits"
+                      countryCode={phoneCountryCode || "+91"}
+                      phoneNumber={phone || ""}
+                      onCountryCodeChange={(v) => onPhoneCountryChange?.(v)}
+                      onPhoneNumberChange={(v) => onPhoneChange?.(v)}
+                    />
+                  </ModalFormField>
+                ) : null}
+              </ModalFormGrid>
+            </ModalFormPanelBody>
+          </ModalFormPanel>
+        </ModalFormBody>
+      </ModalFormShell>
     </CommonModal>
   );
 }

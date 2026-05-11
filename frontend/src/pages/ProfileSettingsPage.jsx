@@ -207,8 +207,7 @@ export default function ProfileSettingsPage() {
               <div className="form-grid cols-2">
                 <div className="form-field">
                   <label className="form-label" htmlFor="fullName">
-                    Full name <span className="reqMark" aria-hidden="true">*</span>
-                  </label>
+                    Full name                   </label>
                   <div className="input-wrap">
                     <span className="input-icon">
                       <IconPsUser size={18} strokeWidth={2} />
@@ -258,8 +257,7 @@ export default function ProfileSettingsPage() {
                 </div>
                 <div className="form-field">
                   <label className="form-label">
-                    Phone number <span className="reqMark" aria-hidden="true">*</span>
-                  </label>
+                    Phone number                   </label>
                   <div className="input-wrap">
                     <span className="input-icon">
                       <IconPsPhone size={18} strokeWidth={2} />

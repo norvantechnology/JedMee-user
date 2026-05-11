@@ -6,7 +6,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AppShell from "../layouts/AppShell.jsx";
 import CommonTable from "../components/CommonTable.jsx";
-import CommonModal from "../components/CommonModal.jsx";
+import CommonModal, {
+  ModalFormBody,
+  ModalFormCheckGroup,
+  ModalFormField,
+  ModalFormGrid,
+  ModalFormPanel,
+  ModalFormPanelBody,
+  ModalFormPanelHead,
+  ModalFormSectionTitle,
+  ModalFormShell
+} from "../components/CommonModal.jsx";
 import CommonDatePicker from "../components/CommonDatePicker.jsx";
 import { readAuth } from "../services/authStorage.js";
 import { can } from "../utils/access.js";
@@ -15,8 +25,9 @@ import { createCustomerPayment, listCustomerPayments, listSalesInvoices } from "
 import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
-import "../components/StructuredForm.css";
 import MasterSelectWithCreate from "../components/MasterSelectWithCreate.jsx";
+import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
+import { AppButton } from "../components/ui/buttons.jsx";
 import { IconAdvancePayment, IconWallet } from "../components/ui/AppIcons.jsx";
 import { todayYmdLocal } from "../utils/date.js";
 
@@ -206,85 +217,208 @@ export default function CustomerPaymentsPage() {
         subtitle={paymentKind === "ON_ACCOUNT" ? "Advance payment" : "Invoice payment"}
         icon={paymentKind === "ON_ACCOUNT" ? <IconAdvancePayment /> : <IconWallet />}
         onClose={closePaymentModal}
-        footer={<div className="sfmModalFooter"><button className="sfmBtnGhost" type="button" onClick={closePaymentModal} disabled={busy}>Cancel</button><button className="sfmBtnPrimary" type="button" disabled={busy} onClick={async () => {
-          setPaySubmitted(true);
-          const needAmount = paymentKind === "ON_ACCOUNT" || !form.salesInvoiceId;
-          if (!form.customerId || (needAmount && !(Number(form.amount) > 0))) return;
-          setBusy(true);
-          const payload = { ...form };
-          if (paymentKind === "ON_ACCOUNT") payload.salesInvoiceId = "";
-          const r = await createCustomerPayment(payload);
-          if (r.status >= 200 && r.status < 300 && r.json?.ok) {
-            setOpen(false);
-            await refresh();
-          } else if (r.status !== 401) emitToast({ type: "error", message: parseApiError(r) });
-          setBusy(false);
-        }}>{busy ? <InlineButtonProgress label="Working..." /> : "Record Payment"}</button></div>}
+        loading={busy}
+        loadingText="Saving payment…"
+        footer={
+          <ModalFooterShell>
+            <AppButton variant="secondary" type="button" onClick={closePaymentModal} disabled={busy}>
+              Cancel
+            </AppButton>
+            <AppButton
+              variant="primary"
+              type="button"
+              disabled={busy}
+              onClick={async () => {
+                setPaySubmitted(true);
+                const needAmount = paymentKind === "ON_ACCOUNT" || !form.salesInvoiceId;
+                if (!form.customerId || (needAmount && !(Number(form.amount) > 0))) return;
+                setBusy(true);
+                const payload = { ...form };
+                if (paymentKind === "ON_ACCOUNT") payload.salesInvoiceId = "";
+                const r = await createCustomerPayment(payload);
+                if (r.status >= 200 && r.status < 300 && r.json?.ok) {
+                  setOpen(false);
+                  await refresh();
+                } else if (r.status !== 401) emitToast({ type: "error", message: parseApiError(r) });
+                setBusy(false);
+              }}
+            >
+              {busy ? <InlineButtonProgress label="Working..." /> : "Record Payment"}
+            </AppButton>
+          </ModalFooterShell>
+        }
       >
-        <div className="sfm"><div className="sfmSection"><div className="sfmSectionHead"><div className="sfmTitle">Payment</div><div style={{ display: "flex", gap: 8 }}><button type="button" className={`sfmBtnGhost${paymentKind === "INVOICE" ? " active" : ""}`} onClick={() => setPaymentKind("INVOICE")}>Receive Payment</button><button type="button" className={`sfmBtnGhost${paymentKind === "ON_ACCOUNT" ? " active" : ""}`} onClick={() => { setPaymentKind("ON_ACCOUNT"); setForm((p) => ({ ...p, salesInvoiceId: "", useAdvanceFirst: false })); }}>Record Advance</button></div></div><div className="sfmGrid">
-          <div className="raField"><label>Customer <span className="reqMark" aria-hidden="true">*</span></label><MasterSelectWithCreate kind="customer" value={form.customerId} onChange={(v) => { setPaySubmitted(false); setForm((p) => {
-            const next = { ...p, customerId: v };
-            if (p.salesInvoiceId) {
-              const inv = (invoices || []).find((x) => String(x.id) === String(p.salesInvoiceId));
-              const stillOk =
-                inv &&
-                String(inv.customer_id) === String(v) &&
-                invoicesPayable.some((x) => String(x.id) === String(p.salesInvoiceId));
-              if (!stillOk) {
-                next.salesInvoiceId = "";
-                next.amount = "";
-              }
-            }
-            return next;
-          }); }} onListsRefresh={refreshCustomersOnly} placeholder="Select customer" options={customers.map((c) => ({ value: c.id, label: c.name }))} />
-          {paySubmitted && !form.customerId && <div className="mfzErr">Customer is required.</div>}</div>
-          <div className="raField"><label>Invoice</label><select className="raInput" value={form.salesInvoiceId} disabled={paymentKind === "ON_ACCOUNT"} onChange={(e) => {
-            const invoiceId = e.target.value;
-            const inv = (invoicesPayable || []).find((x) => String(x.id) === String(invoiceId));
-            const balance = Number(inv?.balance_due || 0);
-            setForm((p) => ({ ...p, salesInvoiceId: invoiceId, amount: Number(p.useAdvanceFirst ? Math.max(0, balance - Number(advanceHint.apply || 0)) : balance).toFixed(2) }));
-          }}><option value="">On Account / Advance</option>{invoicesPayable.filter((x) => !form.customerId || String(x.customer_id) === String(form.customerId)).map((inv) => <option key={inv.id} value={inv.id}>{inv.invoice_number} (Bal {fmtCurrency(inv.balance_due || 0)})</option>)}</select></div>
-          {form.salesInvoiceId ? (
-            <label className="sfmCheck">
-              <input
-                type="checkbox"
-                checked={Boolean(form.useAdvanceFirst)}
-                onChange={(e) => {
-                  const checked = e.target.checked;
-                  const balance = Number(selectedFormInvoice?.balance_due || 0);
-                  setForm((p) => ({
-                    ...p,
-                    useAdvanceFirst: checked,
-                    amount: Number(checked ? advanceHint.remaining : balance).toFixed(2)
-                  }));
-                }}
-              />
-              <span>Use customer advance first</span>
-            </label>
-          ) : null}
-          {form.salesInvoiceId ? (
-            <div className="sfmFull" style={{ border: "1px solid var(--color-border)", borderRadius: 10, padding: 10, background: "var(--color-bg-2)" }}>
-              <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 4 }}>Summary</div>
-              <div style={{ fontSize: 12, color: "var(--color-text-3)", display: "grid", gap: 2 }}>
-                <div>Due: {fmtCurrency(selectedFormInvoice?.balance_due || 0)}</div>
-                <div>Advance used: {fmtCurrency(form.useAdvanceFirst ? advanceHint.apply || 0 : 0)}</div>
-                <div><strong>Collect now: {fmtCurrency(form.useAdvanceFirst ? advanceHint.remaining || 0 : form.amount || 0)}</strong></div>
-              </div>
-            </div>
-          ) : null}
-          <div className="raField"><label>Date <span className="reqMark" aria-hidden="true">*</span></label><CommonDatePicker value={form.paymentDate} onChange={(v) => setForm((p) => ({ ...p, paymentDate: v }))} ariaLabel="Payment date" /></div>
-          <div className="raField">
-            <label>Cash received now <span className="reqMark" aria-hidden="true">*</span></label>
-            <AmountInput className={`raInput${paySubmitted && (paymentKind === "ON_ACCOUNT" || !form.salesInvoiceId) && !(Number(form.amount) > 0) ? " mfzInput_err" : ""}`} value={String(form.amount ?? "")} disabled={Boolean(form.salesInvoiceId) && Boolean(form.useAdvanceFirst)} onChange={(raw) => setForm((p) => ({ ...p, amount: raw }))} inputMode="decimal" />
-            {form.salesInvoiceId && form.useAdvanceFirst ? (
-              <div className="sfmHint" style={{ marginTop: 6 }}>If advance fully covers the due, cash can stay {fmtCurrency(0)}.</div>
-            ) : null}
-            {paySubmitted && (paymentKind === "ON_ACCOUNT" || !form.salesInvoiceId) && !(Number(form.amount) > 0) && <div className="mfzErr">Amount is required.</div>}
-          </div>
-          <div className="raField"><label>Mode</label><select className="raInput" value={form.paymentMode} onChange={(e) => setForm((p) => ({ ...p, paymentMode: e.target.value }))}><option>CASH</option><option>CHEQUE</option><option>NEFT</option><option>UPI</option><option>CARD</option><option>OTHER</option></select></div>
-          <div className="raField"><label>Reference</label><input className="raInput" value={form.referenceNumber} onChange={(e) => setForm((p) => ({ ...p, referenceNumber: e.target.value }))} /></div>
-          
-        </div></div></div>
+        <ModalFormShell>
+          <ModalFormBody>
+            <ModalFormPanel aria-label="Payment">
+              <ModalFormPanelHead>
+                <ModalFormSectionTitle kicker="Payment" />
+                <div className="mfzHeadRight">
+                  <button
+                    type="button"
+                    className={`mfzBtn appBtn appBtn_sm ${paymentKind === "INVOICE" ? "appBtn_primary" : "appBtn_secondary"}`}
+                    onClick={() => setPaymentKind("INVOICE")}
+                  >
+                    Receive Payment
+                  </button>
+                  <button
+                    type="button"
+                    className={`mfzBtn appBtn appBtn_sm ${paymentKind === "ON_ACCOUNT" ? "appBtn_primary" : "appBtn_secondary"}`}
+                    onClick={() => {
+                      setPaymentKind("ON_ACCOUNT");
+                      setForm((p) => ({ ...p, salesInvoiceId: "", useAdvanceFirst: false }));
+                    }}
+                  >
+                    Record Advance
+                  </button>
+                </div>
+              </ModalFormPanelHead>
+              <ModalFormPanelBody>
+                <ModalFormGrid>
+                  <ModalFormField span={12} label="Customer" required error={paySubmitted && !form.customerId ? "Customer is required." : null}>
+                    <MasterSelectWithCreate
+                      kind="customer"
+                      selectClassName="mfzInput"
+                      value={form.customerId}
+                      onChange={(v) => {
+                        setPaySubmitted(false);
+                        setForm((p) => {
+                          const next = { ...p, customerId: v };
+                          if (p.salesInvoiceId) {
+                            const inv = (invoices || []).find((x) => String(x.id) === String(p.salesInvoiceId));
+                            const stillOk =
+                              inv &&
+                              String(inv.customer_id) === String(v) &&
+                              invoicesPayable.some((x) => String(x.id) === String(p.salesInvoiceId));
+                            if (!stillOk) {
+                              next.salesInvoiceId = "";
+                              next.amount = "";
+                            }
+                          }
+                          return next;
+                        });
+                      }}
+                      onListsRefresh={refreshCustomersOnly}
+                      placeholder="Select customer"
+                      options={customers.map((c) => ({ value: c.id, label: c.name }))}
+                    />
+                  </ModalFormField>
+
+                  <ModalFormField span={12} label="Invoice">
+                    <select
+                      className="mfzInput"
+                      value={form.salesInvoiceId}
+                      disabled={paymentKind === "ON_ACCOUNT"}
+                      onChange={(e) => {
+                        const invoiceId = e.target.value;
+                        const inv = (invoicesPayable || []).find((x) => String(x.id) === String(invoiceId));
+                        const balance = Number(inv?.balance_due || 0);
+                        setForm((p) => ({
+                          ...p,
+                          salesInvoiceId: invoiceId,
+                          amount: Number(p.useAdvanceFirst ? Math.max(0, balance - Number(advanceHint.apply || 0)) : balance).toFixed(2)
+                        }));
+                      }}
+                    >
+                      <option value="">On Account / Advance</option>
+                      {invoicesPayable
+                        .filter((x) => !form.customerId || String(x.customer_id) === String(form.customerId))
+                        .map((inv) => (
+                          <option key={inv.id} value={inv.id}>
+                            {inv.invoice_number} (Bal {fmtCurrency(inv.balance_due || 0)})
+                          </option>
+                        ))}
+                    </select>
+                  </ModalFormField>
+
+                  {form.salesInvoiceId ? (
+                    <ModalFormCheckGroup>
+                      <label className="mfzCheck">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(form.useAdvanceFirst)}
+                          onChange={(e) => {
+                            const checked = e.target.checked;
+                            const balance = Number(selectedFormInvoice?.balance_due || 0);
+                            setForm((p) => ({
+                              ...p,
+                              useAdvanceFirst: checked,
+                              amount: Number(checked ? advanceHint.remaining : balance).toFixed(2)
+                            }));
+                          }}
+                        />
+                        <span>Use customer advance first</span>
+                      </label>
+                    </ModalFormCheckGroup>
+                  ) : null}
+
+                  {form.salesInvoiceId ? (
+                    <ModalFormField span={12} label={false}>
+                      <div
+                        style={{
+                          border: "1px solid var(--color-border)",
+                          borderRadius: 10,
+                          padding: 10,
+                          background: "var(--color-bg-2)"
+                        }}
+                      >
+                        <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 4 }}>Summary</div>
+                        <div style={{ fontSize: 12, color: "var(--color-text-3)", display: "grid", gap: 2 }}>
+                          <div>Due: {fmtCurrency(selectedFormInvoice?.balance_due || 0)}</div>
+                          <div>Advance used: {fmtCurrency(form.useAdvanceFirst ? advanceHint.apply || 0 : 0)}</div>
+                          <div>
+                            <strong>Collect now: {fmtCurrency(form.useAdvanceFirst ? advanceHint.remaining || 0 : form.amount || 0)}</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </ModalFormField>
+                  ) : null}
+
+                  <ModalFormField span={12} label="Date" required>
+                    <CommonDatePicker value={form.paymentDate} onChange={(v) => setForm((p) => ({ ...p, paymentDate: v }))} ariaLabel="Payment date" />
+                  </ModalFormField>
+
+                  <ModalFormField
+                    span={12}
+                    label="Cash received now"
+                    required
+                    error={
+                      paySubmitted && (paymentKind === "ON_ACCOUNT" || !form.salesInvoiceId) && !(Number(form.amount) > 0) ? "Amount is required." : null
+                    }
+                    hint={
+                      form.salesInvoiceId && form.useAdvanceFirst
+                        ? `If advance fully covers the due, cash can stay ${fmtCurrency(0)}.`
+                        : null
+                    }
+                  >
+                    <AmountInput
+                      className={`mfzInput${paySubmitted && (paymentKind === "ON_ACCOUNT" || !form.salesInvoiceId) && !(Number(form.amount) > 0) ? " mfzInput_err" : ""}`}
+                      value={String(form.amount ?? "")}
+                      disabled={Boolean(form.salesInvoiceId) && Boolean(form.useAdvanceFirst)}
+                      onChange={(raw) => setForm((p) => ({ ...p, amount: raw }))}
+                      inputMode="decimal"
+                    />
+                  </ModalFormField>
+
+                  <ModalFormField span={12} label="Mode">
+                    <select className="mfzInput" value={form.paymentMode} onChange={(e) => setForm((p) => ({ ...p, paymentMode: e.target.value }))}>
+                      <option>CASH</option>
+                      <option>CHEQUE</option>
+                      <option>NEFT</option>
+                      <option>UPI</option>
+                      <option>CARD</option>
+                      <option>OTHER</option>
+                    </select>
+                  </ModalFormField>
+
+                  <ModalFormField span={12} label="Reference">
+                    <input className="mfzInput" value={form.referenceNumber} onChange={(e) => setForm((p) => ({ ...p, referenceNumber: e.target.value }))} />
+                  </ModalFormField>
+                </ModalFormGrid>
+              </ModalFormPanelBody>
+            </ModalFormPanel>
+          </ModalFormBody>
+        </ModalFormShell>
       </CommonModal>
     </AppShell>
   );

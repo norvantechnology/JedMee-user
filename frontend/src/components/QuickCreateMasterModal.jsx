@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import VendorMasterModal from "./VendorMasterModal.jsx";
-import CustomerMasterModal from "./CustomerMasterModal.jsx";
+import CommonModal, { useCustomerModalForm, CustomerModalFormBody, CustomerModalFooter } from "./CommonModal.jsx";
+import { IconCustomerMark } from "./ui/AppIcons.jsx";
+import { readAuth } from "../services/authStorage.js";
+import { isRetailerAuth } from "../utils/businessRole.js";
 import DivisionMasterModal from "./DivisionMasterModal.jsx";
 import MfgCompanyMasterModal from "./MfgCompanyMasterModal.jsx";
 import ProductMasterModal from "./ProductMasterModal.jsx";
@@ -23,8 +26,19 @@ import { emitToast } from "../services/toastBus.js";
  */
 export default function QuickCreateMasterModal({ open, kind, onClose, onCreated, productMfgOptions = [] }) {
   const [busy, setBusy] = useState(false);
+  const [depsLoading, setDepsLoading] = useState(false);
   const [mfgRows, setMfgRows] = useState([]);
   const [divisionRows, setDivisionRows] = useState([]);
+
+  const isRetailer = isRetailerAuth(readAuth());
+  const customerForm = useCustomerModalForm({
+    open: Boolean(open && kind === "customer"),
+    mode: "add",
+    initialValue: null,
+    isRetailer,
+    busy,
+    onClose
+  });
 
   async function refreshMfgCompanies() {
     const r = await listMfgCompanies({ sortBy: "name", sortDir: "asc" });
@@ -39,16 +53,20 @@ export default function QuickCreateMasterModal({ open, kind, onClose, onCreated,
   useEffect(() => {
     if (!open) return;
     setBusy(false);
+    setDepsLoading(false);
     if (Array.isArray(productMfgOptions) && productMfgOptions.length) {
       setMfgRows(productMfgOptions);
     }
     if (kind === "product" || kind === "vendor" || kind === "division" || kind === "mfgCompany") {
       (async () => {
-        if (!Array.isArray(productMfgOptions) || !productMfgOptions.length) {
-          await refreshMfgCompanies();
-        }
-        if (kind === "product") {
-          await refreshDivisions();
+        setDepsLoading(true);
+        try {
+          const tasks = [];
+          if (!Array.isArray(productMfgOptions) || !productMfgOptions.length) tasks.push(refreshMfgCompanies());
+          if (kind === "product") tasks.push(refreshDivisions());
+          await Promise.all(tasks);
+        } finally {
+          setDepsLoading(false);
         }
       })();
     }
@@ -96,6 +114,7 @@ export default function QuickCreateMasterModal({ open, kind, onClose, onCreated,
         open={open}
         mode="add"
         busy={busy}
+        loading={depsLoading}
         mfgCompanyOptions={mfgRows}
         onRefreshMfgCompanies={refreshMfgCompanies}
         onClose={onClose}
@@ -107,15 +126,43 @@ export default function QuickCreateMasterModal({ open, kind, onClose, onCreated,
   }
   if (kind === "customer") {
     return (
-      <CustomerMasterModal
+      <CommonModal
         open={open}
-        mode="add"
-        busy={busy}
-        onClose={onClose}
-        onSubmit={handleSubmit}
+        title="Add Customer"
+        subtitle=""
+        icon={<IconCustomerMark />}
+        onClose={customerForm.handleExplicitClose}
+        onOverlayClose={customerForm.handleOverlayClose}
         portal
         portalZIndex={560}
-      />
+        footer={
+          <CustomerModalFooter
+            busy={busy}
+            mode="add"
+            canSubmit={customerForm.canSubmit}
+            form={customerForm.form}
+            setSubmitted={customerForm.setSubmitted}
+            onCancel={customerForm.handleExplicitClose}
+            onSubmit={handleSubmit}
+          />
+        }
+      >
+        <CustomerModalFormBody
+          form={customerForm.form}
+          setForm={customerForm.setForm}
+          busy={busy}
+          submitted={customerForm.submitted}
+          showCompliance={customerForm.showCompliance}
+          setShowCompliance={customerForm.setShowCompliance}
+          isRetailer={isRetailer}
+          taxIdLabel={customerForm.taxIdLabel}
+          typeOptions={customerForm.typeOptions}
+          gstError={customerForm.gstError}
+          phoneClean={customerForm.phoneClean}
+          phoneRequired={customerForm.phoneRequired}
+          phone={customerForm.phone}
+        />
+      </CommonModal>
     );
   }
   if (kind === "division") {
@@ -124,6 +171,7 @@ export default function QuickCreateMasterModal({ open, kind, onClose, onCreated,
         open={open}
         mode="add"
         busy={busy}
+        loading={depsLoading}
         mfgCompanyOptions={mfgRows}
         onRefreshMfgCompanies={refreshMfgCompanies}
         onClose={onClose}
@@ -153,6 +201,7 @@ export default function QuickCreateMasterModal({ open, kind, onClose, onCreated,
         open={open}
         mode="add"
         busy={busy}
+        loading={depsLoading}
         mfgCompanyOptions={mfgRows}
         divisionOptions={divisionRows}
         onRefreshMfg={refreshMfgCompanies}

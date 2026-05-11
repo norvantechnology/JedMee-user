@@ -1,13 +1,20 @@
 import { InlineButtonProgress } from "./ui/buttons.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
-import CommonModal from "./CommonModal.jsx";
+import CommonModal, {
+  ModalFormBody,
+  ModalFormField,
+  ModalFormGrid,
+  ModalFormPanel,
+  ModalFormPanelBody,
+  ModalFormPanelHead,
+  ModalFormSectionTitle,
+  ModalFormShell
+} from "./CommonModal.jsx";
 import ModalFooterShell from "./ui/ModalFooterShell.jsx";
 import ConfirmDialog from "./ConfirmDialog.jsx";
 import { checkMfgCompanyUnique, getMfgCompanyPolicyImpact } from "../services/mfgCompanyService.js";
 import PasswordInput from "./ui/PasswordInput.jsx";
 import AmountInput from "./ui/AmountInput.jsx";
-import "./MasterModalForm.css";
-import "./MfgCompanyMasterModal.css";
 import { IconChevronMini, IconMfgMark } from "./ui/AppIcons.jsx";
 
 function clean(v) {
@@ -113,7 +120,8 @@ export default function MfgCompanyMasterModal({
   onClose,
   onSubmit,
   portal = false,
-  portalZIndex = 480
+  portalZIndex = 480,
+  drawer = true
 }) {
   const [form, setForm] = useState(emptyMfg);
   const [submitErrors, setSubmitErrors] = useState({});
@@ -244,8 +252,11 @@ export default function MfgCompanyMasterModal({
         onClose={handleExplicitClose}
         onOverlayClose={handleOverlayClose}
         size="lg"
+        loading={busy || checking}
+        loadingText={busy ? "Saving manufacturer…" : checking ? "Checking code & name…" : "Working…"}
         portal={portal}
         portalZIndex={portalZIndex}
+        drawer={drawer}
         footer={
           <ModalFooterShell meta={submitted && (Object.keys(formErrors).length > 0 || Object.keys(submitErrors).length > 0) ? "Fix errors to save." : ""}>
             <button className="mfzBtn appBtn appBtn_secondary appBtn_md" type="button" data-cm-cancel="true" onClick={handleExplicitClose} disabled={busy}>
@@ -341,51 +352,44 @@ function MfgCompanyFormV2({
   }, [isEdit]);
 
   return (
-    <div className="mfz">
-      <div className="mfzBody">
-        <section className="mfzPanel" aria-label="Identity">
-          <div className="mfzPanelHead">
-            <div>
-              <div className="mfzHeadKicker">Identity</div>
-            </div>
-          </div>
-          <div className="mfzPanelBody">
-            <div className="mfzGrid">
-              <div className="mfzField mfz4">
-                <div className="mfzLabel">Code</div>
+    <ModalFormShell>
+      <ModalFormBody>
+        <ModalFormPanel aria-label="Identity">
+          <ModalFormPanelHead>
+            <ModalFormSectionTitle kicker="Identity" />
+          </ModalFormPanelHead>
+          <ModalFormPanelBody>
+            <ModalFormGrid>
+              <ModalFormField span={4} label="Code" error={errors.code || null}>
                 <input
                   className="mfzInput"
                   value={form.code}
                   onChange={(e) => setField("code", e.target.value)}
                   placeholder="Auto-generated if empty"
                 />
-                {errors.code ? <div className="mfzErr">{errors.code}</div> : null}
-              </div>
+              </ModalFormField>
 
-              <div className="mfzField mfz8">
-                <div className="mfzLabel">
-                  Name <span className="reqMark" aria-hidden="true">*</span>
-                </div>
+              <ModalFormField span={8} label="Name" required error={errors.name || null}>
                 <input
                   className="mfzInput"
                   value={form.name}
                   onChange={(e) => setField("name", e.target.value)}
                   placeholder="Full company name"
                 />
-                {errors.name ? <div className="mfzErr">{errors.name}</div> : null}
-              </div>
+              </ModalFormField>
 
-              <div className="mfzField mfz4">
-                <div className="mfzLabel">Short name</div>
+              <ModalFormField span={4} label="Short name">
                 <input className="mfzInput" value={form.shortName} onChange={(e) => setField("shortName", e.target.value)} placeholder="Optional label" />
-              </div>
-              <div className="mfzField mfz4">
-                <div className="mfzLabel">Rack number</div>
+              </ModalFormField>
+              <ModalFormField span={4} label="Rack number">
                 <input className="mfzInput" value={form.rackNo} onChange={(e) => setField("rackNo", e.target.value)} placeholder="Storage location" />
-              </div>
+              </ModalFormField>
 
-              <div className="mfzField mfz12">
-                <div className="mfzLabel">Main company (group)</div>
+              <ModalFormField
+                span={12}
+                label="Main company (group)"
+                hint="Use this to group multiple manufacturers under one parent."
+              >
                 <select className="mfzInput" value={form.mainCompanyId} onChange={(e) => setField("mainCompanyId", e.target.value)} aria-label="Main company">
                   {mainCompanyOptions.map((o) => (
                     <option key={String(o.value)} value={o.value}>
@@ -393,17 +397,14 @@ function MfgCompanyFormV2({
                     </option>
                   ))}
                 </select>
-                <div className="mfzHelp">Use this to group multiple manufacturers under one parent.</div>
-              </div>
-            </div>
-          </div>
-        </section>
+              </ModalFormField>
+            </ModalFormGrid>
+          </ModalFormPanelBody>
+        </ModalFormPanel>
 
-        <section className="mfzPanel" aria-label="Protection">
-          <div className="mfzPanelHead">
-            <div>
-              <div className="mfzHeadKicker">Protection</div>
-            </div>
+        <ModalFormPanel aria-label="Protection">
+          <ModalFormPanelHead>
+            <ModalFormSectionTitle kicker="Protection" />
             {isEdit && !changePassword ? (
               <div className="mfzHeadRight">
                 <button
@@ -421,14 +422,13 @@ function MfgCompanyFormV2({
                 </button>
               </div>
             ) : null}
-          </div>
-          <div className="mfzPanelBody">
+          </ModalFormPanelHead>
+          <ModalFormPanelBody>
             {isEdit && !changePassword ? (
               <div className="mfzNote">Password unchanged.</div>
             ) : (
-              <div className="mfzGrid">
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">Password (optional)</div>
+              <ModalFormGrid>
+                <ModalFormField span={12} label="Password (optional)">
                   <PasswordInput
                     className="mfzInput"
                     value={form.password}
@@ -450,52 +450,42 @@ function MfgCompanyFormV2({
                       </button>
                     </div>
                   ) : null}
-                </div>
-              </div>
+                </ModalFormField>
+              </ModalFormGrid>
             )}
-          </div>
-        </section>
+          </ModalFormPanelBody>
+        </ModalFormPanel>
 
-        <section className="mfzPanel" aria-label="Email routing">
-          <div className="mfzPanelHead">
-            <div>
-              <div className="mfzHeadKicker">Email routing</div>
-              <div className="mfzHeadHint">Use comma, semicolon, or new line to add multiple emails.</div>
-            </div>
-          </div>
-          <div className="mfzPanelBody">
-            <div className="mfzGrid">
-              <div className="mfzField mfz6">
-                <div className="mfzLabel">MR emails {emailCount(form.mrEmails) ? `(${emailCount(form.mrEmails)})` : ""}</div>
+        <ModalFormPanel aria-label="Email routing">
+          <ModalFormPanelHead>
+            <ModalFormSectionTitle
+              kicker="Email routing"
+              hint="Use comma, semicolon, or new line to add multiple emails."
+            />
+          </ModalFormPanelHead>
+          <ModalFormPanelBody>
+            <ModalFormGrid>
+              <ModalFormField span={6} label={`MR emails${emailCount(form.mrEmails) ? ` (${emailCount(form.mrEmails)})` : ""}`} error={errors.mrEmails || null}>
                 <textarea className="mfzTextarea" value={form.mrEmails} onChange={(e) => setField("mrEmails", e.target.value)} placeholder="mr1@x.com, mr2@x.com" />
-                {errors.mrEmails ? <div className="mfzErr">{errors.mrEmails}</div> : null}
-              </div>
-              <div className="mfzField mfz6">
-                <div className="mfzLabel">C&F emails {emailCount(form.cfEmails) ? `(${emailCount(form.cfEmails)})` : ""}</div>
+              </ModalFormField>
+              <ModalFormField span={6} label={`C&F emails${emailCount(form.cfEmails) ? ` (${emailCount(form.cfEmails)})` : ""}`} error={errors.cfEmails || null}>
                 <textarea className="mfzTextarea" value={form.cfEmails} onChange={(e) => setField("cfEmails", e.target.value)} placeholder="cf@x.com" />
-                {errors.cfEmails ? <div className="mfzErr">{errors.cfEmails}</div> : null}
-              </div>
-              <div className="mfzField mfz6">
-                <div className="mfzLabel">Manufacturer emails {emailCount(form.mfgEmails) ? `(${emailCount(form.mfgEmails)})` : ""}</div>
+              </ModalFormField>
+              <ModalFormField span={6} label={`Manufacturer emails${emailCount(form.mfgEmails) ? ` (${emailCount(form.mfgEmails)})` : ""}`} error={errors.mfgEmails || null}>
                 <textarea className="mfzTextarea" value={form.mfgEmails} onChange={(e) => setField("mfgEmails", e.target.value)} placeholder="company@x.com" />
-                {errors.mfgEmails ? <div className="mfzErr">{errors.mfgEmails}</div> : null}
-              </div>
-              <div className="mfzField mfz6">
-                <div className="mfzLabel">Other emails {emailCount(form.otherEmails) ? `(${emailCount(form.otherEmails)})` : ""}</div>
+              </ModalFormField>
+              <ModalFormField span={6} label={`Other emails${emailCount(form.otherEmails) ? ` (${emailCount(form.otherEmails)})` : ""}`} error={errors.otherEmails || null}>
                 <textarea className="mfzTextarea" value={form.otherEmails} onChange={(e) => setField("otherEmails", e.target.value)} placeholder="other@x.com" />
-                {errors.otherEmails ? <div className="mfzErr">{errors.otherEmails}</div> : null}
-              </div>
-            </div>
-          </div>
-        </section>
+              </ModalFormField>
+            </ModalFormGrid>
+          </ModalFormPanelBody>
+        </ModalFormPanel>
 
-        <section className="mfzPanel" aria-label="Operational locks">
-          <div className="mfzPanelHead">
-            <div>
-              <div className="mfzHeadKicker">Operational locks</div>
-            </div>
-          </div>
-          <div className="mfzPanelBody">
+        <ModalFormPanel aria-label="Operational locks">
+          <ModalFormPanelHead>
+            <ModalFormSectionTitle kicker="Operational locks" />
+          </ModalFormPanelHead>
+          <ModalFormPanelBody>
             <div className="mfgTwoColChecks">
               <label className="mfzCheck">
                 <input
@@ -523,16 +513,14 @@ function MfgCompanyFormV2({
                 <span>Stock visibility lock</span>
               </label>
             </div>
-          </div>
-        </section>
+          </ModalFormPanelBody>
+        </ModalFormPanel>
 
-        <section className="mfzPanel" aria-label="Billing restrictions">
-          <div className="mfzPanelHead">
-            <div>
-              <div className="mfzHeadKicker">Billing restrictions</div>
-            </div>
-          </div>
-          <div className="mfzPanelBody">
+        <ModalFormPanel aria-label="Billing restrictions">
+          <ModalFormPanelHead>
+            <ModalFormSectionTitle kicker="Billing restrictions" />
+          </ModalFormPanelHead>
+          <ModalFormPanelBody>
             <div className="mfgTwoColChecks">
               <label className="mfzCheck">
                 <input type="checkbox" checked={form.preventFreeQty} onChange={(e) => setField("preventFreeQty", e.target.checked)} />
@@ -558,19 +546,16 @@ function MfgCompanyFormV2({
                 </span>
               </label>
             </div>
-          </div>
-        </section>
+          </ModalFormPanelBody>
+        </ModalFormPanel>
 
-        <section className="mfzPanel" aria-label="Financial limits">
-          <div className="mfzPanelHead">
-            <div>
-              <div className="mfzHeadKicker">Financial limits</div>
-            </div>
-          </div>
-          <div className="mfzPanelBody">
-            <div className="mfzGrid">
-              <div className="mfzField mfz4">
-                <div className="mfzLabel">Out bill limit</div>
+        <ModalFormPanel aria-label="Financial limits">
+          <ModalFormPanelHead>
+            <ModalFormSectionTitle kicker="Financial limits" />
+          </ModalFormPanelHead>
+          <ModalFormPanelBody>
+            <ModalFormGrid>
+              <ModalFormField span={4} label="Out bill limit" error={errors.outBillLimit || null}>
                 <AmountInput
                   className="mfzInput"
                   value={String(form.outBillLimit ?? "")}
@@ -578,16 +563,11 @@ function MfgCompanyFormV2({
                   inputMode="numeric"
                   placeholder="e.g. 20"
                 />
-                {errors.outBillLimit ? <div className="mfzErr">{errors.outBillLimit}</div> : null}
-              </div>
-              <div className="mfzField mfz4">
-                <div className="mfzLabel">Out day limit</div>
+              </ModalFormField>
+              <ModalFormField span={4} label="Out day limit" error={errors.outDayLimit || null} hint="Maximum overdue age (days).">
                 <input className="mfzInput" value={form.outDayLimit} onChange={(e) => setField("outDayLimit", e.target.value)} inputMode="numeric" placeholder="e.g. 30" />
-                {errors.outDayLimit ? <div className="mfzErr">{errors.outDayLimit}</div> : null}
-                <div className="mfzHelp">Maximum overdue age (days).</div>
-              </div>
-              <div className="mfzField mfz4">
-                <div className="mfzLabel">Credit limit</div>
+              </ModalFormField>
+              <ModalFormField span={4} label="Credit limit" error={errors.creditLimit || null}>
                 <AmountInput
                   className="mfzInput"
                   value={String(form.creditLimit ?? "")}
@@ -595,12 +575,11 @@ function MfgCompanyFormV2({
                   inputMode="decimal"
                   placeholder="e.g. 50,000"
                 />
-                {errors.creditLimit ? <div className="mfzErr">{errors.creditLimit}</div> : null}
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </div>
+              </ModalFormField>
+            </ModalFormGrid>
+          </ModalFormPanelBody>
+        </ModalFormPanel>
+      </ModalFormBody>
+    </ModalFormShell>
   );
 }

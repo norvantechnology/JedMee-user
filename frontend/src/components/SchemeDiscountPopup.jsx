@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocale } from "../context/LocaleContext.jsx";
 import CommonModal from "./CommonModal.jsx";
 import { BadgeIndianRupee, BarChart3, Layers, IconAlert } from "./ui/AppIcons.jsx";
-import "./MasterModalForm.css";
-import "./SchemeDiscountPopup.css";
 
 /**
  * Per-line scheme + discount editor for retail billing.
@@ -136,6 +134,7 @@ export default function SchemeDiscountPopup({ open, onClose, item, onApply, line
       title={title}
       subtitle={productLabel}
       ariaLabel="Scheme and discount editor"
+      drawer={false}
       icon={<BadgeIndianRupee size={20} strokeWidth={2.2} aria-hidden="true" />}
       footer={
         <div className="sdpModalFoot">

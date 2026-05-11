@@ -12,7 +12,6 @@ export default function CommonLineItemsTable({
             <th
               key={col.key || col.label}
               className={col.className || ""}
-              data-required={col.required ? "true" : undefined}
             >
               {col.label}
             </th>

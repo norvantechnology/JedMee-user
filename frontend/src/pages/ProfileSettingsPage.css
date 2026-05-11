@@ -82,9 +82,9 @@
 .psPage .input-wrap .form-input{padding-left:36px}
 .psPage .input-icon{position:absolute;left:11px;color:var(--text-hint);display:flex;align-items:center;pointer-events:none}
 .psPage .input-icon svg{width:14px;height:14px}
-.psPage .form-input,.psPage .form-textarea,.psPage .form-select{width:100%;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--bg-white);font-family:var(--font);font-size:13.5px;color:var(--text-primary);outline:none;transition:border-color .18s,box-shadow .18s,background .15s;appearance:none}
+.psPage .form-input,.psPage .form-textarea,.psPage .form-select{width:100%;height:38px;padding:0 12px;border:1px solid var(--control-border-default);border-radius:var(--r-sm);background:var(--bg-white);font-family:var(--font);font-size:13.5px;color:var(--text-primary);outline:none;transition:border-color .18s,box-shadow .18s,background .15s;appearance:none}
 .psPage .form-input::placeholder,.psPage .form-textarea::placeholder{color:var(--text-hint)}
-.psPage .form-input:hover{border-color:var(--color-border-strong);background:var(--color-surface)}
+.psPage .form-input:hover{border-color:var(--control-border-hover);background:var(--color-surface)}
 .psPage .form-input:focus,.psPage .form-textarea:focus,.psPage .form-select:focus{border-color:var(--blue);box-shadow:0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);background:var(--bg-white)}
 .psPage .form-input[readonly]{background:var(--bg-surface);color:var(--text-muted);cursor:default;border-color:var(--border-soft)}
 .psPage .status-ok{background:var(--success-bg)!important;color:var(--color-success-dark)!important;border-color:var(--success-border)!important;font-weight:600}

@@ -1,7 +1,8 @@
-import { can } from "../utils/access.js";
-import { NAV_LABELS } from "../constants/navLabels.js";
 import { readAuth } from "./authStorage.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
+import { getSidebarFlatNavRoutes } from "../navigation/userSidebarNav.js";
+
+const MAX_FN = 24;
 
 function isTypingTarget(el) {
   const tag = String(el?.tagName || "").toUpperCase();
@@ -11,53 +12,52 @@ function isTypingTarget(el) {
 }
 
 function isBlockingOverlayOpen() {
-  // CommonModal root (only exists when open)
-  if (document.querySelector(".cmRoot")) return true;
-  // UserDetailPanel drawer stays mounted; check aria-hidden
+  if (document.querySelector(".cmRoot, .mcm")) return true;
   if (document.querySelector('.udpRoot[aria-hidden="false"]')) return true;
   return false;
 }
 
-export function getNavShortcutTargets() {
-  // Order matches sidebar. Only include routes the user can view.
+function sidebarNavContextFromAuth() {
   const auth = readAuth();
+  const access = auth?.access || null;
+  const perms = access?.permissions || {};
+  const isOwner = Boolean(access?.isAccountOwner);
   const isRetailer = isRetailerAuth(auth);
-  const items = [{ key: "h", to: "/dashboard", label: NAV_LABELS.dashboard }];
-  items.push({ key: "k", to: "/profile", label: NAV_LABELS.profile });
-  if (can("USERS", "VIEW")) items.push({ key: "u", to: "/users", label: NAV_LABELS.users });
-  if (can("DIVISIONS", "VIEW") || can("VENDORS", "VIEW")) items.push({ key: "d", to: "/divisions", label: NAV_LABELS.divisions });
-  if (can("MFG_COMPANIES", "VIEW")) items.push({ key: "m", to: "/mfg-companies", label: NAV_LABELS.mfgCompanies });
-  if (can("PRODUCT_BATCHES", "VIEW")) items.push({ key: "q", to: "/quality-master", label: NAV_LABELS.qualityMaster });
-  if (can("CUSTOMERS", "VIEW")) items.push({ key: "c", to: "/customers", label: NAV_LABELS.customers });
-  if (can("PURCHASE_INVOICES", "VIEW")) items.push({ key: "i", to: "/purchase-invoices", label: NAV_LABELS.purchaseInvoices });
-  if (can("PURCHASE_RETURNS", "VIEW")) items.push({ key: "n", to: "/purchase-returns", label: NAV_LABELS.purchaseReturns });
-  if (can("SALES_INVOICES", "VIEW")) items.push({ key: "b", to: "/sales-billing", label: NAV_LABELS.salesBilling });
-  if (can("SALES_RETURNS", "VIEW")) items.push({ key: "s", to: "/sales-returns", label: NAV_LABELS.salesReturns });
-  if (can("PURCHASE_ORDERS", "VIEW")) {
-    items.push({ key: "l", to: isRetailer ? "/order-catalog" : "/my-catalog", label: isRetailer ? NAV_LABELS.orderCatalog : NAV_LABELS.myCatalog });
-    items.push({ key: "o", to: isRetailer ? "/my-orders" : "/orders", label: isRetailer ? NAV_LABELS.myOrders : NAV_LABELS.orders });
-  }
-  if (can("DIVISION_PAYMENTS", "VIEW") || can("VENDOR_PAYMENTS", "VIEW")) items.push({ key: "p", to: "/division-payments", label: NAV_LABELS.divisionPayments });
-  if (can("CUSTOMER_PAYMENTS", "VIEW")) items.push({ key: "y", to: "/customer-payments", label: NAV_LABELS.customerPayments });
-  if (can("ROLES", "VIEW")) items.push({ key: "r", to: "/roles-access", label: NAV_LABELS.rolesAccess });
-  return items;
+  const pendingOrderCount = 0;
+  const taxLabel = "GST";
+  return { isOwner, perms, isRetailer, pendingOrderCount, taxLabel };
 }
 
+/** @returns {number | null} 1-based F-key index from `e.key` (e.g. F1 → 1). */
+function parseFunctionKeyIndex(e) {
+  if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return null;
+  const k = String(e.key || "");
+  const m = /^F(\d+)$/i.exec(k);
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  if (!Number.isFinite(n) || n < 1 || n > MAX_FN) return null;
+  return n;
+}
+
+/**
+ * Global F1…F24: jump to Nth visible sidebar destination (same order as Sidebar).
+ */
 export function installNavShortcuts(navigate) {
   function onKeyDown(e) {
-    // Alt+<letter> navigation (works on Windows/Linux). Skip if typing.
-    if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const n = parseFunctionKeyIndex(e);
+    if (!n) return;
     if (isTypingTarget(e.target)) return;
     if (isBlockingOverlayOpen()) return;
-    const k = String(e.key || "").trim().toLowerCase();
-    const targets = getNavShortcutTargets();
-    const hit = targets.find((t) => t.key === k);
-    if (!hit) return;
+
+    const ctx = sidebarNavContextFromAuth();
+    const routes = getSidebarFlatNavRoutes(ctx);
+    const to = routes[n - 1];
+    if (!to) return;
     e.preventDefault();
-    navigate(hit.to, { preventScrollReset: true });
+    e.stopPropagation();
+    navigate(to, { preventScrollReset: true });
   }
 
-  window.addEventListener("keydown", onKeyDown);
-  return () => window.removeEventListener("keydown", onKeyDown);
+  document.addEventListener("keydown", onKeyDown, true);
+  return () => document.removeEventListener("keydown", onKeyDown, true);
 }
-

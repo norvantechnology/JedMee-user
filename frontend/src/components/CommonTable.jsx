@@ -472,7 +472,7 @@ export default function CommonTable({
   }
 
   function isKeyboardBlocked() {
-    if (document.querySelector(".cmRoot")) return true;
+    if (document.querySelector(".cmRoot, .mcm")) return true;
     if (document.querySelector('.udpRoot[aria-hidden="false"]')) return true;
     if (document.querySelector('[role="dialog"][aria-hidden="false"]')) return true;
     if (document.querySelector('[role="listbox"]')) return true;
@@ -533,6 +533,7 @@ export default function CommonTable({
         const inTable = active ? wrap.contains(active) : false;
         const inMain = isAppMainSurface(active);
         if (!(inTable || inMain)) return;
+        if (active?.closest?.(".sidebar")) return;
 
         // Search focus:
         // - Ctrl/Cmd+F (works when table is focused; prevents browser find)
@@ -548,28 +549,29 @@ export default function CommonTable({
           return;
         }
 
-        // Create:
-        // - Ctrl/Cmd+Shift+N (browser-safe; Ctrl+N is reserved by Chrome)
-        // - Alt+N (browser-safe alternative)
-        if (((e.ctrlKey || e.metaKey) && e.shiftKey && keyLower === "n") || (e.altKey && keyLower === "n")) {
+        // Create: Alt+N or Ctrl/Cmd+Shift+N (sidebar nav uses F-keys, not Alt+letter)
+        if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && keyLower === "n") {
+          if (!onCreate || primaryDisabled) return;
+          e.preventDefault();
+          onCreate();
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && keyLower === "n") {
           if (!onCreate || primaryDisabled) return;
           e.preventDefault();
           onCreate();
           return;
         }
 
-        if ((e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === "Delete" || e.key === "Backspace") && !tableControlActive) {
+        if ((e.key === "Enter" || e.key === "Delete" || e.key === "Backspace") && !tableControlActive) {
           return;
         }
 
-        if (e.key === "ArrowDown") {
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          if (!rowIds.length) return;
           e.preventDefault();
-          move(1);
-          return;
-        }
-        if (e.key === "ArrowUp") {
-          e.preventDefault();
-          move(-1);
+          if (e.key === "ArrowDown") move(1);
+          else move(-1);
           return;
         }
         if (e.key === "Enter" && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
@@ -596,13 +598,14 @@ export default function CommonTable({
         }
       }
 
-      document.addEventListener("keydown", onKeyDown);
-      return () => document.removeEventListener("keydown", onKeyDown);
+      document.addEventListener("keydown", onKeyDown, true);
+      return () => document.removeEventListener("keydown", onKeyDown, true);
     }, [
       enabled,
       wrapRef,
       searchRef,
       move,
+      rowIds,
       kbdId,
       onCreate,
       onOpenById,
@@ -856,6 +859,7 @@ export default function CommonTable({
           title="Actions"
           icon={IconDots}
           size="md"
+          drawer={false}
           footer={
             <div className="tblFilterSheetFoot">
               <AppButton variant="secondary" size="md" onClick={() => setMobileActionsOpen(false)}>
@@ -899,6 +903,7 @@ export default function CommonTable({
           title="Filters"
           icon={IconTableFunnel}
           size="md"
+          drawer={false}
           footer={
             <div className="tblFilterSheetFoot">
               <AppButton variant="secondary" size="md" onClick={() => setMobileFiltersOpen(false)}>
@@ -918,6 +923,7 @@ export default function CommonTable({
         <CommonModal
           open={columnSettingsOpen}
           onClose={() => setColumnSettingsOpen(false)}
+          drawer={false}
           title="Columns"
           icon={<IconSettings />}
           size="md"

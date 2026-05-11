@@ -516,7 +516,7 @@ export default function AuthUnifiedPage() {
 
               <form className="auForm" noValidate onSubmit={handleLoginSubmit}>
                 <div className="auField">
-                  <label className="auLabel" htmlFor="au-login-email">Email address <span className="reqMark" aria-hidden="true">*</span></label>
+                  <label className="auLabel" htmlFor="au-login-email">Email address </label>
                   <div className="auInputWrap">
                     <span className="auFieldIcon" aria-hidden="true"><IconAuthMail /></span>
                     <input
@@ -532,7 +532,7 @@ export default function AuthUnifiedPage() {
                 </div>
 
                 <div className="auField">
-                  <label className="auLabel" htmlFor="au-login-pass">Password <span className="reqMark" aria-hidden="true">*</span></label>
+                  <label className="auLabel" htmlFor="au-login-pass">Password </label>
                   <div className="auInputWrap">
                     <span className="auFieldIcon" aria-hidden="true"><IconAuthLock /></span>
                     <input
@@ -638,7 +638,7 @@ export default function AuthUnifiedPage() {
 
                     <div className="auGrid2">
                       <div className="auField">
-                        <label className="auLabel">Full name <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label className="auLabel">Full name </label>
                         <input
                           className="auInput"
                           value={fullName}
@@ -647,7 +647,7 @@ export default function AuthUnifiedPage() {
                         />
                       </div>
                       <div className="auField">
-                        <label className="auLabel">Password <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label className="auLabel">Password </label>
                         <div className="auInputWrap">
                           <input
                             className="auInput hasIconRight"
@@ -670,7 +670,7 @@ export default function AuthUnifiedPage() {
                     </div>
 
                     <div className="auField">
-                      <label className="auLabel">Email <span className="reqMark" aria-hidden="true">*</span></label>
+                      <label className="auLabel">Email </label>
                       <input
                         className="auInput"
                         value={email}
@@ -707,7 +707,7 @@ export default function AuthUnifiedPage() {
                     </div>
 
                     <div className="auField">
-                      <label className="auLabel">Phone <span className="reqMark" aria-hidden="true">*</span></label>
+                      <label className="auLabel">Phone </label>
                       <div className="auPhoneRow">
                         <select
                           className="auSelect auPhoneCode"
@@ -763,7 +763,7 @@ export default function AuthUnifiedPage() {
 
                   <div className="auGrid2">
                     <div className="auField">
-                      <label className="auLabel">Firm name <span className="reqMark" aria-hidden="true">*</span></label>
+                      <label className="auLabel">Firm name </label>
                       <input
                         className="auInput"
                         value={firmName}
@@ -772,7 +772,7 @@ export default function AuthUnifiedPage() {
                       />
                     </div>
                     <div className="auField">
-                      <label className="auLabel">Pin code <span className="reqMark" aria-hidden="true">*</span></label>
+                      <label className="auLabel">Pin code </label>
                       <input
                         className="auInput"
                         value={pinCode}
@@ -786,7 +786,7 @@ export default function AuthUnifiedPage() {
 
                   <div className="auGrid2">
                     <div className="auField">
-                      <label className="auLabel">City <span className="reqMark" aria-hidden="true">*</span></label>
+                      <label className="auLabel">City </label>
                       <input
                         className="auInput"
                         value={city}
@@ -795,7 +795,7 @@ export default function AuthUnifiedPage() {
                       />
                     </div>
                     <div className="auField">
-                      <label className="auLabel">State <span className="reqMark" aria-hidden="true">*</span></label>
+                      <label className="auLabel">State </label>
                       <input
                         className="auInput"
                         value={state}
@@ -806,7 +806,7 @@ export default function AuthUnifiedPage() {
                   </div>
 
                   <div className="auField">
-                    <label className="auLabel">Address <span className="reqMark" aria-hidden="true">*</span></label>
+                    <label className="auLabel">Address </label>
                     <textarea
                       className="auTextarea"
                       value={address}
@@ -824,7 +824,7 @@ export default function AuthUnifiedPage() {
                   <div className="auSectionSub">These must be unique for each account.</div>
 
                   <div className="auField">
-                    <label className="auLabel">{taxIdLabel} (15 chars) <span className="reqMark" aria-hidden="true">*</span></label>
+                    <label className="auLabel">{taxIdLabel} (15 chars) </label>
                     <input
                       className="auInput"
                       value={gstNumber}
@@ -836,7 +836,7 @@ export default function AuthUnifiedPage() {
 
                   <div className="auGrid2">
                     <div className="auField">
-                      <label className="auLabel">Drug license 1 number <span className="reqMark" aria-hidden="true">*</span></label>
+                      <label className="auLabel">Drug license 1 number </label>
                       <input
                         className="auInput"
                         value={dl1Number}
@@ -845,7 +845,7 @@ export default function AuthUnifiedPage() {
                       />
                     </div>
                     <div className="auField">
-                      <label className="auLabel">Drug license 2 number <span className="reqMark" aria-hidden="true">*</span></label>
+                      <label className="auLabel">Drug license 2 number </label>
                       <input
                         className="auInput"
                         value={dl2Number}

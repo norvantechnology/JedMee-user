@@ -6,7 +6,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AppShell from "../layouts/AppShell.jsx";
 import CommonTable from "../components/CommonTable.jsx";
-import CommonModal from "../components/CommonModal.jsx";
+import CommonModal, {
+  ModalFormBody,
+  ModalFormField,
+  ModalFormGrid,
+  ModalFormPanel,
+  ModalFormPanelBody,
+  ModalFormPanelHead,
+  ModalFormSectionTitle,
+  ModalFormShell
+} from "../components/CommonModal.jsx";
 import CommonDatePicker from "../components/CommonDatePicker.jsx";
 import { readAuth } from "../services/authStorage.js";
 import { can } from "../utils/access.js";
@@ -25,6 +34,8 @@ import { toDivisionOption } from "../utils/divisionLabel.js";
 import { emitToast } from "../services/toastBus.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
 import { IconAdvancePayment, IconWallet } from "../components/ui/AppIcons.jsx";
+import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
+import { AppButton } from "../components/ui/buttons.jsx";
 import { todayYmdLocal } from "../utils/date.js";
 
 function canViewSupplierPayments() {
@@ -242,11 +253,15 @@ export default function VendorPaymentsPage() {
         subtitle={paymentKind === "ON_ACCOUNT" ? "Advance / on-account payment" : "Invoice payment"}
         icon={paymentKind === "ON_ACCOUNT" ? <IconAdvancePayment /> : <IconWallet />}
         onClose={() => (busy ? null : setOpen(false))}
+        loading={busy}
+        loadingText="Saving payment…"
         footer={(
-          <div className="sfmModalFooter">
-            <button className="sfmBtnGhost" type="button" disabled={busy} onClick={() => { setOpen(false); setPaySubmitted(false); }}>Cancel</button>
-            <button
-              className="sfmBtnPrimary"
+          <ModalFooterShell>
+            <AppButton variant="secondary" type="button" disabled={busy} onClick={() => { setOpen(false); setPaySubmitted(false); }}>
+              Cancel
+            </AppButton>
+            <AppButton
+              variant="primary"
               type="button"
               disabled={busy}
               onClick={async () => {
@@ -283,57 +298,109 @@ export default function VendorPaymentsPage() {
               }}
             >
               {busy ? <InlineButtonProgress label="Working..." /> : "Save"}
-            </button>
-          </div>
+            </AppButton>
+          </ModalFooterShell>
         )}
       >
-        <div className="sfm">
-          <div className="sfmSection">
-            <div className="sfmSectionHead">
-              <div className="sfmTitle">Payment details</div>
-              {isRetailer ? (
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button type="button" className={`sfmBtnGhost${paymentKind === "INVOICE" ? " active" : ""}`} onClick={() => setPaymentKind("INVOICE")}>Invoice</button>
-                  <button type="button" className={`sfmBtnGhost${paymentKind === "ON_ACCOUNT" ? " active" : ""}`} onClick={() => { setPaymentKind("ON_ACCOUNT"); setForm((p) => ({ ...p, purchaseInvoiceId: "" })); }}>Advance</button>
-                </div>
-              ) : null}
-            </div>
-            <div className="sfmGrid">
-              <div className="raField">
-                <label>{isRetailer ? "Supplier" : "Division"} <span className="reqMark" aria-hidden="true">*</span></label>
-                <select className={`raInput${paySubmitted && !form.partyId ? " raInput_err" : ""}`} value={form.partyId} onChange={(e) => setForm((p) => ({ ...p, partyId: e.target.value }))}>
-                  <option value="">Select</option>
-                  {partyOptions.filter((o) => o.value).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-                {paySubmitted && !form.partyId && <div className="mfzErr">{isRetailer ? "Supplier" : "Division"} is required.</div>}
-              </div>
-              {paymentKind === "INVOICE" ? (
-                <div className="raField">
-                  <label>Invoice <span className="reqMark" aria-hidden="true">*</span></label>
-                  <select className={`raInput${paySubmitted && !form.purchaseInvoiceId ? " raInput_err" : ""}`} value={form.purchaseInvoiceId} onChange={(e) => {
-                    const invoiceId = e.target.value;
-                    const inv = invoiceOptions.find((x) => String(x.id) === String(invoiceId));
-                    setForm((p) => ({ ...p, purchaseInvoiceId: invoiceId, amount: inv ? Number(inv.balance_due || 0).toFixed(2) : p.amount }));
-                  }}>
-                    <option value="">Select invoice</option>
-                    {invoiceOptions
-                      .filter((x) => !form.partyId || String(isRetailer ? x.vendor_id : x.division_id) === String(form.partyId))
-                      .map((x) => <option key={x.id} value={x.id}>{x.invoice_number} (Bal {fmtCurrency(x.balance_due || 0)})</option>)}
-                  </select>
-                  {paySubmitted && !form.purchaseInvoiceId && <div className="mfzErr">Invoice is required.</div>}
-                </div>
-              ) : null}
-              <div className="raField"><label>Date <span className="reqMark" aria-hidden="true">*</span></label><CommonDatePicker value={form.paymentDate} onChange={(v) => setForm((p) => ({ ...p, paymentDate: v }))} ariaLabel="Payment date" /></div>
-              <div className="raField">
-                <label>Amount <span className="reqMark" aria-hidden="true">*</span></label>
-                <AmountInput className={`raInput${paySubmitted && !(Number(form.amount) > 0) ? " raInput_err" : ""}`} value={String(form.amount ?? "")} onChange={(raw) => setForm((p) => ({ ...p, amount: raw }))} inputMode="decimal" />
-                {paySubmitted && !(Number(form.amount) > 0) && <div className="mfzErr">Amount must be greater than 0.</div>}
-              </div>
-              <div className="raField"><label>Mode</label><select className="raInput" value={form.paymentMode} onChange={(e) => setForm((p) => ({ ...p, paymentMode: e.target.value }))}><option>CASH</option><option>UPI</option><option>CARD</option><option>CHEQUE</option><option>NEFT</option><option>OTHER</option></select></div>
-              <div className="raField"><label>Reference</label><input className="raInput" value={form.referenceNumber} onChange={(e) => setForm((p) => ({ ...p, referenceNumber: e.target.value }))} /></div>
-            </div>
-          </div>
-        </div>
+        <ModalFormShell>
+          <ModalFormBody>
+            <ModalFormPanel aria-label="Payment details">
+              <ModalFormPanelHead>
+                <ModalFormSectionTitle kicker="Payment details" />
+                {isRetailer ? (
+                  <div className="mfzHeadRight">
+                    <button
+                      type="button"
+                      className={`mfzBtn appBtn appBtn_sm ${paymentKind === "INVOICE" ? "appBtn_primary" : "appBtn_secondary"}`}
+                      onClick={() => setPaymentKind("INVOICE")}
+                    >
+                      Invoice
+                    </button>
+                    <button
+                      type="button"
+                      className={`mfzBtn appBtn appBtn_sm ${paymentKind === "ON_ACCOUNT" ? "appBtn_primary" : "appBtn_secondary"}`}
+                      onClick={() => {
+                        setPaymentKind("ON_ACCOUNT");
+                        setForm((p) => ({ ...p, purchaseInvoiceId: "" }));
+                      }}
+                    >
+                      Advance
+                    </button>
+                  </div>
+                ) : null}
+              </ModalFormPanelHead>
+              <ModalFormPanelBody>
+                <ModalFormGrid>
+                  <ModalFormField
+                    span={12}
+                    label={isRetailer ? "Supplier" : "Division"}
+                    required
+                    error={paySubmitted && !form.partyId ? `${isRetailer ? "Supplier" : "Division"} is required.` : null}
+                  >
+                    <select
+                      className={`mfzInput${paySubmitted && !form.partyId ? " mfzInput_err" : ""}`}
+                      value={form.partyId}
+                      onChange={(e) => setForm((p) => ({ ...p, partyId: e.target.value }))}
+                    >
+                      <option value="">Select</option>
+                      {partyOptions.filter((o) => o.value).map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </ModalFormField>
+                  {paymentKind === "INVOICE" ? (
+                    <ModalFormField span={12} label="Invoice" required error={paySubmitted && !form.purchaseInvoiceId ? "Invoice is required." : null}>
+                      <select
+                        className={`mfzInput${paySubmitted && !form.purchaseInvoiceId ? " mfzInput_err" : ""}`}
+                        value={form.purchaseInvoiceId}
+                        onChange={(e) => {
+                          const invoiceId = e.target.value;
+                          const inv = invoiceOptions.find((x) => String(x.id) === String(invoiceId));
+                          setForm((p) => ({ ...p, purchaseInvoiceId: invoiceId, amount: inv ? Number(inv.balance_due || 0).toFixed(2) : p.amount }));
+                        }}
+                      >
+                        <option value="">Select invoice</option>
+                        {invoiceOptions
+                          .filter((x) => !form.partyId || String(isRetailer ? x.vendor_id : x.division_id) === String(form.partyId))
+                          .map((x) => (
+                            <option key={x.id} value={x.id}>
+                              {x.invoice_number} (Bal {fmtCurrency(x.balance_due || 0)})
+                            </option>
+                          ))}
+                      </select>
+                    </ModalFormField>
+                  ) : null}
+                  <ModalFormField span={12} label="Date" required>
+                    <CommonDatePicker value={form.paymentDate} onChange={(v) => setForm((p) => ({ ...p, paymentDate: v }))} ariaLabel="Payment date" />
+                  </ModalFormField>
+                  <ModalFormField span={12} label="Amount" required error={paySubmitted && !(Number(form.amount) > 0) ? "Amount must be greater than 0." : null}>
+                    <AmountInput
+                      className={`mfzInput${paySubmitted && !(Number(form.amount) > 0) ? " mfzInput_err" : ""}`}
+                      value={String(form.amount ?? "")}
+                      onChange={(raw) => setForm((p) => ({ ...p, amount: raw }))}
+                      inputMode="decimal"
+                    />
+                  </ModalFormField>
+                  <ModalFormField span={12} label="Mode">
+                    <select className="mfzInput" value={form.paymentMode} onChange={(e) => setForm((p) => ({ ...p, paymentMode: e.target.value }))}>
+                      <option>CASH</option>
+                      <option>UPI</option>
+                      <option>CARD</option>
+                      <option>CHEQUE</option>
+                      <option>NEFT</option>
+                      <option>OTHER</option>
+                    </select>
+                  </ModalFormField>
+                  <ModalFormField span={12} label="Reference">
+                    <input className="mfzInput" value={form.referenceNumber} onChange={(e) => setForm((p) => ({ ...p, referenceNumber: e.target.value }))} />
+                  </ModalFormField>
+                </ModalFormGrid>
+              </ModalFormPanelBody>
+            </ModalFormPanel>
+          </ModalFormBody>
+        </ModalFormShell>
       </CommonModal>
     </AppShell>
   );

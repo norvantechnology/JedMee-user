@@ -781,7 +781,7 @@
     max-width: 100%;
   }
 
-  .piModalForm .sbmItemsTable tbody td:nth-child(2) .mswSelect,
+  .piModalForm .sbmItemsTable tbody td:nth-child(2) .msw > .csf,
   .piModalForm .sbmItemsTable tbody td:nth-child(2) .csf {
     min-width: 0 !important;
   }
@@ -792,7 +792,8 @@
     height: 40px !important;
   }
 
-  .piModalForm .sbmItemsTable .csf,
+  /* Flatten chrome when idle; keep focus ring + primary border when open (see app.css .mcm .raField .csf:focus-within) */
+  .piModalForm .sbmItemsTable .csf:not(:focus-within),
   .piModalForm .sbmItemsTable .ciab {
     box-shadow: none !important;
     transform: none !important;

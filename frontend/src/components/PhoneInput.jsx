@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import "./PhoneInput.css";
 import { IconTelGlobe, IconTelHandset } from "./ui/AppIcons.jsx";
 
@@ -40,9 +40,16 @@ export default function PhoneInput({
   onPhoneNumberChange,
   countryCodeError = "",
   phoneNumberError = "",
-  /** Omit ribbon/hint when parent already shows a field label (e.g. master modals). */
+  /**
+   * Single-row layout aligned with modal text fields (no inner labels/icons).
+   * Use wherever the parent already shows “Phone” (master modals, account form, …).
+   */
   compact = false
 }) {
+  const uid = useId();
+  const ccId = `${uid}-cc`;
+  const pnId = `${uid}-pn`;
+
   useEffect(() => {
     const raw = String(phoneNumber ?? "").replace(/\D/g, "");
     if (raw.length > MAX_PHONE_DIGITS) {
@@ -50,22 +57,62 @@ export default function PhoneInput({
     }
   }, [phoneNumber, onPhoneNumberChange]);
 
-  const ccId = "telx-cc";
-  const pnId = "telx-pn";
+  if (compact) {
+    const bad = Boolean(countryCodeError) || Boolean(phoneNumberError);
+    const errId = bad ? `${uid}-err` : undefined;
+    const parts = [countryCodeError, phoneNumberError].filter(Boolean);
+    const errText = parts.length > 1 ? parts.join(". ") : parts[0] || "";
+    return (
+      <>
+        <div
+          className={`telxUnified${bad ? " telxUnified_bad" : ""}`}
+          role="group"
+          aria-label="Phone number"
+          aria-invalid={bad ? "true" : undefined}
+          aria-describedby={errId}
+        >
+          <input
+            id={ccId}
+            className="telxUnifiedCc"
+            value={countryCode || ""}
+            onChange={(e) => onCountryCodeChange?.(e.target.value)}
+            placeholder={countryCodePlaceholder}
+            inputMode="tel"
+            autoComplete="tel-country-code"
+            aria-label={countryCodeLabel}
+          />
+          <input
+            id={pnId}
+            className="telxUnifiedPn"
+            value={digitsOnlyMax15(phoneNumber)}
+            onChange={(e) => handlePhoneChange(e.target.value, onPhoneNumberChange)}
+            placeholder={phonePlaceholder}
+            inputMode="numeric"
+            maxLength={MAX_PHONE_DIGITS}
+            autoComplete="tel-national"
+            aria-label={phoneLabel}
+          />
+        </div>
+        {bad && errText ? (
+          <p id={errId} className="mfzErr telxUnifiedErr" role="alert">
+            {errText}
+          </p>
+        ) : null}
+      </>
+    );
+  }
 
   return (
-    <section className={`telx${compact ? " telx_compact" : ""}`} aria-label="Phone number">
-      {!compact ? (
-        <header className="telxRibbon">
-          <span className="telxRibbonMark" aria-hidden="true">
-            <IconTelHandset />
-          </span>
-          <div className="telxRibbonText">
-            <span className="telxRibbonKicker">Contact</span>
-            <span className="telxRibbonHint">Include the country prefix when you enter a number.</span>
-          </div>
-        </header>
-      ) : null}
+    <section className="telx" aria-label="Phone number">
+      <header className="telxRibbon">
+        <span className="telxRibbonMark" aria-hidden="true">
+          <IconTelHandset />
+        </span>
+        <div className="telxRibbonText">
+          <span className="telxRibbonKicker">Contact</span>
+          <span className="telxRibbonHint">Include the country prefix when you enter a number.</span>
+        </div>
+      </header>
 
       <div className="telxBoard">
         <div className="telxLane">

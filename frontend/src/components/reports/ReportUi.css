@@ -20,7 +20,7 @@
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: none;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
 }
 
 @media (max-width: 1100px) {
@@ -32,8 +32,8 @@
 .rptPane {
   display: flex;
   flex-direction: column;
-  background: var(--color-surface, #fff);
-  border: 1px solid var(--color-border, #e6e9ef);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   overflow: hidden;
   min-height: 0;
@@ -46,8 +46,8 @@
   justify-content: space-between;
   gap: 8px;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--color-border, #eef0f4);
-  background: var(--color-bg-soft, #f7f9fc);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-soft);
 }
 
 .rptPaneTitle {
@@ -56,14 +56,14 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-text-2, #4b5563);
+  color: var(--color-text-2);
 }
 
 .rptPaneSub {
   margin: 0;
   font-size: 11px;
   font-weight: 500;
-  color: var(--color-text-2, #4b5563);
+  color: var(--color-text-2);
 }
 
 .rptPaneBody {
@@ -87,7 +87,7 @@
   background: transparent;
   text-align: left;
   cursor: pointer;
-  border-bottom: 1px solid var(--color-border-soft, #f1f3f7);
+  border-bottom: 1px solid var(--color-border-soft);
   transition: background 120ms ease;
 }
 
@@ -110,24 +110,24 @@
 }
 
 .rptListItem:hover {
-  background: var(--color-bg-soft, #f7f9fc);
+  background: var(--color-bg-soft);
 }
 
 .rptListItem.is-selected {
-  background: color-mix(in srgb, var(--color-primary, #7c3aed) 8%, transparent);
-  border-left: 3px solid var(--color-primary, #7c3aed);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  border-left: 3px solid var(--color-primary);
   padding-left: 9px;
 }
 
 .rptListItem.is-selected .rptListItemPrimary {
-  color: var(--color-primary, #7c3aed);
+  color: var(--color-primary);
   font-weight: 700;
 }
 
 .rptListItemPrimary {
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-text-heading, #111827);
+  color: var(--color-text-heading);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -135,7 +135,7 @@
 
 .rptListItemSecondary {
   font-size: 11px;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -143,7 +143,7 @@
 
 .rptListItemMeta {
   font-size: 11px;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -151,7 +151,7 @@
 .rptListEmpty {
   padding: 24px 14px;
   text-align: center;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   font-size: 13px;
 }
 
@@ -176,15 +176,15 @@
   flex: 1;
   padding: 9px 12px;
   border-radius: 8px;
-  border: 1px solid var(--color-border, #d4d8e0);
+  border: 1px solid var(--color-border-strong);
   font-size: 14px;
-  background: var(--color-surface, #fff);
+  background: var(--color-card);
 }
 
 .rptSearchInput:focus {
   outline: none;
-  border-color: var(--color-primary, #2563eb);
-  box-shadow: 0 0 0 3px var(--color-primary-soft, #dbeafe);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
 }
 
 .rptSearchInput_narrow {
@@ -211,15 +211,15 @@
 }
 
 .rptBatchTable thead th {
-  background: var(--color-bg-soft, #f7f9fc);
+  background: var(--color-bg-soft);
   text-align: left;
   font-weight: 600;
   font-size: 10px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   padding: 8px 10px;
-  border-bottom: 1px solid var(--color-border, #e6e9ef);
+  border-bottom: 1px solid var(--color-border);
   vertical-align: bottom;
 }
 
@@ -229,7 +229,7 @@
 
 .rptBatchTable tbody td {
   padding: 8px 10px;
-  border-bottom: 1px solid var(--color-border-soft, #f1f3f7);
+  border-bottom: 1px solid var(--color-border-soft);
   vertical-align: middle;
 }
 
@@ -280,28 +280,28 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: color-mix(in srgb, var(--color-primary, #7c3aed) 12%, transparent);
-  color: var(--color-primary, #7c3aed);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
   font-size: 14px;
   font-weight: 800;
   display: grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--color-primary, #7c3aed) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
   transition: background 120ms ease, color 120ms ease;
 }
 
 .rptMfgAvatar--active {
-  background: var(--color-primary, #7c3aed);
-  color: #fff;
-  border-color: var(--color-primary, #7c3aed);
+  background: var(--color-primary);
+  color: var(--on-primary);
+  border-color: var(--color-primary);
 }
 
 .rptMfgCodeBadge {
   display: inline-block;
   padding: 1px 7px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-border, #e6e9ef) 60%, transparent);
-  color: var(--color-text-3, #6b7280);
+  background: color-mix(in srgb, var(--color-border) 60%, transparent);
+  color: var(--color-text-3);
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -312,7 +312,7 @@
   flex-shrink: 0;
   font-size: 18px;
   font-weight: 700;
-  color: var(--color-primary, #7c3aed);
+  color: var(--color-primary);
   line-height: 1;
   opacity: 0.7;
 }
@@ -323,8 +323,8 @@
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-bottom: 1px solid var(--color-border, #eef0f4);
-  background: color-mix(in srgb, var(--color-primary, #7c3aed) 5%, var(--color-surface, #fff));
+  border-bottom: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-card));
 }
 
 .rptMfgSelectedAvatar {
@@ -332,13 +332,13 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: var(--color-primary, #7c3aed);
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--on-primary);
   font-size: 18px;
   font-weight: 800;
   display: grid;
   place-items: center;
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary, #7c3aed) 30%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 
 .rptMfgSelectedInfo {
@@ -352,7 +352,7 @@
 .rptMfgSelectedName {
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-heading, #111827);
+  color: var(--color-text-heading);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -362,8 +362,8 @@
   display: inline-block;
   padding: 1px 8px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--color-primary, #7c3aed) 12%, transparent);
-  color: var(--color-primary, #7c3aed);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  color: var(--color-primary);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -372,7 +372,7 @@
 .rptMfgSelectedHint {
   flex-shrink: 0;
   font-size: 11px;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   max-width: 160px;
   text-align: right;
   line-height: 1.35;
@@ -382,14 +382,14 @@
 .rptEmptyHint {
   display: block;
   font-size: 13px;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   line-height: 1.5;
 }
 
 .rptEmptyHintSub {
   display: block;
   font-size: 11.5px;
-  color: var(--color-text-4, #9ca3af);
+  color: var(--color-text-4);
   margin-top: 4px;
 }
 
@@ -404,7 +404,7 @@
   flex-shrink: 0;
   font-size: 10px;
   font-weight: 700;
-  color: var(--color-text-4, #9ca3af);
+  color: var(--color-text-4);
   font-variant-numeric: tabular-nums;
   min-width: 18px;
 }
@@ -413,7 +413,7 @@
 .rptVendorPhoneLink {
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-primary, #7c3aed);
+  color: var(--color-primary);
   text-decoration: none;
   font-variant-numeric: tabular-nums;
 }
@@ -424,21 +424,21 @@
 
 .rptVendorPhoneEmpty {
   font-size: 12px;
-  color: var(--color-text-4, #9ca3af);
+  color: var(--color-text-4);
 }
 
 /* ── Supply date cell ── */
 .rptSupplyDate {
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-text-2, #4b5563);
+  color: var(--color-text-2);
   font-variant-numeric: tabular-nums;
 }
 
 .rptSupplyDate--none {
   font-size: 11.5px;
   font-weight: 400;
-  color: var(--color-text-4, #9ca3af);
+  color: var(--color-text-4);
   font-style: italic;
 }
 
@@ -460,7 +460,7 @@
 }
 
 .rptBatchTable tbody tr:hover {
-  background: var(--color-bg-soft, #f7f9fc);
+  background: var(--color-bg-soft);
 }
 
 .rptNum {
@@ -474,17 +474,17 @@
 }
 
 .rptExpiry_red {
-  color: var(--color-danger-dark, #b91c1c);
+  color: var(--color-danger-dark);
   font-weight: 600;
 }
 
 .rptExpiry_amber {
-  color: var(--color-warning-dark, #b45309);
+  color: var(--color-warning-dark);
   font-weight: 600;
 }
 
 .rptExpiry_green {
-  color: var(--color-success-dark, #047857);
+  color: var(--color-success-dark);
 }
 
 .rptExpiryStack {
@@ -497,7 +497,7 @@
 .rptExpirySub {
   font-size: 11px;
   font-weight: 700;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
 }
 
 .rptBadge {
@@ -509,8 +509,8 @@
 }
 
 .rptBadge_pref {
-  background: var(--color-success-light, #ecfdf5);
-  color: var(--color-success-dark, #047857);
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
 }
 
 .rptSupplierTable tbody td {
@@ -524,8 +524,8 @@
 /* Product–Supplier: make product ↔ manufacturer ↔ vendor relationship explicit */
 .rptSkuContext {
   padding: 8px 12px 10px;
-  border-bottom: 1px solid var(--color-border, #eef0f4);
-  background: linear-gradient(180deg, var(--color-bg-soft, #f7f9fc) 0%, var(--color-surface, #fff) 100%);
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(180deg, var(--color-bg-soft) 0%, var(--color-card) 100%);
 }
 
 .rptSkuTop {
@@ -543,7 +543,7 @@
   border-radius: 999px;
   border: 1px solid var(--color-border);
   background: var(--color-bg-1);
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   font-size: 10.5px;
   font-weight: 700;
   white-space: nowrap;
@@ -563,9 +563,9 @@
   min-height: 22px;
   padding: 0 8px;
   border-radius: 999px;
-  background: var(--color-bg-soft, #f7f9fc);
-  border: 1px solid var(--color-border, #eef0f4);
-  color: var(--color-text-2, #4b5563);
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-2);
   font-size: 10.5px;
   line-height: 1.2;
 }
@@ -576,14 +576,14 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
 }
 
 .rptSkuContextName {
   margin: 0 0 8px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-heading, #111827);
+  color: var(--color-text-heading);
 }
 
 .rptSkuContextGrid {
@@ -596,13 +596,13 @@
 }
 
 .rptSkuContextKey {
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   font-weight: 600;
   white-space: nowrap;
 }
 
 .rptSkuContextVal {
-  color: var(--color-text-heading, #111827);
+  color: var(--color-text-heading);
   font-weight: 500;
   min-width: 0;
 }
@@ -611,13 +611,13 @@
   margin: 0 0 8px;
   font-size: 11px;
   line-height: 1.35;
-  color: var(--color-text-2, #4b5563);
+  color: var(--color-text-2);
 }
 
 .rptDetailHeader {
   padding: 8px 14px 10px;
-  border-bottom: 1px solid var(--color-border, #eef0f4);
-  background: var(--color-surface, #fff);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-card);
 }
 
 .rptDetailHeaderTop {
@@ -631,13 +631,13 @@
   margin: 0;
   font-size: 14px;
   font-weight: 700;
-  color: var(--color-text-heading, #111827);
+  color: var(--color-text-heading);
 }
 
 .rptDetailMeta {
   margin: 2px 0 0;
   font-size: 11.5px;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
 }
 
 .rptStockTotals {
@@ -646,12 +646,12 @@
   gap: 10px 14px;
   margin-top: 4px;
   font-size: 11px;
-  color: var(--color-text-2, #4b5563);
+  color: var(--color-text-2);
   font-variant-numeric: tabular-nums;
 }
 
 .rptStockTotals strong {
-  color: var(--color-text-heading, #111827);
+  color: var(--color-text-heading);
 }
 
 .rptBatchPane {
@@ -710,7 +710,7 @@
 }
 
 .rptToolbarHint {
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   font-size: 11px;
 }
 
@@ -720,8 +720,8 @@
   gap: 6px;
   padding: 3px 10px;
   border-radius: 999px;
-  background: var(--color-primary-soft, #dbeafe);
-  color: var(--color-primary, #2563eb);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
   font-size: 12px;
   font-weight: 600;
 }
@@ -733,7 +733,7 @@
 .rptCountChip .cl__inlineText {
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-primary, #2563eb);
+  color: var(--color-primary);
 }
 
 .rptVendorContact {
@@ -745,18 +745,18 @@
 .rptVendorName {
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-text-heading, #111827);
+  color: var(--color-text-heading);
 }
 
 .rptVendorPhone {
   font-size: 11px;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   font-variant-numeric: tabular-nums;
 }
 
 .rptVendorAddress {
   font-size: 10.5px;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -780,14 +780,14 @@
   font-size: 11px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  background: var(--color-success-light, #ecfdf5);
-  color: var(--color-success-dark, #047857);
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
 }
 
-.rptExpiryChip.is-expired { background: var(--color-danger-light, #fee2e2); color: var(--color-danger-dark, #b91c1c); }
-.rptExpiryChip.is-soon    { background: var(--color-warning-light, #fef3c7); color: var(--color-warning-dark, #b45309); }
-.rptExpiryChip.is-warn    { background: var(--color-warning-light, #fff7ed); color: var(--color-warning-dark, #c2410c); }
-.rptExpiryChip.is-ok      { background: var(--color-success-light, #ecfdf5); color: var(--color-success-dark, #047857); }
+.rptExpiryChip.is-expired { background: var(--color-danger-light); color: var(--color-danger-dark); }
+.rptExpiryChip.is-soon    { background: var(--color-warning-light); color: var(--color-warning-dark); }
+.rptExpiryChip.is-warn    { background: var(--color-warning-light); color: var(--color-warning-dark); }
+.rptExpiryChip.is-ok      { background: var(--color-success-light); color: var(--color-success-dark); }
 
 /* Optional: indeterminate bar while any report fetch is in flight */
 .rptCard {
@@ -889,16 +889,16 @@
     display: none;
   }
   .rptBatchTable tbody tr {
-    border: 1px solid var(--color-border, #e6e9ef);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     margin-bottom: 10px;
     padding: 10px 12px;
-    background: var(--color-surface, #fff);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    background: var(--color-card);
+    box-shadow: var(--shadow-sm);
   }
   .rptBatchTable tbody td {
     padding: 5px 0;
-    border-bottom: 1px solid var(--color-border-soft, #f1f3f7);
+    border-bottom: 1px solid var(--color-border-soft);
     display: grid;
     grid-template-columns: 82px 1fr;
     gap: 6px;
@@ -915,7 +915,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: var(--color-text-3, #6b7280);
+    color: var(--color-text-3);
     padding-top: 1px;
     white-space: nowrap;
   }

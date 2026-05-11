@@ -31,9 +31,7 @@
 
   /* Dark nav surface derived from tokens */
   --brand: var(--color-primary);
-  --brand-mid: var(--color-primary-dark);
   --brand-lt: color-mix(in srgb, var(--color-primary) 62%, var(--color-on-primary));
-  --brand-glow: color-mix(in srgb, var(--color-primary) 18%, transparent);
   --nav-bg: color-mix(in srgb, var(--color-primary-darker) 80%, var(--color-text) 20%);
   --nav-surface: color-mix(in srgb, var(--color-primary-darker) 72%, var(--color-text) 28%);
   --nav-border: color-mix(in srgb, var(--color-on-primary) 14%, transparent);
@@ -42,7 +40,6 @@
   --text-primary: color-mix(in srgb, var(--color-on-primary) 96%, transparent);
   --text-muted: color-mix(in srgb, var(--color-on-primary) 68%, transparent);
   --text-label: color-mix(in srgb, var(--color-on-primary) 78%, transparent);
-  --shadow-pop: 0 10px 28px color-mix(in srgb, var(--color-text) 24%, transparent);
 
   width: var(--sidebar-w);
   min-width: var(--sidebar-w);
@@ -76,28 +73,7 @@
   flex-shrink: 0;
   overflow: hidden;
   position: relative;
-  /* Gradient border-bottom */
-  border-bottom: 1px solid transparent;
-  border-image: linear-gradient(90deg,
-    transparent 0%,
-    color-mix(in srgb, var(--brand-lt) 55%, transparent) 30%,
-    color-mix(in srgb, var(--brand-lt) 55%, transparent) 70%,
-    transparent 100%
-  ) 1;
-}
-
-/* Glow orb behind logo */
-.sidebar-logo::after {
-  content: "";
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--brand-lt) 0%, transparent 70%);
-  opacity: 0.12;
-  top: -40px;
-  left: -20px;
-  pointer-events: none;
+  border-bottom: 1px solid var(--nav-border);
 }
 
 /* Inner wrapper: logo + tagline stacked */
@@ -142,7 +118,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--brand-lt) 70%, white);
+  color: color-mix(in srgb, var(--brand-lt) 70%, var(--color-on-primary));
   opacity: 0.65;
   white-space: nowrap;
   overflow: hidden;
@@ -195,45 +171,6 @@
 .sidebar.collapsed .nav-scroll { overflow: visible; }
 .nav-scroll::-webkit-scrollbar { display: none; }
 
-/* Top-of-scroll shadow fade — fades in when scrolled, invisible at top */
-.nav-scroll::before {
-  content: '';
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 18px;
-  display: block;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--nav-bg) 90%, transparent) 0%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 2;
-  flex-shrink: 0;
-}
-
-/* Bottom fade on nav-scroll to signal more content below */
-.nav-scroll::after {
-  content: '';
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 28px;
-  display: block;
-  background: linear-gradient(
-    0deg,
-    color-mix(in srgb, var(--nav-bg) 85%, transparent) 0%,
-    transparent 100%
-  );
-  pointer-events: none;
-  z-index: 2;
-  margin-top: -28px;
-  flex-shrink: 0;
-}
-
 /* ── Section group ── */
 .nav-group { margin-bottom: 4px; }
 .nav-group-label {
@@ -262,7 +199,7 @@
   cursor: pointer;
   text-decoration: none;
   color: var(--text-muted);
-  transition: background var(--tr), color var(--tr), border-color var(--tr), transform var(--tr), box-shadow var(--tr);
+  transition: background var(--tr), color var(--tr), border-color var(--tr), transform var(--tr);
   white-space: nowrap;
   overflow: hidden;
   position: relative;
@@ -274,7 +211,6 @@
   background: var(--nav-active-bg);
   color: color-mix(in srgb, var(--brand-lt) 74%, var(--text-primary));
   border-color: color-mix(in srgb, var(--brand-lt) 28%, transparent);
-  box-shadow: 0 10px 18px color-mix(in srgb, var(--brand) 12%, transparent);
 }
 .nav-link.active .nav-icon { color: var(--brand-lt); }
 .nav-link.active .nav-active-bar { opacity: 1; }
@@ -285,7 +221,7 @@
   top: 20%;
   bottom: 20%;
   width: 3px;
-  background: linear-gradient(180deg, var(--brand-lt), color-mix(in srgb, var(--brand-lt) 55%, var(--text-primary)));
+  background: var(--brand);
   border-radius: 0 2px 2px 0;
   opacity: 0;
   transition: opacity var(--tr);
@@ -310,6 +246,24 @@
 .nav-label { font-size: 14.5px; font-weight: 650; flex: 1; overflow: hidden; text-overflow: ellipsis; opacity: 1; transition: opacity var(--tr); }
 .sidebar.collapsed .nav-label { opacity: 0; width: 0; }
 
+/* Alt+letter hints (global shortcuts — see services/navShortcuts.js) */
+.navShortcutHint {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 2px 5px;
+  border-radius: 5px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--color-on-primary) 8%, transparent);
+  border: 1px solid var(--nav-border);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.sidebar.collapsed .navShortcutHint { display: none; }
+
 /* Pending-order badge on sidebar nav items */
 .nav-badge {
   flex-shrink: 0;
@@ -317,8 +271,8 @@
   height: 18px;
   padding: 0 5px;
   border-radius: 9px;
-  background: #ef4444;
-  color: #fff;
+  background: var(--color-danger);
+  color: var(--on-danger);
   font-size: 10.5px;
   font-weight: 700;
   line-height: 18px;
@@ -329,15 +283,12 @@
 }
 .sidebar.collapsed .nav-badge { opacity: 0; width: 0; min-width: 0; padding: 0; overflow: hidden; }
 
-/* Subtle "3D" treatment (no size changes) */
 .nav-link:hover .nav-icon {
-  background: radial-gradient(120% 120% at 30% 25%, color-mix(in srgb, var(--brand-lt) 24%, transparent), transparent 65%);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-on-primary) 14%, transparent);
+  background: color-mix(in srgb, var(--color-on-primary) 10%, transparent);
 }
 
 .nav-link.active .nav-icon {
-  background: radial-gradient(120% 120% at 30% 25%, color-mix(in srgb, var(--brand-lt) 28%, transparent), transparent 68%);
-  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-on-primary) 16%, transparent);
+  background: color-mix(in srgb, var(--color-on-primary) 14%, transparent);
 }
 
 .nav-badge {
@@ -358,7 +309,13 @@
 .nav-item.open > .nav-link .nav-chevron { transform: rotate(90deg); color: var(--brand-lt); }
 .sidebar.collapsed .nav-chevron { display: none; }
 
-.nav-link.nav-link_kbd { background: color-mix(in srgb, var(--brand) 18%, transparent); color: var(--text-primary); border-color: color-mix(in srgb, var(--brand-lt) 35%, transparent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand) 22%, transparent); }
+.nav-link.nav-link_kbd {
+  background: color-mix(in srgb, var(--brand) 18%, transparent);
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--brand-lt) 35%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--brand) 35%, transparent);
+  outline-offset: 0;
+}
 
 /* ── Tooltip for collapsed state ── */
 .nav-item { position: relative; }
@@ -378,7 +335,6 @@
   pointer-events: none;
   opacity: 0;
   border: 1px solid var(--nav-border);
-  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-text) 28%, transparent);
   z-index: 9999;
   transition: opacity .14s ease, transform .14s ease;
   transform: translateY(-50%) translateX(-4px);
@@ -450,7 +406,7 @@
 .sidebar-footer { border-top: 1px solid var(--nav-border); padding: 12px 10px; flex-shrink: 0; }
 .user-card { display: flex; align-items: center; gap: 9px; padding: 8px 8px; border-radius: 9px; cursor: pointer; transition: background var(--tr); overflow: hidden; position: relative; }
 .user-card:hover { background: var(--nav-hover); }
-.user-avatar { width: 32px; height: 32px; border-radius: 9px; background: linear-gradient(135deg, var(--brand-mid), var(--brand-lt)); color: var(--color-on-primary); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: .5px; }
+.user-avatar { width: 32px; height: 32px; border-radius: 9px; background: var(--brand); color: var(--color-on-primary); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; letter-spacing: .5px; }
 .user-info { flex: 1; overflow: hidden; opacity: 1; transition: opacity var(--tr); }
 .sidebar.collapsed .user-info { opacity: 0; width: 0; }
 .user-name { font-size: 12.5px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -471,7 +427,6 @@
   border-radius: 12px;
   overflow: hidden;
   z-index: 320;
-  box-shadow: var(--shadow-pop);
 }
 .userMenuItem {
   width: 100%;
@@ -514,7 +469,6 @@
   }
   .sidebar.mobile-open {
     transform: translateX(0);
-    box-shadow: 6px 0 32px color-mix(in srgb, var(--color-text) 28%, transparent);
   }
 
   /* Hide desktop toggle */

@@ -9,7 +9,7 @@ import {
   IconEdit,
   IconLinkOut
 } from "./ui/AppIcons.jsx";
-import "./MasterModalForm.css";
+import "./CommonModal.css";
 import "./StructuredForm.css";
 import "./UserDetailPanel.css";
 import { useLocale } from "../context/LocaleContext.jsx";

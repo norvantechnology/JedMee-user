@@ -1,12 +1,20 @@
 import { AppButton, AsyncButton } from "./ui/buttons.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
-import CommonModal from "./CommonModal.jsx";
+import CommonModal, {
+  ModalFormBody,
+  ModalFormCheckGroup,
+  ModalFormField,
+  ModalFormGrid,
+  ModalFormPanel,
+  ModalFormPanelBody,
+  ModalFormPanelHead,
+  ModalFormSectionTitle,
+  ModalFormShell
+} from "./CommonModal.jsx";
 import MasterSelectWithCreate from "./MasterSelectWithCreate.jsx";
 import PhoneInput, { validatePhone } from "./PhoneInput.jsx";
 import ModalFooterShell from "./ui/ModalFooterShell.jsx";
 import { IconSupplier } from "./ui/AppIcons.jsx";
-import "./MasterModalForm.css";
-import "./VendorMasterModal.css";
 import { isRetailerAuth } from "../utils/businessRole.js";
 import { readAuth } from "../services/authStorage.js";
 
@@ -46,13 +54,15 @@ export default function VendorMasterModal({
   open,
   mode = "add",
   busy = false,
+  loading = false,
   initialValue = null,
   mfgCompanyOptions = [],
   onRefreshMfgCompanies,
   onClose,
   onSubmit,
   portal = false,
-  portalZIndex = 480
+  portalZIndex = 480,
+  drawer = true
 }) {
   const isRetailer = useMemo(() => isRetailerAuth(readAuth()), []);
   const [form, setForm] = useState(emptyVendor);
@@ -137,6 +147,8 @@ export default function VendorMasterModal({
   return (
     <CommonModal
       open={open}
+      loading={loading}
+      loadingText="Loading required data…"
       title={
         mode === "edit"
           ? isRetailer
@@ -153,6 +165,7 @@ export default function VendorMasterModal({
       icon={<IconSupplier />}
       portal={portal}
       portalZIndex={portalZIndex}
+      drawer={drawer}
       footer={
         <ModalFooterShell>
           <AppButton type="button" variant="secondary" size="md" data-cm-cancel="true" disabled={busy} onClick={handleExplicitClose}>
@@ -173,20 +186,20 @@ export default function VendorMasterModal({
         </ModalFooterShell>
       }
     >
-      <div className="mfz vmShell">
-        <div className="mfzBody vmSplit">
-          <section className="mfzPanel vmColStretch" aria-label={`${partnerLabel} profile`}>
-            <div className="mfzPanelHead">
-              <div>
-                <div className="mfzHeadKicker">{isRetailer ? "Supplier profile" : "Vendor profile"}</div>
-              </div>
-            </div>
-            <div className="mfzPanelBody">
-              <div className="mfzGrid">
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">
-                    {isRetailer ? "Supplier name" : "Vendor name"} <span className="reqMark" aria-hidden="true">*</span>
-                  </div>
+      <ModalFormShell className="vmShell">
+        <ModalFormBody className="vmSplit">
+          <ModalFormPanel className="vmColStretch" aria-label={`${partnerLabel} profile`}>
+            <ModalFormPanelHead>
+              <ModalFormSectionTitle kicker={isRetailer ? "Supplier profile" : "Vendor profile"} />
+            </ModalFormPanelHead>
+            <ModalFormPanelBody>
+              <ModalFormGrid>
+                <ModalFormField
+                  span={12}
+                  label={isRetailer ? "Supplier name" : "Vendor name"}
+                  required
+                  error={submitted && clean(form.name).length < 2 ? "Name is required (min 2 characters)." : null}
+                >
                   <input
                     className={`mfzInput${submitted && clean(form.name).length < 2 ? " mfzInput_err" : ""}`}
                     value={form.name}
@@ -195,13 +208,9 @@ export default function VendorMasterModal({
                     placeholder=""
                     autoComplete="organization"
                   />
-                  {submitted && clean(form.name).length < 2 && (
-                    <div className="mfzErr">Name is required (min 2 characters).</div>
-                  )}
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">Code</div>
+                <ModalFormField span={4} label="Code">
                   <input
                     className="mfzInput"
                     value={form.code}
@@ -209,10 +218,9 @@ export default function VendorMasterModal({
                     onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))}
                     placeholder={isRetailer ? "Optional  e.g. SUP-0001" : "Optional  e.g. VEN-0001"}
                   />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">Short name</div>
+                <ModalFormField span={4} label="Short name">
                   <input
                     className="mfzInput"
                     value={form.shortName}
@@ -220,10 +228,9 @@ export default function VendorMasterModal({
                     onChange={(e) => setForm((p) => ({ ...p, shortName: e.target.value }))}
                     placeholder=""
                   />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">Credit days</div>
+                <ModalFormField span={4} label="Credit days">
                   <input
                     className="mfzInput"
                     type="text"
@@ -237,11 +244,10 @@ export default function VendorMasterModal({
                       setForm((p) => ({ ...p, creditDays: val }));
                     }}
                   />
-                </div>
+                </ModalFormField>
 
                 {!isRetailer ? (
-                  <div className="mfzField mfz6">
-                    <div className="mfzLabel">Rack / shelf</div>
+                  <ModalFormField span={6} label="Rack / shelf">
                     <input
                       className="mfzInput"
                       value={form.rackNumber}
@@ -249,10 +255,9 @@ export default function VendorMasterModal({
                       onChange={(e) => setForm((p) => ({ ...p, rackNumber: e.target.value }))}
                       placeholder=""
                     />
-                  </div>
+                  </ModalFormField>
                 ) : (
-                  <div className="mfzField mfz6">
-                    <div className="mfzLabel">Supplier type</div>
+                  <ModalFormField span={6} label="Supplier type">
                     <select
                       className="mfzInput"
                       value={form.vendorType || "WHOLESALER"}
@@ -266,11 +271,10 @@ export default function VendorMasterModal({
                         </option>
                       ))}
                     </select>
-                  </div>
+                  </ModalFormField>
                 )}
 
-                <div className="mfzField mfz6">
-                  <div className="mfzLabel">{isRetailer ? "Main brand" : "Main company"}</div>
+                <ModalFormField span={6} label={isRetailer ? "Main brand" : "Main company"}>
                   <input
                     className="mfzInput"
                     value={form.mainCompany}
@@ -278,11 +282,10 @@ export default function VendorMasterModal({
                     onChange={(e) => setForm((p) => ({ ...p, mainCompany: e.target.value }))}
                     placeholder="Parent or flagship name"
                   />
-                </div>
+                </ModalFormField>
 
                 {!isRetailer ? (
-                  <div className="mfzField mfz12">
-                    <div className="mfzLabel">Linked manufacturer</div>
+                  <ModalFormField span={12} label="Linked manufacturer">
                     <MasterSelectWithCreate
                       kind="mfgCompany"
                       selectClassName="mfzInput"
@@ -303,26 +306,22 @@ export default function VendorMasterModal({
                       options={mfgOptions}
                       buttonTitle="Create new manufacturer"
                     />
-                  </div>
+                  </ModalFormField>
                 ) : null}
-              </div>
-            </div>
-          </section>
+              </ModalFormGrid>
+            </ModalFormPanelBody>
+          </ModalFormPanel>
 
-          <section className="mfzPanel vmColStretch" aria-label="Contact and notes">
-            <div className="mfzPanelHead">
-              <div>
-                <div className="mfzHeadKicker">Reach & notes</div>
-              </div>
-            </div>
-            <div className="mfzPanelBody">
-              <div className="mfzGrid">
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">
-                    Phone <span className="reqMark" aria-hidden="true">*</span>
-                  </div>
+          <ModalFormPanel className="vmColStretch" aria-label="Contact and notes">
+            <ModalFormPanelHead>
+              <ModalFormSectionTitle kicker="Reach & notes" />
+            </ModalFormPanelHead>
+            <ModalFormPanelBody>
+              <ModalFormGrid>
+                <ModalFormField span={12} label="Phone" required>
                   <PhoneInput
                     compact
+                    phonePlaceholder="7–15 digits"
                     countryCode={form.phoneCountryCode}
                     phoneNumber={form.phoneNumber}
                     onCountryCodeChange={(v) => setForm((p) => ({ ...p, phoneCountryCode: v }))}
@@ -338,10 +337,9 @@ export default function VendorMasterModal({
                         : !clean(form.phoneNumber) || phone.numOk ? "" : "Enter 7–15 digits"
                     }
                   />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">Email</div>
+                <ModalFormField span={12} label="Email">
                   <input
                     className="mfzInput"
                     type="email"
@@ -351,10 +349,9 @@ export default function VendorMasterModal({
                     placeholder="billing@example.com"
                     autoComplete="email"
                   />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">Address</div>
+                <ModalFormField span={12} label="Address">
                   <input
                     className="mfzInput"
                     value={form.address}
@@ -363,10 +360,9 @@ export default function VendorMasterModal({
                     placeholder=""
                     autoComplete="street-address"
                   />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">Notes</div>
+                <ModalFormField span={12} label="Notes">
                   <textarea
                     className="mfzTextarea"
                     value={form.notes}
@@ -375,26 +371,24 @@ export default function VendorMasterModal({
                     placeholder="Payment instructions, delivery slots, alternate contacts…"
                     rows={4}
                   />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz12">
-                  <div className="mfzChecks">
-                    <label className="mfzCheck">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(form.isActive)}
-                        disabled={busy}
-                        onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))}
-                      />
-                      <span>Active</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
+                <ModalFormCheckGroup>
+                  <label className="mfzCheck">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(form.isActive)}
+                      disabled={busy}
+                      onChange={(e) => setForm((p) => ({ ...p, isActive: e.target.checked }))}
+                    />
+                    <span>Active</span>
+                  </label>
+                </ModalFormCheckGroup>
+              </ModalFormGrid>
+            </ModalFormPanelBody>
+          </ModalFormPanel>
+        </ModalFormBody>
+      </ModalFormShell>
     </CommonModal>
   );
 }

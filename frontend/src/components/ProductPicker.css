@@ -3,7 +3,7 @@
 .ppShell {
   --mfz-surface: color-mix(in srgb, var(--color-surface) 92%, var(--color-primary) 2%);
   --mfz-card: color-mix(in srgb, var(--color-card) 92%, var(--mfz-surface) 8%);
-  --mfz-border: color-mix(in srgb, var(--color-border) 86%, transparent);
+  --mfz-border: var(--modal-field-border, var(--control-border-default));
   --mfz-shadow-soft: 0 2px 10px color-mix(in srgb, var(--color-text) 6%, transparent);
   width: 100%;
 }

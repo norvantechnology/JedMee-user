@@ -1,0 +1,1004 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   common.css  — Single source of truth for ALL shared UI patterns
+   Used by: every page, every modal, every form across the entire app.
+
+   Design tokens come from theme.css.
+   Animation keyframes come from animations.css.
+   Button system lives in components/ui/AppButton.css (.appBtn*).
+   Modal shell + master form fields (.mfz*) live in components/CommonModal.css (.mcm*).
+
+   This file fills the gap: page-level forms, inline modals, shared
+   field wrappers, section headings, badges, error states, and footers
+   that were previously duplicated in every page/modal CSS file.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   PAGE HEADING BLOCK
+   (.pageWrap and .pageCard live in AppShell.css)
+   ═══════════════════════════════════════════════════════ */
+.pgHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.pgTitle {
+  margin: 0;
+  font-size: clamp(17px, 2vw, 20px);
+  font-weight: 800;
+  color: var(--color-text-heading);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  font-family: var(--font);
+}
+
+.pgSub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--color-text-3);
+  font-weight: 450;
+  line-height: 1.4;
+}
+
+.pgActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   SECTION HEADING  (inside cards / modals / forms)
+   ═══════════════════════════════════════════════════════ */
+.cmSectionHead {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.cmSectionHead::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORM FIELD WRAPPER
+   ═══════════════════════════════════════════════════════ */
+.cmField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORM LABEL
+   ═══════════════════════════════════════════════════════ */
+.cmLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-2);
+  line-height: 1.2;
+  padding-bottom: 1px;
+}
+
+/* Accent dot before each label */
+.cmLabel::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-primary) 70%, transparent);
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STANDARD FORM FIELD + INPUT  (raField / raInput)
+   The primary form-field pattern used across ALL pages,
+   modals, and payment forms. Replaces page-specific
+   duplicates in RolesAccessPage, UsersPage, etc.
+   ═══════════════════════════════════════════════════════ */
+
+/* Field wrapper */
+.raField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+/* Field label — dark background strip, white text, accent dot */
+.raField > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--field-label-text);
+  padding: 3px 8px 3px 6px;
+  border-radius: 4px;
+  width: fit-content;
+  margin: 0 0 2px;
+  line-height: 1.2;
+}
+
+.raField > label::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--field-label-dot);
+  flex-shrink: 0;
+}
+
+/* Checkbox labels inside raField — reset field-label styles so they render normally */
+.raField > label.sfmCheck,
+.raField > label.mfzCheck,
+.raField > label.cmCheck {
+  background: none;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: clamp(12.5px, 2.4vw, 13.5px);
+  font-weight: 700;
+  padding: 8px 10px;
+  border-radius: clamp(10px, 1.8vw, 12px);
+  border: 1px solid color-mix(in srgb, var(--color-border) 78%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 45%, transparent);
+  color: var(--color-text-2);
+  width: auto;
+  margin: 0;
+}
+
+.raField > label.sfmCheck::before,
+.raField > label.mfzCheck::before,
+.raField > label.cmCheck::before {
+  display: none;
+}
+
+/* Base input — white background */
+.raInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: var(--control-border-width, 1px) solid var(--control-border-default);
+  border-radius: var(--radius);
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 13.5px;
+  font-family: var(--font);
+  font-weight: 500;
+  outline: none;
+  box-sizing: border-box;
+  box-shadow: var(--field-rest-shadow);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.raInput::placeholder { color: var(--color-text-faint); }
+
+.raInput:hover:not(:disabled):not(:focus) {
+  border-color: var(--control-border-hover);
+}
+
+.raInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--field-focus-ring), var(--field-focus-shadow-layer);
+  background: var(--color-primary-light);
+}
+
+.raInput:disabled,
+.raInput[readonly] {
+  background: color-mix(in srgb, var(--color-surface) 80%, var(--color-card));
+  color: var(--color-text-4);
+  cursor: not-allowed;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+/* Error state */
+.raInput_err {
+  border-color: var(--color-danger) !important;
+  box-shadow: var(--field-error-ring) !important;
+}
+
+/* Textarea variant */
+textarea.raInput {
+  height: auto;
+  min-height: 72px;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+/* Select variant */
+select.raInput {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24' stroke='%234b5563' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .raInput {
+    height: 44px;
+    font-size: 16px; /* prevent iOS zoom */
+  }
+
+  textarea.raInput {
+    height: auto;
+    font-size: 16px;
+  }
+
+  select.raInput {
+    height: 44px;
+    font-size: 16px;
+  }
+
+  .raField > label {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    padding: 2px 7px 2px 5px;
+  }
+
+  .raField > label::before {
+    width: 4px;
+    height: 4px;
+  }
+
+  /* Keep checkbox labels at normal size on mobile */
+  .raField > label.sfmCheck,
+  .raField > label.mfzCheck,
+  .raField > label.cmCheck {
+    font-size: clamp(12px, 3vw, 13.5px);
+    letter-spacing: normal;
+    padding: 6px 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  .raInput {
+    height: 40px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON INPUT  (text, number, email, tel, password)
+   ═══════════════════════════════════════════════════════ */
+.cmInput {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: var(--control-border-width, 1px) solid var(--control-border-default);
+  border-radius: var(--radius);
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 13.5px;
+  font-family: var(--font);
+  font-weight: 500;
+  outline: none;
+  box-sizing: border-box;
+  box-shadow: var(--field-rest-shadow);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.cmInput::placeholder { color: var(--color-text-faint); }
+
+.cmInput:hover:not(:disabled):not(:focus) {
+  border-color: var(--control-border-hover);
+}
+
+.cmInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--field-focus-ring), var(--field-focus-shadow-layer);
+  background: var(--color-primary-light);
+}
+
+.cmInput:disabled {
+  background: color-mix(in srgb, var(--color-surface) 80%, var(--color-card));
+  color: var(--color-text-4);
+  cursor: not-allowed;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+.cmInput_err {
+  border-color: var(--color-danger) !important;
+  box-shadow: var(--field-error-ring) !important;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON TEXTAREA
+   ═══════════════════════════════════════════════════════ */
+.cmTextarea {
+  width: 100%;
+  min-height: 72px;
+  padding: 10px 12px;
+  border: var(--control-border-width, 1px) solid var(--control-border-default);
+  border-radius: var(--radius);
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 13.5px;
+  font-family: var(--font);
+  font-weight: 500;
+  outline: none;
+  resize: vertical;
+  line-height: 1.5;
+  box-sizing: border-box;
+  box-shadow: var(--field-rest-shadow);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.cmTextarea::placeholder { color: var(--color-text-faint); }
+
+.cmTextarea:hover:not(:disabled):not(:focus) {
+  border-color: var(--control-border-hover);
+}
+
+.cmTextarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--field-focus-ring), var(--field-focus-shadow-layer);
+}
+
+.cmTextarea:disabled {
+  background: color-mix(in srgb, var(--color-surface) 80%, var(--color-card));
+  color: var(--color-text-4);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON SELECT
+   ═══════════════════════════════════════════════════════ */
+.cmSelect {
+  width: 100%;
+  height: 36px;
+  padding: 0 32px 0 12px;
+  border: var(--control-border-width, 1px) solid var(--control-border-default);
+  border-radius: var(--radius);
+  background: var(--color-card);
+  color: var(--color-text);
+  font-size: 13.5px;
+  font-family: var(--font);
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24' stroke='%234b5563' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  box-sizing: border-box;
+  box-shadow: var(--field-rest-shadow);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.cmSelect:hover:not(:disabled):not(:focus) {
+  border-color: var(--control-border-hover);
+}
+
+.cmSelect:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--field-focus-ring), var(--field-focus-shadow-layer);
+}
+
+.cmSelect:disabled {
+  background-color: color-mix(in srgb, var(--color-surface) 80%, var(--color-card));
+  color: var(--color-text-4);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Mini select (compact, for inline use) */
+.cmSelectMini {
+  height: 34px;
+  font-size: 13px;
+  padding: 0 28px 0 10px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON FORM GRID  (2-column responsive)
+   ═══════════════════════════════════════════════════════ */
+.cmGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.cmGrid2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.cmGrid3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.cmGridFull {
+  grid-column: 1 / -1;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON MODAL FOOTER  (action row at bottom of modals)
+   ═══════════════════════════════════════════════════════ */
+.cmModalFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.cmModalFooterMeta {
+  margin-right: auto;
+  font-size: 12px;
+  color: var(--color-text-4);
+  font-weight: 700;
+  line-height: 1.35;
+  max-width: min(100%, 420px);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON BUTTONS  (page-level, inline — use appBtn in modals)
+   These mirror AppButton.css but use the cm* namespace so
+   page JSX doesn't need to import AppButton separately.
+   ═══════════════════════════════════════════════════════ */
+
+/* Base */
+.cmBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 13.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  border-radius: var(--radius);
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  box-sizing: border-box;
+  user-select: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease,
+              box-shadow 0.15s ease, transform 0.14s ease, filter 0.14s ease;
+  height: 40px;
+  padding: 0 16px;
+}
+
+.cmBtn:hover:not(:disabled) { transform: translateY(-1px); }
+.cmBtn:active:not(:disabled) { transform: translateY(0) scale(0.99); }
+.cmBtn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+/* Small variant */
+.cmBtn_sm {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+  border-radius: calc(var(--radius) - 2px);
+}
+
+/* Extra-small variant */
+.cmBtn_xs {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  border-radius: calc(var(--radius) - 2px);
+}
+
+/* Primary — ocean blue fill */
+.cmBtn_primary {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-primary) 92%, var(--on-primary) 8%),
+    var(--color-primary)
+  );
+  color: var(--color-on-primary);
+  border-color: color-mix(in srgb, var(--color-primary) 55%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--on-primary) 28%, transparent) inset,
+    0 4px 14px -2px color-mix(in srgb, var(--color-primary) 28%, transparent);
+}
+
+.cmBtn_primary:hover:not(:disabled) {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-secondary) 92%, var(--on-primary) 8%),
+    var(--color-secondary)
+  );
+  border-color: color-mix(in srgb, var(--color-secondary) 55%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--on-primary) 28%, transparent) inset,
+    0 6px 18px -2px color-mix(in srgb, var(--color-secondary) 32%, transparent);
+}
+
+/* Ghost / secondary */
+.cmBtn_ghost {
+  background: var(--color-card);
+  color: var(--color-text-2);
+  border-color: color-mix(in srgb, var(--color-border) 90%, transparent);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-text) 7%, transparent);
+}
+
+.cmBtn_ghost:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary-light) 60%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+  color: var(--color-primary);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+/* Danger */
+.cmBtn_danger {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-danger) 92%, var(--on-primary) 8%),
+    var(--color-danger)
+  );
+  color: var(--color-on-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 55%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--on-primary) 20%, transparent) inset,
+    0 4px 14px -2px color-mix(in srgb, var(--color-danger) 24%, transparent);
+}
+
+.cmBtn_danger:hover:not(:disabled) {
+  filter: brightness(1.05);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--on-primary) 20%, transparent) inset,
+    0 6px 18px -2px color-mix(in srgb, var(--color-danger) 30%, transparent);
+}
+
+/* Success */
+.cmBtn_success {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-success) 92%, var(--on-primary) 8%),
+    var(--color-success)
+  );
+  color: var(--on-primary);
+  border-color: color-mix(in srgb, var(--color-success) 55%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--on-primary) 20%, transparent) inset,
+    0 4px 14px -2px color-mix(in srgb, var(--color-success) 24%, transparent);
+}
+
+.cmBtn_success:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+/* Outline (border only, no fill) */
+.cmBtn_outline {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.cmBtn_outline:hover:not(:disabled) {
+  background: var(--color-primary-subtle);
+  border-color: var(--color-secondary);
+  color: var(--color-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON VALIDATION / HELPER TEXT
+   ═══════════════════════════════════════════════════════ */
+.cmErr {
+  font-size: 12px;
+  color: var(--color-danger);
+  font-weight: 700;
+  margin-top: 4px;
+  line-height: 1.35;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.cmHelp {
+  font-size: 12px;
+  color: var(--color-text-3);
+  font-weight: 600;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.cmWarn {
+  font-size: 12px;
+  color: var(--color-warning-dark);
+  font-weight: 700;
+  margin-top: 4px;
+  line-height: 1.35;
+}
+
+/* Inline error banner (below a form section) */
+.cmErrBanner {
+  margin: 6px 0 0;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-card));
+  border: 1px solid color-mix(in srgb, var(--color-danger) 25%, transparent);
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--color-danger);
+  line-height: 1.35;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON BADGE / STATUS PILL
+   ═══════════════════════════════════════════════════════ */
+.cmBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.cmBadge_primary {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
+  color: var(--color-primary-darker);
+  border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
+}
+
+.cmBadge_success {
+  background: var(--color-success-light);
+  color: var(--color-success-dark);
+  border-color: var(--color-success-subtle);
+}
+
+.cmBadge_warning {
+  background: var(--color-warning-light);
+  color: var(--color-warning-darker);
+  border-color: var(--color-warning-subtle);
+}
+
+.cmBadge_danger {
+  background: var(--color-danger-light);
+  color: var(--color-danger-dark);
+  border-color: var(--color-danger-subtle);
+}
+
+.cmBadge_neutral {
+  background: var(--color-surface-2);
+  color: var(--color-text-3);
+  border-color: var(--color-border);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON CARD  (content card with border + shadow)
+   ═══════════════════════════════════════════════════════ */
+.cmCard {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--layout-card-radius);
+  padding: var(--layout-card-pad-y) var(--layout-card-pad-x);
+  box-shadow: var(--shadow-sm);
+}
+
+.cmCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cmCardTitle {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-text-heading);
+  letter-spacing: -0.01em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON CHECKBOX ROW
+   ═══════════════════════════════════════════════════════ */
+.cmCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px;
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.cmCheck:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary-light) 20%, var(--color-card));
+}
+
+.cmCheck input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON INFO NOTE  (blue tinted info box)
+   ═══════════════════════════════════════════════════════ */
+.cmNote {
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+  color: var(--color-text-2);
+  padding: 10px 14px;
+  line-height: 1.5;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cmNote_warn {
+  border-color: color-mix(in srgb, var(--color-warning) 30%, var(--color-border));
+  background: color-mix(in srgb, var(--color-warning-light) 40%, var(--color-card));
+  color: var(--color-warning-darker);
+}
+
+.cmNote_danger {
+  border-color: color-mix(in srgb, var(--color-danger) 25%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger-light) 50%, var(--color-card));
+  color: var(--color-danger-dark);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON DIVIDER
+   ═══════════════════════════════════════════════════════ */
+.cmDivider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 14px 0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON STAT TILE  (KPI / summary tile)
+   ═══════════════════════════════════════════════════════ */
+.cmTile {
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  background: color-mix(in srgb, var(--color-card) 96%, var(--color-surface));
+  transition: border-color 140ms ease;
+  min-width: 0;
+}
+
+.cmTile:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+}
+
+.cmTileLabel {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cmTileVal {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-text-heading);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON LOADING PLACEHOLDER  (skeleton shimmer)
+   ═══════════════════════════════════════════════════════ */
+.cmSkeleton {
+  border-radius: var(--radius);
+  background:
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--color-surface-2) 92%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-3) 92%, transparent) 50%,
+      color-mix(in srgb, var(--color-surface-2) 92%, transparent) 100%
+    );
+  background-size: 220% 100%;
+  animation: shimmerSweep 1.6s linear infinite;
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON EMPTY STATE
+   ═══════════════════════════════════════════════════════ */
+.cmEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--color-text-4);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cmEmpty svg {
+  width: 40px;
+  height: 40px;
+  opacity: 0.4;
+}
+
+/* ═══════════════════════════════════════════════════════
+   COMMON INLINE ACTIONS ROW  (icon buttons in a row)
+   ═══════════════════════════════════════════════════════ */
+.cmActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE  (≤720px mobile)
+   ═══════════════════════════════════════════════════════ */
+@media (max-width: 720px) {
+  .pageWrap {
+    padding: var(--layout-page-y) var(--layout-shell-pad-x) var(--layout-page-bottom);
+  }
+
+  .pgHead {
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+
+  .pgTitle {
+    font-size: clamp(15px, 4.5vw, 18px);
+  }
+
+  .cmGrid2,
+  .cmGrid3 {
+    grid-template-columns: 1fr;
+  }
+
+  .cmModalFooter {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .cmModalFooterMeta {
+    margin-right: 0;
+    order: -1;
+  }
+
+  .cmBtn {
+    min-height: 36px;
+    height: auto;
+    padding: 8px 12px;
+    font-size: clamp(12px, 3vw, 13.5px);
+  }
+
+  .cmBtn_sm {
+    min-height: 32px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+  }
+
+  .cmInput,
+  .cmSelect {
+    height: 44px;
+    font-size: 16px; /* prevent iOS zoom */
+  }
+
+  .cmTextarea {
+    font-size: 16px;
+  }
+
+  .cmLabel {
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+  }
+
+  .cmLabel::before {
+    width: 4px;
+    height: 4px;
+  }
+
+  .cmCheck {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .cmTile {
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cmGrid {
+    gap: 8px;
+  }
+
+  .cmBtn {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .cmInput,
+  .cmSelect {
+    height: 42px;
+  }
+
+  .cmNote {
+    padding: 8px 11px;
+    font-size: 12.5px;
+  }
+}
+@media (max-width: 380px) {
+  .cmInput,
+  .cmSelect {
+    height: 40px;
+  }
+
+  .cmBtn {
+    padding: 6px 9px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cmBtn,
+  .cmTile,
+  .cmCheck,
+  .cmInput,
+  .cmTextarea,
+  .cmSelect {
+    transition: none !important;
+  }
+
+  .cmBtn:hover:not(:disabled),
+  .cmBtn:active:not(:disabled) {
+    transform: none !important;
+  }
+
+  .cmSkeleton {
+    animation: none;
+    opacity: 0.7;
+  }
+}

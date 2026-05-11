@@ -1,0 +1,111 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ProductMasterModal.css
+   Scoped to `.mcmBody .mfz.pmmForm`. Layout between stacked grids lives in
+   CommonModal.css (`.mfzPanelBody_stack`). This file only keeps:
+     • Panel body padding tweaks for the first panel
+     • Per-grid gap tuning for the drawer width
+     • Hero / secondary / read-only input variants
+     • Policy checkbox density
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mcmBody .mfz.pmmForm .mfzBody {
+  gap: 10px;
+}
+
+.mcmBody .mfz.pmmForm .pmmPanel_details .mfzPanelBody.mfzPanelBody_stack {
+  padding-top: 6px;
+  padding-bottom: 8px;
+}
+
+.mcmBody .mfz.pmmForm .pmmGrid_identity {
+  gap: 8px 10px;
+}
+
+.mcmBody .mfz.pmmForm .pmmGrid_codes {
+  gap: 6px 8px;
+}
+
+.mcmBody .mfz.pmmForm .pmmGrid_org {
+  gap: 7px 10px;
+}
+
+.mcmBody .mfz.pmmForm .pmmGrid_packNums {
+  gap: 6px 8px;
+}
+
+.mcmBody .mfz.pmmForm .pmmGrid_conversion {
+  gap: 6px 8px;
+}
+
+.mcmBody .mfz.pmmForm .pmmGrid_tax {
+  gap: 6px 8px;
+}
+
+.mcmBody .mfz.pmmForm .pmmGrid_scheme {
+  gap: 6px 8px;
+}
+
+.mcmBody .mfz.pmmForm .pmmGrid_lowStock {
+  gap: 6px 8px;
+}
+
+.mcmBody .mfz.pmmForm .pmmInputHero {
+  min-height: 44px;
+  font-size: clamp(14px, 0.95rem + 0.25vw, 15.5px);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--color-text);
+}
+
+.mcmBody .mfz.pmmForm .pmmInputSecondary {
+  font-size: clamp(13px, 0.87rem, 13.5px);
+  font-weight: 450;
+  color: var(--color-text-2);
+}
+
+.mcmBody .mfz.pmmForm .pmmInputReadonlyDisplay {
+  font-weight: 600;
+  color: var(--color-text-2);
+  background: color-mix(
+    in srgb,
+    var(--color-surface) 55%,
+    var(--modal-field-bg, var(--color-card))
+  ) !important;
+  cursor: default;
+  box-shadow: none !important;
+}
+
+.mcmBody .mfz.pmmForm .pmmPanel_scheme .mfzPanelBody.mfzPanelBody_stack,
+.mcmBody .mfz.pmmForm .pmmPanel_policy .mfzPanelBody.mfzPanelBody_stack {
+  padding-top: 8px;
+}
+
+.mcm_drawer .mcmBody .mfz.pmmForm .pmmGrid_scheme .mfz6,
+.mcm_drawer .mcmBody .mfz.pmmForm .pmmGrid_scheme .mfz3 {
+  min-width: 0;
+}
+
+.mcm_drawer .mcmBody .mfz.pmmForm .pmmGrid_scheme .mfz6 {
+  min-width: min(0px, 100%);
+}
+
+@media (max-width: 720px) {
+  .mcmBody .mfz.pmmForm .pmmInputHero {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .mcmBody .mfz.pmmForm .pmmGrid_packNums,
+  .mcmBody .mfz.pmmForm .pmmGrid_tax,
+  .mcmBody .mfz.pmmForm .pmmGrid_scheme,
+  .mcmBody .mfz.pmmForm .pmmGrid_lowStock,
+  .mcmBody .mfz.pmmForm .pmmGrid_codes {
+    gap: 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mcmBody .mfz.pmmForm * {
+    transition: none !important;
+  }
+}

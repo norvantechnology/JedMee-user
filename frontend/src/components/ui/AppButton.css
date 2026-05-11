@@ -81,10 +81,10 @@
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--color-primary) 92%, white 8%),
+      color-mix(in srgb, var(--color-primary) 92%, var(--on-primary) 8%),
       var(--color-primary)
     );
-  color: var(--color-card, #fff);
+  color: var(--on-primary);
   border: 1px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
   box-shadow:
     0 1px 0 color-mix(in srgb, var(--color-card) 32%, transparent) inset,
@@ -95,7 +95,7 @@
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--color-secondary) 92%, white 8%),
+      color-mix(in srgb, var(--color-secondary) 92%, var(--on-primary) 8%),
       var(--color-secondary)
     );
   border-color: color-mix(in srgb, var(--color-secondary) 55%, transparent);
@@ -126,7 +126,7 @@
 }
 
 .appBtn_ghost:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface, #f3f4f6));
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
   border-color: color-mix(in srgb, var(--color-text) 18%, var(--color-border));
 }
 
@@ -134,10 +134,10 @@
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--color-danger) 92%, white 8%),
+      color-mix(in srgb, var(--color-danger) 92%, var(--on-primary) 8%),
       var(--color-danger)
     );
-  color: var(--color-on-danger, #fff);
+  color: var(--color-on-danger);
   border: 1px solid color-mix(in srgb, var(--color-danger) 55%, transparent);
   box-shadow:
     0 1px 0 color-mix(in srgb, var(--color-card) 24%, transparent) inset,

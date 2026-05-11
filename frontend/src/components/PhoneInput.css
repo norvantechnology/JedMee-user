@@ -3,7 +3,91 @@
   border-radius: 14px;
   padding: 12px;
   background: var(--color-card);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--control-border-default);
+}
+
+/* Compact / modal: single bordered row (two inputs), same tokens as .mcmBody fields */
+.telx_compact {
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+.telxUnified {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: var(--mcm-ctrl-h, 42px);
+  box-sizing: border-box;
+  border-radius: var(--mcm-ctrl-radius, 10px);
+  border: var(--mcm-field-border-width, var(--modal-field-border-width, var(--control-border-width, 2px))) solid
+    var(--mcm-field-border, var(--modal-field-border, var(--control-border-default)));
+  background: var(--mcm-field-bg, var(--modal-field-bg, var(--color-card)));
+  color: var(--color-text);
+  overflow: hidden;
+  box-shadow: var(--field-rest-shadow);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.telxUnified:hover:not(:focus-within) {
+  border-color: var(--mcm-field-border-hover, var(--modal-field-border-hover));
+  background: var(--mcm-field-bg-hover, var(--modal-field-bg-hover, var(--color-card)));
+}
+
+.telxUnified:focus-within {
+  border-color: var(--mcm-field-border-focus, var(--color-primary));
+  box-shadow: var(--field-focus-ring), var(--field-focus-shadow-layer);
+  background: var(--mcm-field-bg-focus, var(--modal-field-bg-focus, var(--color-card)));
+  outline: none;
+}
+
+.telxUnified_bad {
+  border-color: var(--color-danger) !important;
+  box-shadow: var(--field-error-ring);
+}
+
+.telxUnifiedCc,
+.telxUnifiedPn {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: var(--mcm-ctrl-fs, 14px);
+  font-weight: var(--mcm-ctrl-fw, 600);
+  color: var(--color-text);
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.telxUnifiedCc {
+  flex: 0 0 5.25rem;
+  width: 5.25rem;
+  padding: 0 var(--mcm-ctrl-pad-x, 13px);
+  text-align: left;
+}
+
+.telxUnifiedPn {
+  flex: 1 1 auto;
+  padding: 0 var(--mcm-ctrl-pad-x, 13px) 0 10px;
+  border-left: 1px solid color-mix(in srgb, var(--mcm-field-border, var(--modal-field-border)) 72%, transparent);
+}
+
+.telxUnifiedCc::placeholder,
+.telxUnifiedPn::placeholder {
+  color: var(--mcm-field-ph, var(--color-text-4));
+  font-weight: 600;
+}
+
+/* Single error line under the group (compact mode) */
+.telxUnifiedErr {
+  margin-top: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .telxUnified {
+    transition: none;
+  }
 }
 
 .telxRibbon {
@@ -22,7 +106,7 @@
   flex-shrink: 0;
   color: var(--color-text-heading);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--control-border-default);
 }
 
 .telxRibbonMark svg {
@@ -89,18 +173,20 @@
   min-height: 42px;
   padding: 0 10px;
   border-radius: 12px;
-  border: 1px solid var(--color-border);
-  background: var(--color-card);
-  transition: border-color 160ms ease, box-shadow 180ms ease;
+  border: var(--modal-field-border-width, var(--control-border-width, 2px)) solid
+    var(--modal-field-border, var(--control-border-default));
+  background: var(--modal-field-bg, var(--color-card));
+  transition: border-color 160ms ease, box-shadow 180ms ease, background 160ms ease;
 }
 
 .telxSlot:hover {
-  border-color: var(--color-border-focus);
+  border-color: var(--modal-field-border-hover, var(--control-border-hover));
 }
 
 .telxSlot:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+  background: var(--modal-field-bg-focus, var(--color-card));
+  box-shadow: var(--field-focus-ring);
 }
 
 .telxSlot_bad {
@@ -117,7 +203,7 @@
   flex-shrink: 0;
   color: var(--color-text-2);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--control-border-default);
 }
 
 .telxGlyph svg {

@@ -3,6 +3,7 @@ import "./styles/theme.css";
 import "./styles/animations.css";
 import "./styles/app.css";
 import "./styles/buttons-responsive.css";
+import "./styles/common.css";
 import { useEffect, useState } from "react";
 import { APP_DOCUMENT_TITLE } from "./constants/brand.js";
 import { bootstrapAuth, startTokenRefreshTimer, stopTokenRefreshTimer } from "./services/authBootstrap.js";

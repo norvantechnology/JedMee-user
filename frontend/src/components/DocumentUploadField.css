@@ -400,13 +400,13 @@
 .duf_box_clickable:focus-visible {
   border-color: var(--color-primary);
   background: var(--color-primary-light);
-  box-shadow: 0 0 0 3px rgba(107, 63, 160, 0.1);
+  box-shadow: var(--field-focus-ring);
 }
 
 .duf_box_drag {
   border-color: var(--color-primary) !important;
   background: var(--color-primary-light) !important;
-  box-shadow: 0 0 0 4px rgba(107, 63, 160, 0.15) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primary) 16%, transparent) !important;
 }
 
 .duf_box_has {

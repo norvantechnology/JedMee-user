@@ -43,7 +43,6 @@ import {
   BadgeCheck,
   Printer,
 } from "../components/ui/AppIcons.jsx";
-import "../components/MasterModalForm.css";
 import "./OrdersPage.css";
 
 /* ── Status config ─────────────────────────────────────────── */
@@ -809,6 +808,7 @@ export default function OrdersPage() {
         title="Cancel this order?"
         danger
         size="sm"
+        drawer={false}
         footer={
           <div className="opModalFoot">
             <AppButton variant="ghost" onClick={() => setCancelTarget(null)}>No, Keep It</AppButton>

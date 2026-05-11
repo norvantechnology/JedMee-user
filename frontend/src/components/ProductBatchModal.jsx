@@ -2,12 +2,10 @@ import AmountInput from "./ui/AmountInput.jsx";
 import { InlineButtonProgress } from "./ui/buttons.jsx";
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "../context/LocaleContext.jsx";
-import CommonModal from "./CommonModal.jsx";
+import CommonModal, { ModalFormCheckGroup, ModalFormField } from "./CommonModal.jsx";
 import { computeProductBatch } from "../utils/productBatchCalc.js";
 import { checkProductBatch } from "../services/productBatchService.js";
 import CommonDatePicker from "./CommonDatePicker.jsx";
-import "./MasterModalForm.css";
-import "./ProductBatchModal.css";
 import ProductPicker from "./ProductPicker.jsx";
 import { formatBatchExpiryRelativePhrase } from "../utils/batchExpiryDisplay.js";
 import { readAuth } from "../services/authStorage.js";
@@ -76,6 +74,8 @@ export default function ProductBatchModal({
   open,
   mode = "add", // add | edit | view
   busy = false,
+  /** Parent-driven: e.g. while master dropdown APIs refresh for the batch form */
+  depsLoading = false,
   initialValue,
   existingRows = [],
   divisionOptions = [],
@@ -85,7 +85,8 @@ export default function ProductBatchModal({
   onRefreshProducts,
   onRequestCreateProduct,
   onClose,
-  onSubmit
+  onSubmit,
+  drawer = true
 }) {
   const readOnly = mode === "view";
   const { taxLabel, taxRates } = useLocale();
@@ -524,6 +525,11 @@ export default function ProductBatchModal({
       onClose={handleExplicitClose}
       onOverlayClose={handleOverlayClose}
       closeOnOverlay={!busy}
+      drawer={drawer}
+      loading={Boolean(depsLoading) || busy || checkingBatch || Boolean(batchCheck?.loading)}
+      loadingText={
+        depsLoading ? "Loading options…" : checkingBatch ? "Checking batch…" : busy ? "Saving batch…" : "Working…"
+      }
       footer={
         <div className="pbmFoot mfzFooter">
           {!readOnly && !canSubmit && submitAttempted && errorCount ? (
@@ -707,8 +713,12 @@ export default function ProductBatchModal({
                   <span>Product</span>
                 </div>
                 <div className="mfzGrid">
-                  <div className="mfzField mfz12">
-                    <label>Product <span className="reqMark" aria-hidden="true">*</span></label>
+                  <ModalFormField
+                    span={12}
+                    label="Product"
+                    required
+                    error={!clean(form.productId) && submitAttempted ? "Pick a product from the list or create a new one." : null}
+                  >
                     {isProductLocked ? (
                       <div className="pbmHero">
                         <div className="pbmHeroName">{form.productName || form.productCode || "Product"}</div>
@@ -754,24 +764,18 @@ export default function ProductBatchModal({
                         }}
                       />
                     )}
-                    {!clean(form.productId) && submitAttempted ? (
-                      <div className="mfzErr">Pick a product from the list or create a new one.</div>
-                    ) : null}
-                  </div>
+                  </ModalFormField>
                   {!isProductLocked ? (
                     <>
-                      <div className="mfzField mfz6">
-                        <label>Code</label>
+                      <ModalFormField span={6} label="Code">
                         <input className="mfzInput" value={form.productCode || ""} readOnly />
-                      </div>
-                      <div className="mfzField mfz6">
-                        <label>Drug</label>
+                      </ModalFormField>
+                      <ModalFormField span={6} label="Drug">
                         <input className="mfzInput" value={form.drugName || ""} readOnly />
-                      </div>
+                      </ModalFormField>
                     </>
                   ) : null}
-                  <div className="mfzField mfz6">
-                    <label>Batch No <span className="reqMark" aria-hidden="true">*</span></label>
+                  <ModalFormField span={6} label="Batch No" required>
                     <input
                       className="mfzInput"
                       value={form.batchNo}
@@ -783,9 +787,8 @@ export default function ProductBatchModal({
                       <div className="mfzErr">Batch already exists for this product.</div>
                     ) : null}
                     {showErr("batchNo") && errors.batchNo ? <div className="mfzErr">{errors.batchNo}</div> : null}
-                  </div>
-                  <div className="mfzField mfz6">
-                    <label>Barcode</label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label="Barcode">
                     <input
                       className="mfzInput"
                       value={form.barcode}
@@ -794,7 +797,7 @@ export default function ProductBatchModal({
                       onBlur={() => markTouched("barcode")}
                     />
                     {showErr("barcode") && errors.barcode ? <div className="mfzErr">{errors.barcode}</div> : null}
-                  </div>
+                  </ModalFormField>
                 </div>
               </div>
 
@@ -804,8 +807,7 @@ export default function ProductBatchModal({
                   <span>Dates</span>
                 </div>
                 <div className="mfzGrid">
-                  <div className="mfzField mfz6">
-                    <label>Expiry date <span className="reqMark" aria-hidden="true">*</span></label>
+                  <ModalFormField span={6} label="Expiry date" required>
                     <CommonDatePicker
                       value={form.expiryDate}
                       disabled={busy || readOnly}
@@ -821,17 +823,15 @@ export default function ProductBatchModal({
                     {!errors.expiryDate && clean(form.expiryDate) && isValidDateYmd(form.expiryDate) && !isFutureDateYmd(form.expiryDate) ? (
                       <div className="pbmWarn">This batch is already expired. It will be marked as EXPIRED status.</div>
                     ) : null}
-                  </div>
-                  <div className="mfzField mfz6">
-                    <label>Mfg date</label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label="Mfg date" error={showErr("mfgDate") && warnings.mfgDate ? warnings.mfgDate : null}>
                     <CommonDatePicker
                       value={form.mfgDate}
                       disabled={busy || readOnly}
                       onChange={(v) => setField("mfgDate", v)}
                       ariaLabel="Mfg date"
                     />
-                    {showErr("mfgDate") && warnings.mfgDate ? <div className="mfzErr">{warnings.mfgDate}</div> : null}
-                  </div>
+                  </ModalFormField>
                 </div>
               </div>
             </>
@@ -840,8 +840,7 @@ export default function ProductBatchModal({
           {tab === "pricing" ? (
             <div className="pbmPanel">
               <div className="mfzGrid">
-                <div className="mfzField mfz6">
-                  <label>MRP <span className="reqMark" aria-hidden="true">*</span></label>
+                <ModalFormField span={6} label="MRP" required error={showErr("mrp") && errors.mrp ? errors.mrp : null}>
                   <AmountInput
                     className="mfzInput"
                     value={String(form.mrp ?? "")}
@@ -849,10 +848,8 @@ export default function ProductBatchModal({
                     onChange={(raw) => setField("mrp", raw)}
                     onBlur={() => markTouched("mrp")}
                   />
-                  {showErr("mrp") && errors.mrp ? <div className="mfzErr">{errors.mrp}</div> : null}
-                </div>
-                <div className="mfzField mfz6">
-                  <label>Purchase rate</label>
+                </ModalFormField>
+                <ModalFormField span={6} label="Purchase rate" error={showErr("purchaseRate") && errors.purchaseRate ? errors.purchaseRate : null}>
                   <AmountInput
                     className="mfzInput"
                     value={String(form.purchaseRate ?? "")}
@@ -860,10 +857,8 @@ export default function ProductBatchModal({
                     onChange={(raw) => setField("purchaseRate", raw)}
                     onBlur={() => markTouched("purchaseRate")}
                   />
-                  {showErr("purchaseRate") && errors.purchaseRate ? <div className="mfzErr">{errors.purchaseRate}</div> : null}
-                </div>
-                <div className="mfzField mfz6">
-                  <label>Margin %</label>
+                </ModalFormField>
+                <ModalFormField span={6} label="Margin %" error={showErr("marginPercent") && errors.marginPercent ? errors.marginPercent : null}>
                   <input
                     className="mfzInput"
                     value={form.marginPercent}
@@ -871,10 +866,8 @@ export default function ProductBatchModal({
                     onChange={(e) => setField("marginPercent", e.target.value)}
                     onBlur={() => markTouched("marginPercent")}
                   />
-                  {showErr("marginPercent") && errors.marginPercent ? <div className="mfzErr">{errors.marginPercent}</div> : null}
-                </div>
-                <div className="mfzField mfz6">
-                  <label>Sales rate</label>
+                </ModalFormField>
+                <ModalFormField span={6} label="Sales rate" error={showErr("salesRate") && errors.salesRate ? errors.salesRate : null}>
                   <AmountInput
                     className="mfzInput"
                     value={String(displaySalesRate ?? "")}
@@ -885,10 +878,8 @@ export default function ProductBatchModal({
                     }}
                     onBlur={() => markTouched("salesRate")}
                   />
-                  {showErr("salesRate") && errors.salesRate ? <div className="mfzErr">{errors.salesRate}</div> : null}
-                </div>
-                <div className="mfzField mfz6">
-                  <label>Retail rate</label>
+                </ModalFormField>
+                <ModalFormField span={6} label="Retail rate" error={showErr("retailRate") && errors.retailRate ? errors.retailRate : null}>
                   <AmountInput
                     className="mfzInput"
                     value={String(displayRetailRate ?? "")}
@@ -899,10 +890,8 @@ export default function ProductBatchModal({
                     }}
                     onBlur={() => markTouched("retailRate")}
                   />
-                  {showErr("retailRate") && errors.retailRate ? <div className="mfzErr">{errors.retailRate}</div> : null}
-                </div>
-                <div className="mfzField mfz6">
-                  <label>Special rate 1</label>
+                </ModalFormField>
+                <ModalFormField span={6} label="Special rate 1" error={showErr("specialRate1") && errors.specialRate1 ? errors.specialRate1 : null}>
                   <AmountInput
                     className="mfzInput"
                     value={String(form.specialRate1 ?? "")}
@@ -910,10 +899,8 @@ export default function ProductBatchModal({
                     onChange={(raw) => setField("specialRate1", raw)}
                     onBlur={() => markTouched("specialRate1")}
                   />
-                  {showErr("specialRate1") && errors.specialRate1 ? <div className="mfzErr">{errors.specialRate1}</div> : null}
-                </div>
-                <div className="mfzField mfz6">
-                  <label>Special rate 2</label>
+                </ModalFormField>
+                <ModalFormField span={6} label="Special rate 2" error={showErr("specialRate2") && errors.specialRate2 ? errors.specialRate2 : null}>
                   <AmountInput
                     className="mfzInput"
                     value={String(form.specialRate2 ?? "")}
@@ -921,12 +908,10 @@ export default function ProductBatchModal({
                     onChange={(raw) => setField("specialRate2", raw)}
                     onBlur={() => markTouched("specialRate2")}
                   />
-                  {showErr("specialRate2") && errors.specialRate2 ? <div className="mfzErr">{errors.specialRate2}</div> : null}
-                </div>
-                <div className="mfzField mfz6">
-                  <label>Net rate</label>
+                </ModalFormField>
+                <ModalFormField span={6} label="Net rate">
                   <input className="mfzInput" value={String(computed.netRate || 0)} readOnly />
-                </div>
+                </ModalFormField>
               </div>
             </div>
           ) : null}
@@ -940,8 +925,7 @@ export default function ProductBatchModal({
                   {form.isNet ? <span className="pbmTag">Net</span> : null}
                 </div>
                 <div className="mfzGrid">
-                  <div className="mfzField mfz6">
-                    <label>Retail discount %</label>
+                  <ModalFormField span={6} label="Retail discount %" error={showErr("retailDiscountPercent") && errors.retailDiscountPercent ? errors.retailDiscountPercent : null}>
                     <input
                       className="mfzInput"
                       value={form.retailDiscountPercent}
@@ -949,14 +933,11 @@ export default function ProductBatchModal({
                       onChange={(e) => setField("retailDiscountPercent", e.target.value)}
                       onBlur={() => markTouched("retailDiscountPercent")}
                     />
-                    {showErr("retailDiscountPercent") && errors.retailDiscountPercent ? <div className="mfzErr">{errors.retailDiscountPercent}</div> : null}
-                  </div>
-                  <div className="mfzField mfz6">
-                    <label>Discount sales</label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label="Discount sales">
                     <input className="mfzInput" value={String(computed.discountSales || 0)} readOnly />
-                  </div>
-                  <div className="mfzField mfz6">
-                    <label>Net discount %</label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label="Net discount %" error={showErr("netDiscountPercent") && errors.netDiscountPercent ? errors.netDiscountPercent : null}>
                     <input
                       className="mfzInput"
                       value={form.netDiscountPercent}
@@ -964,10 +945,8 @@ export default function ProductBatchModal({
                       onChange={(e) => setField("netDiscountPercent", e.target.value)}
                       onBlur={() => markTouched("netDiscountPercent")}
                     />
-                    {showErr("netDiscountPercent") && errors.netDiscountPercent ? <div className="mfzErr">{errors.netDiscountPercent}</div> : null}
-                  </div>
-                  <div className="mfzField mfz6">
-                    <label>Discount purchase</label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label="Discount purchase" error={showErr("discountPurchase") && errors.discountPurchase ? errors.discountPurchase : null}>
                     <input
                       className="mfzInput"
                       value={form.discountPurchase}
@@ -975,12 +954,10 @@ export default function ProductBatchModal({
                       onChange={(e) => setField("discountPurchase", e.target.value)}
                       onBlur={() => markTouched("discountPurchase")}
                     />
-                    {showErr("discountPurchase") && errors.discountPurchase ? <div className="mfzErr">{errors.discountPurchase}</div> : null}
-                  </div>
-                  <div className="mfzField mfz12">
-                    <label>Effective rate</label>
+                  </ModalFormField>
+                  <ModalFormField span={12} label="Effective rate">
                     <input className="mfzInput" value={String(computed.effectiveRate || 0)} readOnly />
-                  </div>
+                  </ModalFormField>
                 </div>
               </div>
 
@@ -991,8 +968,11 @@ export default function ProductBatchModal({
                   {form.isHalfScheme ? <span className="pbmTag">Half scheme</span> : null}
                 </div>
                 <div className="mfzGrid">
-                  <div className="mfzField mfz12">
-                    <label>Scheme note</label>
+                  <ModalFormField
+                    span={12}
+                    label="Scheme note"
+                    hint={clean(form.productId) && !readOnly ? "Scheme is set on the product master." : null}
+                  >
                     <input
                       className="mfzInput"
                       value={form.salesScheme || ""}
@@ -1001,12 +981,8 @@ export default function ProductBatchModal({
                       onChange={(e) => setField("salesScheme", e.target.value)}
                       placeholder="e.g. 10+1"
                     />
-                    {clean(form.productId) && !readOnly ? (
-                      <p className="mfzHelp">Scheme is set on the product master.</p>
-                    ) : null}
-                  </div>
-                  <div className="mfzField mfz6">
-                    <label>Paid qty</label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label="Paid qty" error={showErr("schemeQtyPaid") && errors.schemeQtyPaid ? errors.schemeQtyPaid : null}>
                     <input
                       className="mfzInput"
                       type="text"
@@ -1018,10 +994,8 @@ export default function ProductBatchModal({
                       onChange={(e) => setField("schemeQtyPaid", e.target.value.replace(/[^0-9]/g, ""))}
                       onBlur={() => markTouched("schemeQtyPaid")}
                     />
-                    {showErr("schemeQtyPaid") && errors.schemeQtyPaid ? <div className="mfzErr">{errors.schemeQtyPaid}</div> : null}
-                  </div>
-                  <div className="mfzField mfz6">
-                    <label>Free qty</label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label="Free qty" error={showErr("schemeQtyFree") && errors.schemeQtyFree ? errors.schemeQtyFree : null}>
                     <input
                       className="mfzInput"
                       type="text"
@@ -1033,8 +1007,7 @@ export default function ProductBatchModal({
                       onChange={(e) => setField("schemeQtyFree", e.target.value.replace(/[^0-9]/g, ""))}
                       onBlur={() => markTouched("schemeQtyFree")}
                     />
-                    {showErr("schemeQtyFree") && errors.schemeQtyFree ? <div className="mfzErr">{errors.schemeQtyFree}</div> : null}
-                  </div>
+                  </ModalFormField>
                 </div>
               </div>
 
@@ -1044,22 +1017,18 @@ export default function ProductBatchModal({
                   <span>Tax</span>
                 </div>
                 <div className="mfzGrid">
-                  <div className="mfzField mfz6">
-                    <label>Purchase {taxLabel} %</label>
+                  <ModalFormField span={6} label={`Purchase ${taxLabel} %`}>
                     <input className="mfzInput" value={form.purchaseGST === "" || form.purchaseGST == null ? "" : `${form.purchaseGST}%`} readOnly />
-                  </div>
-                  <div className="mfzField mfz6">
-                    <label>Sales {taxLabel} %</label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label={`Sales ${taxLabel} %`}>
                     <input className="mfzInput" value={form.salesGST === "" || form.salesGST == null ? "" : `${form.salesGST}%`} readOnly />
-                  </div>
-                  <div className="mfzField mfz6">
-                    <label>Landing cost</label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label="Landing cost">
                     <input className="mfzInput" value={String(computed.landingCost || 0)} readOnly />
-                  </div>
-                  <div className="mfzField mfz6">
-                    <label>Sales with {taxLabel}</label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label={`Sales with ${taxLabel}`}>
                     <input className="mfzInput" value={String(computed.salesWithGST || 0)} readOnly />
-                  </div>
+                  </ModalFormField>
                 </div>
               </div>
             </>
@@ -1074,15 +1043,13 @@ export default function ProductBatchModal({
                   {!form.stockable ? <span className="pbmTag">Non-stockable</span> : null}
                 </div>
                 <div className="mfzGrid">
-                  <div className="mfzField mfz12">
-                    <label>Total stock</label>
+                  <ModalFormField span={12} label="Total stock">
                     <input className="mfzInput" value={String(computed.totalStock || 0)} readOnly />
-                  </div>
+                  </ModalFormField>
                   <div className="mfzField mfz12 pbmInset">
                     <div className="pbmInsetTitle">Opening stock</div>
                     <div className="mfzGrid">
-                      <div className="mfzField mfz6">
-                        <label>Opening Qty{form.stockable ? <span className="reqMark" aria-hidden="true"> *</span> : null}</label>
+                      <ModalFormField span={6} label="Opening Qty" required={form.stockable} error={showErr("openingStock") && errors.openingStock ? errors.openingStock : null}>
                         <input
                           className="mfzInput"
                           value={form.openingStock}
@@ -1090,23 +1057,17 @@ export default function ProductBatchModal({
                           onChange={(e) => setField("openingStock", e.target.value)}
                           onBlur={() => markTouched("openingStock")}
                         />
-                        {showErr("openingStock") && errors.openingStock ? <div className="mfzErr">{errors.openingStock}</div> : null}
-                      </div>
-                      <div className="mfzField mfz6">
-                        <label>Opening Free Qty</label>
+                      </ModalFormField>
+                      <ModalFormField span={6} label="Opening Free Qty" error={errors.openStockFreeQty || null}>
                         <input className="mfzInput" value={form.openStockFreeQty} disabled={busy || readOnly || !form.stockable || form.isNonEditableFreeQty || openingStockLocked} onChange={(e) => setField("openStockFreeQty", e.target.value)} />
-                        {errors.openStockFreeQty ? <div className="mfzErr">{errors.openStockFreeQty}</div> : null}
-                      </div>
+                      </ModalFormField>
                     </div>
-                    {openingStockLocked ? (
-                      <div className="pbmWarn">Locked  transactions already exist.</div>
-                    ) : null}
+                    {openingStockLocked ? <div className="pbmWarn">Locked — transactions already exist.</div> : null}
                   </div>
                   <div className="mfzField mfz12 pbmInset">
                     <div className="pbmInsetTitle">Loose stock</div>
                     <div className="mfzGrid">
-                      <div className="mfzField mfz6">
-                        <label>Loose qty in stock</label>
+                      <ModalFormField span={6} label="Loose qty in stock" error={showErr("looseStock") && errors.looseStock ? errors.looseStock : null}>
                         <input
                           className="mfzInput"
                           type="text"
@@ -1118,10 +1079,8 @@ export default function ProductBatchModal({
                           onBlur={() => markTouched("looseStock")}
                           placeholder="0"
                         />
-                        {showErr("looseStock") && errors.looseStock ? <div className="mfzErr">{errors.looseStock}</div> : null}
-                      </div>
-                      <div className="mfzField mfz6">
-                        <label>Loose unit name</label>
+                      </ModalFormField>
+                      <ModalFormField span={6} label="Loose unit name">
                         <input
                           className="mfzInput"
                           value={form.looseUnitName ?? ""}
@@ -1130,40 +1089,41 @@ export default function ProductBatchModal({
                           placeholder="TAB / CAP / ML / GM / UNIT"
                           maxLength={16}
                         />
-                      </div>
+                      </ModalFormField>
                     </div>
                   </div>
                   <div className="mfzField mfz12 pbmInset">
                     <div className="pbmInsetTitle">Low stock alert</div>
-                    <label className="mfzCheck pbmCheckSpaced">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(form.lowStockAlertEnabled)}
-                        disabled={busy || readOnly}
-                        onChange={(e) => setField("lowStockAlertEnabled", e.target.checked)}
-                      />
-                      <span>Enable low stock alert</span>
-                    </label>
-                    <div className="mfzField mfz6">
-                      <label>Threshold</label>
-                      <input
-                        className="mfzInput"
-                        type="text"
-                        inputMode="decimal"
-                        pattern="[0-9]*\.?[0-9]*"
-                        value={form.lowStockThreshold}
-                        disabled={busy || readOnly || !form.lowStockAlertEnabled}
-                        onChange={(e) => setField("lowStockThreshold", e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1"))}
-                        onBlur={() => markTouched("lowStockThreshold")}
-                      />
-                      {showErr("lowStockThreshold") && errors.lowStockThreshold ? <div className="mfzErr">{errors.lowStockThreshold}</div> : null}
+                    <div className="mfzGrid">
+                      <ModalFormField span={6} label={false}>
+                        <label className="mfzCheck pbmCheckSpaced">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(form.lowStockAlertEnabled)}
+                            disabled={busy || readOnly}
+                            onChange={(e) => setField("lowStockAlertEnabled", e.target.checked)}
+                          />
+                          <span>Enable low stock alert</span>
+                        </label>
+                      </ModalFormField>
+                      <ModalFormField span={6} label="Threshold" error={showErr("lowStockThreshold") && errors.lowStockThreshold ? errors.lowStockThreshold : null}>
+                        <input
+                          className="mfzInput"
+                          type="text"
+                          inputMode="decimal"
+                          pattern="[0-9]*\.?[0-9]*"
+                          value={form.lowStockThreshold}
+                          disabled={busy || readOnly || !form.lowStockAlertEnabled}
+                          onChange={(e) => setField("lowStockThreshold", e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1"))}
+                          onBlur={() => markTouched("lowStockThreshold")}
+                        />
+                      </ModalFormField>
                     </div>
                   </div>
                   {form.conversionUnit ? (
-                    <div className="mfzField mfz12">
-                      <label>Conversion unit</label>
+                    <ModalFormField span={12} label="Conversion unit">
                       <input className="mfzInput" value={form.conversionUnit || ""} readOnly />
-                    </div>
+                    </ModalFormField>
                   ) : null}
                 </div>
               </div>
@@ -1174,22 +1134,15 @@ export default function ProductBatchModal({
                   <span>Packing</span>
                 </div>
                 <div className="mfzGrid">
-                  <div className="mfz12">
-                    <div className="pbmGridTri">
-                      <div className="mfzField">
-                        <label>Packing</label>
-                        <input className="mfzInput" value={form.packing || ""} readOnly />
-                      </div>
-                      <div className="mfzField">
-                        <label>Bulk pack</label>
-                        <input className="mfzInput" value={form.bulkPack || ""} readOnly />
-                      </div>
-                      <div className="mfzField">
-                        <label>Case pack</label>
-                        <input className="mfzInput" value={form.casePack || ""} readOnly />
-                      </div>
-                    </div>
-                  </div>
+                  <ModalFormField span={4} label="Packing">
+                    <input className="mfzInput" value={form.packing || ""} readOnly />
+                  </ModalFormField>
+                  <ModalFormField span={4} label="Bulk pack">
+                    <input className="mfzInput" value={form.bulkPack || ""} readOnly />
+                  </ModalFormField>
+                  <ModalFormField span={4} label="Case pack">
+                    <input className="mfzInput" value={form.casePack || ""} readOnly />
+                  </ModalFormField>
                 </div>
               </div>
             </>
@@ -1198,49 +1151,45 @@ export default function ProductBatchModal({
           {tab === "flags" ? (
             <div className="pbmPanel">
               <div className="mfzGrid">
-                {[
-                  ["isHold", "Hold", "Blocks sale confirmation until hold is removed."],
-                  ["isNet", "Net (bypass discount)", "Uses net-discount path."],
-                  ["isNonEditableFreeQty", "Lock free qty", "Free qty auto-derives from scheme."]
-                ].map(([k, label, tip]) => (
-                  <label key={k} className="mfzCheck" title={tip}>
-                    <input
-                      type="checkbox"
-                      checked={Boolean(form[k])}
-                      disabled={busy || readOnly}
-                      onChange={(e) => setField(k, e.target.checked)}
-                    />
-                    <span>{label}</span>
-                  </label>
-                ))}
+                <ModalFormCheckGroup>
+                  {[
+                    ["isHold", "Hold", "Blocks sale confirmation until hold is removed."],
+                    ["isNet", "Net (bypass discount)", "Uses net-discount path."],
+                    ["isNonEditableFreeQty", "Lock free qty", "Free qty auto-derives from scheme."]
+                  ].map(([k, label, tip]) => (
+                    <label key={k} className="mfzCheck" title={tip}>
+                      <input
+                        type="checkbox"
+                        checked={Boolean(form[k])}
+                        disabled={busy || readOnly}
+                        onChange={(e) => setField(k, e.target.checked)}
+                      />
+                      <span>{label}</span>
+                    </label>
+                  ))}
+                </ModalFormCheckGroup>
                 {form.isHold ? (
-                  <div className="mfzField mfz12">
-                    <label>Hold reason</label>
+                  <ModalFormField span={12} label="Hold reason">
                     <input className="mfzInput" value={form.holdReason || ""} disabled={busy || readOnly} onChange={(e) => setField("holdReason", e.target.value)} />
-                  </div>
+                  </ModalFormField>
                 ) : null}
-                <div className="mfz12 pbmBar" style={{ marginTop: 8 }}>
-                  <Layers size={13} strokeWidth={2} aria-hidden />
-                  <span style={{ fontSize: "11px", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--color-text-4)" }}>
-                    Product-level policy
-                  </span>
+                <div className="mfzField mfz12 pbmFlagsSubhead">
+                  <div className="pbmInsetTitle">Product-level policy</div>
                 </div>
-                {[
-                  ["isHalfScheme", "Half scheme", "Free units are taxed at 50% of their value."],
-                  ["isDiscountEnabled", "Discounts allowed", "Retail and net discounts are enabled for this product."]
-                ].map(([k, label, tip]) => (
-                  <label key={k} className="mfzCheck" title={tip} style={{ opacity: 0.8 }}>
-                    <input
-                      type="checkbox"
-                      checked={Boolean(form[k])}
-                      disabled
-                    />
-                    <span>
-                      {label}{" "}
-                      <span style={{ fontWeight: 400, color: "var(--color-text-3)", fontSize: "0.85em" }}>(product master)</span>
-                    </span>
-                  </label>
-                ))}
+                <ModalFormCheckGroup>
+                  {[
+                    ["isHalfScheme", "Half scheme", "Free units are taxed at 50% of their value."],
+                    ["isDiscountEnabled", "Discounts allowed", "Retail and net discounts are enabled for this product."]
+                  ].map(([k, label, tip]) => (
+                    <label key={k} className="mfzCheck mfzCheck_muted" title={tip}>
+                      <input type="checkbox" checked={Boolean(form[k])} disabled />
+                      <span>
+                        {label}{" "}
+                        <span className="mfzCheckMeta">(product master)</span>
+                      </span>
+                    </label>
+                  ))}
+                </ModalFormCheckGroup>
                 {form.isControl ? <div className="mfz12 pbmWarn">Controlled — prescription required at billing.</div> : null}
               </div>
             </div>

@@ -2,7 +2,7 @@ import { AppButton } from "./ui/buttons.jsx";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useLocale } from "../context/LocaleContext.jsx";
 import { IconChevronRight, IconPlus, IconProducts, Search } from "./ui/AppIcons.jsx";
-import "./MasterModalForm.css";
+import "./CommonModal.css";
 import "./ProductPicker.css";
 
 function clean(v) {

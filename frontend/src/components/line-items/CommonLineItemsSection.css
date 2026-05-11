@@ -198,11 +198,11 @@
 }
 
 .cliSummaryCell_total .cliSummaryLabel {
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--on-primary-muted);
 }
 
 .cliSummaryCell_total .cliSummaryValue {
-  color: #ffffff;
+  color: var(--on-primary);
 }
 
 .cliSummaryLabel {

@@ -312,17 +312,17 @@ export default function RegistrationPage() {
                     </div>
                     <div className="regGrid2">
                       <div className="field">
-                        <label>Full name <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Full name </label>
                         <input className="regInput" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your full name" />
                       </div>
                       <div className="field">
-                        <label>Email <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Email </label>
                         <input className="regInput" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@domain.com" />
                       </div>
                     </div>
                     <div className="regGrid2">
                       <div className="field">
-                        <label>Phone <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Phone </label>
                         <div className="regPhoneRow">
                           <select className="regSelect" value={countryCode} onChange={(e) => setCountryCode(e.target.value)}>
                             <option value="+91">🇮🇳 +91</option>
@@ -335,7 +335,7 @@ export default function RegistrationPage() {
                         </div>
                       </div>
                       <div className="field">
-                        <label>Password <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Password </label>
                         <input className="regInput" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create password (min 8 chars)" />
                       </div>
                     </div>
@@ -350,26 +350,26 @@ export default function RegistrationPage() {
                     </div>
                     <div className="regGrid2">
                       <div className="field">
-                        <label>Firm name <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Firm name </label>
                         <input className="regInput" value={firmName} onChange={(e) => setFirmName(e.target.value)} placeholder="Firm name" />
                       </div>
                       <div className="field">
-                        <label>Pin code <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Pin code </label>
                         <input className="regInput" value={pinCode} onChange={(e) => setPinCode(e.target.value)} onInput={sanitizePin} placeholder="6-digit pin" inputMode="numeric" />
                       </div>
                     </div>
                     <div className="regGrid2">
                       <div className="field">
-                        <label>City <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>City </label>
                         <input className="regInput" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" />
                       </div>
                       <div className="field">
-                        <label>State <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>State </label>
                         <input className="regInput" value={state} onChange={(e) => setState(e.target.value)} placeholder="State" />
                       </div>
                     </div>
                     <div className="field">
-                      <label>Address <span className="reqMark" aria-hidden="true">*</span></label>
+                      <label>Address </label>
                       <textarea className="regTextarea" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Full address" />
                     </div>
                     </div>
@@ -382,16 +382,16 @@ export default function RegistrationPage() {
                       <div className="regSectionSub">These must be unique for each account.</div>
                     </div>
                     <div className="field">
-                      <label>{taxIdLabel} (15 chars) <span className="reqMark" aria-hidden="true">*</span></label>
+                      <label>{taxIdLabel} (15 chars) </label>
                       <input className="regInput" value={gstNumber} onChange={(e) => setGstNumber(e.target.value)} placeholder="Tax registration number" maxLength={15} />
                     </div>
                     <div className="regGrid2">
                       <div className="field">
-                        <label>Drug license 1 number <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Drug license 1 number </label>
                         <input className="regInput" value={dl1Number} onChange={(e) => setDl1Number(e.target.value)} placeholder="DL1 number" />
                       </div>
                       <div className="field">
-                        <label>Drug license 2 number <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Drug license 2 number </label>
                         <input className="regInput" value={dl2Number} onChange={(e) => setDl2Number(e.target.value)} placeholder="DL2 number" />
                       </div>
                     </div>

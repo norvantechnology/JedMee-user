@@ -589,88 +589,35 @@
   font-weight: 700;
 }
 
-.piModalFooter {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-}
-
-.piPrimaryBtn {
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid var(--color-primary);
-  background: var(--color-primary);
-  color: var(--color-card);
-  font-family: var(--font);
-  font-size: 13.5px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.piPrimaryBtn:hover {
-  background: var(--color-secondary);
-  border-color: var(--color-secondary);
-}
-.piPrimaryBtn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
+/* ── Confirm variant — extra shadow on top of sfmBtnPrimary ── */
 .piPrimaryBtn_confirm {
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--color-primary) 34%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, white 28%, transparent) inset,
+    0 6px 18px color-mix(in srgb, var(--color-primary) 34%, transparent);
 }
 
-.piPrimaryBtn_confirm:hover {
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--color-primary) 40%, transparent);
-}
-
+/* ── Payment / success variant — green fill on top of sfmBtnPrimary ── */
 .piPrimaryBtn_payment {
-  border-color: var(--color-success);
-  background: var(--color-success);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--color-success) 34%, transparent);
+  border-color: color-mix(in srgb, var(--color-success) 55%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-success) 92%, white 8%),
+    var(--color-success)
+  );
+  box-shadow:
+    0 1px 0 color-mix(in srgb, white 20%, transparent) inset,
+    0 6px 18px color-mix(in srgb, var(--color-success) 34%, transparent);
 }
-
-.piPrimaryBtn_payment:hover {
-  border-color: color-mix(in srgb, var(--color-success) 82%, black);
-  background: color-mix(in srgb, var(--color-success) 82%, black);
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--color-success) 40%, transparent);
-}
-
-.piGhostBtn {
-  height: 34px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  background: var(--color-card);
-  color: var(--color-text-2);
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.piGhostBtn:hover { background: var(--color-surface); }
-.piGhostBtn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.piDangerBtn {
-  height: 34px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, transparent);
-  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
-  color: var(--color-danger);
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.piDangerBtn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+.piPrimaryBtn_payment:hover:not(:disabled) {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--color-success-dark) 92%, white 8%),
+    var(--color-success-dark)
+  );
+  border-color: color-mix(in srgb, var(--color-success-dark) 55%, transparent);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, white 20%, transparent) inset,
+    0 8px 22px color-mix(in srgb, var(--color-success) 40%, transparent);
 }
 
 /* ── Purchase Return modal ── */
@@ -996,7 +943,7 @@
     width: 100%;
     max-width: 100%;
   }
-  .piModalForm .piItemsTable tbody td:nth-child(2) .mswSelect,
+  .piModalForm .piItemsTable tbody td:nth-child(2) .msw > .csf,
   .piModalForm .piItemsTable tbody td:nth-child(2) .csf {
     min-width: 0 !important;
   }
@@ -1007,8 +954,8 @@
     height: 40px !important;
   }
 
-  /* Remove heavy shadows in card layout (avoid “cut” look) */
-  .piModalForm .piItemsTable .csf,
+  /* Flatten chrome when idle; allow :focus-within ring on .csf (batch/product selects) */
+  .piModalForm .piItemsTable .csf:not(:focus-within),
   .piModalForm .piItemsTable .ciab {
     box-shadow: none !important;
     transform: none !important;

@@ -9,7 +9,6 @@ import { IconChevronRight, IconPlaceOrder, Phone, MapPin, Building2 } from "../u
 import { emitToast } from "../../services/toastBus.js";
 import { parseApiError } from "../../utils/api.js";
 import { readAuth } from "../../services/authStorage.js";
-import "./OrderPlaceWizardModal.css";
 
 function round2(v) {
   return Math.round((Number(v) || 0) * 100) / 100;
@@ -200,6 +199,8 @@ export default function OrderPlaceWizardModal({
         }}
         title="Place Order"
         size="lg"
+        loading={busy}
+        loadingText="Placing order…"
         footer={
           <ModalFooterShell variant="appActions">
             <AppButton variant="secondary" type="button" onClick={onClose} disabled={busy}>

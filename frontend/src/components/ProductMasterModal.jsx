@@ -1,8 +1,17 @@
 import { InlineButtonProgress } from "./ui/buttons.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "../context/LocaleContext.jsx";
-import CommonModal from "./CommonModal.jsx";
-import "./MasterModalForm.css";
+import CommonModal, {
+  ModalFormBody,
+  ModalFormCheckGroup,
+  ModalFormField,
+  ModalFormGrid,
+  ModalFormPanel,
+  ModalFormPanelBody,
+  ModalFormPanelHead,
+  ModalFormSectionTitle,
+  ModalFormShell
+} from "./CommonModal.jsx";
 import MasterSelectWithCreate from "./MasterSelectWithCreate.jsx";
 import { checkProductName } from "../services/productService.js";
 import { toDivisionOption } from "../utils/divisionLabel.js";
@@ -11,6 +20,7 @@ import { readAuth } from "../services/authStorage.js";
 import { IconProductMark } from "./ui/AppIcons.jsx";
 import ModalFooterShell from "./ui/ModalFooterShell.jsx";
 import { useDebounce } from "../utils/useDebounce.js";
+import "./ProductMasterModal.css";
 
 function clean(v) {
   return String(v ?? "").trim();
@@ -27,6 +37,7 @@ export default function ProductMasterModal({
   open,
   mode = "add",
   busy = false,
+  loading = false,
   initialValue = null,
   mfgCompanyOptions = [],
   divisionOptions = [],
@@ -35,7 +46,8 @@ export default function ProductMasterModal({
   onClose,
   onSubmit,
   portal = false,
-  portalZIndex = 480
+  portalZIndex = 480,
+  drawer = true
 }) {
   const readOnly = mode === "view";
   const isRetailer = useMemo(() => isRetailerAuth(readAuth()), []);
@@ -158,6 +170,17 @@ export default function ProductMasterModal({
     return (mfgCompanyOptions || []).find((c) => String(c.id) === id) || null;
   }, [derivedMfgCompanyId, mfgCompanyOptions]);
 
+  const manufacturerLockHint = useMemo(() => {
+    if (!selectedMfg) return null;
+    const parts = [
+      selectedMfg.sale_lock ? "Sale locked" : "",
+      selectedMfg.prevent_free_qty ? "No free qty" : "",
+      selectedMfg.prevent_discount ? "No discounts" : "",
+      selectedMfg.prevent_net_rate ? "Net rate locked" : ""
+    ].filter(Boolean);
+    return parts.length ? parts.join(" · ") : null;
+  }, [selectedMfg]);
+
   useEffect(() => {
     if (!open || readOnly) return;
     if (selectedDivision) {
@@ -250,9 +273,12 @@ export default function ProductMasterModal({
       title={title}
       icon={<IconProductMark />}
       onClose={() => !busy && onClose?.()}
-      size="lg"
+      loading={loading}
+      loadingText="Loading required data…"
+      size={780}
       portal={portal}
       portalZIndex={portalZIndex}
+      drawer={drawer}
       footer={
         <ModalFooterShell meta={readOnly || !(submitted && hasErrors) ? "" : "Fix errors to save."}>
           <button className="mfzBtn appBtn appBtn_secondary appBtn_md" type="button" data-cm-cancel="true" disabled={busy} onClick={() => onClose?.()}>
@@ -293,22 +319,98 @@ export default function ProductMasterModal({
         </ModalFooterShell>
       }
     >
-      <div className="mfz">
-        <div className="mfzBody">
-          <section className="mfzPanel" aria-label="Identity">
-            <div className="mfzPanelHead">
-              <div>
-                <div className="mfzHeadKicker">Identity</div>
-              </div>
-            </div>
-            <div className="mfzPanelBody">
-              <div className="mfzGrid">
-                {!isRetailer ? (
-                  <>
-                    <div className="mfzField mfz12">
-                      <div className="mfzLabel">
-                        Division <span className="reqMark" aria-hidden="true">*</span>
-                      </div>
+      <ModalFormShell className="pmmForm">
+        <ModalFormBody>
+          <ModalFormPanel aria-label="Product details" className="pmmPanel pmmPanel_details">
+            <ModalFormPanelHead>
+              <ModalFormSectionTitle kicker="Product details" />
+            </ModalFormPanelHead>
+            <ModalFormPanelBody className="mfzPanelBody_stack">
+              <ModalFormGrid className="pmmGrid pmmGrid_identity" aria-label="Product identity">
+                  {isRetailer ? (
+                    <ModalFormField span={12} label="Brand / Company" required error={displayErrors.mfgCompanyId || null}>
+                      <MasterSelectWithCreate
+                        kind="mfgCompany"
+                        selectClassName={`mfzInput${displayErrors.mfgCompanyId ? " mfzInput_err" : ""}`}
+                        value={String(form.mfgCompanyId || "")}
+                        disabled={busy || readOnly}
+                        onChange={(v, createdRow) => {
+                          const id = v != null ? String(v) : "";
+                          if (createdRow && String(createdRow.id) === id && onRefreshMfg) {
+                            onRefreshMfg();
+                          }
+                          setForm((p) => ({ ...p, mfgCompanyId: id }));
+                        }}
+                        onListsRefresh={async () => {
+                          if (onRefreshMfg) await onRefreshMfg();
+                        }}
+                        placeholder="Select brand or company"
+                        options={(mfgCompanyOptions || []).map((m) => ({
+                          value: String(m.id),
+                          label: `${m.name || ""}${m.short_name ? ` (${m.short_name})` : ""}`
+                        }))}
+                      />
+                    </ModalFormField>
+                  ) : null}
+
+                  <ModalFormField span={12} label="Product name" required error={nameError || displayErrors.name || null}>
+                    <input
+                      className={`mfzInput pmmInputHero${nameError || displayErrors.name ? " mfzInput_err" : ""}`}
+                      value={form.name}
+                      readOnly={readOnly}
+                      onBlur={() => setTouched((t) => ({ ...t, name: true }))}
+                      onChange={(e) => {
+                        setNameError("");
+                        setField("name", e.target.value);
+                      }}
+                      placeholder="e.g. Brand name + strength + form"
+                    />
+                  </ModalFormField>
+
+                  <ModalFormField span={12} label="Generic / drug name">
+                    <input
+                      className="mfzInput pmmInputSecondary"
+                      value={form.drugName}
+                      readOnly={readOnly}
+                      onChange={(e) => setField("drugName", e.target.value)}
+                      placeholder="INN or generic (optional)"
+                    />
+                  </ModalFormField>
+              </ModalFormGrid>
+
+              <ModalFormGrid className="pmmGrid pmmGrid_codes" aria-label="SKU, tax code, and location">
+                  <ModalFormField span={4} label="SKU code">
+                    <input
+                      className="mfzInput"
+                      value={form.code}
+                      readOnly={readOnly || mode === "edit"}
+                      placeholder={mode === "add" ? "Auto if blank" : ""}
+                      onChange={(e) => setField("code", e.target.value)}
+                    />
+                  </ModalFormField>
+                  <ModalFormField span={4} label="HSN / Tax Code" hint="Tax classification.">
+                    <input
+                      className="mfzInput"
+                      value={form.hsnCode}
+                      readOnly={readOnly}
+                      onChange={(e) => setField("hsnCode", e.target.value)}
+                      placeholder="e.g. 3004"
+                    />
+                  </ModalFormField>
+                  <ModalFormField span={4} label="Rack or shelf">
+                    <input
+                      className="mfzInput"
+                      value={form.rackLocation}
+                      readOnly={readOnly}
+                      onChange={(e) => setField("rackLocation", e.target.value)}
+                      placeholder="e.g. A-3"
+                    />
+                  </ModalFormField>
+              </ModalFormGrid>
+
+              {!isRetailer ? (
+                <ModalFormGrid className="pmmGrid pmmGrid_org" aria-label="Division and manufacturer">
+                    <ModalFormField span={6} label="Division" required error={displayErrors.divisionId || null}>
                       <MasterSelectWithCreate
                         kind="division"
                         productMfgOptions={mfgCompanyOptions}
@@ -330,223 +432,137 @@ export default function ProductMasterModal({
                         placeholder="Select division"
                         options={(divisionOptions || []).map((d) => ({ ...toDivisionOption(d), value: String(d.id) }))}
                       />
-                      {displayErrors.divisionId ? <div className="mfzErr">{displayErrors.divisionId}</div> : null}
-                    </div>
+                    </ModalFormField>
 
-                    <div className="mfzField mfz12">
-                      <div className="mfzLabel">Manufacturer</div>
+                    <ModalFormField span={6} label="Manufacturer" hint={manufacturerLockHint}>
                       <input
-                        className="mfzInput"
+                        className="mfzInput pmmInputReadonlyDisplay"
                         readOnly
                         value={selectedMfg ? `${selectedMfg.name || ""}${selectedMfg.short_name ? ` (${selectedMfg.short_name})` : ""}` : ""}
                         placeholder="Select a division first"
                       />
-                      {selectedMfg
-                        ? (() => {
-                            const parts = [
-                              selectedMfg.sale_lock ? "Sale locked" : "",
-                              selectedMfg.prevent_free_qty ? "No free qty" : "",
-                              selectedMfg.prevent_discount ? "No discounts" : "",
-                              selectedMfg.prevent_net_rate ? "Net rate locked" : ""
-                            ].filter(Boolean);
-                            return parts.length ? <div className="mfzHelp">{parts.join(" · ")}</div> : null;
-                          })()
-                        : null}
-                    </div>
-                  </>
-                ) : (
-                  <div className="mfzField mfz12">
-                    <div className="mfzLabel">Brand / Company <span className="mfzRequired">*</span></div>
-                    <MasterSelectWithCreate
-                      kind="mfgCompany"
-                      selectClassName={`mfzInput${displayErrors.mfgCompanyId ? " mfzInputErr" : ""}`}
-                      value={String(form.mfgCompanyId || "")}
-                      disabled={busy || readOnly}
-                      onChange={(v, createdRow) => {
-                        const id = v != null ? String(v) : "";
-                        if (createdRow && String(createdRow.id) === id && onRefreshMfg) {
-                          onRefreshMfg();
-                        }
-                        setForm((p) => ({ ...p, mfgCompanyId: id }));
+                    </ModalFormField>
+                </ModalFormGrid>
+              ) : null}
+            </ModalFormPanelBody>
+          </ModalFormPanel>
+
+          <ModalFormPanel aria-label="Packaging and tax" className="pmmPanel pmmPanel_pack">
+            <ModalFormPanelHead>
+              <ModalFormSectionTitle kicker={`Packaging · ${taxLabel}`} />
+            </ModalFormPanelHead>
+            <ModalFormPanelBody className="mfzPanelBody_stack">
+              <ModalFormGrid className="pmmGrid pmmGrid_packNums" aria-label="Pack counts">
+                  <ModalFormField span={4} label="Strips per box">
+                    <input
+                      className="mfzInput"
+                      value={form.packing}
+                      readOnly={readOnly}
+                      onChange={(e) => {
+                        casePackManualRef.current = false;
+                        setField("packing", e.target.value);
                       }}
-                      onListsRefresh={async () => {
-                        if (onRefreshMfg) await onRefreshMfg();
-                      }}
-                      placeholder="Select brand or company"
-                      options={(mfgCompanyOptions || []).map((m) => ({
-                        value: String(m.id),
-                        label: `${m.name || ""}${m.short_name ? ` (${m.short_name})` : ""}`
-                      }))}
+                      placeholder="e.g. 10"
+                      inputMode="numeric"
                     />
-                    {displayErrors.mfgCompanyId ? <div className="mfzErr">{displayErrors.mfgCompanyId}</div> : null}
-                  </div>
-                )}
-
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">SKU code</div>
-                  <input
-                    className="mfzInput"
-                    value={form.code}
-                    readOnly={readOnly || mode === "edit"}
-                    placeholder={mode === "add" ? "Leave blank to auto-generate" : ""}
-                    onChange={(e) => setField("code", e.target.value)}
-                  />
-                </div>
-
-                <div className="mfzField mfz8">
-                  <div className="mfzLabel">
-                    Product name <span className="reqMark" aria-hidden="true">*</span>
-                  </div>
-                  <input
-                    className="mfzInput"
-                    value={form.name}
-                    readOnly={readOnly}
-                    onBlur={() => setTouched((t) => ({ ...t, name: true }))}
-                    onChange={(e) => { setNameError(""); setField("name", e.target.value); }}
-                  />
-                  {nameError ? <div className="mfzErr">{nameError}</div> : null}
-                  {!nameError && displayErrors.name ? <div className="mfzErr">{displayErrors.name}</div> : null}
-                </div>
-
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">Generic / drug name</div>
-                  <input className="mfzInput" value={form.drugName} readOnly={readOnly} onChange={(e) => setField("drugName", e.target.value)} />
-                </div>
-
-                <div className="mfzField mfz6">
-                  <div className="mfzLabel">HSN / Tax Code</div>
-                  <input
-                    className="mfzInput"
-                    value={form.hsnCode}
-                    readOnly={readOnly}
-                    onChange={(e) => setField("hsnCode", e.target.value)}
-                    placeholder="e.g. 3004"
-                  />
-                  <div className="mfzHelp">Product tax classification code.</div>
-                </div>
-                <div className="mfzField mfz6">
-                  <div className="mfzLabel">Rack or shelf</div>
-                  <input
-                    className="mfzInput"
-                    value={form.rackLocation}
-                    readOnly={readOnly}
-                    onChange={(e) => setField("rackLocation", e.target.value)}
-                    placeholder="e.g. A-3, cold chain"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="mfzPanel" aria-label="Packaging">
-            <div className="mfzPanelHead">
-              <div>
-                <div className="mfzHeadKicker">Packaging</div>
-              </div>
-            </div>
-            <div className="mfzPanelBody">
-              <div className="mfzGrid">
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">Strips per box</div>
-                  <input
-                    className="mfzInput"
-                    value={form.packing}
-                    readOnly={readOnly}
-                    onChange={(e) => { casePackManualRef.current = false; setField("packing", e.target.value); }}
-                    placeholder="e.g. 10"
-                    inputMode="numeric"
-                  />
-                </div>
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">Boxes per case</div>
-                  <input
-                    className="mfzInput"
-                    value={form.bulkPack}
-                    readOnly={readOnly}
-                    onChange={(e) => { casePackManualRef.current = false; setField("bulkPack", e.target.value); }}
-                    placeholder="e.g. 10"
-                    inputMode="numeric"
-                  />
-                </div>
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">Strips per case {!readOnly && Number(form.packing) > 0 && Number(form.bulkPack) > 0 ? <span className="mfzHelp" style={{fontWeight:400}}>(auto)</span> : null}</div>
-                  <input
-                    className="mfzInput"
-                    value={form.casePack}
-                    readOnly={readOnly}
-                    onChange={(e) => { casePackManualRef.current = true; setField("casePack", e.target.value); }}
-                    placeholder="e.g. 100"
-                    inputMode="numeric"
-                  />
-                  {!readOnly && Number(form.packing) > 0 && Number(form.bulkPack) > 0 && !casePackManualRef.current
-                    ? <div className="mfzHelp">{form.packing} strips × {form.bulkPack} boxes = {Number(form.packing) * Number(form.bulkPack)} strips/case</div>
-                    : null}
-                </div>
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">Conversion</div>
-                  <input
-                    className="mfzInput"
-                    value={form.conversionUnit}
-                    readOnly={readOnly}
-                    onChange={(e) => setField("conversionUnit", e.target.value)}
-                    placeholder="e.g. 1 box = 10 strips"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="mfzPanel" aria-label="Tax">
-            <div className="mfzPanelHead">
-              <div>
-                <div className="mfzHeadKicker">{taxLabel}</div>
-              </div>
-            </div>
-            <div className="mfzPanelBody">
-              <div className="mfzGrid">
-                <div className="mfzField mfz6">
-                  <div className="mfzLabel">Purchase {taxLabel} %</div>
-                  <select className="mfzInput" value={form.purchaseGST} disabled={readOnly} onChange={(e) => setField("purchaseGST", e.target.value)}>
-                    <option value="">Select</option>
-                    {TAX_OPTIONS.map((g) => (
-                      <option key={g} value={g}>
-                        {g}%
-                      </option>
-                    ))}
-                  </select>
-                  {displayErrors.purchaseGST ? <div className="mfzErr">{displayErrors.purchaseGST}</div> : null}
-                </div>
-                <div className="mfzField mfz6">
-                  <div className="mfzLabel">Sales {taxLabel} %</div>
-                  <select className="mfzInput" value={form.salesGST} disabled={readOnly} onChange={(e) => setField("salesGST", e.target.value)}>
-                    <option value="">Select</option>
-                    {TAX_OPTIONS.map((g) => (
-                      <option key={g} value={g}>
-                        {g}%
-                      </option>
-                    ))}
-                  </select>
-                  {displayErrors.salesGST ? <div className="mfzErr">{displayErrors.salesGST}</div> : null}
-                </div>
-              </div>
-            </div>
-          </section>
+                  </ModalFormField>
+                  <ModalFormField span={4} label="Boxes per case">
+                    <input
+                      className="mfzInput"
+                      value={form.bulkPack}
+                      readOnly={readOnly}
+                      onChange={(e) => {
+                        casePackManualRef.current = false;
+                        setField("bulkPack", e.target.value);
+                      }}
+                      placeholder="e.g. 10"
+                      inputMode="numeric"
+                    />
+                  </ModalFormField>
+                  <ModalFormField
+                    span={4}
+                    label={
+                      <>
+                        Strips per case{" "}
+                        {!readOnly && Number(form.packing) > 0 && Number(form.bulkPack) > 0 ? (
+                          <span className="mfzHelp" style={{ fontWeight: 400 }}>
+                            (auto)
+                          </span>
+                        ) : null}
+                      </>
+                    }
+                    hint={
+                      !readOnly && Number(form.packing) > 0 && Number(form.bulkPack) > 0 && !casePackManualRef.current
+                        ? `${form.packing} strips × ${form.bulkPack} boxes = ${Number(form.packing) * Number(form.bulkPack)} strips/case`
+                        : null
+                    }
+                  >
+                    <input
+                      className="mfzInput"
+                      value={form.casePack}
+                      readOnly={readOnly}
+                      onChange={(e) => {
+                        casePackManualRef.current = true;
+                        setField("casePack", e.target.value);
+                      }}
+                      placeholder="e.g. 100"
+                      inputMode="numeric"
+                    />
+                  </ModalFormField>
+              </ModalFormGrid>
+              <ModalFormGrid className="pmmGrid pmmGrid_conversion" aria-label="Conversion note">
+                  <ModalFormField span={12} label="Conversion" hint="How selling units relate (optional).">
+                    <input
+                      className="mfzInput"
+                      value={form.conversionUnit}
+                      readOnly={readOnly}
+                      onChange={(e) => setField("conversionUnit", e.target.value)}
+                      placeholder="e.g. 1 box = 10 strips"
+                    />
+                  </ModalFormField>
+              </ModalFormGrid>
+              <ModalFormGrid className="pmmGrid pmmGrid_tax" aria-label="Purchase and sales tax">
+                  <ModalFormField span={6} label={`Purchase ${taxLabel} %`} error={displayErrors.purchaseGST || null}>
+                    <select className="mfzInput" value={form.purchaseGST} disabled={readOnly} onChange={(e) => setField("purchaseGST", e.target.value)}>
+                      <option value="">Select</option>
+                      {TAX_OPTIONS.map((g) => (
+                        <option key={g} value={g}>
+                          {g}%
+                        </option>
+                      ))}
+                    </select>
+                  </ModalFormField>
+                  <ModalFormField span={6} label={`Sales ${taxLabel} %`} error={displayErrors.salesGST || null}>
+                    <select className="mfzInput" value={form.salesGST} disabled={readOnly} onChange={(e) => setField("salesGST", e.target.value)}>
+                      <option value="">Select</option>
+                      {TAX_OPTIONS.map((g) => (
+                        <option key={g} value={g}>
+                          {g}%
+                        </option>
+                      ))}
+                    </select>
+                  </ModalFormField>
+              </ModalFormGrid>
+            </ModalFormPanelBody>
+          </ModalFormPanel>
 
           {!isRetailer ? (
-            <section className="mfzPanel" aria-label="Scheme">
-              <div className="mfzPanelHead">
-                <div>
-                  <div className="mfzHeadKicker">Scheme</div>
-                </div>
-              </div>
-              <div className="mfzPanelBody">
-                <div className="mfzGrid">
-                  <div className="mfzField mfz12">
-                    <div className="mfzLabel">Scheme note</div>
-                    <input className="mfzInput" value={form.salesScheme} readOnly={readOnly} onChange={(e) => setField("salesScheme", e.target.value)} placeholder="e.g. 10+1" />
-                  </div>
-                  <div className="mfzField mfz6">
-                    <div className="mfzLabel">Paid qty</div>
+            <ModalFormPanel aria-label="Scheme" className="pmmPanel pmmPanel_scheme">
+              <ModalFormPanelHead>
+                <ModalFormSectionTitle kicker="Scheme" hint="Optional trade scheme; paid/free quantities for offers." />
+              </ModalFormPanelHead>
+              <ModalFormPanelBody className="mfzPanelBody_stack">
+                <ModalFormGrid className="pmmGrid pmmGrid_scheme">
+                  <ModalFormField span={6} label="Scheme note">
+                    <input
+                      className="mfzInput"
+                      value={form.salesScheme}
+                      readOnly={readOnly}
+                      onChange={(e) => setField("salesScheme", e.target.value)}
+                      placeholder="e.g. 10+1"
+                    />
+                  </ModalFormField>
+                  <ModalFormField span={3} label="Paid qty" error={displayErrors.schemeQtyPaid || null}>
                     <input
                       className="mfzInput"
                       type="text"
@@ -557,10 +573,8 @@ export default function ProductMasterModal({
                       readOnly={readOnly}
                       onChange={(e) => setField("schemeQtyPaid", e.target.value.replace(/[^0-9]/g, ""))}
                     />
-                    {displayErrors.schemeQtyPaid ? <div className="mfzErr">{displayErrors.schemeQtyPaid}</div> : null}
-                  </div>
-                  <div className="mfzField mfz6">
-                    <div className="mfzLabel">Free qty</div>
+                  </ModalFormField>
+                  <ModalFormField span={3} label="Free qty">
                     <input
                       className="mfzInput"
                       type="text"
@@ -571,20 +585,21 @@ export default function ProductMasterModal({
                       readOnly={readOnly}
                       onChange={(e) => setField("schemeQtyFree", e.target.value.replace(/[^0-9]/g, ""))}
                     />
-                  </div>
-                </div>
-              </div>
-            </section>
+                  </ModalFormField>
+                </ModalFormGrid>
+              </ModalFormPanelBody>
+            </ModalFormPanel>
           ) : null}
 
-          <section className="mfzPanel" aria-label="Flags">
-            <div className="mfzPanelHead">
-              <div>
-                <div className="mfzHeadKicker">Policy</div>
-              </div>
-            </div>
-            <div className="mfzPanelBody">
-              <div className="mfzChecks">
+          <ModalFormPanel aria-label="Policy and stock alerts" className="pmmPanel pmmPanel_policy">
+            <ModalFormPanelHead>
+              <ModalFormSectionTitle
+                kicker="Policy & alerts"
+                hint="Billing behaviour and optional low-stock warning."
+              />
+            </ModalFormPanelHead>
+            <ModalFormPanelBody className="mfzPanelBody_stack pmmPanelBody_policy">
+              <ModalFormCheckGroup>
                 {(isRetailer
                   ? [
                       ["stockable", "Stockable", "Track inventory."],
@@ -622,53 +637,40 @@ export default function ProductMasterModal({
                     <span>{label}</span>
                   </label>
                 ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="mfzPanel" aria-label="Alerts">
-            <div className="mfzPanelHead">
-              <div>
-                <div className="mfzHeadKicker">Low stock</div>
-                <div className="mfzHeadHint">Alert when total quantity across batches is at or below the threshold.</div>
-              </div>
-            </div>
-            <div className="mfzPanelBody">
-              <div className="mfzGrid">
-                <div className="mfzField mfz12">
-                  <label className="mfzCheck">
-                    <input type="checkbox" checked={Boolean(form.lowStockAlertEnabled)} disabled={readOnly} onChange={(e) => setField("lowStockAlertEnabled", e.target.checked)} />
-                    <span>Low stock alert</span>
-                  </label>
-                </div>
-                <div className="mfzField mfz6">
-                  <div className="mfzLabel">Threshold</div>
-                  <input
-                    className="mfzInput"
-                    type="text"
-                    inputMode="decimal"
-                    pattern="[0-9]*\.?[0-9]*"
-                    placeholder="0"
-                    value={form.lowStockThreshold}
-                    readOnly={readOnly}
-                    onClick={() => {
-                      if (!readOnly && !form.lowStockAlertEnabled) setField("lowStockAlertEnabled", true);
-                    }}
-                    onFocus={() => {
-                      if (!readOnly && !form.lowStockAlertEnabled) setField("lowStockAlertEnabled", true);
-                    }}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1");
-                      setField("lowStockThreshold", val);
-                    }}
-                  />
-                  {displayErrors.lowStockThreshold ? <div className="mfzErr">{displayErrors.lowStockThreshold}</div> : null}
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
+              </ModalFormCheckGroup>
+              <ModalFormGrid className="pmmGrid pmmGrid_lowStock" aria-label="Low stock threshold">
+                  <ModalFormField span={6} label={false}>
+                    <label className="mfzCheck">
+                      <input type="checkbox" checked={Boolean(form.lowStockAlertEnabled)} disabled={readOnly} onChange={(e) => setField("lowStockAlertEnabled", e.target.checked)} />
+                      <span>Low stock alert</span>
+                    </label>
+                  </ModalFormField>
+                  <ModalFormField span={6} label="Threshold" error={displayErrors.lowStockThreshold || null}>
+                    <input
+                      className="mfzInput"
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*\.?[0-9]*"
+                      placeholder="0"
+                      value={form.lowStockThreshold}
+                      readOnly={readOnly}
+                      onClick={() => {
+                        if (!readOnly && !form.lowStockAlertEnabled) setField("lowStockAlertEnabled", true);
+                      }}
+                      onFocus={() => {
+                        if (!readOnly && !form.lowStockAlertEnabled) setField("lowStockAlertEnabled", true);
+                      }}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1");
+                        setField("lowStockThreshold", val);
+                      }}
+                    />
+                  </ModalFormField>
+              </ModalFormGrid>
+            </ModalFormPanelBody>
+          </ModalFormPanel>
+        </ModalFormBody>
+      </ModalFormShell>
     </CommonModal>
   );
 }

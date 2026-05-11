@@ -188,7 +188,7 @@ export default function ForgotPasswordPage() {
             {step === "email" ? (
               <form noValidate onSubmit={onRequestOtp}>
                 <div className="field">
-                  <label>Email address <span className="reqMark" aria-hidden="true">*</span></label>
+                  <label>Email address </label>
                   <div className="input-wrap">
                     <span className="ico" aria-hidden="true"><IconAuthMail /></span>
                     <input
@@ -207,7 +207,7 @@ export default function ForgotPasswordPage() {
             ) : (
               <form noValidate onSubmit={onReset}>
                 <div className="field">
-                  <label>OTP <span className="reqMark" aria-hidden="true">*</span></label>
+                  <label>OTP </label>
                   <div className="otpBoxes" role="group" aria-label="OTP input">
                     {Array.from({ length: 6 }).map((_, idx) => (
                       <input
@@ -238,7 +238,7 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 <div className="field">
-                  <label>New password <span className="reqMark" aria-hidden="true">*</span></label>
+                  <label>New password </label>
                   <div className="input-wrap">
                     <input
                       className="fpInput fpPwInput"
@@ -262,7 +262,7 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 <div className="field">
-                  <label>Confirm password <span className="reqMark" aria-hidden="true">*</span></label>
+                  <label>Confirm password </label>
                   <div className="input-wrap">
                     <input
                       className="fpInput fpPwInput"

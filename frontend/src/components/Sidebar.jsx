@@ -1,20 +1,19 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { clearAuth, onAuthChanged, readAuth } from "../services/authStorage.js";
 import { logout } from "../services/authService.js";
 import { getPendingOrderCount } from "../services/orderService.js";
 import { subscribeOrderBadgeRefresh } from "../services/orderBadgeBus.js";
-import { APP_DISPLAY_NAME, sidebarNavScrollStorageKey } from "../constants/brand.js";
-import { NAV_LABELS } from "../constants/navLabels.js";
+import { sidebarNavScrollStorageKey } from "../constants/brand.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
 import { useLocale } from "../context/LocaleContext.jsx";
+import { buildUserSidebarSections } from "../navigation/userSidebarNav.js";
 import {
   BadgeIndianRupee,
   Building2,
   CreditCard,
   IconCollapseChevron,
   IconDots,
-  IconMenu,
   IconLedger,
   IconCatalog,
   IconOrder,
@@ -51,6 +50,56 @@ function initialsFrom(nameOrEmail) {
   const parts = s.split(/\s+/).filter(Boolean);
   if (parts.length >= 2) return `${parts[0][0] || "U"}${parts[1][0] || "S"}`.toUpperCase();
   return s.slice(0, 2).toUpperCase();
+}
+
+/** Icons for sidebar routes — keep in sync with navigation/userSidebarNav.js */
+function pickSidebarIcon(to) {
+  const path = String(to || "");
+  switch (path) {
+    case "/dashboard":
+      return <LayoutGrid />;
+    case "/quality-master":
+      return <Package2 />;
+    case "/mfg-companies":
+      return <Building2 />;
+    case "/divisions":
+    case "/vendors":
+      return <Truck />;
+    case "/customers":
+      return <UsersRound />;
+    case "/order-catalog":
+    case "/my-catalog":
+      return <IconCatalog />;
+    case "/sales-billing":
+      return <WalletCards />;
+    case "/sales-returns":
+    case "/purchase-returns":
+      return <RotateCcw />;
+    case "/purchase-invoices":
+      return <ClipboardList />;
+    case "/my-orders":
+    case "/orders":
+      return <IconOrder />;
+    case "/prescriptions":
+      return <ShieldCheck />;
+    case "/reports/inventory":
+      return <Layers />;
+    case "/reports/day-book":
+    case "/reports/gst-r1":
+      return <IconDayBook />;
+    case "/reports/ledger":
+      return <IconLedger />;
+    case "/division-payments":
+      return <BadgeIndianRupee />;
+    case "/customer-payments":
+      return <CreditCard />;
+    case "/users":
+      return <Users />;
+    case "/roles-access":
+      return <ShieldCheck />;
+    default:
+      return <LayoutGrid />;
+  }
 }
 
 export default function Sidebar({
@@ -111,124 +160,29 @@ export default function Sidebar({
   useEffect(() => subscribeOrderBadgeRefresh(refreshOrderBadge), [refreshOrderBadge]);
 
   const sections = useMemo(() => {
-    const out = [
-      {
-        title: "MAIN",
-        items: [{ to: "/dashboard", label: NAV_LABELS.dashboard, icon: <LayoutGrid />, shortcut: "Alt+H" }]
-      }
-    ];
-
-    const divisionBaseTo = isRetailer ? "/vendors" : "/divisions";
-    const masterSetupItems = [
-      ...(canQuality ? [{ to: "/quality-master", label: NAV_LABELS.qualityMaster, icon: <Package2 />, shortcut: "Alt+Q" }] : []),
-      ...(canMfg ? [{ to: "/mfg-companies", label: NAV_LABELS.mfgCompanies, icon: <Building2 />, shortcut: "Alt+M" }] : []),
-      ...(canDivisions
-        ? [
-            {
-              to: divisionBaseTo,
-              label: isRetailer ? "Suppliers" : NAV_LABELS.divisions,
-              icon: <Truck />,
-              shortcut: "Alt+D"
-            }
-          ]
-        : []),
-      ...(canCustomers ? [{ to: "/customers", label: NAV_LABELS.customers, icon: <UsersRound />, shortcut: "Alt+C" }] : [])
-      ,
-      ...(canOrders
-        ? [
-            {
-              to: isRetailer ? "/order-catalog" : "/my-catalog",
-              label: isRetailer ? NAV_LABELS.orderCatalog : NAV_LABELS.myCatalog,
-              icon: <IconCatalog />,
-              shortcut: "Alt+L"
-            }
-          ]
-        : [])
-    ];
-    if (masterSetupItems.length) out.push({ title: "MASTER SETUP", items: masterSetupItems });
-
-    const txnItems = [
-      ...(canSales
-        ? [
-            {
-              to: "/sales-billing",
-              label: isRetailer ? "Sales & Billing" : NAV_LABELS.salesBilling,
-              icon: <WalletCards />,
-              shortcut: "Alt+B"
-            }
-          ]
-        : []),
-      ...(canSalesReturns ? [{ to: "/sales-returns", label: NAV_LABELS.salesReturns, icon: <RotateCcw />, shortcut: "Alt+S" }] : []),
-      ...(canPurchase ? [{ to: "/purchase-invoices", label: NAV_LABELS.purchaseInvoices, icon: <ClipboardList />, shortcut: "Alt+I" }] : []),
-      ...(canPurchaseReturns ? [{ to: "/purchase-returns", label: "Purchase Returns", icon: <RotateCcw />, shortcut: "Alt+N" }] : []),
-      ...(canOrders
-        ? [
-            {
-              to: isRetailer ? "/my-orders" : "/orders",
-              label: isRetailer ? NAV_LABELS.myOrders : NAV_LABELS.orders,
-              icon: <IconOrder />,
-              shortcut: "Alt+O",
-              badge: !isRetailer && pendingOrderCount > 0 ? (pendingOrderCount > 99 ? "99+" : String(pendingOrderCount)) : null
-            }
-          ]
-        : []),
-      ...(isRetailer && canPrescriptions ? [{ to: "/prescriptions", label: "Prescriptions", icon: <ShieldCheck />, shortcut: "Alt+X" }] : [])
-    ];
-    if (txnItems.length) out.push({ title: "TRANSACTIONS", items: txnItems });
-
-    const reportItems = [
-      ...(canQuality || canMfg ? [{ to: "/reports/inventory", label: "Inventory Reports", icon: <Layers /> }] : []),
-      ...(canSales ? [{ to: "/reports/day-book", label: "Day Book", icon: <IconDayBook /> }] : []),
-      ...(canSales ? [{ to: "/reports/gst-r1", label: `${taxLabel} Report (R1)`, icon: <IconDayBook /> }] : []),
-      ...(canCustomers || canDivisions ? [{ to: "/reports/ledger", label: "Ledger", icon: <IconLedger /> }] : [])
-    ];
-    if (reportItems.length) out.push({ title: "REPORTS", items: reportItems });
-
-    const paymentItems = [
-      ...(canDivisionPayments ? [{ to: "/division-payments", label: isRetailer ? "Supplier Payments" : NAV_LABELS.divisionPayments, icon: <BadgeIndianRupee />, shortcut: "Alt+P" }] : []),
-      ...(canCustomerPayments ? [{ to: "/customer-payments", label: NAV_LABELS.customerPayments, icon: <CreditCard />, shortcut: "Alt+Y" }] : [])
-    ];
-    if (paymentItems.length) out.push({ title: "PAYMENTS", items: paymentItems });
-
-    const userManagementItems = [
-      ...(canUsers ? [{ to: "/users", label: NAV_LABELS.users, icon: <Users />, shortcut: "Alt+U" }] : []),
-      ...(canRoles ? [{ to: "/roles-access", label: NAV_LABELS.rolesAccess, icon: <ShieldCheck />, shortcut: "Alt+R" }] : [])
-    ];
-    if (userManagementItems.length) out.push({ title: "USER MANAGEMENT", items: userManagementItems });
-
-    return out;
-  }, [canUsers, canRoles, canDivisions, canQuality, canMfg, canPurchase, canCustomers, canSales, canSalesReturns, canPurchaseReturns, canOrders, canPrescriptions, canDivisionPayments, canCustomerPayments, isRetailer, authTick, pendingOrderCount, taxLabel]);
-
-  const flatNavItems = useMemo(() => sections.flatMap((s) => s.items), [sections]);
-
-  const indexForPath = useCallback(
-    (pathname) => {
-      const path = String(pathname || "");
-      let best = 0;
-      let bestLen = -1;
-      flatNavItems.forEach((it, i) => {
-        const to = String(it.to || "");
-        if (!to) return;
-        if (path === to || (to !== "/" && path.startsWith(`${to}/`))) {
-          if (to.length > bestLen) {
-            bestLen = to.length;
-            best = i;
-          }
-        }
-      });
-      return best;
-    },
-    [flatNavItems]
-  );
+    const model = buildUserSidebarSections({
+      isOwner,
+      perms,
+      isRetailer,
+      pendingOrderCount,
+      taxLabel
+    });
+    return model.map((sec) => ({
+      title: sec.title,
+      items: sec.items.map((it) => ({
+        to: it.to,
+        label: it.label,
+        badge: it.badge,
+        fnKey: it.fnKey,
+        icon: pickSidebarIcon(it.to)
+      }))
+    }));
+  }, [isOwner, perms, isRetailer, pendingOrderCount, taxLabel, authTick, canUsers, canRoles, canDivisions, canQuality, canMfg, canPurchase, canCustomers, canSales, canSalesReturns, canPurchaseReturns, canOrders, canPrescriptions, canDivisionPayments, canCustomerPayments]);
 
   const panelLabel = variant === "admin" ? "Admin Panel" : "User Panel";
   const avatar = initialsFrom(userName || userEmail || "User");
-  const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [kbdRingIndex, setKbdRingIndex] = useState(null);
-  const kbdRingRef = useRef(null);
-  kbdRingRef.current = kbdRingIndex;
   const menuRef = useRef(null);
   const navRef = useRef(null);
 
@@ -275,115 +229,6 @@ export default function Sidebar({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, [menuOpen]);
 
-  useEffect(() => {
-    setKbdRingIndex(null);
-  }, [location.pathname]);
-
-  function isBlockingOverlay() {
-    if (menuOpen) return true;
-    if (document.querySelector(".cmRoot")) return true;
-    if (document.querySelector('.udpRoot[aria-hidden="false"]')) return true;
-    if (document.querySelector('[role="dialog"][aria-hidden="false"]')) return true;
-    if (document.querySelector('[role="listbox"]')) return true;
-    return false;
-  }
-
-  function isEditable(el) {
-    if (!el) return false;
-    const tag = String(el.tagName || "").toLowerCase();
-    if (tag === "input" || tag === "textarea" || tag === "select") return true;
-    if (el.isContentEditable) return true;
-    return false;
-  }
-
-  /**
-   * Global keyboard nav for the sidebar.
-   * - ↑/↓ move a highlight over flattened nav items (smooth scroll, wrap).
-   * - Enter opens the highlighted item.
-   * - Esc clears the highlight.
-   * - ↑/↓ while a sidebar link is focused: roving focus between links.
-   * Disabled when modal/drawer/popup is open, an input/select is focused,
-   * or focus is inside a CommonTable row (so in-table arrow nav still works).
-   */
-  useEffect(() => {
-    function onKeyDown(e) {
-      const key = e.key;
-      if (key !== "ArrowDown" && key !== "ArrowUp" && key !== "Escape") return;
-      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-
-      if (isBlockingOverlay()) {
-        if (kbdRingRef.current !== null) setKbdRingIndex(null);
-        return;
-      }
-
-      const active = document.activeElement;
-      const navEl = navRef.current;
-
-      if (active?.matches?.("a.nav-link") && navEl) {
-        if (key === "ArrowDown" || key === "ArrowUp") {
-          const links = [...navEl.querySelectorAll("a.nav-link[data-sb-idx]")];
-          const i = links.indexOf(active);
-          if (i >= 0) {
-            e.preventDefault();
-            e.stopPropagation();
-            const next = key === "ArrowDown" ? Math.min(links.length - 1, i + 1) : Math.max(0, i - 1);
-            links[next]?.focus?.();
-          }
-          return;
-        }
-      }
-
-      if (key === "Escape") {
-        if (kbdRingRef.current !== null) {
-          e.preventDefault();
-          setKbdRingIndex(null);
-        }
-        return;
-      }
-
-      if (isEditable(active)) return;
-      if (active?.closest?.(".ct tbody tr")) return;
-
-      const n = flatNavItems.length;
-      if (!n) return;
-
-      e.preventDefault();
-      e.stopPropagation();
-      setKbdRingIndex((prev) => {
-        const start = prev !== null ? prev : indexForPath(location.pathname);
-        let next = key === "ArrowDown" ? start + 1 : start - 1;
-        next = ((next % n) + n) % n;
-        requestAnimationFrame(() => {
-          navEl?.querySelector(`a.nav-link[data-sb-idx="${next}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-        });
-        return next;
-      });
-    }
-
-    document.addEventListener("keydown", onKeyDown, true);
-    return () => document.removeEventListener("keydown", onKeyDown, true);
-  }, [flatNavItems.length, indexForPath, location.pathname, menuOpen]);
-
-  useEffect(() => {
-    function onKeyCapture(e) {
-      if (e.key !== "Enter" || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-      if (kbdRingIndex === null) return;
-      if (isBlockingOverlay()) return;
-      if (isEditable(document.activeElement)) return;
-
-      const item = flatNavItems[kbdRingIndex];
-      if (!item?.to) return;
-
-      e.preventDefault();
-      e.stopPropagation();
-      setKbdRingIndex(null);
-      navigate(item.to);
-      onNavigate?.();
-    }
-    document.addEventListener("keydown", onKeyCapture, true);
-    return () => document.removeEventListener("keydown", onKeyCapture, true);
-  }, [flatNavItems, kbdRingIndex, menuOpen, navigate, onNavigate]);
-
   return (
     <>
       <div className={`overlay ${mobileOpen ? "visible" : ""}`} onClick={onCloseMobile} aria-hidden={!mobileOpen} />
@@ -416,7 +261,6 @@ export default function Sidebar({
 
         <nav ref={navRef} className="nav-scroll" aria-label="Primary navigation">
           {(() => {
-            let sbRunning = 0;
             const prettyTitle = (t) => {
               const s = String(t || "").trim().toLowerCase();
               if (!s) return "";
@@ -430,9 +274,8 @@ export default function Sidebar({
               <div key={sec.title} className="nav-group">
                 <div className="nav-group-label">{prettyTitle(sec.title)}</div>
                 {sec.items.map((it) => {
-                  const sbIdx = sbRunning++;
-                  const ring = kbdRingIndex === sbIdx;
-                  const itemKey = String(it.to || it.label || sbIdx);
+                  const itemKey = String(it.to || it.label || sec.title);
+                  const shortcutHint = it.fnKey ? `F${it.fnKey}` : "";
 
                   const snapshotScroll = () => {
                     const el = navRef.current;
@@ -450,15 +293,13 @@ export default function Sidebar({
                     <div key={itemKey} className="nav-item">
                       <NavLink
                         to={it.to}
-                        title={it.label}
+                        title={shortcutHint ? `${it.label} (${shortcutHint})` : it.label}
                         preventScrollReset
                         data-label={it.label}
-                        data-sb-idx={sbIdx}
-                        className={({ isActive }) => `nav-link${isActive ? " active" : ""}${ring ? " nav-link_kbd" : ""}`}
+                        className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
                         onClick={() => {
                           snapshotScroll();
                           onNavigate?.();
-                          setKbdRingIndex(null);
                         }}
                       >
                         <span className="nav-active-bar" />
@@ -466,12 +307,22 @@ export default function Sidebar({
                           {it.icon}
                         </span>
                         <span className="nav-label">{it.label}</span>
+                        {!collapsed && shortcutHint ? (
+                          <kbd className="navShortcutHint" aria-label={`Shortcut ${shortcutHint}`}>
+                            {shortcutHint}
+                          </kbd>
+                        ) : null}
                         {it.badge ? (
                           <span className="nav-badge" aria-label={`${it.badge} pending`}>{it.badge}</span>
                         ) : null}
                       </NavLink>
 
-                      {collapsed ? <span className="nav-tooltip">{it.label}</span> : null}
+                      {collapsed ? (
+                        <span className="nav-tooltip">
+                          {it.label}
+                          {shortcutHint ? ` (${shortcutHint})` : ""}
+                        </span>
+                      ) : null}
                     </div>
                   );
                 })}

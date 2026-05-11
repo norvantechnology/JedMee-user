@@ -10,43 +10,43 @@
   position: relative;
   border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
   border-radius: var(--radius);
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--color-card) 96%, var(--color-surface)),
-    var(--color-card)
-  );
-  padding: clamp(14px, 2.6vw, 18px) clamp(14px, 2.8vw, 18px) clamp(14px, 2.6vw, 18px)
-    calc(12px + 4px + clamp(14px, 2.6vw, 18px));
+  background: var(--color-card);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  /* Remove left padding offset — section head now provides the visual anchor */
+  padding: 0;
 }
 
+/* Remove the left accent bar — replaced by dark section header */
 .sfmSection::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: clamp(12px, 2.2vw, 16px);
-  bottom: clamp(12px, 2.2vw, 16px);
-  width: 4px;
-  border-radius: 0 3px 3px 0;
-  background: linear-gradient(180deg, var(--color-primary), color-mix(in srgb, var(--color-secondary) 85%, var(--color-primary)));
-  pointer-events: none;
+  display: none;
 }
 
+/* ── Section header — same calm chrome tokens as CommonModal .mcmHead ── */
 .sfmSectionHead {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
-  margin-bottom: clamp(12px, 2.2vw, 14px);
-  padding-bottom: clamp(10px, 2vw, 12px);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+  gap: 4px;
+  padding: 10px 16px;
+  background: var(--modal-head-bg);
+  border-bottom: 1px solid var(--modal-head-border);
+  margin-bottom: 0;
+}
+
+/* Section body padding (replaces the old section padding) */
+.sfmSection > .sfmGrid,
+.sfmSection > .sfmCheckRow,
+.sfmSection > .sfmKpiRow,
+.sfmSection > .custPayAllocWrap,
+.sfmSection > *:not(.sfmSectionHead) {
+  padding: clamp(12px, 2.2vw, 16px) clamp(14px, 2.8vw, 18px);
 }
 
 @media (min-width: 721px) {
   .sfmSectionHead {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: clamp(12px, 2vw, 16px);
   }
@@ -58,16 +58,16 @@
 }
 
 .sfmTitle {
-  font-weight: 950;
-  color: var(--color-text-heading);
-  font-size: clamp(14px, 2.6vw, 15.5px);
-  letter-spacing: -0.02em;
+  font-weight: 800;
+  color: var(--modal-head-text);
+  font-size: clamp(13px, 2.4vw, 14.5px);
+  letter-spacing: 0.01em;
   line-height: 1.25;
 }
 
 .sfmHint {
-  color: var(--color-text-3);
-  font-weight: 650;
+  color: var(--modal-head-sub);
+  font-weight: 600;
   font-size: clamp(11.5px, 2.2vw, 12.5px);
   line-height: 1.45;
   overflow-wrap: anywhere;
@@ -96,20 +96,24 @@
     gap: 8px;
   }
 
+  /* Section: no padding — header + body children handle their own padding */
   .sfmSection {
-    padding: 8px 8px 8px 12px; /* inset left for accent bar */
+    padding: 0;
     border-radius: var(--radius, 12px);
-  }
-
-  .sfmSection::before {
-    top: 8px;
-    bottom: 8px;
   }
 
   .sfmSectionHead {
     gap: 4px;
-    margin-bottom: 6px;
-    padding-bottom: 6px;
+    padding: 8px 12px;
+  }
+
+  /* Section body children on mobile */
+  .sfmSection > .sfmGrid,
+  .sfmSection > .sfmCheckRow,
+  .sfmSection > .sfmKpiRow,
+  .sfmSection > .custPayAllocWrap,
+  .sfmSection > *:not(.sfmSectionHead) {
+    padding: 10px 12px;
   }
 
   .sfmGrid {
@@ -117,7 +121,7 @@
   }
 
   .sfmTitle {
-    font-size: clamp(13px, 3.2vw, 14.5px);
+    font-size: clamp(12.5px, 3.2vw, 14px);
   }
 
   .sfmHint {
@@ -126,7 +130,9 @@
   }
 
   .sfm .raField label {
-    font-size: clamp(10.5px, 2.8vw, 12px);
+    font-size: 10px;
+    padding: 2px 7px 2px 5px;
+    letter-spacing: 0.06em;
   }
 
   .sfm .raInput,
@@ -356,17 +362,34 @@
   min-height: clamp(38px, 6vw, 42px);
   height: auto;
   font-size: clamp(13px, 2.4vw, 14px);
+  background: var(--color-card);
 }
 
 .sfm .raField label {
-  display: block;
-  margin-bottom: 0;
-  font-size: clamp(11.5px, 2.2vw, 12.5px);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 2px;
+  font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--color-text-4);
+  color: var(--field-label-text);
+  padding: 3px 8px 3px 6px;
+  border-radius: 4px;
+  width: fit-content;
   line-height: 1.2;
+}
+
+/* Accent dot before each label */
+.sfm .raField label::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--field-label-dot);
+  flex-shrink: 0;
 }
 
 .sfm .cdpInput {

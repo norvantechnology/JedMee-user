@@ -27,6 +27,7 @@ export default function ConfirmDialog({
       icon={danger ? <IconConfirmMarkDanger /> : <IconConfirmMarkOk />}
       onClose={() => (busy ? null : onClose?.())}
       closeOnOverlay={!busy}
+      drawer={false}
       footer={
         <div className="cdlgActions">
           <button className="cdlgBtn appBtn appBtn_secondary appBtn_md" type="button" data-cm-cancel="true" onClick={onClose} disabled={busy}>

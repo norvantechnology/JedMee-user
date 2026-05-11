@@ -1,10 +1,8 @@
-import "./ModalFooterShell.css";
-
 /**
  * Shared modal footer shells so layout + class names stay consistent.
  *
- * - `master`: MasterModalForm layout (`mfzFooter`, optional `mfzFooterMeta`, `mfzFooterActions`).
- *   Parent must import `MasterModalForm.css` (existing master modals already do).
+ * - `master`: Master form footer layout (`mfzFooter`, optional `mfzFooterMeta`, `mfzFooterActions`).
+ *   Styles live in `CommonModal.css` (loaded by `CommonModal.jsx` and by non-modal pickers that import it).
  * - `appActions`: Right-aligned flex row for `AppButton` groups (catalog / order flows).
  * - `sfm`: Native structured-form footer row (`sfmModalFooter`); pair with `sfmBtnGhost` / `sfmBtnPrimary`.
  */

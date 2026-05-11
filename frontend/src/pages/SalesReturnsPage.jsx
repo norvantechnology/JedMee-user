@@ -275,8 +275,8 @@ export default function SalesReturnsPage() {
         open={open}
         title={modalLoading ? "Opening return…" : isRetailer ? "Create Counter Return" : "Create Sales Return"}
         icon={<IconSalesReturn />}
-        loading={modalLoading}
-        loadingText="Loading invoice lines…"
+        loading={modalLoading || busy}
+        loadingText={busy ? "Creating return…" : "Loading invoice lines…"}
         onClose={() => {
           returnPrefillGenRef.current += 1;
           setModalLoading(false);
@@ -324,7 +324,7 @@ export default function SalesReturnsPage() {
           <div className="sfmSection">
             <div className="sfmGrid srmHeadGrid">
               <div className="raField">
-                <label>Customer <span className="reqMark" aria-hidden="true">*</span></label>
+                <label>Customer</label>
                 <MasterSelectWithCreate
                   kind="customer"
                   value={form.customerId}
@@ -341,7 +341,7 @@ export default function SalesReturnsPage() {
                   Linked Invoice{" "}
                   {isRetailer
                     ? <span className="raSubMuted" style={{ color: "var(--color-text-3)", fontWeight: 600 }}>(optional)</span>
-                    : <span className="reqMark" aria-hidden="true">*</span>}
+                    : null}
                 </label>
                 <select
                   className={`raInput${submitted && !isRetailer && !form.salesInvoiceId ? " srmSelectErr" : ""}`}
@@ -383,7 +383,7 @@ export default function SalesReturnsPage() {
               </div>
 
               <div className="raField">
-                <label>Return Date <span className="reqMark" aria-hidden="true">*</span></label>
+                <label>Return Date</label>
                 <CommonDatePicker value={form.returnDate} onChange={(v) => setForm((p) => ({ ...p, returnDate: v }))} ariaLabel="Return date" />
               </div>
 
@@ -432,7 +432,7 @@ export default function SalesReturnsPage() {
                     {isManualLine ? (
                       <button
                         type="button"
-                        className="sfmBtnGhost"
+                        className="mfzBtn appBtn appBtn_secondary appBtn_sm"
                         style={{ marginLeft: 8, padding: "2px 8px", fontSize: 11 }}
                         disabled={busy}
                         onClick={() => setForm((p) => {
@@ -470,7 +470,7 @@ export default function SalesReturnsPage() {
                   {isManualLine ? (
                     <div className="sfmGrid srmItemGrid" style={{ marginTop: 8 }}>
                       <div className={`raField sfmFull${submitted && !it.productId ? " srmFieldErr" : ""}`}>
-                        <label>Product <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Product</label>
                         <MasterSelectWithCreate
                           kind="product"
                           value={it.productId || ""}
@@ -514,7 +514,7 @@ export default function SalesReturnsPage() {
                       </div>
 
                       <div className={`raField${submitted && !it.batchId ? " srmFieldErr" : ""}`}>
-                        <label>Batch <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Batch</label>
                         <CommonSelectField
                           value={it.batchId || ""}
                           placeholder="Pick batch"
@@ -542,7 +542,7 @@ export default function SalesReturnsPage() {
                       </div>
 
                       <div className={`raField${submitted && !(Number(it.returnQty || 0) > 0) ? " srmFieldErr" : ""}`}>
-                        <label>Return Qty <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Return Qty</label>
                         <input
                           className={`raInput${submitted && !(Number(it.returnQty || 0) > 0) ? " srmInputErr" : ""}`}
                           type="text"
@@ -586,7 +586,7 @@ export default function SalesReturnsPage() {
                       )}
                       <div className="raField"><label>Max Returnable</label><input className="raInput" readOnly value={it.maxReturnableQty || 0} /></div>
                       <div className="raField">
-                        <label>Return Qty <span className="reqMark" aria-hidden="true">*</span></label>
+                        <label>Return Qty</label>
                         <input
                           className="raInput"
                           type="text"
@@ -613,7 +613,7 @@ export default function SalesReturnsPage() {
               <div className="srmAddLineWrap">
                 <button
                   type="button"
-                  className="sfmBtnGhost"
+                  className="mfzBtn appBtn appBtn_secondary appBtn_md"
                   disabled={busy}
                   onClick={() => setForm((p) => ({ ...p, items: [...(p.items || []), { ...emptyReturnItem(), manual: true }] }))}
                 >

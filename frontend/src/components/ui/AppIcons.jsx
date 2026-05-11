@@ -215,7 +215,7 @@ export function IconChevronsDown(p) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CUSTOMER MASTER MODAL
-// components/CustomerMasterModal.jsx
+// components/CommonModal.jsx (customer form)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -237,7 +237,7 @@ export function IconCustomerMark(p) {
 
 /**
  * IconChevronMini  small chevron for inline show/hide toggles.
- * Used in: CustomerMasterModal.jsx (Retailer compliance toggle).
+ * Used in: CommonModal.jsx customer form (retailer compliance toggle).
  */
 export function IconChevronMini(p) {
   return (

@@ -49,9 +49,8 @@ import { NAV_LABELS } from "../constants/navLabels.js";
 import { salesInvoiceDefaultsStorageKey } from "../constants/brand.js";
 import { printSalesInvoiceBulkDoc, printSalesInvoiceDoc } from "../print/salesInvoicePrint.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
-import { focusAdjacentModalField, isCmPanelTopStackLayer, SALES_MODAL_FOCUS_BUTTON_ATTR } from "../utils/modalFocusNav.js";
+import { isCmPanelTopStackLayer } from "../utils/modalFocusNav.js";
 import { openFocusedDropdown } from "../utils/dropdownKeyboard.js";
-import KeyboardShortcutsModal, { KeyboardShortcutsTrigger } from "../components/KeyboardShortcutsModal.jsx";
 import "../components/StructuredForm.css";
 import "./PurchaseInvoicesPage.css";
 import "./SalesBillingPage.css";
@@ -79,8 +78,9 @@ import {
 
 /** Keyboard help for the sales invoice editor (opens from modal header). */
 const SALES_BILLING_EDITOR_SHORTCUTS = [
-  { description: "Next field", keys: "Enter" },
-  { description: "Previous field", keys: "Shift+Enter" },
+  { description: "Next field (required first when marked)", keys: "Enter" },
+  { description: "Primary submit / save", keys: "Shift+Enter" },
+  { description: "Previous field", keys: "Shift+Tab" },
   { description: "Open focused dropdown", keys: "↓" },
   { description: "Change dropdown option", keys: "↑ / ↓" },
   { description: "Focus customer", keys: "Alt+K" },
@@ -591,7 +591,6 @@ export default function SalesBillingPage() {
   const [dateTo, setDateTo] = useState("");
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [shortcutsHelpOpen, setShortcutsHelpOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [loadingEditId, setLoadingEditId] = useState(null);
   const salesInvoiceLoadGenRef = useRef(0);
@@ -1018,7 +1017,6 @@ export default function SalesBillingPage() {
     salesInvoiceLoadGenRef.current += 1;
     setModalLoading(false);
     setLoadingEditId(null);
-    setShortcutsHelpOpen(false);
     setSubmitted(false);
     setOpen(false);
   }
@@ -1215,40 +1213,12 @@ export default function SalesBillingPage() {
   });
   salesKbdRef.current = { canSaveDraft, canCreateAndConfirm, canSaveAndConfirm, isDraftModalEdit, busy, isRetailer };
 
-  // ─── Keyboard shortcuts (Alt+key) + Enter navigation ──────────────────────
+  // ─── Editor keyboard shortcuts + Enter navigation ─────────────────────────
   useEffect(() => {
     if (!open) return;
 
     function onKeyDown(e) {
       if (!isCmPanelTopStackLayer(modalBodyRef.current)) return;
-      // Enter behavior in modal:
-      // - Enter => next field
-      // - Shift+Enter => previous field
-      // - Never submit/confirm on plain Enter
-      if (e.key === "Enter" && !e.altKey && !e.ctrlKey && !e.metaKey) {
-        const tag = document.activeElement?.tagName;
-        if (tag === "TEXTAREA") return;
-        if ((tag === "INPUT" || tag === "SELECT") && e.shiftKey) {
-          e.preventDefault();
-          e.stopPropagation();
-          focusAdjacentModalField(modalBodyRef.current, document.activeElement, -1, {
-            buttonDataAttr: SALES_MODAL_FOCUS_BUTTON_ATTR
-          });
-          return;
-        }
-        if ((tag === "INPUT" || tag === "SELECT") && !e.shiftKey) {
-          e.preventDefault();
-          e.stopPropagation();
-          focusAdjacentModalField(modalBodyRef.current, document.activeElement, 1, {
-            buttonDataAttr: SALES_MODAL_FOCUS_BUTTON_ATTR
-          });
-          return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-
       // ↓ opens native select list (no Alt). ⌥/Alt+↓ still works the same.
       if (!e.ctrlKey && !e.shiftKey && e.key === "ArrowDown") {
         const el = document.activeElement;
@@ -1732,9 +1702,9 @@ export default function SalesBillingPage() {
         }
         subtitle={modalLoading && loadingEditId ? "Fetching lines and batch info" : ""}
         icon={<IconReceipt />}
-        loading={modalLoading}
-        loadingText="Loading invoice and line items…"
-        headerTools={<KeyboardShortcutsTrigger onClick={() => setShortcutsHelpOpen(true)} />}
+        loading={modalLoading || busy}
+        loadingText={busy ? "Saving invoice…" : "Loading invoice and line items…"}
+        shortcutsItems={SALES_BILLING_EDITOR_SHORTCUTS}
         onClose={closeSalesEditor}
         size={1100}
         footer={
@@ -1819,7 +1789,7 @@ export default function SalesBillingPage() {
               {/* Row 1: Customer + Dates */}
               <div className="piHeaderTop">
                 <div className="raField piHeadField" data-sbm-focus="customer">
-                  <label>Customer <span className="reqMark" aria-hidden="true">*</span></label>
+                  <label>Customer </label>
                   <MasterSelectWithCreate
                     kind="customer"
                     value={form.customerId || ""}
@@ -1844,7 +1814,7 @@ export default function SalesBillingPage() {
                   {submitted && !form.customerId && <div className="mfzErr">Customer is required.</div>}
                 </div>
                 <div className="raField piHeadField">
-                  <label>Invoice Date <span className="reqMark" aria-hidden="true">*</span></label>
+                  <label>Invoice Date </label>
                   <CommonDatePicker value={form.invoiceDate} onChange={(v) => setForm((p) => ({ ...p, invoiceDate: v }))} ariaLabel="Invoice date" />
                 </div>
                 <div className="raField piHeadField">
@@ -2262,9 +2232,9 @@ export default function SalesBillingPage() {
                 <div key={`rx-${it.lineKey || idx}`} className="sbmControlBlock">
                   <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 12 }}>Line {idx + 1} controlled medicine details</div>
                   <div className="sfmGrid">
-                    <div className="raField"><label>Prescription No <span className="reqMark" aria-hidden="true">*</span></label><input className="raInput" value={it.prescriptionNo || ""} onChange={(e) => setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, prescriptionNo: e.target.value } : x)) }))} /></div>
-                    <div className="raField"><label>Doctor Name <span className="reqMark" aria-hidden="true">*</span></label><input className="raInput" value={it.doctorName || ""} onChange={(e) => setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, doctorName: e.target.value } : x)) }))} /></div>
-                    <div className="raField"><label>Patient Name <span className="reqMark" aria-hidden="true">*</span></label><input className="raInput" value={it.patientName || ""} onChange={(e) => setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, patientName: e.target.value } : x)) }))} /></div>
+                    <div className="raField"><label>Prescription No </label><input className="raInput" value={it.prescriptionNo || ""} onChange={(e) => setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, prescriptionNo: e.target.value } : x)) }))} /></div>
+                    <div className="raField"><label>Doctor Name </label><input className="raInput" value={it.doctorName || ""} onChange={(e) => setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, doctorName: e.target.value } : x)) }))} /></div>
+                    <div className="raField"><label>Patient Name </label><input className="raInput" value={it.patientName || ""} onChange={(e) => setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, patientName: e.target.value } : x)) }))} /></div>
                   </div>
                 </div>
               ) : null
@@ -2343,19 +2313,14 @@ export default function SalesBillingPage() {
         </div>
       </CommonModal>
 
-      <KeyboardShortcutsModal
-        open={shortcutsHelpOpen && open}
-        onClose={() => setShortcutsHelpOpen(false)}
-        title="Keyboard shortcuts"
-        items={SALES_BILLING_EDITOR_SHORTCUTS}
-      />
-
       {/* ─── Record Payment Modal ─────────────────────────────────────────── */}
       <CommonModal
         open={paymentOpen}
         title="Record Customer Payment"
         icon={<IconReceipt />}
         onClose={() => setPaymentOpen(false)}
+        loading={busy}
+        loadingText="Saving payment…"
         footer={
           <div className="sfmModalFooter">
             <button className="sfmBtnGhost" type="button" onClick={() => setPaymentOpen(false)} disabled={busy}>Cancel</button>
@@ -2396,8 +2361,8 @@ export default function SalesBillingPage() {
               </div>
             </div>
           ) : null}
-          <div className="raField"><label>Date <span className="reqMark" aria-hidden="true">*</span></label><CommonDatePicker value={paymentForm.paymentDate} onChange={(v) => setPaymentForm((p) => ({ ...p, paymentDate: v }))} ariaLabel="Payment date" /></div>
-          <div className="raField"><label>Cash received now <span className="reqMark" aria-hidden="true">*</span></label><AmountInput className="raInput" value={String(paymentForm.amount ?? "")} disabled={Boolean(paymentForm.salesInvoiceId) && Boolean(paymentForm.useAdvanceFirst)} onChange={(raw) => setPaymentForm((p) => ({ ...p, amount: raw }))} inputMode="decimal" /></div>
+          <div className="raField"><label>Date </label><CommonDatePicker value={paymentForm.paymentDate} onChange={(v) => setPaymentForm((p) => ({ ...p, paymentDate: v }))} ariaLabel="Payment date" /></div>
+          <div className="raField"><label>Cash received now </label><AmountInput className="raInput" value={String(paymentForm.amount ?? "")} disabled={Boolean(paymentForm.salesInvoiceId) && Boolean(paymentForm.useAdvanceFirst)} onChange={(raw) => setPaymentForm((p) => ({ ...p, amount: raw }))} inputMode="decimal" /></div>
           <div className="raField"><label>Mode</label><select className="raInput" value={paymentForm.paymentMode} onChange={(e) => setPaymentForm((p) => ({ ...p, paymentMode: e.target.value }))}><option>CASH</option><option>CHEQUE</option><option>NEFT</option><option>UPI</option><option>CARD</option><option>OTHER</option></select></div>
           <div className="raField"><label>Reference</label><input className="raInput" value={paymentForm.referenceNumber} onChange={(e) => setPaymentForm((p) => ({ ...p, referenceNumber: e.target.value }))} /></div>
           {paymentForm.salesInvoiceId ? (
@@ -2517,6 +2482,8 @@ export default function SalesBillingPage() {
         icon={<IconReceipt />}
         onClose={() => (bulkPaymentBusy ? null : setBulkPaymentConfirm({ open: false, ids: [], count: 0, total: 0, paymentDate: "", paymentMode: "" }))}
         size="md"
+        loading={bulkPaymentBusy}
+        loadingText="Completing payments…"
         footer={
           <div className="sfmModalFooter">
             <button
@@ -2538,7 +2505,7 @@ export default function SalesBillingPage() {
             <strong>{bulkPaymentConfirm.count || 0}</strong> invoice(s) selected | Total collection: <strong>{fmtCurrency(bulkPaymentConfirm.total || 0)}</strong>
           </div>
           <div className="raField">
-            <label>Payment Date <span className="reqMark" aria-hidden="true">*</span></label>
+            <label>Payment Date </label>
             <CommonDatePicker
               value={bulkPaymentConfirm.paymentDate || todayYmdLocal()}
               onChange={(v) => setBulkPaymentConfirm((p) => ({ ...p, paymentDate: v }))}
@@ -2546,7 +2513,7 @@ export default function SalesBillingPage() {
             />
           </div>
           <div className="raField">
-            <label>Payment Mode <span className="reqMark" aria-hidden="true">*</span></label>
+            <label>Payment Mode </label>
             <select
               className="raInput"
               value={bulkPaymentConfirm.paymentMode || "CASH"}

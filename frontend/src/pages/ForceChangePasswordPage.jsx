@@ -63,7 +63,7 @@ export default function ForceChangePasswordPage() {
             }}
           >
             <div className="fcpField">
-              <label>Current password <span className="reqMark" aria-hidden="true">*</span></label>
+              <label>Current password </label>
               <div className="fcpInputWrap">
                 <IconAuthLock className="fcpIco" />
                 <input name="currentPassword" type="password" autoComplete="current-password" placeholder="Enter current password" />
@@ -71,7 +71,7 @@ export default function ForceChangePasswordPage() {
             </div>
 
             <div className="fcpField">
-              <label>New password <span className="reqMark" aria-hidden="true">*</span></label>
+              <label>New password </label>
               <div className="fcpInputWrap">
                 <IconAuthLock className="fcpIco" />
                 <input name="newPassword" type="password" autoComplete="new-password" placeholder="Create a new password" />
@@ -79,7 +79,7 @@ export default function ForceChangePasswordPage() {
             </div>
 
             <div className="fcpField">
-              <label>Confirm new password <span className="reqMark" aria-hidden="true">*</span></label>
+              <label>Confirm new password </label>
               <div className="fcpInputWrap">
                 <IconAuthLock className="fcpIco" />
                 <input name="confirmPassword" type="password" autoComplete="new-password" placeholder="Re-enter new password" />

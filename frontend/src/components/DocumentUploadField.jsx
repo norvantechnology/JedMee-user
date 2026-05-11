@@ -267,6 +267,7 @@ export default function DocumentUploadField({ label, docType, url, onUrlChange, 
         subtitle={url ? fileName : ""}
         ariaLabel={`${label} preview`}
         size="lg"
+        drawer={false}
       >
         <div className="dufPreviewWrap">
           {previewImgSrc ? (

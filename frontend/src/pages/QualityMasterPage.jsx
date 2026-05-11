@@ -63,6 +63,8 @@ export default function QualityMasterPage() {
   const [rows, setRows] = useState([]);
   const [divisions, setDivisions] = useState([]);
   const [mfgCompanies, setMfgCompanies] = useState([]);
+  const [divisionsLoading, setDivisionsLoading] = useState(false);
+  const [mfgLoading, setMfgLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState({ by: "name", dir: "asc" });
   const [batchPresenceFilter, setBatchPresenceFilter] = useState(""); // "" | "with" | "without"
@@ -135,11 +137,13 @@ export default function QualityMasterPage() {
   useEffect(() => {
     let alive = true;
     (async () => {
+      setDivisionsLoading(true);
       const resp = await listDivisions({ sortBy: "name", sortDir: "asc", isActive: true });
       if (!alive) return;
       if (resp.status >= 200 && resp.status < 300 && resp.json?.ok) {
         setDivisions(resp.json?.data?.divisions || []);
       }
+      if (alive) setDivisionsLoading(false);
     })();
     return () => {
       alive = false;
@@ -149,11 +153,13 @@ export default function QualityMasterPage() {
   useEffect(() => {
     let alive = true;
     (async () => {
+      setMfgLoading(true);
       const resp = await listMfgCompanies({ limit: 500, offset: 0 });
       if (!alive) return;
       if (resp.status >= 200 && resp.status < 300 && resp.json?.ok) {
         setMfgCompanies(resp.json?.data?.companies || []);
       }
+      if (alive) setMfgLoading(false);
     })();
     return () => {
       alive = false;
@@ -1004,6 +1010,7 @@ export default function QualityMasterPage() {
         loadingText="Loading batches..."
         onClose={() => !busy && setBatchDrawer(null)}
         size={980}
+        drawer={true}
         footer={
           <div className="qmBatchDrawerFooter">
             {canDelete && batchRows.length > 0 ? (
@@ -1259,6 +1266,7 @@ export default function QualityMasterPage() {
         open={productMasterOpen}
         mode={productMasterMode}
         busy={busy}
+        loading={Boolean(divisionsLoading || mfgLoading)}
         initialValue={editingProduct}
         mfgCompanyOptions={mfgCompanies}
         divisionOptions={divisions}

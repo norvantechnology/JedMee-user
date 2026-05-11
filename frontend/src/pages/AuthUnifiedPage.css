@@ -667,8 +667,6 @@ section.auScreen,
   text-transform: uppercase;
 }
 
-.reqMark { color: var(--color-primary); font-weight: 800; }
-
 .auInputWrap { position: relative; }
 
 .auFieldIcon {
@@ -712,7 +710,7 @@ section.auScreen,
   width: 100%;
   padding: 10px 14px;
   background: var(--color-surface);
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--control-border-default);
   border-radius: 10px;
   font-family: var(--font);
   font-size: 13.5px;
@@ -733,8 +731,8 @@ section.auScreen,
   border-color: var(--color-primary);
   background: var(--color-card);
   box-shadow:
-    0 0 0 3px rgba(107, 63, 160, 0.12),
-    0 2px 8px rgba(107,63,160,0.06);
+    var(--field-focus-ring),
+    var(--field-focus-shadow-layer);
 }
 
 .auInput::placeholder,

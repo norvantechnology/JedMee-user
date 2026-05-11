@@ -1,17 +1,8 @@
-.qmWrap {
-  padding: 18px 6px 24px;
-  font-family: var(--font);
-}
-
-.qmCard {
-  width: 100%;
-  max-width: none;
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: 18px;
-  padding: 18px 20px;
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text) 6%, transparent);
-}
+/* QualityMasterPage.css
+   Page-specific styles only.
+   .qmWrap and .qmCard removed — use .pageWrap and .pageCard from layouts/AppShell.css.
+   Shared button/input styles come from styles/common.css and components/StructuredForm.css.
+*/
 
 .qmTopRow {
   display: flex;

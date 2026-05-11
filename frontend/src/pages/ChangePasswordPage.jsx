@@ -56,15 +56,15 @@ export default function ChangePasswordPage() {
             }}
           >
             <div className="cpField">
-              <label>Current password <span className="reqMark" aria-hidden="true">*</span></label>
+              <label>Current password </label>
               <input name="currentPassword" type="password" autoComplete="current-password" />
             </div>
             <div className="cpField">
-              <label>New password <span className="reqMark" aria-hidden="true">*</span></label>
+              <label>New password </label>
               <input name="newPassword" type="password" autoComplete="new-password" />
             </div>
             <div className="cpField">
-              <label>Confirm new password <span className="reqMark" aria-hidden="true">*</span></label>
+              <label>Confirm new password </label>
               <input name="confirmPassword" type="password" autoComplete="new-password" />
             </div>
 

@@ -41,6 +41,7 @@ export default function DivisionsPage() {
   const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [mfgCompanies, setMfgCompanies] = useState([]);
+  const [mfgCompaniesLoading, setMfgCompaniesLoading] = useState(false);
   const [confirm, setConfirm] = useState({ open: false, id: "", name: "" });
 
   useEffect(() => {
@@ -71,18 +72,28 @@ export default function DivisionsPage() {
   }, [canView, authTick, sort.by, sort.dir]);
 
   async function refreshMfgCompanies() {
-    const m = await listMfgCompanies({ limit: 500, offset: 0 });
-    if (m.status >= 200 && m.status < 300 && m.json?.ok) {
-      setMfgCompanies(m.json?.data?.companies || []);
+    setMfgCompaniesLoading(true);
+    try {
+      const m = await listMfgCompanies({ limit: 500, offset: 0 });
+      if (m.status >= 200 && m.status < 300 && m.json?.ok) {
+        setMfgCompanies(m.json?.data?.companies || []);
+      }
+    } finally {
+      setMfgCompaniesLoading(false);
     }
   }
 
   useEffect(() => {
     let alive = true;
     (async () => {
-      const m = await listMfgCompanies({ limit: 500, offset: 0 });
-      if (!alive) return;
-      if (m.status >= 200 && m.status < 300 && m.json?.ok) setMfgCompanies(m.json?.data?.companies || []);
+      setMfgCompaniesLoading(true);
+      try {
+        const m = await listMfgCompanies({ limit: 500, offset: 0 });
+        if (!alive) return;
+        if (m.status >= 200 && m.status < 300 && m.json?.ok) setMfgCompanies(m.json?.data?.companies || []);
+      } finally {
+        if (alive) setMfgCompaniesLoading(false);
+      }
     })();
     return () => {
       alive = false;
@@ -351,6 +362,7 @@ export default function DivisionsPage() {
         mode="add"
         busy={busy}
         mfgCompanyOptions={mfgCompanies}
+        loading={mfgCompaniesLoading}
         onRefreshMfgCompanies={refreshMfgCompanies}
         onClose={() => !busy && setCreateOpen(false)}
         onSubmit={async (payload) => {
@@ -371,6 +383,7 @@ export default function DivisionsPage() {
         busy={busy}
         initialValue={editing}
         mfgCompanyOptions={mfgCompanies}
+        loading={mfgCompaniesLoading}
         onRefreshMfgCompanies={refreshMfgCompanies}
         onClose={() => !busy && setEditOpen(false)}
         onSubmit={async (payload) => {

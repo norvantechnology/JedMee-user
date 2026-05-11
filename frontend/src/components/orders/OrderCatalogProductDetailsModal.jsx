@@ -4,7 +4,6 @@ import CommonModal from "../CommonModal.jsx";
 import ModalFooterShell from "../ui/ModalFooterShell.jsx";
 import { IconChevronsDown, IconChevronsUp, IconPill, IconStore } from "../ui/AppIcons.jsx";
 import { useLocale } from "../../context/LocaleContext.jsx";
-import "./OrderCatalogProductDetailsModal.css";
 
 export default function OrderCatalogProductDetailsModal({ open, onClose, row }) {
   const { taxLabel, taxIdLabel } = useLocale();

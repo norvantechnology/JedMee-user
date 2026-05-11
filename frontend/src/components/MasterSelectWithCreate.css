@@ -7,14 +7,21 @@
   align-items: center;
 }
 
-.mswSelect {
+/* First column is the select control (no extra wrapper div) */
+.msw > .csf {
   min-width: 0;
 }
 
 .mswAdd {
-  width: 42px;
-  min-height: 40px;
+  width: var(--mcm-ctrl-h, 42px);
+  min-height: var(--mcm-ctrl-h, 42px);
   flex: 0 0 auto;
+}
+
+/* `.msw_mfz` (select has `mfzInput` inside CommonModal): border/hover/focus/error chrome lives in
+   CommonModal.css under `.mcmBody .mfzField > .msw > .csf` — avoid duplicating tokens here. */
+.msw_mfz {
+  align-items: center;
 }
 
 /* Kind-specific emphasis */
@@ -27,21 +34,11 @@
   .msw {
     gap: 7px;
   }
-
-  .mswAdd {
-    width: 42px;
-    min-height: 42px;
-  }
 }
 
 @media (max-width: 480px) {
   .msw {
     gap: 6px;
-  }
-
-  .mswAdd {
-    width: 40px;
-    min-height: 40px;
   }
 }
 

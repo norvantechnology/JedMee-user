@@ -1,16 +1,16 @@
 .csf {
   --csf-surface: color-mix(in srgb, var(--color-surface) 92%, var(--color-primary) 2%);
   --csf-card: color-mix(in srgb, var(--color-card) 92%, var(--csf-surface) 8%);
-  --csf-border: color-mix(in srgb, var(--color-border) 86%, transparent);
+  --csf-border: var(--modal-field-border, var(--control-border-default));
 
   position: relative;
   width: 100%;
-  min-height: 40px;
+  min-height: 36px;
   display: flex;
   align-items: center;
 
   border-radius: 12px;
-  border: 1px solid var(--csf-border);
+  border: var(--control-border-width, 2px) solid var(--csf-border);
   background: linear-gradient(
     180deg,
     var(--csf-card),
@@ -18,7 +18,7 @@
   );
   box-shadow:
     0 1px 0 color-mix(in srgb, var(--color-card) 60%, transparent) inset,
-    0 12px 22px -14px color-mix(in srgb, var(--color-text) 16%, transparent);
+    0 10px 20px -14px color-mix(in srgb, var(--color-text) 7%, transparent);
 
   transition: border-color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease, background 0.16s ease;
 }
@@ -29,7 +29,7 @@
   -moz-appearance: none;
 
   width: 100%;
-  height: 40px;
+  height: 36px;
   padding: 0 38px 0 12px;
   border: none;
   border-radius: 12px;
@@ -47,16 +47,19 @@
   border-color: color-mix(in srgb, var(--color-primary) 40%, var(--csf-border));
   transform: translateY(-1px);
   box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent),
-    0 18px 30px -18px color-mix(in srgb, var(--color-text) 16%, transparent);
+    0 1px 0 color-mix(in srgb, var(--color-card) 60%, transparent) inset,
+    0 0 0 2.5px color-mix(in srgb, var(--color-primary) 8%, transparent),
+    0 14px 26px -16px color-mix(in srgb, var(--color-text) 7%, transparent);
 }
 
 .csf:focus-within {
   border-color: var(--color-primary);
   transform: translateY(-1px);
   box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent),
-    0 18px 30px -18px color-mix(in srgb, var(--color-text) 16%, transparent);
+    0 1px 0 color-mix(in srgb, var(--color-card) 60%, transparent) inset,
+    var(--field-focus-ring),
+    0 14px 24px -16px color-mix(in srgb, var(--color-text) 6%, transparent),
+    var(--field-focus-shadow-layer);
 }
 
 .csfChevron {

@@ -1,18 +1,13 @@
-.uupWrap {
-  padding: 18px 6px 24px;
-  font-family: var(--font);
-}
+/* UsersPage.css
+   Page-specific styles only.
+   Shared styles come from:
+   - styles/common.css        (.cmBtn, .cmInput, .raInput, .raField, etc.)
+   - layouts/AppShell.css     (.pageWrap, .pageCard, .raTop, .raTitle, .raSub)
+   - components/StructuredForm.css (.sfmBtnPrimary, .sfmBtnGhost, .sfmModalFooter, etc.)
+   - components/CommonTable.css (.tbl*)
+*/
 
-.uupCard {
-  width: 100%;
-  max-width: none;
-  border: 1px solid var(--color-border);
-  border-radius: 18px;
-  background: var(--color-card);
-  padding: 18px 20px;
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text) 6%, transparent);
-}
-
+/* ── Page heading (no-permission view) ── */
 .uupTitle {
   font-size: clamp(16px, 1.8vw, 18px);
   font-weight: 700;
@@ -25,158 +20,68 @@
   color: var(--color-text-3);
 }
 
-.uupActionsRow {
-  margin-top: 14px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.uupInput,
-.uupSelect {
-  height: 40px;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  padding: 0 12px;
-  font-family: var(--font);
-  font-size: 13.5px;
-  outline: none;
+/* ── Compact role select inside table cell ── */
+.uupMiniSelect {
+  height: 34px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--color-border);
   background: var(--color-card);
-  min-width: 0;
+  padding: 0 28px 0 10px;
+  font-family: var(--font);
+  font-size: 13px;
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24' stroke='%234b5563' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  cursor: pointer;
+  transition: border-color 0.16s ease;
+  color: var(--color-text);
 }
 
-.uupInput:focus,
-.uupSelect:focus {
+.uupMiniSelect:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
-.uupBtn {
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid var(--color-primary);
-  background: var(--color-primary);
-  color: var(--color-card);
-  font-family: var(--font);
-  font-size: 13.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.14s, border-color 0.14s;
-}
-
-.uupBtn:hover {
-  background: var(--color-secondary);
-  border-color: var(--color-secondary);
-}
-
-.uupBtn:disabled {
+.uupMiniSelect:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-.uupMiniSelect {
-  height: 34px;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  background: var(--color-card);
-  padding: 0 10px;
-  font-family: var(--font);
-  font-size: 13px;
-  outline: none;
-}
-
-.uupDanger {
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--color-danger) 28%, transparent);
-  background: color-mix(in srgb, var(--color-danger) 8%, transparent);
-  color: var(--color-danger);
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.uupDanger:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.uupBtnSmall {
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  background: var(--color-card);
-  color: var(--color-text-2);
-  font-family: var(--font);
-  font-size: 13px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.uupBtnSmall:hover {
-  border-color: var(--color-border-focus);
-  background: var(--color-primary-light);
-  color: var(--color-primary);
-}
-
-.uupBtnSmall:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-@media (max-width: 860px) {
-  .uupActionsRow {
-    justify-content: stretch;
-  }
-  .uupActionsRow .uupBtn {
-    width: 100%;
-  }
-}
-
-/* CommonTable spacing is handled via `compact` mode. */
-
-/* Modal form */
+/* ── Modal form grid ── */
 .uupModalGrid {
   display: grid;
   gap: 12px;
 }
 
+/* ── Modal field label (used in AccountUserModal) ── */
 .uupField label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--color-text-2);
-}
-
-.uupModalFooter {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.uupBtnGhost {
-  height: 40px;
-  padding: 0 14px;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  background: var(--color-card);
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--color-text-2);
-  font-family: var(--font);
-  font-size: 13.5px;
-  font-weight: 700;
-  cursor: pointer;
+  line-height: 1.2;
 }
 
-.uupBtnGhost:hover {
-  background: var(--color-surface);
+.uupField label::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-primary) 70%, transparent);
+  flex-shrink: 0;
 }
 
-.uupBtnGhost:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
+@media (max-width: 720px) {
+  .uupMiniSelect {
+    height: 40px;
+    font-size: 16px;
+  }
 }
-

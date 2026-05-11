@@ -1039,37 +1039,7 @@
   gap: 12px;
 }
 
-/* Shared input/textarea used inside modals */
-.mfzInput {
-  padding: 8px 10px;
-  border: 1.5px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-card);
-  color: var(--color-text);
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.15s;
-  width: 100%;
-  box-sizing: border-box;
-  font-family: inherit;
-}
-.mfzInput:focus { border-color: var(--color-primary); }
-.mfzTextarea {
-  padding: 8px 10px;
-  border: 1.5px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-card);
-  color: var(--color-text);
-  font-size: 13px;
-  outline: none;
-  resize: vertical;
-  min-height: 72px;
-  transition: border-color 0.15s;
-  width: 100%;
-  box-sizing: border-box;
-  font-family: inherit;
-}
-.mfzTextarea:focus { border-color: var(--color-primary); }
+/* Inputs in CommonModal: CommonModal.css only (bare .mfzInput here would override all modals by cascade). */
 
 /* ══════════════════════════════════════════════════════════════
    REDESIGNED DETAIL MODAL — section-based layout

@@ -30,7 +30,7 @@
   font-weight: 700;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   background: color-mix(in srgb, var(--ciw-card) 72%, var(--ciw-surface) 28%);
   border: 1px solid var(--ciw-border);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--color-card) 65%, transparent);
@@ -45,7 +45,7 @@
 }
 
 .ciwStepPill_done {
-  color: var(--color-success, #15803d);
+  color: var(--color-success);
   background: color-mix(in srgb, var(--color-success) 10%, var(--ciw-card));
   border-color: color-mix(in srgb, var(--color-success) 26%, transparent);
 }
@@ -87,13 +87,13 @@
 .ciwLead {
   font-size: clamp(14.5px, 0.92rem + 0.38vw, 16.5px);
   line-height: 1.5;
-  color: var(--color-text-2, #374151);
+  color: var(--color-text-2);
   margin: 0 0 4px;
 }
 
 .ciwHint {
   font-size: clamp(13px, 0.82rem + 0.32vw, 14.5px);
-  color: var(--color-text-3, #6b7280);
+  color: var(--color-text-3);
   margin: 0 0 12px;
   line-height: 1.45;
 }
@@ -201,7 +201,7 @@
 
 .ciwMapTable th,
 .ciwMapTable td {
-  border-bottom: 1px solid var(--color-border, #e5e5e5);
+  border-bottom: 1px solid var(--color-border);
   padding: 10px 8px;
   text-align: left;
   vertical-align: middle;
@@ -256,7 +256,7 @@
 }
 
 .ciwErr {
-  color: var(--color-danger, #b00020);
+  color: var(--color-danger);
   font-size: clamp(12.5px, 0.8rem + 0.3vw, 14px);
 }
 

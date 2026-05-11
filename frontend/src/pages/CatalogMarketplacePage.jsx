@@ -358,7 +358,7 @@ export default function CatalogMarketplacePage() {
           </>
         )}
         {/* ── Add Product Modal (2-step wizard) ── */}
-        <CommonModal open={openAdd} onClose={() => { setOpenAdd(false); resetAddForm(); }} title="Add Product to Catalog" size="md">
+        <CommonModal open={openAdd} onClose={() => { setOpenAdd(false); resetAddForm(); }} title="Add Product to Catalog" size="md" loading={addBusy} loadingText="Adding to catalog…">
           <div className="mcWizBody">
             {/* Step indicator */}
             <div className="mcStepsWrap">
@@ -461,7 +461,7 @@ export default function CatalogMarketplacePage() {
         </CommonModal>
 
         {/* ── Edit Product Modal ── */}
-        <CommonModal open={openEdit} onClose={() => { setOpenEdit(false); setEditingCatalogId(""); setEditingRow(null); }} title="Edit Catalog Product" size="md">
+        <CommonModal open={openEdit} onClose={() => { setOpenEdit(false); setEditingCatalogId(""); setEditingRow(null); }} title="Edit Catalog Product" size="md" loading={editBusy} loadingText="Saving changes…">
           <div className="mcWizBody">
             {editingRow && (
               <div className="mcSelCard">
@@ -510,7 +510,7 @@ export default function CatalogMarketplacePage() {
         </CommonModal>
 
         {/* ── Delete confirm modal ── */}
-        <CommonModal open={openDelete} onClose={() => { setOpenDelete(false); setDeletingRow(null); }} title="Remove from Catalog" size="sm">
+        <CommonModal open={openDelete} onClose={() => { setOpenDelete(false); setDeletingRow(null); }} title="Remove from Catalog" size="sm" drawer={false} loading={deleteBusy} loadingText="Removing…">
           <div className="mcWizBody">
             <div className="mcDeleteConfirm">
               <div className="mcDeleteIcon"><Trash2 size={28} /></div>
@@ -547,7 +547,7 @@ export default function CatalogMarketplacePage() {
 
         {/* ── Retailer: Qty picker modal ── */}
         {isRetailer && qtyPick.open && qtyPick.row && (
-          <CommonModal open={qtyPick.open} onClose={() => setQtyPick({ open: false, row: null })} title="Select Quantity" size="sm">
+          <CommonModal open={qtyPick.open} onClose={() => setQtyPick({ open: false, row: null })} title="Select Quantity" size="sm" drawer={false}>
             <div style={{ padding: "16px 0 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
               <div style={{ fontWeight: 600, fontSize: 15 }}>{qtyPick.row.product_name}</div>
               <QtyStepper

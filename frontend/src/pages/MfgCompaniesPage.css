@@ -1,3 +1,7 @@
+/* MfgCompaniesPage.css
+   Page-specific layout only — shared input/button styles come from
+   styles/common.css and components/ui/AppButton.css */
+
 .mcTop {
   padding: 18px 6px 24px;
   font-family: var(--font);
@@ -21,16 +25,18 @@
 .mcTabBtn {
   width: 100%;
   text-align: left;
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   background: var(--color-card);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 10px 10px;
   cursor: pointer;
+  font-family: var(--font);
   transition: border-color 0.14s, background 0.14s;
 }
 
 .mcTabBtn:hover {
   background: var(--color-surface);
+  border-color: var(--color-border-strong);
 }
 
 .mcTabBtn_active {
@@ -47,7 +53,7 @@
 
 .mcTabLabel {
   font-size: 13px;
-  font-weight: 900;
+  font-weight: 800;
   color: var(--color-text);
 }
 
@@ -55,13 +61,13 @@
   display: block;
   margin-top: 2px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text-4);
 }
 
 .mcTabBadge {
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 800;
   padding: 2px 8px;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--color-danger) 25%, transparent);
@@ -69,24 +75,7 @@
   color: var(--color-danger);
 }
 
-.mcTextarea {
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid var(--color-border);
-  padding: 10px 12px;
-  font-family: var(--font);
-  font-size: 13.5px;
-  outline: none;
-  background: var(--color-card);
-  resize: vertical;
-  min-height: 84px;
-  box-sizing: border-box;
-}
-
-.mcTextarea:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
-}
+/* .mcTextarea removed — use .cmTextarea or .raInput (textarea) from styles/common.css */
 
 .mcChecks {
   display: grid;
@@ -103,14 +92,14 @@
   display: block;
   margin-top: 2px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text-4);
 }
 
 .mcHelp {
   margin-top: 6px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--color-text-4);
 }
 
@@ -118,11 +107,12 @@
   background: none;
   border: 0;
   padding: 0;
-  color: var(--color-primary, var(--color-primary));
+  color: var(--color-primary);
   font-weight: 700;
   font-size: 12px;
   cursor: pointer;
   text-decoration: underline;
+  font-family: var(--font);
 }
 .mcLinkBtn:hover { opacity: 0.8; }
 
@@ -145,3 +135,4 @@
   }
 }
 
+/* Mobile: no page-specific overrides needed — common.css handles raInput/cmTextarea font-size */

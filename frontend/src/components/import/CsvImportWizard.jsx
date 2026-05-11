@@ -239,7 +239,7 @@ export default function CsvImportWizard({ open, onClose, entityType, title, onCo
   };
 
   const fieldOptions = useMemo(() => {
-    const opts = (fields || []).map((f) => ({ value: f.key, label: `${f.label}${f.required ? " *" : ""}` }));
+    const opts = (fields || []).map((f) => ({ value: f.key, label: f.label }));
     return [{ value: "__skip__", label: " Skip column " }, ...opts];
   }, [fields]);
 
@@ -261,6 +261,7 @@ export default function CsvImportWizard({ open, onClose, entityType, title, onCo
       subtitle={modalSubtitle}
       size="lg"
       closeOnOverlay={!busy}
+      drawer={true}
     >
       <div className="ciwOverlay">
         <ImportStepper step={step} />

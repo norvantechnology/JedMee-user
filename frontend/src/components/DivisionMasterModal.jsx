@@ -1,10 +1,19 @@
 import { fmtMoney, fmtCurrency } from "../utils/format.js";
 import { InlineButtonProgress } from "./ui/buttons.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
-import CommonModal from "./CommonModal.jsx";
+import CommonModal, {
+  ModalFormBody,
+  ModalFormCheckGroup,
+  ModalFormField,
+  ModalFormGrid,
+  ModalFormPanel,
+  ModalFormPanelBody,
+  ModalFormPanelHead,
+  ModalFormSectionTitle,
+  ModalFormShell
+} from "./CommonModal.jsx";
 import MasterSelectWithCreate from "./MasterSelectWithCreate.jsx";
 import PhoneInput, { validatePhone } from "./PhoneInput.jsx";
-import "./MasterModalForm.css";
 import { IconDivisionMark } from "./ui/AppIcons.jsx";
 import ModalFooterShell from "./ui/ModalFooterShell.jsx";
 
@@ -34,13 +43,15 @@ export default function DivisionMasterModal({
   open,
   mode = "add",
   busy = false,
+  loading = false,
   initialValue = null,
   mfgCompanyOptions = [],
   onRefreshMfgCompanies,
   onClose,
   onSubmit,
   portal = false,
-  portalZIndex = 480
+  portalZIndex = 480,
+  drawer = true
 }) {
   const [form, setForm] = useState(emptyDivision);
   // Locally-remembered rows for manufacturers created via the inline "+" button
@@ -136,8 +147,11 @@ export default function DivisionMasterModal({
       onOverlayClose={handleOverlayClose}
       size="lg"
       icon={<IconDivisionMark />}
+      loading={loading}
+      loadingText="Loading required data…"
       portal={portal}
       portalZIndex={portalZIndex}
+      drawer={drawer}
       footer={
         <ModalFooterShell meta="">
           <button
@@ -167,20 +181,20 @@ export default function DivisionMasterModal({
         </ModalFooterShell>
       }
     >
-      <div className="mfz">
-        <div className="mfzBody">
-          <section className="mfzPanel" aria-label="Division details">
-            <div className="mfzPanelHead">
-              <div>
-                <div className="mfzHeadKicker">Division details</div>
-              </div>
-            </div>
-            <div className="mfzPanelBody">
-              <div className="mfzGrid">
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">
-                    Manufacturer <span className="reqMark" aria-hidden="true">*</span>
-                  </div>
+      <ModalFormShell>
+        <ModalFormBody>
+          <ModalFormPanel aria-label="Division details">
+            <ModalFormPanelHead>
+              <ModalFormSectionTitle kicker="Division details" />
+            </ModalFormPanelHead>
+            <ModalFormPanelBody>
+              <ModalFormGrid>
+                <ModalFormField
+                  span={12}
+                  label="Manufacturer"
+                  required
+                  error={submitted && !clean(form.mfgCompanyId) ? "Manufacturer is required." : null}
+                >
                   <MasterSelectWithCreate
                     kind="mfgCompany"
                     selectClassName={`mfzInput${submitted && !clean(form.mfgCompanyId) ? " mfzInput_err" : ""}`}
@@ -201,10 +215,7 @@ export default function DivisionMasterModal({
                     options={mfgOptions}
                     buttonTitle="Create manufacturer"
                   />
-                  {submitted && !clean(form.mfgCompanyId) && (
-                    <div className="mfzErr">Manufacturer is required.</div>
-                  )}
-                </div>
+                </ModalFormField>
 
                 {selectedMfg ? (
                   <div className="mfz12">
@@ -224,15 +235,11 @@ export default function DivisionMasterModal({
                   </div>
                 ) : null}
 
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">
-                    Code{mode === "edit" ? (
-                      <>
-                        {" "}
-                        <span className="reqMark" aria-hidden="true">*</span>
-                      </>
-                    ) : null}
-                  </div>
+                <ModalFormField
+                  span={4}
+                  label="Code"
+                  required={mode === "edit"}
+                >
                   <input
                     className="mfzInput"
                     value={form.code}
@@ -240,12 +247,14 @@ export default function DivisionMasterModal({
                     onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))}
                     placeholder={mode === "edit" ? "" : "Auto-generated if empty"}
                   />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">
-                    Name <span className="reqMark" aria-hidden="true">*</span>
-                  </div>
+                <ModalFormField
+                  span={4}
+                  label="Name"
+                  required
+                  error={submitted && clean(form.name).length < 2 ? "Name is required (min 2 characters)." : null}
+                >
                   <input
                     className={`mfzInput${submitted && clean(form.name).length < 2 ? " mfzInput_err" : ""}`}
                     value={form.name}
@@ -253,13 +262,9 @@ export default function DivisionMasterModal({
                     onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                     placeholder="Division name"
                   />
-                  {submitted && clean(form.name).length < 2 && (
-                    <div className="mfzErr">Name is required (min 2 characters).</div>
-                  )}
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">Short name</div>
+                <ModalFormField span={4} label="Short name">
                   <input
                     className="mfzInput"
                     value={form.shortName}
@@ -267,10 +272,9 @@ export default function DivisionMasterModal({
                     onChange={(e) => setForm((p) => ({ ...p, shortName: e.target.value }))}
                     placeholder="Optional label"
                   />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz4">
-                  <div className="mfzLabel">Credit days</div>
+                <ModalFormField span={4} label="Credit days">
                   <input
                     className="mfzInput"
                     type="text"
@@ -284,25 +288,21 @@ export default function DivisionMasterModal({
                       setForm((p) => ({ ...p, creditDays: val }));
                     }}
                   />
-                </div>
-              </div>
-            </div>
-          </section>
+                </ModalFormField>
+              </ModalFormGrid>
+            </ModalFormPanelBody>
+          </ModalFormPanel>
 
-          <section className="mfzPanel" aria-label="Contact">
-            <div className="mfzPanelHead">
-              <div>
-                <div className="mfzHeadKicker">Contact</div>
-              </div>
-            </div>
-            <div className="mfzPanelBody">
-              <div className="mfzGrid">
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">
-                    Phone <span className="reqMark" aria-hidden="true">*</span>
-                  </div>
+          <ModalFormPanel aria-label="Contact">
+            <ModalFormPanelHead>
+              <ModalFormSectionTitle kicker="Contact" />
+            </ModalFormPanelHead>
+            <ModalFormPanelBody>
+              <ModalFormGrid>
+                <ModalFormField span={12} label="Phone" required>
                   <PhoneInput
                     compact
+                    phonePlaceholder="7–15 digits"
                     countryCode={form.phoneCountryCode}
                     phoneNumber={form.phoneNumber}
                     onCountryCodeChange={(v) => setForm((p) => ({ ...p, phoneCountryCode: v }))}
@@ -318,24 +318,21 @@ export default function DivisionMasterModal({
                         : !clean(form.phoneNumber) || phone.numOk ? "" : "Phone must be 7 to 15 digits"
                     }
                   />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz6">
-                  <div className="mfzLabel">Email</div>
+                <ModalFormField span={6} label="Email">
                   <input className="mfzInput" value={form.email} disabled={busy} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))} />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">Address</div>
+                <ModalFormField span={12} label="Address">
                   <input className="mfzInput" value={form.address} disabled={busy} onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))} />
-                </div>
+                </ModalFormField>
 
-                <div className="mfzField mfz12">
-                  <div className="mfzLabel">Notes</div>
+                <ModalFormField span={12} label="Notes">
                   <textarea className="mfzTextarea" value={form.notes} disabled={busy} onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} />
-                </div>
+                </ModalFormField>
 
-                <div className="mfz12">
+                <ModalFormCheckGroup>
                   <label className="mfzCheck">
                     <input
                       type="checkbox"
@@ -345,12 +342,12 @@ export default function DivisionMasterModal({
                     />
                     <span>Active division</span>
                   </label>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
+                </ModalFormCheckGroup>
+              </ModalFormGrid>
+            </ModalFormPanelBody>
+          </ModalFormPanel>
+        </ModalFormBody>
+      </ModalFormShell>
     </CommonModal>
   );
 }

@@ -47,22 +47,23 @@ export default function MasterSelectWithCreate({
       ? can("DIVISIONS", "ADD") || can("VENDORS", "ADD")
       : perm && can(perm[0], perm[1]);
   const label = KIND_LABEL[kind] || "record";
-  const effectiveSelectClass = `${selectClassName || ""} ${kind === "division" || kind === "product" ? "mswStrong" : ""}`.trim();
+  /** Match flat modal inputs (Add product, division, vendor, …); keep line-item pages on default csf chrome. */
+  const modalMfzLayout = /\bmfzInput\b/.test(selectClassName || "");
+  const emphasizeLineItem = !modalMfzLayout && (kind === "division" || kind === "product");
+  const effectiveSelectClass = `${selectClassName || ""} ${emphasizeLineItem ? "mswStrong" : ""}`.trim();
 
   return (
-    <div className={`msw ${className}`.trim()}>
-      <div className="mswSelect">
-        <CommonSelectField
-          key={resKey}
-          className={effectiveSelectClass}
-          value={value ?? ""}
-          disabled={disabled}
-          autoOpenOnFocus={selectAutoOpenOnFocus}
-          onChange={(v) => onChange?.(v)}
-          placeholder={placeholder}
-          options={options}
-        />
-      </div>
+    <div className={["msw", modalMfzLayout ? "msw_mfz" : "", className].filter(Boolean).join(" ")}>
+      <CommonSelectField
+        key={resKey}
+        className={effectiveSelectClass}
+        value={value ?? ""}
+        disabled={disabled}
+        autoOpenOnFocus={selectAutoOpenOnFocus}
+        onChange={(v) => onChange?.(v)}
+        placeholder={placeholder}
+        options={options}
+      />
       {allowCreate && !disabled ? (
         <CommonInlineAddButton
           variant="icon"
