@@ -666,6 +666,7 @@ export default function CustomersPage() {
                 const payload = {
                   customerId: paymentForm.customerId,
                   paymentDate: paymentForm.paymentDate,
+                  clientToday: todayYmdLocal(),
                   amount: payAmt,
                   paymentMode: paymentForm.paymentMode,
                   referenceNumber: paymentForm.referenceNumber || undefined,

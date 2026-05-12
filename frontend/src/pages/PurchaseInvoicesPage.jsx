@@ -2232,6 +2232,7 @@ export default function PurchaseInvoicesPage() {
                   returnDate: returnForm.returnDate,
                   returnReason: returnForm.returnReason,
                   notes: returnForm.notes,
+                  clientToday: localCalendarYmd(),
                   items: (returnForm.items || []).map((it) => ({
                     purchaseInvoiceItemId: it.purchaseInvoiceItemId,
                     returnQty: Number(it.returnQty || 0),

@@ -233,7 +233,7 @@ export default function CustomerPaymentsPage() {
                 const needAmount = paymentKind === "ON_ACCOUNT" || !form.salesInvoiceId;
                 if (!form.customerId || (needAmount && !(Number(form.amount) > 0))) return;
                 setBusy(true);
-                const payload = { ...form };
+                const payload = { ...form, clientToday: todayYmdLocal() };
                 if (paymentKind === "ON_ACCOUNT") payload.salesInvoiceId = "";
                 const r = await createCustomerPayment(payload);
                 if (r.status >= 200 && r.status < 300 && r.json?.ok) {

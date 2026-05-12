@@ -120,7 +120,7 @@ async function handler(event) {
   const body = parseJsonBody(event);
   const customerId = clean(body.customerId || body.customer_id);
   let invoiceId = clean(body.salesInvoiceId || body.sales_invoice_id || body.invoiceId || body.invoice_id);
-  const paymentDate = clean(body.paymentDate || body.payment_date) || new Date().toISOString().slice(0, 10);
+  const paymentDate = clean(body.paymentDate || body.payment_date) || localCalendarYmd();
   const amount = n(body.amount);
   const paymentMode = clean(body.paymentMode || body.payment_mode || "CASH").toUpperCase();
   const useAdvanceFirst = body.useAdvanceFirst !== false;
@@ -134,7 +134,9 @@ async function handler(event) {
   if (!useBatchAlloc && !(amount > 0) && !(invoiceId && useAdvanceFirst)) {
     return fail(400, "VALIDATION_ERROR", "amount must be greater than 0.");
   }
-  if (isFutureDate(paymentDate)) return fail(400, "VALIDATION_ERROR", "Payment date cannot be in future.");
+  if (isFutureDate(paymentDate, { clientTodayYmd: clean(body.clientToday) })) {
+    return fail(400, "VALIDATION_ERROR", "Payment date cannot be in future.");
+  }
   if (!["CASH", "CHEQUE", "NEFT", "UPI", "CARD", "OTHER"].includes(paymentMode)) {
     return fail(400, "VALIDATION_ERROR", "Invalid payment mode.");
   }

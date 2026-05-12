@@ -358,7 +358,9 @@ function validateInvoiceHeader(body) {
   };
   if (!header.customerId) return { ok: false, message: "Customer is required." };
   if (!header.invoiceDate) return { ok: false, message: "Invoice date is required." };
-  if (isFutureDate(header.invoiceDate)) return { ok: false, message: "Invoice date cannot be in future." };
+  if (isFutureDate(header.invoiceDate, { clientTodayYmd: clean(body.clientToday) })) {
+    return { ok: false, message: "Invoice date cannot be in future." };
+  }
   return { ok: true, header };
 }
 

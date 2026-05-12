@@ -305,7 +305,7 @@ export default function SalesReturnsPage() {
                 setSubmitted(true);
                 if (!form.customerId || (!isRetailer && !form.salesInvoiceId) || !hasAnyReturnQty || hasInvalidReturnQty || hasIncompleteManualLine) return;
                 setBusy(true);
-                const r = await createSalesReturn(form);
+                const r = await createSalesReturn({ ...form, clientToday: todayYmdLocal() });
                 if (r.status >= 200 && r.status < 300 && r.json?.ok) {
                   setOpen(false);
                   await refresh();

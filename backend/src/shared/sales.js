@@ -20,17 +20,46 @@ function round4(v) {
   return Math.round((Number(v) + Number.EPSILON) * 10000) / 10000;
 }
 
-function todayYmd() {
-  return new Date().toISOString().slice(0, 10);
+/** Server process local calendar date (same idea as purchase `localCalendarYmd`). */
+function localCalendarYmd(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
-function isFutureDate(ymd) {
+function addCalendarDaysYmd(ymd, days) {
   const s = clean(ymd);
-  if (!s) return false;
-  const d = new Date(`${s}T00:00:00.000Z`);
-  if (Number.isNaN(d.getTime())) return false;
-  const t = new Date(`${todayYmd()}T00:00:00.000Z`);
-  return d.getTime() > t.getTime();
+  const parts = s.split("-").map(Number);
+  if (parts.length !== 3 || parts.some((x) => !Number.isFinite(x))) return localCalendarYmd();
+  const [y, mo, da] = parts;
+  const dt = new Date(y, mo - 1, da + Number(days || 0));
+  return localCalendarYmd(dt);
+}
+
+/** Upper bound for civil dates: browser "today" if trustworthy, else server local; capped at server+1 day slack. */
+function effectiveInvoiceDateCap(opts = {}) {
+  const server = localCalendarYmd();
+  const c = clean(opts.clientTodayYmd);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(c)) return server;
+  const slack = addCalendarDaysYmd(server, 1);
+  return c <= slack ? c : slack;
+}
+
+/** @deprecated Prefer localCalendarYmd — kept for backward compatibility */
+function todayYmd() {
+  return localCalendarYmd();
+}
+
+/**
+ * True if YYYY-MM-DD is strictly after the allowed "today" (matches purchase invoice date rules).
+ * Pass `clientTodayYmd` from the browser so the user's local screen date is allowed.
+ */
+function isFutureDate(ymd, opts = {}) {
+  const s = clean(ymd);
+  if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const cap = effectiveInvoiceDateCap(opts);
+  return s > cap;
 }
 
 function calculateLineItem(item) {
@@ -168,6 +197,7 @@ module.exports = {
   n,
   i,
   round4,
+  localCalendarYmd,
   todayYmd,
   isFutureDate,
   calculateLineItem,

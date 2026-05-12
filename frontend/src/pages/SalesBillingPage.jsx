@@ -987,7 +987,8 @@ export default function SalesBillingPage() {
       invoiceIds: bulkPaymentConfirm.ids,
       paymentDate: bulkPaymentConfirm.paymentDate || todayYmdLocal(),
       paymentMode: bulkPaymentConfirm.paymentMode || "CASH",
-      notes: "Bulk payment settled from sales invoices table"
+      notes: "Bulk payment settled from sales invoices table",
+      clientToday: todayYmdLocal()
     });
     setBulkPaymentBusy(false);
     if (r.status >= 200 && r.status < 300 && r.json?.ok) {
@@ -1288,6 +1289,7 @@ export default function SalesBillingPage() {
       const { divisionId: _divisionId, ...basePayload } = form;
       const payload = {
         ...basePayload,
+        clientToday: todayYmdLocal(),
         isWalkInSale: Boolean(isRetailer && selectedCustomerIsWalkIn),
         walkInPatientName: clean(form.walkInPatientName) || null,
         walkInPatientPhone: clean(form.walkInPatientPhone) || null,
@@ -2337,7 +2339,7 @@ export default function SalesBillingPage() {
               }
               onClick={async () => {
                 setBusy(true);
-                const r = await createCustomerPayment(paymentForm);
+                const r = await createCustomerPayment({ ...paymentForm, clientToday: todayYmdLocal() });
                 if (r.status >= 200 && r.status < 300 && r.json?.ok) {
                   setPaymentOpen(false);
                   await refresh();

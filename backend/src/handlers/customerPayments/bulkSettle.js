@@ -26,13 +26,15 @@ async function handler(event) {
 
   const body = parseJsonBody(event);
   const invoiceIds = uniqueIds(body.invoiceIds || body.ids || []);
-  const paymentDate = clean(body.paymentDate) || new Date().toISOString().slice(0, 10);
+  const paymentDate = clean(body.paymentDate) || localCalendarYmd();
   const paymentMode = clean(body.paymentMode || "CASH").toUpperCase();
   const referenceNumber = clean(body.referenceNumber) || null;
   const notes = clean(body.notes) || null;
 
   if (!invoiceIds.length) return fail(400, "VALIDATION_ERROR", "invoiceIds is required.");
-  if (isFutureDate(paymentDate)) return fail(400, "VALIDATION_ERROR", "Payment date cannot be in future.");
+  if (isFutureDate(paymentDate, { clientTodayYmd: clean(body.clientToday) })) {
+    return fail(400, "VALIDATION_ERROR", "Payment date cannot be in future.");
+  }
   if (!["CASH", "CHEQUE", "NEFT", "UPI", "CARD", "OTHER"].includes(paymentMode)) return fail(400, "VALIDATION_ERROR", "Invalid payment mode.");
 
   try {

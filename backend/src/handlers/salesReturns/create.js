@@ -3,7 +3,7 @@ const { parseJsonBody } = require("../../shared/request");
 const { withTransaction } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
-const { clean, i, n, nextSalesNumber, isFutureDate } = require("../../shared/sales");
+const { clean, i, n, nextSalesNumber, isFutureDate, localCalendarYmd } = require("../../shared/sales");
 
 async function handler(event) {
   const auth = await requirePermission(event, "SALES_RETURNS", "ADD");
@@ -14,8 +14,10 @@ async function handler(event) {
   const body = parseJsonBody(event);
   const customerId = clean(body.customerId || body.customer_id);
   if (!customerId) return fail(400, "VALIDATION_ERROR", "customerId is required");
-  const returnDate = clean(body.returnDate || body.return_date) || new Date().toISOString().slice(0, 10);
-  if (isFutureDate(returnDate)) return fail(400, "VALIDATION_ERROR", "Return date cannot be in future.");
+  const returnDate = clean(body.returnDate || body.return_date) || localCalendarYmd();
+  if (isFutureDate(returnDate, { clientTodayYmd: clean(body.clientToday) })) {
+    return fail(400, "VALIDATION_ERROR", "Return date cannot be in future.");
+  }
   const returnReason = clean(body.returnReason || body.return_reason || "OTHER").toUpperCase();
   if (!["EXPIRED", "DAMAGED", "WRONG_PRODUCT", "EXCESS", "PATIENT_RETURNED", "OTHER"].includes(returnReason)) {
     return fail(400, "VALIDATION_ERROR", "Invalid return reason.");
