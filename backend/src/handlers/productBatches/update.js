@@ -57,6 +57,19 @@ async function handler(event) {
     });
   }
 
+  // Validate vendor if provided (supplier is batch-level, independent of division).
+  const vendorId = body.vendorId !== undefined
+    ? (body.vendorId ? String(body.vendorId).trim() : null)
+    : (cur.vendor_id ? String(cur.vendor_id) : null);
+
+  if (vendorId) {
+    const vr = await query(
+      `SELECT id FROM vendors WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`,
+      [vendorId, ctx.accountId]
+    );
+    if (!vr.rows?.[0]) return fail(400, "VALIDATION_ERROR", "Invalid vendor.", { subMessage: "Selected vendor was not found for this account." });
+  }
+
   // Batch-level inputs only (falling back to current row values for partial updates)
   const input = {
     productCode: product.code,
@@ -174,7 +187,7 @@ async function handler(event) {
         product_name = $25,
         drug_name = $26,
         division_id = $27,
-        vendor_id = CASE WHEN $27::uuid IS NULL THEN vendor_id ELSE NULL END,
+        vendor_id = $46,
         packing = $28,
         bulk_pack = $29,
         case_pack = $30,
@@ -242,7 +255,8 @@ async function handler(event) {
         n(input.specialRate1) || null,
         n(input.specialRate2) || null,
         n(input.looseStock) || 0,
-        looseUnitNameStored
+        looseUnitNameStored,
+        vendorId || null
       ]
     );
     if (!upd.rows[0]) return fail(404, "NOT_FOUND", "Item not found");

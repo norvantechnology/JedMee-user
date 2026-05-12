@@ -10,7 +10,11 @@ function n(v) {
 }
 
 async function handler(event) {
-  const auth = await requirePermission(event, "SALES_INVOICES", "VIEW");
+  // FE-03 fix: Day Book shows both sales and purchase data.
+  // Accept access if the user has VIEW on either SALES_INVOICES or PURCHASE_INVOICES.
+  const authSales = await requirePermission(event, "SALES_INVOICES", "VIEW");
+  const authPurchase = await requirePermission(event, "PURCHASE_INVOICES", "VIEW");
+  const auth = authSales.ok ? authSales : authPurchase;
   if (!auth.ok) return auth.resp;
   const actorId = String(auth.claims?.sub || "");
   const ctx = await getPermissionsForUser(actorId);
@@ -19,7 +23,7 @@ async function handler(event) {
   const date = resolveSingleDate(qs.date);
 
   try {
-    const [settingsRs, salesRs, receiptsRs, paymentsRs, profitRs] = await Promise.all([
+    const [settingsRs, salesRs, receiptsRs, paymentsRs, profitRs, purchaseReturnsRs, salesReturnsRs] = await Promise.all([
       query(`SELECT daily_opening_cash FROM account_settings WHERE account_id = $1 LIMIT 1`, [ctx.accountId]),
       query(
         `SELECT
@@ -62,19 +66,42 @@ async function handler(event) {
            AND si.status = 'CONFIRMED'
            AND si.invoice_date = $2`,
         [ctx.accountId, date]
+      ),
+      // FE-09: Purchase returns confirmed on this date (reduce outstanding payables)
+      query(
+        `SELECT COALESCE(SUM(total_amount),0)::numeric(14,2) AS purchase_returns_total
+         FROM purchase_returns
+         WHERE account_id = $1
+           AND deleted_at IS NULL
+           AND status = 'CONFIRMED'
+           AND return_date = $2`,
+        [ctx.accountId, date]
+      ),
+      // Sales returns confirmed on this date (reduce revenue)
+      query(
+        `SELECT COALESCE(SUM(total_return_amount),0)::numeric(14,2) AS sales_returns_total
+         FROM sales_returns
+         WHERE account_id = $1
+           AND deleted_at IS NULL
+           AND status = 'CONFIRMED'
+           AND return_date = $2`,
+        [ctx.accountId, date]
       )
     ]);
 
-    const openingCash       = n(settingsRs.rows?.[0]?.daily_opening_cash);
-    const cashSales         = n(salesRs.rows?.[0]?.cash_sales);
-    const creditSales       = n(salesRs.rows?.[0]?.credit_sales);
-    const customerReceipts  = n(receiptsRs.rows?.[0]?.customer_receipts);
-    const supplierPayments  = n(paymentsRs.rows?.[0]?.supplier_payments);
-    const totalRevenue      = n(profitRs.rows?.[0]?.total_revenue);
-    const totalCogs         = n(profitRs.rows?.[0]?.total_cogs);
-    const grossProfit       = totalRevenue - totalCogs;
-    const profitMarginPct   = totalRevenue > 0
-      ? Math.round((grossProfit / totalRevenue) * 10000) / 100   // 2 decimal places
+    const openingCash        = n(settingsRs.rows?.[0]?.daily_opening_cash);
+    const cashSales          = n(salesRs.rows?.[0]?.cash_sales);
+    const creditSales        = n(salesRs.rows?.[0]?.credit_sales);
+    const customerReceipts   = n(receiptsRs.rows?.[0]?.customer_receipts);
+    const supplierPayments   = n(paymentsRs.rows?.[0]?.supplier_payments);
+    const totalRevenue       = n(profitRs.rows?.[0]?.total_revenue);
+    const totalCogs          = n(profitRs.rows?.[0]?.total_cogs);
+    const purchaseReturns    = n(purchaseReturnsRs.rows?.[0]?.purchase_returns_total);
+    const salesReturns       = n(salesReturnsRs.rows?.[0]?.sales_returns_total);
+    const grossProfit        = (totalRevenue - salesReturns) - totalCogs;
+    const netRevenue         = totalRevenue - salesReturns;
+    const profitMarginPct    = netRevenue > 0
+      ? Math.round((grossProfit / netRevenue) * 10000) / 100   // 2 decimal places
       : 0;
 
     // totalReceipts = actual cash received (cash sales + customer payments).
@@ -83,9 +110,10 @@ async function handler(event) {
     // the same day.  We expose credit_sales separately for informational display.
     const totalReceipts = cashSales + customerReceipts;
     const totalSales    = cashSales + creditSales;          // informational
-    const totalPayments = supplierPayments;
+    // FE-09: purchase returns reduce the effective payments out (they are credits from supplier)
+    const totalPayments = supplierPayments - purchaseReturns;
     const cashReceived  = cashSales + customerReceipts;
-    const closingCash   = openingCash + cashReceived - totalPayments;
+    const closingCash   = openingCash + cashReceived - supplierPayments;
 
     return ok({
       date,
@@ -98,20 +126,24 @@ async function handler(event) {
         total_sales:       totalSales        // informational
       },
       payments: {
-        supplier_payments: supplierPayments,
-        total_payments:    totalPayments
+        supplier_payments:  supplierPayments,
+        purchase_returns:   purchaseReturns,  // FE-09: purchase returns reduce payables
+        sales_returns:      salesReturns,     // informational
+        total_payments:     totalPayments     // net of purchase returns
       },
       cash_position: {
         opening_cash:  openingCash,
         cash_received: cashReceived,
-        cash_paid:     totalPayments,
+        cash_paid:     supplierPayments,
         closing_cash:  closingCash
       },
       profit: {
         total_revenue:     totalRevenue,     // sales taxable amount (excl. GST)
+        sales_returns:     salesReturns,     // sales returns reduce revenue
+        net_revenue:       netRevenue,       // revenue after returns
         total_cogs:        totalCogs,        // qty × purchase_rate per batch
-        gross_profit:      grossProfit,      // revenue − cogs
-        profit_margin_pct: profitMarginPct   // % of revenue
+        gross_profit:      grossProfit,      // net_revenue − cogs
+        profit_margin_pct: profitMarginPct   // % of net_revenue
       }
     });
   } catch (e) {

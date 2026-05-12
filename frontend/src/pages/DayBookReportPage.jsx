@@ -26,7 +26,9 @@ import "./DayBookReportPage.css";
 export default function DayBookReportPage() {
   useSeoMeta({ title: "Day Book Report" });
   const { taxLabel } = useLocale();
-  const canView = can("SALES_INVOICES", "VIEW");
+  // FE-03 fix: Day Book shows both sales and purchase data.
+  // Allow access if the user can view either sales invoices or purchase invoices.
+  const canView = can("SALES_INVOICES", "VIEW") || can("PURCHASE_INVOICES", "VIEW");
   const [busy, setBusy] = useState(false);
   const [date, setDate] = useState(todayYmdLocal());
   const [data, setData] = useState(null);
@@ -51,6 +53,9 @@ export default function DayBookReportPage() {
   const pay    = data?.payments      || {};
   const cash   = data?.cash_position || {};
   const profit = data?.profit        || {};
+  // FE-09: purchase returns and sales returns
+  const hasPurchaseReturns = (pay.purchase_returns ?? 0) > 0;
+  const hasSalesReturns    = (profit.sales_returns ?? 0) > 0;
   const money = (v) => fmtCurrency(v) || fmtCurrency(0);
   const pct   = (v) => `${Number(v ?? 0).toFixed(1)}%`;
   const displayDate = fmtDateIndian(data?.date || date);
@@ -203,8 +208,18 @@ export default function DayBookReportPage() {
                   <span className="dbRowLabel">Supplier Payments</span>
                   <span className="dbRowValue">{money(pay.supplier_payments)}</span>
                 </div>
+                {/* FE-09: Purchase returns reduce outstanding payables */}
+                {hasPurchaseReturns && (
+                  <div className="dbRow dbRow_info">
+                    <span className="dbRowLabel dbRowLabel_info">
+                      Purchase Returns
+                      <span className="dbInfoBadge">reduces payables</span>
+                    </span>
+                    <span className="dbRowValue dbRowValue_info">− {money(pay.purchase_returns)}</span>
+                  </div>
+                )}
                 <div className="dbRow dbRow_total dbRow_total_out">
-                  <span className="dbRowLabel">Total Payments</span>
+                  <span className="dbRowLabel">Net Payments</span>
                   <span className="dbRowValue">{money(pay.total_payments)}</span>
                 </div>
               </div>
@@ -230,6 +245,22 @@ export default function DayBookReportPage() {
                 <span className="dbRowLabel">Sales Revenue (excl. {taxLabel})</span>
                 <span className="dbRowValue">{money(profit.total_revenue)}</span>
               </div>
+              {/* FE-09: Sales returns reduce revenue */}
+              {hasSalesReturns && (
+                <div className="dbRow dbRow_info">
+                  <span className="dbRowLabel dbRowLabel_info">
+                    Sales Returns
+                    <span className="dbInfoBadge">reduces revenue</span>
+                  </span>
+                  <span className="dbRowValue dbRowValue_info">− {money(profit.sales_returns)}</span>
+                </div>
+              )}
+              {hasSalesReturns && (
+                <div className="dbRow">
+                  <span className="dbRowLabel">Net Revenue</span>
+                  <span className="dbRowValue">{money(profit.net_revenue)}</span>
+                </div>
+              )}
               <div className="dbRow">
                 <span className="dbRowLabel">Cost of Goods Sold (COGS)</span>
                 <span className="dbRowValue dbRowValue_cogs">− {money(profit.total_cogs)}</span>
@@ -240,7 +271,7 @@ export default function DayBookReportPage() {
               </div>
             </div>
             <div className="dbProfitNote">
-              Gross profit = sales revenue (excl. {taxLabel}) − purchase cost of items sold.
+              Gross profit = net sales revenue (excl. {taxLabel} and returns) − purchase cost of items sold.
               Does not include overheads, salaries, or other expenses.
             </div>
           </div>

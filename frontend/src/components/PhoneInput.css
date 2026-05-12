@@ -16,13 +16,12 @@
 
 .telxUnified {
   display: flex;
+  gap:5px;
   align-items: stretch;
   width: 100%;
   min-height: var(--mcm-ctrl-h, 42px);
   box-sizing: border-box;
   border-radius: var(--mcm-ctrl-radius, 10px);
-  border: var(--mcm-field-border-width, var(--modal-field-border-width, var(--control-border-width, 2px))) solid
-    var(--mcm-field-border, var(--modal-field-border, var(--control-border-default)));
   background: var(--mcm-field-bg, var(--modal-field-bg, var(--color-card)));
   color: var(--color-text);
   overflow: hidden;

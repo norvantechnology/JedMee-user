@@ -112,6 +112,13 @@ async function handler(event) {
   const productCode = product?.code || input.productCode || (await nextCode(ctx.accountId));
   const vendorId = body.vendorId ? String(body.vendorId).trim() : "";
 
+  // Validate vendor if provided (applies regardless of whether product has a division).
+  // A batch can have both a division (from the product) and a supplier (vendor).
+  if (vendorId) {
+    const v = await query(`SELECT id FROM vendors WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`, [vendorId, ctx.accountId]);
+    if (!v.rows?.[0]) return fail(400, "VALIDATION_ERROR", "Invalid vendor.", { subMessage: "Selected vendor was not found for this account." });
+  }
+
   // Backward-compat: callers may still pass division/mfg at batch level (e.g. legacy forms,
   // or when auto-creating a product from the batch flow). If a product exists, product wins.
   let divisionId = clean(body.divisionId);
@@ -142,10 +149,6 @@ async function handler(event) {
         return fail(400, "VALIDATION_ERROR", "Selected division is inactive.", { subMessage: "Activate the division first." });
       }
       mfgCompanyId = String(d.rows[0].mfg_company_id || "");
-    }
-    if (vendorId) {
-      const v = await query(`SELECT id FROM vendors WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`, [vendorId, ctx.accountId]);
-      if (!v.rows?.[0]) return fail(400, "VALIDATION_ERROR", "Invalid vendor.", { subMessage: "Selected vendor was not found for this account." });
     }
     if (mfgCompanyId) {
       const c = await query(`SELECT id FROM mfg_companies WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`, [mfgCompanyId, ctx.accountId]);
@@ -317,7 +320,7 @@ async function handler(event) {
       [
         ctx.accountId,
         productId,
-        product.division_id ? null : vendorId || null,
+        vendorId || null,
         product.division_id || null,
         productCode,
         product.name,

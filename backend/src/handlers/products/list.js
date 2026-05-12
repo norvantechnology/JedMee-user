@@ -101,7 +101,12 @@ async function handler(event) {
         (
           COALESCE(p.low_stock_alert_enabled, false)
           AND COALESCE(bs.total_quantity, 0) <= COALESCE(p.low_stock_threshold, 0)
-        ) AS product_low_stock
+        ) AS product_low_stock,
+        sup.sp_id          AS supplier_product_id,
+        sup.sp_vendor_id   AS supplier_id,
+        sup.sp_vendor_name AS supplier_name,
+        sup.sp_vendor_short_name AS supplier_short_name,
+        sup.sp_is_preferred      AS supplier_is_preferred
       FROM products p
       LEFT JOIN mfg_companies m
         ON m.id = p.mfg_company_id
@@ -114,6 +119,23 @@ async function handler(event) {
       LEFT JOIN batch_stock bs
         ON bs.account_id = p.account_id
        AND bs.product_id = p.id
+      LEFT JOIN LATERAL (
+        SELECT
+          sp.id            AS sp_id,
+          sp.vendor_id     AS sp_vendor_id,
+          sp.is_preferred  AS sp_is_preferred,
+          v.name           AS sp_vendor_name,
+          v.short_name     AS sp_vendor_short_name
+        FROM supplier_products sp
+        JOIN vendors v
+          ON v.id = sp.vendor_id
+         AND v.account_id = sp.account_id
+         AND v.deleted_at IS NULL
+        WHERE sp.account_id = p.account_id
+          AND sp.product_id = p.id
+        ORDER BY sp.is_preferred DESC, sp.last_supplied_on DESC NULLS LAST
+        LIMIT 1
+      ) sup ON true
       ${whereSql}
       ORDER BY ${orderBy} ${sortOrder}
       LIMIT $${ps.length + 1} OFFSET $${ps.length + 2}

@@ -1435,7 +1435,7 @@ export default function PurchaseInvoicesPage() {
                       <>
                         {String(r.payment_status || "").toUpperCase() !== "PAID" ? (
                           <IconBtn
-                            tooltip="Add vendor payment"
+                            tooltip="Add supplier payment"
                             variant="blue"
                             disabled={busy}
                             onClick={() => openPaymentFromInvoice(r)}
@@ -2086,8 +2086,8 @@ export default function PurchaseInvoicesPage() {
         open={sendVendorContact.open}
         title="Supplier email for invoice"
         icon={<IconEmail />}
-        partySubtitle={sendVendorContact.vendorName ? `Vendor: ${sendVendorContact.vendorName}` : ""}
-        permissionWarning={!canUpdateVendor ? "You need permission to update vendors to add email here." : undefined}
+        partySubtitle={sendVendorContact.vendorName ? `Supplier: ${sendVendorContact.vendorName}` : ""}
+        permissionWarning={!canUpdateVendor ? "You need permission to update suppliers to add email here." : undefined}
         email={sendVendorContactForm.email}
         phone=""
         phoneCountryCode="+91"

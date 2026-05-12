@@ -26,7 +26,7 @@ export default function VendorsPage() {
   const user = auth?.user || null;
   const [authTick, setAuthTick] = useState(0);
   const isRetailer = useMemo(() => isRetailerAuth(auth), [auth]);
-  const entityLabel = isRetailer ? "supplier" : "vendor";
+  const entityLabel = "supplier";
 
   const [busy, setBusy] = useState(false);
   const [rows, setRows] = useState([]);
@@ -494,7 +494,7 @@ export default function VendorsPage() {
 
       <ConfirmDialog
         open={confirm.open}
-        title={isRetailer ? "Delete supplier?" : "Delete vendor?"}
+        title="Delete supplier?"
         message={confirm.name ? `Delete ${confirm.name}?` : `Delete this ${entityLabel}?`}
         confirmLabel="Delete"
         cancelLabel="Cancel"

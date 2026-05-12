@@ -27,20 +27,27 @@ export function buildUserSidebarSections(ctx) {
     return { ...item, fnKey: fnCounter };
   }
 
-  const canUsers = isOwner || Boolean(perms?.USERS?.VIEW);
-  const canRoles = isOwner || Boolean(perms?.ROLES?.VIEW);
-  const canDivisions = isOwner || Boolean(perms?.DIVISIONS?.VIEW) || Boolean(perms?.VENDORS?.VIEW);
-  const canQuality = isOwner || Boolean(perms?.PRODUCT_BATCHES?.VIEW);
-  const canMfg = isOwner || Boolean(perms?.MFG_COMPANIES?.VIEW);
-  const canPurchase = isOwner || Boolean(perms?.PURCHASE_INVOICES?.VIEW);
+  const canUsers    = isOwner || Boolean(perms?.USERS?.VIEW);
+  const canRoles    = isOwner || Boolean(perms?.ROLES?.VIEW);
+  // Wholesalers: divisions (manufacturer sales divisions) and vendors (actual suppliers) are separate.
+  // Retailers:   vendors are shown as "Suppliers" — no divisions tab.
+  const canDivisions = !isRetailer && (isOwner || Boolean(perms?.DIVISIONS?.VIEW));
+  const canVendors   = isOwner || Boolean(perms?.VENDORS?.VIEW);
+  const canQuality   = isOwner || Boolean(perms?.PRODUCT_BATCHES?.VIEW);
+  const canMfg       = isOwner || Boolean(perms?.MFG_COMPANIES?.VIEW);
+  const canPurchase  = isOwner || Boolean(perms?.PURCHASE_INVOICES?.VIEW);
   const canCustomers = isOwner || Boolean(perms?.CUSTOMERS?.VIEW);
-  const canSales = isOwner || Boolean(perms?.SALES_INVOICES?.VIEW);
-  const canSalesReturns = isOwner || Boolean(perms?.SALES_RETURNS?.VIEW);
+  const canSales     = isOwner || Boolean(perms?.SALES_INVOICES?.VIEW);
+  const canSalesReturns    = isOwner || Boolean(perms?.SALES_RETURNS?.VIEW);
   const canPurchaseReturns = isOwner || Boolean(perms?.PURCHASE_RETURNS?.VIEW);
-  const canDivisionPayments = isOwner || Boolean(perms?.DIVISION_PAYMENTS?.VIEW) || Boolean(perms?.VENDOR_PAYMENTS?.VIEW);
-  const canCustomerPayments = isOwner || Boolean(perms?.CUSTOMER_PAYMENTS?.VIEW);
+  // FE-01 fix: DIVISION_PAYMENTS and VENDOR_PAYMENTS are separate resources.
+  // Wholesalers use division payments; retailers use vendor payments.
+  // Do NOT merge them — a user with only VENDOR_PAYMENTS should not see Division Payments.
+  const canDivisionPayments = !isRetailer && (isOwner || Boolean(perms?.DIVISION_PAYMENTS?.VIEW));
+  const canVendorPayments   = isRetailer  && (isOwner || Boolean(perms?.VENDOR_PAYMENTS?.VIEW));
+  const canCustomerPayments  = isOwner || Boolean(perms?.CUSTOMER_PAYMENTS?.VIEW);
   const canPrescriptions = isOwner || Boolean(perms?.PRESCRIPTIONS?.VIEW);
-  const canOrders = isOwner || Boolean(perms?.PURCHASE_ORDERS?.VIEW);
+  const canOrders    = isOwner || Boolean(perms?.PURCHASE_ORDERS?.VIEW);
 
   const out = [
     {
@@ -49,11 +56,14 @@ export function buildUserSidebarSections(ctx) {
     }
   ];
 
-  const divisionBaseTo = isRetailer ? "/vendors" : "/divisions";
   const masterSetupItems = [
     ...(canQuality ? [withFn({ to: "/quality-master", label: NAV_LABELS.qualityMaster })] : []),
-    ...(canMfg ? [withFn({ to: "/mfg-companies", label: NAV_LABELS.mfgCompanies })] : []),
-    ...(canDivisions ? [withFn({ to: divisionBaseTo, label: isRetailer ? "Suppliers" : NAV_LABELS.divisions })] : []),
+    ...(canMfg     ? [withFn({ to: "/mfg-companies",  label: NAV_LABELS.mfgCompanies  })] : []),
+    // Wholesalers: Divisions tab (manufacturer's sales divisions)
+    ...(canDivisions ? [withFn({ to: "/divisions", label: NAV_LABELS.divisions })] : []),
+    // FE-02 fix: Both wholesalers and retailers use /vendors (labelled "Suppliers").
+    // Consolidated into a single conditional — no need to duplicate for each role.
+    ...(canVendors ? [withFn({ to: "/vendors", label: "Suppliers" })] : []),
     ...(canCustomers ? [withFn({ to: "/customers", label: NAV_LABELS.customers })] : []),
     ...(canOrders
       ? [
@@ -75,9 +85,9 @@ export function buildUserSidebarSections(ctx) {
           })
         ]
       : []),
-    ...(canSalesReturns ? [withFn({ to: "/sales-returns", label: NAV_LABELS.salesReturns })] : []),
-    ...(canPurchase ? [withFn({ to: "/purchase-invoices", label: NAV_LABELS.purchaseInvoices })] : []),
-    ...(canPurchaseReturns ? [withFn({ to: "/purchase-returns", label: "Purchase Returns" })] : []),
+    ...(canSalesReturns    ? [withFn({ to: "/sales-returns",    label: NAV_LABELS.salesReturns    })] : []),
+    ...(canPurchase        ? [withFn({ to: "/purchase-invoices", label: NAV_LABELS.purchaseInvoices })] : []),
+    ...(canPurchaseReturns ? [withFn({ to: "/purchase-returns",  label: "Purchase Returns"          })] : []),
     ...(canOrders
       ? [
           withFn({
@@ -93,27 +103,28 @@ export function buildUserSidebarSections(ctx) {
 
   const reportItems = [
     ...(canQuality || canMfg ? [withFn({ to: "/reports/inventory", label: "Inventory Reports" })] : []),
-    ...(canSales ? [withFn({ to: "/reports/day-book", label: "Day Book" })] : []),
-    ...(canSales ? [withFn({ to: "/reports/gst-r1", label: `${taxLabel} Report (R1)` })] : []),
-    ...(canCustomers || canDivisions ? [withFn({ to: "/reports/ledger", label: "Ledger" })] : [])
+    ...(canSales ? [withFn({ to: "/reports/day-book", label: "Day Book"                    })] : []),
+    ...(canSales ? [withFn({ to: "/reports/gst-r1",   label: `${taxLabel} Report (R1)`     })] : []),
+    ...(canCustomers || canDivisions || canVendors
+      ? [withFn({ to: "/reports/ledger", label: "Ledger" })]
+      : [])
   ];
   if (reportItems.length) out.push({ title: "REPORTS", items: reportItems });
 
   const paymentItems = [
+    // FE-01 fix: Division Payments (wholesaler only) and Vendor Payments (retailer only) are separate.
     ...(canDivisionPayments
-      ? [
-          withFn({
-            to: "/division-payments",
-            label: isRetailer ? "Supplier Payments" : NAV_LABELS.divisionPayments
-          })
-        ]
+      ? [withFn({ to: "/division-payments", label: NAV_LABELS.divisionPayments })]
+      : []),
+    ...(canVendorPayments
+      ? [withFn({ to: "/vendor-payments", label: "Supplier Payments" })]
       : []),
     ...(canCustomerPayments ? [withFn({ to: "/customer-payments", label: NAV_LABELS.customerPayments })] : [])
   ];
   if (paymentItems.length) out.push({ title: "PAYMENTS", items: paymentItems });
 
   const userManagementItems = [
-    ...(canUsers ? [withFn({ to: "/users", label: NAV_LABELS.users })] : []),
+    ...(canUsers ? [withFn({ to: "/users",        label: NAV_LABELS.users       })] : []),
     ...(canRoles ? [withFn({ to: "/roles-access", label: NAV_LABELS.rolesAccess })] : [])
   ];
   if (userManagementItems.length) out.push({ title: "USER MANAGEMENT", items: userManagementItems });

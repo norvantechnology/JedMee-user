@@ -745,7 +745,9 @@ export default function CommonTable({
       <div className="tblToolsRow">
         {controlsPlacement === "top" && countText ? (
           <div className="tblKpi tblKpi_toolbar" aria-live="polite">
-            {String(countText).split(/\s+/)[0]}
+            {loadingFromCountText
+              ? String(Array.isArray(rows) ? rows.length : 0)
+              : String(countText).split(/\s+/)[0]}
           </div>
         ) : null}
         <TableSearch
@@ -757,6 +759,52 @@ export default function CommonTable({
 
         {!isMobile ? filterList.map((f, idx) => <TableToolbarFilterSlot key={f.id || f.label || String(idx)} filter={f} />) : null}
 
+        {controlsPlacement === "top" && !isMobile && (extraHeaderActions || primaryAction) ? (
+          <div className="tblToolsRowActions">
+            {extraHeaderActions}
+            {primaryAction ? (
+              <AppButton
+                className="tblPrimary"
+                variant="primary"
+                size="sm"
+                disabled={Boolean(primaryAction.disabled)}
+                onClick={primaryAction.onClick}
+                icon={<IconPlus />}
+              >
+                {primaryAction.label || "Create"}
+              </AppButton>
+            ) : null}
+          </div>
+        ) : null}
+
+        {isMobile && filterList.length ? (
+          <button
+            type="button"
+            className={`tblFilterBtn ${activeFilterCount ? "tblFilterBtn_on" : ""}`.trim()}
+            onClick={() => setMobileFiltersOpen(true)}
+            aria-label="Open filters"
+          >
+            <span className="tblFilterBtnIcon" aria-hidden="true">
+              <IconTableFunnel />
+            </span>
+            <span className="tblFilterBtnText">Filters</span>
+            {activeFilterCount ? <span className="tblFilterBtnBadge">{activeFilterCount}</span> : null}
+          </button>
+        ) : null}
+
+        {isMobile && mobileActions.length ? (
+          <button type="button" className="tblActionBtn" onClick={() => setMobileActionsOpen(true)} aria-label="Open actions">
+            <span className="tblFilterBtnIcon" aria-hidden="true">
+              <IconDots />
+            </span>
+            <span className="tblFilterBtnText">Actions</span>
+            <span className="tblActionBtnCount" aria-hidden="true">
+              {mobileActions.length}
+            </span>
+          </button>
+        ) : null}
+
+        {/* Columns icon — always last/rightmost */}
         {showColumnCustomizer ? (
           <div className="tblColsWrap">
             <button
@@ -804,51 +852,6 @@ export default function CommonTable({
               </div>
             ) : null}
           </div>
-        ) : null}
-
-        {controlsPlacement === "top" && !isMobile && (extraHeaderActions || primaryAction) ? (
-          <div className="tblToolsRowActions">
-            {extraHeaderActions}
-            {primaryAction ? (
-              <AppButton
-                className="tblPrimary"
-                variant="primary"
-                size="sm"
-                disabled={Boolean(primaryAction.disabled)}
-                onClick={primaryAction.onClick}
-                icon={<IconPlus />}
-              >
-                {primaryAction.label || "Create"}
-              </AppButton>
-            ) : null}
-          </div>
-        ) : null}
-
-        {isMobile && filterList.length ? (
-          <button
-            type="button"
-            className={`tblFilterBtn ${activeFilterCount ? "tblFilterBtn_on" : ""}`.trim()}
-            onClick={() => setMobileFiltersOpen(true)}
-            aria-label="Open filters"
-          >
-            <span className="tblFilterBtnIcon" aria-hidden="true">
-              <IconTableFunnel />
-            </span>
-            <span className="tblFilterBtnText">Filters</span>
-            {activeFilterCount ? <span className="tblFilterBtnBadge">{activeFilterCount}</span> : null}
-          </button>
-        ) : null}
-
-        {isMobile && mobileActions.length ? (
-          <button type="button" className="tblActionBtn" onClick={() => setMobileActionsOpen(true)} aria-label="Open actions">
-            <span className="tblFilterBtnIcon" aria-hidden="true">
-              <IconDots />
-            </span>
-            <span className="tblFilterBtnText">Actions</span>
-            <span className="tblActionBtnCount" aria-hidden="true">
-              {mobileActions.length}
-            </span>
-          </button>
         ) : null}
       </div>
 

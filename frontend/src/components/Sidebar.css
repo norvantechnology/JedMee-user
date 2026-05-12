@@ -29,20 +29,20 @@
   /* Local transition shorthand — scoped to sidebar only */
   --tr: 0.18s cubic-bezier(.4,0,.2,1);
 
-  /* Dark nav surface derived from tokens */
-  --brand: var(--color-primary);
-  --brand-lt: color-mix(in srgb, var(--color-primary) 62%, var(--color-on-primary));
-  --nav-bg: color-mix(in srgb, var(--color-primary-darker) 80%, var(--color-text) 20%);
-  --nav-surface: color-mix(in srgb, var(--color-primary-darker) 72%, var(--color-text) 28%);
-  --nav-border: color-mix(in srgb, var(--color-on-primary) 14%, transparent);
-  --nav-hover: color-mix(in srgb, var(--color-on-primary) 14%, transparent);
-  --nav-active-bg: color-mix(in srgb, var(--color-primary) 22%, transparent);
-  --text-primary: color-mix(in srgb, var(--color-on-primary) 96%, transparent);
-  --text-muted: color-mix(in srgb, var(--color-on-primary) 68%, transparent);
-  --text-label: color-mix(in srgb, var(--color-on-primary) 78%, transparent);
+  /* Dark nav surface — mapped directly to theme.css --sidebar-* tokens */
+  --brand:         var(--sidebar-active-border);
+  --brand-lt:      color-mix(in srgb, var(--sidebar-active-border) 62%, var(--sidebar-text-active));
+  --nav-bg:        var(--sidebar-bg);
+  --nav-surface:   var(--sidebar-active-bg);
+  --nav-border:    var(--sidebar-border);
+  --nav-hover:     var(--sidebar-active-bg);
+  --nav-active-bg: var(--sidebar-active-bg);
+  --text-primary:  var(--sidebar-text-active);
+  --text-muted:    var(--sidebar-text);
+  --text-label:    var(--sidebar-section-label);
 
-  width: var(--sidebar-w);
-  min-width: var(--sidebar-w);
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
   background: var(--nav-bg);
   display: flex;
   flex-direction: column;
@@ -272,7 +272,7 @@
   padding: 0 5px;
   border-radius: 9px;
   background: var(--color-danger);
-  color: var(--on-danger);
+  color: var(--color-on-danger);
   font-size: 10.5px;
   font-weight: 700;
   line-height: 18px;
@@ -325,7 +325,7 @@
   left: calc(100% + 12px);
   top: 50%;
   transform: translateY(-50%);
-  background: color-mix(in srgb, var(--nav-surface) 96%, white);
+  background: color-mix(in srgb, var(--nav-surface) 96%, var(--color-card));
   color: var(--text-primary);
   font-size: 12.5px;
   font-weight: 600;
@@ -357,7 +357,7 @@
   top: 50%;
   transform: translateY(-50%);
   border: 5px solid transparent;
-  border-right-color: color-mix(in srgb, var(--nav-surface) 96%, white);
+  border-right-color: color-mix(in srgb, var(--nav-surface) 96%, var(--color-card));
 }
 
 .sidebar.collapsed .nav-item:hover .nav-tooltip {
@@ -450,25 +450,37 @@
 @media (max-width: 720px) {
   /* Overlay: starts below the sticky header so header stays tappable */
   .overlay {
-    top: 50px;
+    top: 56px;
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
     background: color-mix(in srgb, var(--color-text) 48%, transparent);
   }
 
-  /* Sidebar drawer — starts below header, never covers it */
+  /* Sidebar drawer — z-index 300 ensures it renders above the header (210) */
   .sidebar {
-    top: 50px;
-    height: calc(100vh - 50px);
+    top: 56px;
+    height: calc(100dvh - 56px);
     transform: translateX(-110%);
-    width: min(82vw, 288px);
-    min-width: 0;
-    transition: transform .28s cubic-bezier(.4,0,.2,1);
+    width: min(82vw, 288px) !important;
+    min-width: 0 !important;
+    transition: transform .28s cubic-bezier(.4,0,.2,1) !important;
     border-right: 1px solid var(--nav-border);
-    z-index: 195;   /* below header (210) so header stays on top */
+    z-index: 300;
+    overflow: hidden !important;
   }
-  .sidebar.mobile-open {
-    transform: translateX(0);
+
+  /* collapsed class has higher specificity (2 classes) — override it on mobile
+     so the drawer always uses full drawer width and correct transition */
+  .sidebar.collapsed {
+    width: min(82vw, 288px) !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    transition: transform .28s cubic-bezier(.4,0,.2,1) !important;
+  }
+
+  .sidebar.mobile-open,
+  .sidebar.collapsed.mobile-open {
+    transform: translateX(0) !important;
   }
 
   /* Hide desktop toggle */

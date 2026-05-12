@@ -35,14 +35,24 @@ async function handler(event) {
     if (!vendor) return fail(404, "NOT_FOUND", "Supplier not found");
 
     const [invoicesRs, paymentsRs, returnsRs] = await Promise.all([
+      // BE-08: Include both direct vendor invoices (vendor_id) and
+      // division-based invoices where this vendor is the supplier (via supplier_products).
+      // We use a UNION to avoid double-counting invoices that have both vendor_id and division_id.
       query(
-        `SELECT id, invoice_number, invoice_date, total_amount, created_at
-         FROM purchase_invoices
-         WHERE account_id = $1
-           AND vendor_id = $2
-           AND deleted_at IS NULL
-           AND status = 'CONFIRMED'
-         ORDER BY invoice_date ASC, created_at ASC`,
+        `SELECT DISTINCT pi.id, pi.invoice_number, pi.invoice_date, pi.total_amount, pi.created_at
+         FROM purchase_invoices pi
+         WHERE pi.account_id = $1
+           AND pi.deleted_at IS NULL
+           AND pi.status = 'CONFIRMED'
+           AND (
+             pi.vendor_id = $2
+             OR pi.division_id IN (
+               SELECT sp.division_id
+               FROM supplier_products sp
+               WHERE sp.account_id = $1 AND sp.vendor_id = $2 AND sp.division_id IS NOT NULL
+             )
+           )
+         ORDER BY pi.invoice_date ASC, pi.created_at ASC`,
         [ctx.accountId, vendorId]
       ),
       query(
@@ -58,9 +68,16 @@ async function handler(event) {
         `SELECT pr.id, pr.return_number, pr.return_date, pr.total_amount, pr.created_at
          FROM purchase_returns pr
          WHERE pr.account_id = $1
-           AND pr.vendor_id = $2
            AND pr.status = 'CONFIRMED'
            AND pr.deleted_at IS NULL
+           AND (
+             pr.vendor_id = $2
+             OR pr.division_id IN (
+               SELECT sp.division_id
+               FROM supplier_products sp
+               WHERE sp.account_id = $1 AND sp.vendor_id = $2 AND sp.division_id IS NOT NULL
+             )
+           )
          ORDER BY pr.return_date ASC, pr.created_at ASC`,
         [ctx.accountId, vendorId]
       )
@@ -93,7 +110,7 @@ async function handler(event) {
         type: "PURCHASE_RETURN",
         reference: x.return_number || "",
         debit: 0,
-        credit: Number(x.total_return_amount || 0),
+        credit: Number(x.total_amount || 0),
         sortTs: ledgerTs(x.return_date, x.created_at),
         sortId: x.id
       }))

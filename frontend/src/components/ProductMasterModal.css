@@ -1,54 +1,20 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    ProductMasterModal.css
-   Scoped to `.mcmBody .mfz.pmmForm`. Layout between stacked grids lives in
-   CommonModal.css (`.mfzPanelBody_stack`). This file only keeps:
-     • Panel body padding tweaks for the first panel
-     • Per-grid gap tuning for the drawer width
-     • Hero / secondary / read-only input variants
-     • Policy checkbox density
+   Scoped to `.mcmBody .mfz.pmmForm`.
+   Layout: single ModalFormGrid per panel — no stacked separators needed.
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* Tighten section-to-section gap inside this modal */
 .mcmBody .mfz.pmmForm .mfzBody {
-  gap: 10px;
+  gap: 12px;
 }
 
-.mcmBody .mfz.pmmForm .pmmPanel_details .mfzPanelBody.mfzPanelBody_stack {
-  padding-top: 6px;
-  padding-bottom: 8px;
+/* Single grid per panel — consistent gap throughout */
+.mcmBody .mfz.pmmForm .pmmGrid {
+  gap: 10px clamp(8px, 1.2vw, 14px);
 }
 
-.mcmBody .mfz.pmmForm .pmmGrid_identity {
-  gap: 8px 10px;
-}
-
-.mcmBody .mfz.pmmForm .pmmGrid_codes {
-  gap: 6px 8px;
-}
-
-.mcmBody .mfz.pmmForm .pmmGrid_org {
-  gap: 7px 10px;
-}
-
-.mcmBody .mfz.pmmForm .pmmGrid_packNums {
-  gap: 6px 8px;
-}
-
-.mcmBody .mfz.pmmForm .pmmGrid_conversion {
-  gap: 6px 8px;
-}
-
-.mcmBody .mfz.pmmForm .pmmGrid_tax {
-  gap: 6px 8px;
-}
-
-.mcmBody .mfz.pmmForm .pmmGrid_scheme {
-  gap: 6px 8px;
-}
-
-.mcmBody .mfz.pmmForm .pmmGrid_lowStock {
-  gap: 6px 8px;
-}
-
+/* ── Hero input: product name — larger, bolder ── */
 .mcmBody .mfz.pmmForm .pmmInputHero {
   min-height: 44px;
   font-size: clamp(14px, 0.95rem + 0.25vw, 15.5px);
@@ -57,50 +23,115 @@
   color: var(--color-text);
 }
 
+/* ── Secondary input: generic/drug name — lighter weight ── */
 .mcmBody .mfz.pmmForm .pmmInputSecondary {
   font-size: clamp(13px, 0.87rem, 13.5px);
   font-weight: 450;
   color: var(--color-text-2);
 }
 
+/* ── Read-only display: manufacturer derived from division ── */
 .mcmBody .mfz.pmmForm .pmmInputReadonlyDisplay {
   font-weight: 600;
   color: var(--color-text-2);
-  background: color-mix(
-    in srgb,
-    var(--color-surface) 55%,
-    var(--modal-field-bg, var(--color-card))
-  ) !important;
+  background: color-mix(in srgb, var(--color-surface) 55%, var(--modal-field-bg, var(--color-card))) !important;
   cursor: default;
   box-shadow: none !important;
 }
 
-.mcmBody .mfz.pmmForm .pmmPanel_scheme .mfzPanelBody.mfzPanelBody_stack,
-.mcmBody .mfz.pmmForm .pmmPanel_policy .mfzPanelBody.mfzPanelBody_stack {
-  padding-top: 8px;
+/* ── Policy checkboxes: compact tile grid — top-aligned so wrapping labels don't skew row ── */
+.mcmBody .mfz.pmmForm .pmmChecks.mfzChecks {
+  grid-template-columns: repeat(auto-fill, minmax(clamp(9rem, 22%, 14rem), 1fr));
+  align-items: start;
+  gap: 8px 10px;
+  padding: 2px 0;
 }
 
-.mcm_drawer .mcmBody .mfz.pmmForm .pmmGrid_scheme .mfz6,
-.mcm_drawer .mcmBody .mfz.pmmForm .pmmGrid_scheme .mfz3 {
+/* ── Disabled / conditional-off checkbox tile ── */
+.mcmBody .mfz.pmmForm .pmmCheck_off {
+  opacity: 0.42;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Low-stock alert row: toggle + threshold side-by-side ── */
+.mcmBody .mfz.pmmForm .pmmLowStockRow {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin-top: 8px;
+}
+
+.mcmBody .mfz.pmmForm .pmmLowStockToggle {
+  flex: 0 0 auto;
+  align-self: center;
+  white-space: nowrap;
+}
+
+.mcmBody .mfz.pmmForm .pmmLowStockField {
+  flex: 1 1 140px;
+  min-width: 120px;
+  max-width: 220px;
+}
+
+.mcmBody .mfz.pmmForm .pmmLowStockField .mfzLabel {
+  margin-bottom: 4px;
+  font-size: var(--mcm-fs-label, 0.8125rem);
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+/* ── Threshold field dimmed when low-stock alert is off ── */
+.mcmBody .mfz.pmmForm .pmmLowStockRow_off .pmmLowStockField {
+  opacity: 0.48;
+  transition: opacity 0.15s ease;
+}
+
+/* Clicking the dimmed threshold auto-enables the alert — keep pointer active */
+.mcmBody .mfz.pmmForm .pmmLowStockRow_off .pmmLowStockField .mfzInput {
+  cursor: pointer;
+}
+
+/* Restore full opacity once alert is on */
+.mcmBody .mfz.pmmForm .pmmLowStockRow:not(.pmmLowStockRow_off) .pmmLowStockField {
+  opacity: 1;
+  transition: opacity 0.15s ease;
+}
+
+/* ── Scheme panel: keep paid/free qty fields from collapsing too narrow ── */
+.mcm_drawer .mcmBody .mfz.pmmForm .pmmPanel_scheme .mfz3 {
   min-width: 0;
-}
-
-.mcm_drawer .mcmBody .mfz.pmmForm .pmmGrid_scheme .mfz6 {
-  min-width: min(0px, 100%);
 }
 
 @media (max-width: 720px) {
   .mcmBody .mfz.pmmForm .pmmInputHero {
     min-height: 44px;
-    font-size: 16px;
+    font-size: 16px; /* iOS auto-zoom prevention */
   }
+  .mcmBody .mfz.pmmForm .pmmGrid {
+    gap: 9px;
+  }
+  .mcmBody .mfz.pmmForm .pmmChecks.mfzChecks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 8px;
+  }
+  .mcmBody .mfz.pmmForm .pmmLowStockField {
+    max-width: 100%;
+  }
+  .mcmBody .mfz.pmmForm .pmmLowStockRow {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .mcmBody .mfz.pmmForm .pmmLowStockField {
+    width: 100%;
+    max-width: 100%;
+  }
+}
 
-  .mcmBody .mfz.pmmForm .pmmGrid_packNums,
-  .mcmBody .mfz.pmmForm .pmmGrid_tax,
-  .mcmBody .mfz.pmmForm .pmmGrid_scheme,
-  .mcmBody .mfz.pmmForm .pmmGrid_lowStock,
-  .mcmBody .mfz.pmmForm .pmmGrid_codes {
-    gap: 5px;
+@media (max-width: 480px) {
+  .mcmBody .mfz.pmmForm .pmmChecks.mfzChecks {
+    grid-template-columns: 1fr 1fr;
   }
 }
 

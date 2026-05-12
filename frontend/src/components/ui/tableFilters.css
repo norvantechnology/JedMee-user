@@ -96,8 +96,8 @@
 }
 
 .tcSearch:focus-within {
-  border-color: color-mix(in srgb, var(--color-border-focus) 42%, var(--color-border));
-  box-shadow: var(--shadow-sm);
+  border-color: color-mix(in srgb, var(--color-border-focus) 38%, var(--color-border));
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--color-text) 6%, transparent);
 }
 
 .tcSearchInput:focus,

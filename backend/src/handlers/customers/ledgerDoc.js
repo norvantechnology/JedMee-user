@@ -74,7 +74,9 @@ async function buildCustomerLedgerDoc({ accountId, customerId }) {
     query(
       `SELECT id, return_number, return_date, total_return_amount, status, created_at
        FROM sales_returns
-       WHERE account_id = $1 AND customer_id = $2 AND status = 'CONFIRMED'
+       WHERE account_id = $1 AND customer_id = $2
+         AND status = 'CONFIRMED'
+         AND deleted_at IS NULL
        ORDER BY return_date ASC, created_at ASC`,
       [accountId, customerId]
     )

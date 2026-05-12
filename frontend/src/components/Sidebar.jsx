@@ -23,6 +23,7 @@ import {
   Package2,
   RotateCcw,
   ShieldCheck,
+  Store,
   Truck,
   Users,
   UsersRound,
@@ -63,8 +64,9 @@ function pickSidebarIcon(to) {
     case "/mfg-companies":
       return <Building2 />;
     case "/divisions":
-    case "/vendors":
       return <Truck />;
+    case "/vendors":
+      return <Store />;
     case "/customers":
       return <UsersRound />;
     case "/order-catalog":
@@ -123,20 +125,23 @@ export default function Sidebar({
   const isRetailer = isRetailerAuth(auth);
   const perms = access?.permissions || {};
   const isOwner = Boolean(access?.isAccountOwner);
-  const canUsers = isOwner || Boolean(perms?.USERS?.VIEW);
-  const canRoles = isOwner || Boolean(perms?.ROLES?.VIEW);
-  const canDivisions = isOwner || Boolean(perms?.DIVISIONS?.VIEW) || Boolean(perms?.VENDORS?.VIEW);
-  const canQuality = isOwner || Boolean(perms?.PRODUCT_BATCHES?.VIEW);
-  const canMfg = isOwner || Boolean(perms?.MFG_COMPANIES?.VIEW);
-  const canPurchase = isOwner || Boolean(perms?.PURCHASE_INVOICES?.VIEW);
+  const canUsers    = isOwner || Boolean(perms?.USERS?.VIEW);
+  const canRoles    = isOwner || Boolean(perms?.ROLES?.VIEW);
+  // Wholesalers: divisions and vendors are separate tabs.
+  // Retailers:   vendors shown as "Suppliers" — no divisions tab.
+  const canDivisions = !isRetailer && (isOwner || Boolean(perms?.DIVISIONS?.VIEW));
+  const canVendors   = isOwner || Boolean(perms?.VENDORS?.VIEW);
+  const canQuality   = isOwner || Boolean(perms?.PRODUCT_BATCHES?.VIEW);
+  const canMfg       = isOwner || Boolean(perms?.MFG_COMPANIES?.VIEW);
+  const canPurchase  = isOwner || Boolean(perms?.PURCHASE_INVOICES?.VIEW);
   const canCustomers = isOwner || Boolean(perms?.CUSTOMERS?.VIEW);
-  const canSales = isOwner || Boolean(perms?.SALES_INVOICES?.VIEW);
-  const canSalesReturns = isOwner || Boolean(perms?.SALES_RETURNS?.VIEW);
+  const canSales     = isOwner || Boolean(perms?.SALES_INVOICES?.VIEW);
+  const canSalesReturns    = isOwner || Boolean(perms?.SALES_RETURNS?.VIEW);
   const canPurchaseReturns = isOwner || Boolean(perms?.PURCHASE_RETURNS?.VIEW);
-  const canDivisionPayments = isOwner || Boolean(perms?.DIVISION_PAYMENTS?.VIEW) || Boolean(perms?.VENDOR_PAYMENTS?.VIEW);
-  const canCustomerPayments = isOwner || Boolean(perms?.CUSTOMER_PAYMENTS?.VIEW);
+  const canDivisionPayments  = isOwner || Boolean(perms?.DIVISION_PAYMENTS?.VIEW) || Boolean(perms?.VENDOR_PAYMENTS?.VIEW);
+  const canCustomerPayments  = isOwner || Boolean(perms?.CUSTOMER_PAYMENTS?.VIEW);
   const canPrescriptions = isOwner || Boolean(perms?.PRESCRIPTIONS?.VIEW);
-  const canOrders = isOwner || Boolean(perms?.PURCHASE_ORDERS?.VIEW);
+  const canOrders    = isOwner || Boolean(perms?.PURCHASE_ORDERS?.VIEW);
 
   useEffect(() => {
     return onAuthChanged(() => setAuthTick((t) => t + 1));
@@ -177,7 +182,7 @@ export default function Sidebar({
         icon: pickSidebarIcon(it.to)
       }))
     }));
-  }, [isOwner, perms, isRetailer, pendingOrderCount, taxLabel, authTick, canUsers, canRoles, canDivisions, canQuality, canMfg, canPurchase, canCustomers, canSales, canSalesReturns, canPurchaseReturns, canOrders, canPrescriptions, canDivisionPayments, canCustomerPayments]);
+  }, [isOwner, perms, isRetailer, pendingOrderCount, taxLabel, authTick, canUsers, canRoles, canDivisions, canVendors, canQuality, canMfg, canPurchase, canCustomers, canSales, canSalesReturns, canPurchaseReturns, canOrders, canPrescriptions, canDivisionPayments, canCustomerPayments]);
 
   const panelLabel = variant === "admin" ? "Admin Panel" : "User Panel";
   const avatar = initialsFrom(userName || userEmail || "User");

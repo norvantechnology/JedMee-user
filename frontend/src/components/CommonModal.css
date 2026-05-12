@@ -41,16 +41,16 @@
   --mcm-fs-title:   clamp(14px, 0.95rem + 0.3vw, 17px);   /* modal title          */
   --mcm-fs-body:    clamp(13px, 0.84rem + 0.15vw, 14px);  /* body / input value   */
   --mcm-fs-sub:     clamp(11.5px, 0.76rem + 0.14vw, 12.5px); /* subtitle           */
-  --mcm-fs-label:   clamp(13px, 0.85rem + 0.2vw, 14px);    /* field labels        */
-  --mcm-fs-hint:    10.5px;                                 /* helper — compact     */
-  --mcm-fs-kicker:  clamp(10.5px, 0.72rem + 0.2vw, 12px);   /* section header caps  */
-  --mcm-fs-error:   10.5px;                                 /* validation — compact */
+  --mcm-fs-label:   clamp(14px, 0.9rem + 0.25vw, 15px);    /* field labels — bumped for readability */
+  --mcm-fs-hint:    11.5px;                                 /* helper — visible     */
+  --mcm-fs-kicker:  clamp(11.5px, 0.78rem + 0.25vw, 13px); /* section header caps  */
+  --mcm-fs-error:   11.5px;                                 /* validation — visible */
   --mcm-fs-btn:     13.5px;                                 /* footer CTA buttons   */
 
   /* ── Spacing — more air between groups & sections ── */
-  --mcm-field-stack-gap: 9px;     /* label → control */
-  --mcm-section-gap:    16px;     /* between section cards / stacks in body */
-  --mcm-field-gap:      13px;     /* within section grids */
+  --mcm-field-stack-gap: 11px;    /* label → control — more breathing room */
+  --mcm-section-gap:    20px;     /* between section cards / stacks in body */
+  --mcm-field-gap:      14px;     /* within section grids */
 
   /* ── Surface tokens ── */
   --mcm-surface: var(--color-surface);
@@ -67,26 +67,26 @@
   --mcm-field-border:        var(--modal-field-border);
   --mcm-field-border-hover:  var(--modal-field-border-hover);
   --mcm-field-border-focus:  var(--color-primary);
-  --mcm-field-border-width:  var(--modal-field-border-width, 1px);
+  --mcm-field-border-width:  var(--modal-field-border-width, 1.5px);
   --mcm-field-text:          var(--color-text);
-  /* Lighter than value text so placeholders read as hints, not labels */
-  --mcm-field-ph:            color-mix(in srgb, var(--color-text-faint) 72%, var(--color-border));
+  /* Placeholder — visible hint, not invisible */
+  --mcm-field-ph:            color-mix(in srgb, var(--color-text-3) 75%, var(--color-border));
 
-  /* ── Label — primary reading colour, semi-bold ── */
-  --mcm-label-color:         var(--color-text);
+  /* ── Label — strong reading colour, bold ── */
+  --mcm-label-color:         var(--color-text-heading, var(--color-text));
 
   /* ── Control metrics — taller touch, softer chrome, smoother corners ── */
   --mcm-ctrl-h:          42px;
-  --mcm-ctrl-fs:         13.5px;
+  --mcm-ctrl-fs:         14.5px;
   --mcm-ctrl-fw:         500;
   --mcm-ctrl-radius:     var(--radius-md, 10px);
   --mcm-ctrl-pad-x:      12px;
   --mcm-ctrl-icon-gap:   36px;
   --mcm-ctrl-textarea-min: 76px;
 
-  /* Softer default strokes (modal-only) */
-  --modal-field-border:       color-mix(in srgb, var(--color-text-3) 24%, var(--color-border-strong));
-  --modal-field-border-hover: color-mix(in srgb, var(--color-text-3) 38%, var(--color-border-strong));
+  /* Crisper default strokes (modal-only) — clearly visible borders */
+  --modal-field-border:       color-mix(in srgb, var(--color-text-3) 48%, var(--color-border-strong));
+  --modal-field-border-hover: color-mix(in srgb, var(--color-text-3) 65%, var(--color-border-strong));
 
   /* Focus: clear ring + gentle lift */
   --field-focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent);
@@ -319,15 +319,15 @@
   font-weight: 400;
 }
 
-/* ── Close button ── */
+/* ── Close button — high contrast, always visible ── */
 .mcmClose {
   flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 7px;
-  border: 1px solid var(--modal-head-border);
-  background: var(--modal-head-close-bg);
-  color: var(--modal-head-sub);
+  border: 1.5px solid color-mix(in srgb, var(--modal-head-border, var(--color-border)) 90%, var(--color-text-3));
+  background: color-mix(in srgb, var(--color-surface) 60%, var(--color-card));
+  color: var(--modal-head-text, var(--color-text-2));
   cursor: pointer;
   display: grid;
   place-items: center;
@@ -337,11 +337,11 @@
     color       0.14s ease,
     transform   0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.mcmClose svg { width: 13px; height: 13px; }
+.mcmClose svg { width: 14px; height: 14px; }
 .mcmClose:hover {
-  background: var(--modal-head-close-hover);
-  border-color: var(--modal-head-border);
-  color: var(--modal-head-text);
+  background: color-mix(in srgb, var(--color-danger) 10%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border));
+  color: var(--color-danger);
   transform: scale(1.1) rotate(90deg);
 }
 .mcmClose:active { transform: scale(0.9); }
@@ -404,7 +404,7 @@
     0 14px 32px -12px color-mix(in srgb, var(--color-text) 7%, transparent);
 }
 
-/* Section head — neutral band + hairline separation (no heavy primary bar) */
+/* Section head — clean band, no decorative separator line */
 .mcmBody .sfmSectionHead,
 .mcmBody .piSectionHead,
 .mcmBody .sbmSecHd,
@@ -412,7 +412,7 @@
 .mcmBody .mfzPanelHead {
   background: color-mix(in srgb, var(--color-surface) 42%, var(--color-card));
   border-bottom: none;
-  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--color-border) 75%, var(--color-text-3));
+  box-shadow: none;
   padding: 10px 14px;
   display: flex;
   align-items: center;
@@ -421,23 +421,19 @@
   min-height: 0;
 }
 
-/* Kicker / section title — clearer hierarchy vs field labels */
+/* Kicker / section title — brand purple, clearly above field labels */
 .mcmBody .sfmSectionHead .sfmTitle,
 .mcmBody .sfmSectionTitle,
 .mcmBody .piSectionTitle,
+.mcmBody .cliSectionTitle,
 .mcmBody .mfzHeadKicker,
 .mcmBody .pbmBar {
   font-size: var(--mcm-fs-kicker);
   font-weight: 800;
   letter-spacing: 0.11em;
   text-transform: uppercase;
-  color: var(--color-text-2);
-  line-height: 1.25;
-}
-
-.mcmBody .mfzHeadKicker,
-.mcmBody .pbmBar {
   color: var(--color-primary);
+  line-height: 1.25;
 }
 
 /* Section body — inner frame only when a head exists (outer card already has --mcm-chrome-border) */
@@ -668,7 +664,7 @@
 .mcm_drawer .mcmBody .raField > label,
 .mcm_drawer .mcmBody .sfm .raField label {
   font-size: var(--mcm-fs-label);
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: 0.015em;
   text-transform: none;
   color: var(--mcm-label-color);
@@ -720,14 +716,23 @@
     box-shadow   0.12s ease;
 }
 
-/* Single-line controls */
+/* Single-line controls — uniform height across all field types */
 .mcmBody input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .mcmBody select:not(.csfSelect),
 .mcmBody .raInput {
   min-height: var(--mcm-ctrl-h);
+  height: var(--mcm-ctrl-h);
   padding: 0 var(--mcm-ctrl-pad-x);
 }
-.mcmBody select:not(.csfSelect) { padding-right: var(--mcm-ctrl-icon-gap); }
+.mcmBody select:not(.csfSelect) {
+  padding-right: var(--mcm-ctrl-icon-gap);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
 
 .mcmBody textarea {
   min-height: var(--mcm-ctrl-textarea-min);
@@ -829,13 +834,13 @@
   box-shadow: var(--field-error-ring) !important;
 }
 
-/* ── Error / hint — small, consistent rhythm under controls ── */
+/* ── Error / hint — clearly visible rhythm under controls ── */
 .mcmBody .field-error,
 .mcmBody .raFieldError,
 .mcmBody .mfzErr {
   font-size: var(--mcm-fs-error);
-  color: var(--color-danger-dark);
-  font-weight: 600;
+  color: var(--color-danger-dark, #c0392b);
+  font-weight: 700;
   margin-top: 5px;
   display: flex;
   align-items: center;
@@ -847,8 +852,8 @@
 .mcmBody .raFieldHint,
 .mcmBody .mfzHelp {
   font-size: var(--mcm-fs-hint);
-  color: var(--color-text-3);
-  margin-top: 4px;
+  color: var(--color-text-2);
+  margin-top: 5px;
   line-height: 1.4;
   font-weight: 500;
   letter-spacing: 0.01em;
@@ -1102,13 +1107,13 @@
     --mcm-fs-title:  clamp(13.5px, 4vw, 16px);
     --mcm-fs-body:   clamp(13px, 3.5vw, 14px);
     --mcm-fs-sub:    clamp(11px, 3vw, 12.5px);
-    --mcm-fs-label:  clamp(11.5px, 3vw, 13px);
-    --mcm-field-stack-gap: 6px;
-    --mcm-section-gap: 12px;
-    --mcm-field-gap: 11px;
-    --mcm-fs-hint:   10.5px;
+    --mcm-fs-label:  clamp(13px, 3.4vw, 14.5px);
+    --mcm-field-stack-gap: 9px;
+    --mcm-section-gap: 16px;
+    --mcm-field-gap: 12px;
+    --mcm-fs-hint:   11px;
     --mcm-fs-btn:    12.5px;
-    --mcm-fs-kicker: 10px;
+    --mcm-fs-kicker: 11px;
   }
   .mcmPanel {
     width: 100%;
@@ -1208,10 +1213,10 @@
   .mcm {
     --mcm-fs-title:  clamp(12.5px, 3.8vw, 15px);
     --mcm-fs-body:   12.5px;
-    --mcm-fs-label:  clamp(11px, 2.9vw, 12px);
-    --mcm-fs-hint:   10.5px;
+    --mcm-fs-label:  clamp(12px, 3.2vw, 13.5px);
+    --mcm-fs-hint:   11px;
     --mcm-fs-btn:    12px;
-    --mcm-fs-kicker: 9px;
+    --mcm-fs-kicker: 10.5px;
   }
   .mcmHead { padding-left: 8px; padding-right: 8px; }
   .mcmMark { width: 32px; height: 32px; border-radius: 9px; }
@@ -1424,15 +1429,15 @@
   gap: 8px;
   padding: 10px 14px;
   border-bottom: none;
-  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--color-border) 75%, var(--color-text-3));
+  box-shadow: none;
   background: color-mix(in srgb, var(--color-surface) 42%, var(--color-card));
 }
 
-/* Section kicker — mono, tracking, distinct from field labels */
+/* Section kicker — mono, tracking, clearly above field labels */
 .mfzHeadKicker {
   font-family: var(--font-mono, monospace);
-  font-size: clamp(10px, 1.5vw, 11px);
-  font-weight: 700;
+  font-size: clamp(11.5px, 1.8vw, 13px);
+  font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-primary);
@@ -1496,10 +1501,10 @@
 .mfzTop12 { margin-top: 10px; }
 
 .mfzPanelBody {
-  padding: 12px 14px;
+  padding: 14px 16px;
   display: grid;
-  gap: 13px;
-  background: var(--modal-panel-body-bg);
+  gap: 14px;
+  background: var(--modal-panel-body-bg, color-mix(in srgb, var(--color-surface) 6%, var(--color-card)));
 }
 
 /* Vertical bands inside one panel (grids, check groups, …) — shared by master + any modal using .mcmBody */
@@ -1547,7 +1552,7 @@
 
 .mfzLabel {
   font-size: var(--mcm-fs-label);
-  font-weight: 650;
+  font-weight: 700;
   letter-spacing: 0.015em;
   text-transform: none;
   color: var(--mcm-label-color);
@@ -1632,8 +1637,8 @@
   background: var(--mcm-field-error-bg, color-mix(in srgb, var(--color-danger) 6%, var(--modal-field-bg))) !important;
 }
 
-.mfzHelp { font-size: 10.5px; color: var(--color-text-3); line-height: 1.4; font-weight: 500; letter-spacing: 0.01em; }
-.mfzErr  { font-size: 10.5px; color: var(--color-danger-dark); font-weight: 600; letter-spacing: 0.01em; }
+.mfzHelp { font-size: 11.5px; color: var(--color-text-2); line-height: 1.4; font-weight: 500; letter-spacing: 0.01em; margin-top: 4px; }
+.mfzErr  { font-size: 11.5px; color: var(--color-danger-dark, #c0392b); font-weight: 700; letter-spacing: 0.01em; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
 
 .mfzNote {
   border-radius: 9px;
@@ -1704,7 +1709,7 @@
 
 @media (max-width: 720px) {
   .mfzPanelHead { padding: 8px 12px; gap: 8px; }
-  .mfzPanelBody { padding: 10px 12px; gap: 10px; }
+  .mfzPanelBody { padding: 12px 14px; gap: 11px; }
   .mcmBody .mfzPanelBody.mfzPanelBody_stack > * + * {
     margin-top: 9px;
     padding-top: 9px;
@@ -1833,7 +1838,7 @@
 .mfgInlineRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mfgInlineRowEnd { justify-content: space-between; }
 .mfgMiniBtn { height: 30px; border-radius: 999px; font-weight: 800; }
-.mfgTwoColChecks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.mfgTwoColChecks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 8px 12px; }
 .mfgCheckDesc { display: block; margin-top: 3px; font-size: 12px; font-weight: 600; color: var(--color-text-3); line-height: 1.35; }
 
 @media (max-width: 720px) {

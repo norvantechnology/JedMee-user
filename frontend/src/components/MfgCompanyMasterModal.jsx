@@ -360,6 +360,15 @@ function MfgCompanyFormV2({
           </ModalFormPanelHead>
           <ModalFormPanelBody>
             <ModalFormGrid>
+              {/* Name first — required, primary, wide */}
+              <ModalFormField span={8} label="Name" required error={errors.name || null}>
+                <input
+                  className="mfzInput"
+                  value={form.name}
+                  onChange={(e) => setField("name", e.target.value)}
+                  placeholder="Full company name"
+                />
+              </ModalFormField>
               <ModalFormField span={4} label="Code" error={errors.code || null}>
                 <input
                   className="mfzInput"
@@ -369,24 +378,17 @@ function MfgCompanyFormV2({
                 />
               </ModalFormField>
 
-              <ModalFormField span={8} label="Name" required error={errors.name || null}>
-                <input
-                  className="mfzInput"
-                  value={form.name}
-                  onChange={(e) => setField("name", e.target.value)}
-                  placeholder="Full company name"
-                />
-              </ModalFormField>
-
-              <ModalFormField span={4} label="Short name">
+              {/* Short name + Rack — fill the full row evenly */}
+              <ModalFormField span={6} label="Short name">
                 <input className="mfzInput" value={form.shortName} onChange={(e) => setField("shortName", e.target.value)} placeholder="Optional label" />
               </ModalFormField>
-              <ModalFormField span={4} label="Rack number">
+              <ModalFormField span={6} label="Rack number">
                 <input className="mfzInput" value={form.rackNo} onChange={(e) => setField("rackNo", e.target.value)} placeholder="Storage location" />
               </ModalFormField>
 
+              {/* Main company — optional grouping, narrower than full width */}
               <ModalFormField
-                span={12}
+                span={8}
                 label="Main company (group)"
                 hint="Use this to group multiple manufacturers under one parent."
               >
@@ -428,7 +430,7 @@ function MfgCompanyFormV2({
               <div className="mfzNote">Password unchanged.</div>
             ) : (
               <ModalFormGrid>
-                <ModalFormField span={12} label="Password (optional)">
+                <ModalFormField span={6} label="Password (optional)">
                   <PasswordInput
                     className="mfzInput"
                     value={form.password}

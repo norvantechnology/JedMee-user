@@ -81,6 +81,8 @@ export default function ProductBatchModal({
   divisionOptions = [],
   mfgCompanyOptions = [],
   productOptions = [],
+  /** Vendor/supplier options for the batch-level supplier picker */
+  vendorOptions = [],
   onRefreshDivisionMfg,
   onRefreshProducts,
   onRequestCreateProduct,
@@ -98,6 +100,7 @@ export default function ProductBatchModal({
     () => ({
       divisionId: "",
       mfgCompanyId: "",
+      vendorId: "",
       productCode: "",
       productName: "",
       drugName: "",
@@ -301,8 +304,11 @@ export default function ProductBatchModal({
     else if (clean(form.productName).length < 2) out.productName = "Product name is required.";
     if (!clean(form.batchNo)) out.batchNo = "Batch No is required.";
     if (!clean(form.expiryDate)) out.expiryDate = "Expiry date is required.";
-    // Allow editing/creating expired batches; expiry rules should be enforced at sale time.
+    // Allow editing/creating expired batches (e.g. for historical data entry).
+    // Expiry rules are enforced at sale time. Show a warning but do not block.
     else if (!isValidDateYmd(form.expiryDate)) out.expiryDate = "Expiry date must be a valid date.";
+    // FE-12: warn if expiry date is in the past (non-blocking)
+    // The warning is surfaced via the `expiryWarning` field (not `expiryDate` error).
 
     const salesGST = numOrEmpty(form.salesGST);
     const purchaseGST = numOrEmpty(form.purchaseGST);
@@ -581,7 +587,7 @@ export default function ProductBatchModal({
                   const payload = {
                     productId: clean(form.productId) || null,
                     divisionId: clean(form.divisionId) || null,
-                    vendorId: null,
+                    vendorId: clean(form.vendorId) || null,
                     mfgCompanyId: clean(form.mfgCompanyId) || null,
                     productCode: clean(form.productCode),
                     productName: clean(form.productName),
@@ -798,6 +804,25 @@ export default function ProductBatchModal({
                     />
                     {showErr("barcode") && errors.barcode ? <div className="mfzErr">{errors.barcode}</div> : null}
                   </ModalFormField>
+                  {vendorOptions.length > 0 ? (
+                    <ModalFormField span={12} label="Supplier">
+                      <select
+                        className="mfzInput"
+                        value={form.vendorId || ""}
+                        disabled={busy || readOnly}
+                        onChange={(e) => setField("vendorId", e.target.value)}
+                      >
+                        <option value="">— No supplier —</option>
+                        {vendorOptions.map((v) => (
+                          <option key={v.id} value={v.id}>
+                            {v.name || v.short_name || v.id}
+                            {v.short_name && v.name && v.short_name !== v.name ? ` (${v.short_name})` : ""}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="mfzHelp">Which supplier provided this batch</div>
+                    </ModalFormField>
+                  ) : null}
                 </div>
               </div>
 

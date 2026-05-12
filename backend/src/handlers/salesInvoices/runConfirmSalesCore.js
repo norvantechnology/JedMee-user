@@ -21,6 +21,14 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
   const invoice = invRs.rows?.[0] || null;
   if (!invoice) return { err: fail(404, "NOT_FOUND", "Invoice not found") };
   if (String(invoice.status) !== "DRAFT") return { err: fail(400, "BUSINESS_RULE", "Only DRAFT invoices can be confirmed.") };
+
+  // BE-14: Validate bill_type
+  const VALID_BILL_TYPES_CONFIRM = ["CASH_MEMO", "TAX_INVOICE", "DEBIT", "CREDIT"];
+  const billType = String(invoice.bill_type || "CASH_MEMO").toUpperCase();
+  if (!VALID_BILL_TYPES_CONFIRM.includes(billType)) {
+    return { err: fail(400, "VALIDATION_ERROR", `Invalid bill type "${invoice.bill_type}". Must be one of: CASH_MEMO, TAX_INVOICE, DEBIT, CREDIT.`) };
+  }
+
   const custRs = await q(`SELECT * FROM customers WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`, [invoice.customer_id, accountId]);
   const customer = custRs.rows?.[0] || null;
   if (!customer) return { err: fail(400, "VALIDATION_ERROR", "Customer not found") };

@@ -19,6 +19,8 @@ import { bulkDeleteProductBatches, createProductBatch, deleteProductBatch, listP
 import { useLocale } from "../context/LocaleContext.jsx";
 import { listDivisions } from "../services/divisionService.js";
 import { listMfgCompanies } from "../services/mfgCompanyService.js";
+import { listVendors } from "../services/vendorService.js";
+import { upsertSupplierProduct } from "../services/supplierProductService.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
 import { IconProducts, IconStockAlert } from "../components/ui/AppIcons.jsx";
 import { IconBtn, IconEdit, IconLayers, IconPlus, IconTrash } from "../components/TableActionKit.jsx";
@@ -63,8 +65,10 @@ export default function QualityMasterPage() {
   const [rows, setRows] = useState([]);
   const [divisions, setDivisions] = useState([]);
   const [mfgCompanies, setMfgCompanies] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [divisionsLoading, setDivisionsLoading] = useState(false);
   const [mfgLoading, setMfgLoading] = useState(false);
+  const [vendorsLoading, setVendorsLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState({ by: "name", dir: "asc" });
   const [batchPresenceFilter, setBatchPresenceFilter] = useState(""); // "" | "with" | "without"
@@ -165,6 +169,24 @@ export default function QualityMasterPage() {
       alive = false;
     };
   }, [authTick]);
+
+  // Load vendors for supplier assignment (wholesaler only)
+  useEffect(() => {
+    if (isRetailer) return;
+    let alive = true;
+    (async () => {
+      setVendorsLoading(true);
+      const resp = await listVendors({ limit: 500, sortBy: "name", sortDir: "asc" });
+      if (!alive) return;
+      if (resp.status >= 200 && resp.status < 300 && resp.json?.ok) {
+        setVendors(resp.json?.data?.vendors || resp.json?.data?.items || []);
+      }
+      if (alive) setVendorsLoading(false);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [authTick, isRetailer]);
 
   async function loadBatchesForDrawer(productId) {
     if (!productId) {
@@ -852,6 +874,31 @@ export default function QualityMasterPage() {
                       header: "Mfg company",
                       sortable: false,
                       render: (r) => <span>{r.mfg_company_name || ""}</span>
+                    },
+                    {
+                      id: "supplier_name",
+                      header: "Supplier",
+                      sortable: false,
+                      render: (r) => {
+                        const name = r.supplier_short_name || r.supplier_name;
+                        if (!name) return <span style={{ color: "var(--color-text-4)", fontSize: 12 }}>—</span>;
+                        return (
+                          <span
+                            title={r.supplier_name || ""}
+                            style={{ color: "var(--color-text-2)", fontSize: 12.5 }}
+                          >
+                            {name}
+                            {r.supplier_is_preferred ? (
+                              <span
+                                style={{ marginLeft: 4, fontSize: 10, color: "var(--color-success)", fontWeight: 700 }}
+                                title="Preferred supplier"
+                              >
+                                ★
+                              </span>
+                            ) : null}
+                          </span>
+                        );
+                      }
                     }
                   ]),
               {
@@ -996,6 +1043,7 @@ export default function QualityMasterPage() {
                 const pieces = [
                   `Code ${p.code || ""}`,
                   p.division_name ? `Division: ${p.division_name}${p.mfg_short_name || p.mfg_company_name ? ` (${p.mfg_short_name || p.mfg_company_name})` : ""}` : p.mfg_company_name ? `Mfg: ${p.mfg_company_name}` : "",
+                  !isRetailer && (p.supplier_short_name || p.supplier_name) ? `Supplier: ${p.supplier_short_name || p.supplier_name}` : "",
                   p.sales_gst != null && p.sales_gst !== "" ? `${taxLabel}: ${p.sales_gst}%` : "",
                   p.sales_scheme ? `Scheme: ${p.sales_scheme}` : "",
                   p.packing ? `Packing: ${p.packing}` : "",
@@ -1266,10 +1314,11 @@ export default function QualityMasterPage() {
         open={productMasterOpen}
         mode={productMasterMode}
         busy={busy}
-        loading={Boolean(divisionsLoading || mfgLoading)}
+        loading={Boolean(divisionsLoading || mfgLoading || vendorsLoading)}
         initialValue={editingProduct}
         mfgCompanyOptions={mfgCompanies}
         divisionOptions={divisions}
+        vendorOptions={vendors}
         portal={productMasterStacked}
         portalZIndex={520}
         onRefreshDivisions={async () => {
@@ -1294,6 +1343,21 @@ export default function QualityMasterPage() {
               : await createProduct(payload);
           if (resp.status >= 200 && resp.status < 300 && resp.json?.ok) {
             const created = resp.json?.data?.product || null;
+            const savedProductId = created?.id || editingProduct?.id || null;
+
+            // Save supplier assignment for wholesalers when a supplier was chosen
+            if (!isRetailer && payload.supplierId && savedProductId) {
+              try {
+                await upsertSupplierProduct({
+                  vendorId: payload.supplierId,
+                  productId: savedProductId,
+                  isPreferred: true
+                });
+              } catch {
+                /* non-fatal — product was saved; supplier link can be retried */
+              }
+            }
+
             setProductMasterOpen(false);
             setProductMasterStacked(false);
             await refresh();

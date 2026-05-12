@@ -70,6 +70,16 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
     }
   }
 
+  // BE-13: Warn (non-blocking) if any line item has an already-expired batch
+  const today = new Date();
+  const todayYmd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const expiredWarnings = [];
+  for (const it of items) {
+    if (it.expiry_date && String(it.expiry_date).slice(0, 10) < todayYmd) {
+      expiredWarnings.push(`Batch "${it.batch_no}" (${it.product_name}) has already expired (${String(it.expiry_date).slice(0, 10)}). Confirm only if this is intentional.`);
+    }
+  }
+
   const lowStockBatches = new Set();
   for (const it of items) {
     const gstSlab = toGstSlab(it.gst_percent);
@@ -392,7 +402,7 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
     `SELECT * FROM purchase_invoices WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`,
     [invoiceId, accountId]
   );
-  return { invoice: done.rows?.[0] || null, affectedBatchIds: [...lowStockBatches] };
+  return { invoice: done.rows?.[0] || null, affectedBatchIds: [...lowStockBatches], warnings: expiredWarnings };
 }
 
 module.exports = { runConfirmPurchaseInvoiceInTx };

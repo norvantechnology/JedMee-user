@@ -24,9 +24,12 @@ async function handler(event) {
 
       const itemsR = await q(
         `
-        SELECT pri.*, pii.qty AS purchased_qty, pii.free_qty AS purchased_free_qty, pii.mfg_company_id
+        SELECT pri.*,
+               pii.qty          AS purchased_qty,
+               pii.free_qty     AS purchased_free_qty,
+               pii.mfg_company_id
         FROM purchase_return_items pri
-        JOIN purchase_invoice_items pii ON pii.id = pri.purchase_invoice_item_id
+        LEFT JOIN purchase_invoice_items pii ON pii.id = pri.purchase_invoice_item_id
         WHERE pri.purchase_return_id = $1 AND pri.account_id = $2
         `,
         [id, ctx.accountId]
@@ -42,44 +45,50 @@ async function handler(event) {
             return { err: fail(400, "POLICY_BLOCK", `Return is blocked for manufacturer: ${mfg.name || "Unknown"}.`) };
           }
         }
-        const prevR = await q(
-          `
-          SELECT
-            COALESCE(SUM(pri.return_qty), 0) AS q,
-            COALESCE(SUM(pri.return_free_qty), 0) AS fq
-          FROM purchase_return_items pri
-          JOIN purchase_returns pr ON pr.id = pri.purchase_return_id
-          WHERE pri.account_id = $1
-            AND pri.purchase_invoice_item_id = $2
-            AND pr.status = 'CONFIRMED'
-            AND pr.id <> $3
-          `,
-          [ctx.accountId, it.purchase_invoice_item_id, id]
-        );
-        const used = Number(prevR.rows?.[0]?.q || 0);
-        const usedFree = Number(prevR.rows?.[0]?.fq || 0);
-        if (used + Number(it.return_qty || 0) > Number(it.purchased_qty || 0)) {
-          return { err: fail(400, "VALIDATION_ERROR", "Return qty exceeds original purchased qty.") };
+        // Only validate qty limits when linked to an original purchase invoice item (not freehand)
+        if (it.purchase_invoice_item_id) {
+          const prevR = await q(
+            `
+            SELECT
+              COALESCE(SUM(pri.return_qty), 0) AS q,
+              COALESCE(SUM(pri.return_free_qty), 0) AS fq
+            FROM purchase_return_items pri
+            JOIN purchase_returns pr ON pr.id = pri.purchase_return_id
+            WHERE pri.account_id = $1
+              AND pri.purchase_invoice_item_id = $2
+              AND pr.status = 'CONFIRMED'
+              AND pr.id <> $3
+            `,
+            [ctx.accountId, it.purchase_invoice_item_id, id]
+          );
+          const used = Number(prevR.rows?.[0]?.q || 0);
+          const usedFree = Number(prevR.rows?.[0]?.fq || 0);
+          if (used + Number(it.return_qty || 0) > Number(it.purchased_qty || 0)) {
+            return { err: fail(400, "VALIDATION_ERROR", "Return qty exceeds original purchased qty.") };
+          }
+          if (usedFree + Number(it.return_free_qty || 0) > Number(it.purchased_free_qty || 0)) {
+            return { err: fail(400, "VALIDATION_ERROR", "Return free qty exceeds original purchased free qty.") };
+          }
         }
-        if (usedFree + Number(it.return_free_qty || 0) > Number(it.purchased_free_qty || 0)) {
-          return { err: fail(400, "VALIDATION_ERROR", "Return free qty exceeds original purchased free qty.") };
+        // Only post inventory transaction when a batch is linked
+        if (it.batch_id) {
+          await q(
+            `
+            INSERT INTO inventory_txns (account_id, batch_id, txn_type, qty, free_qty, ref_type, ref_id, note, created_by_user_id)
+            VALUES ($1,$2,'PURCHASE_RETURN',$3,$4,'PURCHASE_RETURN_ITEM',$5,$6,$7)
+            `,
+            [
+              ctx.accountId,
+              it.batch_id,
+              -Number(it.return_qty || 0),
+              -Number(it.return_free_qty || 0),
+              it.id,
+              `Purchase return ${ret.return_number}`,
+              actorId
+            ]
+          );
+          lowStockBatches.add(String(it.batch_id));
         }
-        await q(
-          `
-          INSERT INTO inventory_txns (account_id, batch_id, txn_type, qty, free_qty, ref_type, ref_id, note, created_by_user_id)
-          VALUES ($1,$2,'PURCHASE_RETURN',$3,$4,'PURCHASE_RETURN_ITEM',$5,$6,$7)
-          `,
-          [
-            ctx.accountId,
-            it.batch_id,
-            -Number(it.return_qty || 0),
-            -Number(it.return_free_qty || 0),
-            it.id,
-            `Purchase return ${ret.return_number}`,
-            actorId
-          ]
-        );
-        lowStockBatches.add(String(it.batch_id));
       }
 
       await q(
@@ -93,6 +102,13 @@ async function handler(event) {
         `,
         [id, ctx.accountId, actorId]
       );
+
+      // Refresh the original purchase invoice payment summary so balance_due reflects the return
+      if (ret.purchase_invoice_id) {
+        const { refreshInvoicePaymentSummary } = require("../../shared/purchase");
+        await refreshInvoicePaymentSummary(q, ctx.accountId, ret.purchase_invoice_id);
+      }
+
       const done = await q(`SELECT * FROM purchase_returns WHERE id = $1 AND account_id = $2 LIMIT 1`, [id, ctx.accountId]);
       return { item: done.rows?.[0] || null, affectedBatchIds: [...lowStockBatches] };
     });

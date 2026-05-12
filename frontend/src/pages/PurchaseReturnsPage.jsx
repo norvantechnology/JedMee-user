@@ -176,7 +176,7 @@ export default function PurchaseReturnsPage() {
               },
               {
                 id: "vendor_name",
-                header: "Vendor / Division",
+                header: "Supplier / Division",
                 render: (r) => r.vendor_name || r.division_name || "—"
               },
               {

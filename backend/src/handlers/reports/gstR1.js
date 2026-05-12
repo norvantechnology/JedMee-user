@@ -30,17 +30,14 @@ async function handler(event) {
       // HSN-wise summary (B2B + B2C combined)
       query(
         `SELECT
-           COALESCE(sii.hsn_code, 'N/A')   AS hsn_code,
-           sii.gst_percent                  AS gst_rate,
-           COUNT(DISTINCT si.id)            AS invoice_count,
-           SUM(sii.taxable_amount)          AS taxable_value,
-           SUM(sii.cgst_amount)             AS cgst,
-           SUM(sii.sgst_amount)             AS sgst,
-           SUM(sii.igst_amount)             AS igst,
-           SUM(sii.taxable_amount
-               + COALESCE(sii.cgst_amount,0)
-               + COALESCE(sii.sgst_amount,0)
-               + COALESCE(sii.igst_amount,0)) AS total_value
+           COALESCE(sii.hsn_code, 'N/A')                          AS hsn_code,
+           sii.gst_percent                                         AS gst_rate,
+           COUNT(DISTINCT si.id)                                   AS invoice_count,
+           ROUND(SUM(sii.taxable_amount)::numeric, 4)              AS taxable_value,
+           ROUND((SUM(sii.taxable_amount) * sii.gst_percent / 200)::numeric, 4) AS cgst,
+           ROUND((SUM(sii.taxable_amount) * sii.gst_percent / 200)::numeric, 4) AS sgst,
+           0                                                        AS igst,
+           ROUND((SUM(sii.taxable_amount) * (1 + sii.gst_percent / 100))::numeric, 4) AS total_value
          FROM sales_invoice_items sii
          JOIN sales_invoices si ON si.id = sii.sales_invoice_id
          WHERE si.account_id = $1

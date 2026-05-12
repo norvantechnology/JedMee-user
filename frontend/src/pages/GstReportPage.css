@@ -10,12 +10,12 @@
 
 .gstFilterRow {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
   align-items: flex-end;
 }
 
-.gstFilterField { display: flex; flex-direction: column; gap: 5px; }
+.gstFilterField { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 130px; }
 
 .gstFieldLabel {
   font-size: 11px;
@@ -35,7 +35,7 @@
   font-size: 14px;
   font-family: var(--font);
   outline: none;
-  min-width: 148px;
+  width: 100%;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .gstDateInput:focus {
@@ -48,6 +48,15 @@
   gap: 8px;
   align-items: center;
   flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .gstFilterBar { padding: 12px 14px; }
+  .gstFilterRow { gap: 8px; }
+  .gstFilterField { min-width: 0; }
+  .gstFilterActions { width: 100%; }
+  .gstFilterActions .appBtn { flex: 1; justify-content: center; }
 }
 
 /* ── Stat cards ──────────────────────────────────────────────────────────── */
@@ -58,7 +67,8 @@
   margin-bottom: 16px;
 }
 @media (max-width: 900px) { .gstStatRow { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 480px) { .gstStatRow { grid-template-columns: 1fr; } }
+/* Always 2-per-row on phones — never collapse to 1 column */
+@media (max-width: 480px) { .gstStatRow { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
 
 .gstStatCard {
   background: var(--color-card);
@@ -66,6 +76,13 @@
   border-radius: var(--layout-card-radius, 12px);
   padding: 16px 20px;
   box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 480px) {
+  .gstStatCard { padding: 12px 14px; }
+  .gstStatIcon { width: 30px; height: 30px; margin-bottom: 8px; }
+  .gstStatLabel { font-size: 10px; }
+  .gstStatValue { font-size: 18px; }
 }
 
 /* Icon badge — color driven by CSS custom property --ic set inline */
@@ -182,9 +199,15 @@
 /* ── B2C summary block ───────────────────────────────────────────────────── */
 .gstB2cRow {
   display: flex;
-  gap: 32px;
-  flex-wrap: wrap;
+  gap: 24px;
+  flex-wrap: nowrap;
   padding: 16px 20px;
+}
+
+@media (max-width: 480px) {
+  .gstB2cRow { gap: 16px; padding: 12px 14px; }
+  .gstB2cValue { font-size: 16px; }
+  .gstB2cLabel { font-size: 10px; }
 }
 
 .gstB2cLabel {

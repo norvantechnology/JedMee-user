@@ -59,11 +59,34 @@ export default function AppShell({
     setMobileOpen(false);
   }, [location.pathname]);
 
-  // Safety: never let the app get "scroll locked" on mobile.
-  // Some overlays/modals intentionally set body overflow hidden; if anything
-  // interrupts cleanup, this ensures scrolling is restored on navigation.
+  // Lock body scroll when mobile sidebar is open; restore on close/navigation.
   useEffect(() => {
     try {
+      if (mobileOpen) {
+        document.body.classList.add("sidebar-mobile-open");
+      } else {
+        document.body.classList.remove("sidebar-mobile-open");
+        document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
+        document.body.style.position = "";
+        document.body.style.width = "";
+      }
+    } catch {
+      // ignore
+    }
+    return () => {
+      try {
+        document.body.classList.remove("sidebar-mobile-open");
+      } catch {
+        // ignore
+      }
+    };
+  }, [mobileOpen]);
+
+  // Safety: always restore scroll on navigation.
+  useEffect(() => {
+    try {
+      document.body.classList.remove("sidebar-mobile-open");
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
       document.body.style.position = "";
@@ -71,7 +94,7 @@ export default function AppShell({
     } catch {
       // ignore
     }
-  }, [location.pathname, mobileOpen]);
+  }, [location.pathname]);
 
   const userRoleLabel = useMemo(() => {
     // eslint-disable-next-line no-unused-vars

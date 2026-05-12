@@ -123,7 +123,7 @@ export default function VendorMasterModal({
     [allMfgRows]
   );
 
-  const partnerLabel = isRetailer ? "Supplier" : "Vendor";
+  const partnerLabel = "Supplier";
 
   function submitPayload() {
     return {
@@ -149,15 +149,7 @@ export default function VendorMasterModal({
       open={open}
       loading={loading}
       loadingText="Loading required data…"
-      title={
-        mode === "edit"
-          ? isRetailer
-            ? "Edit supplier"
-            : "Edit vendor"
-          : isRetailer
-            ? "New supplier"
-            : "New vendor"
-      }
+      title={mode === "edit" ? "Edit supplier" : "New supplier"}
       subtitle=""
       onClose={handleExplicitClose}
       onOverlayClose={handleOverlayClose}
@@ -181,7 +173,7 @@ export default function VendorMasterModal({
             loading={busy}
             loadingText={mode === "edit" ? "Saving…" : "Working…"}
           >
-            {mode === "edit" ? "Save changes" : isRetailer ? "Create supplier" : "Create vendor"}
+            {mode === "edit" ? "Save changes" : "Create supplier"}
           </AsyncButton>
         </ModalFooterShell>
       }
@@ -190,13 +182,13 @@ export default function VendorMasterModal({
         <ModalFormBody className="vmSplit">
           <ModalFormPanel className="vmColStretch" aria-label={`${partnerLabel} profile`}>
             <ModalFormPanelHead>
-              <ModalFormSectionTitle kicker={isRetailer ? "Supplier profile" : "Vendor profile"} />
+              <ModalFormSectionTitle kicker="Supplier profile" />
             </ModalFormPanelHead>
             <ModalFormPanelBody>
               <ModalFormGrid>
                 <ModalFormField
                   span={12}
-                  label={isRetailer ? "Supplier name" : "Vendor name"}
+                  label="Supplier name"
                   required
                   error={submitted && clean(form.name).length < 2 ? "Name is required (min 2 characters)." : null}
                 >
@@ -207,6 +199,23 @@ export default function VendorMasterModal({
                     onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                     placeholder=""
                     autoComplete="organization"
+                  />
+                </ModalFormField>
+
+                {/* Credit days first — business-critical; Code + Short name are optional */}
+                <ModalFormField span={4} label="Credit days">
+                  <input
+                    className="mfzInput"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="0"
+                    value={String(form.creditDays ?? "")}
+                    disabled={busy}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, "");
+                      setForm((p) => ({ ...p, creditDays: val }));
+                    }}
                   />
                 </ModalFormField>
 
@@ -227,22 +236,6 @@ export default function VendorMasterModal({
                     disabled={busy}
                     onChange={(e) => setForm((p) => ({ ...p, shortName: e.target.value }))}
                     placeholder=""
-                  />
-                </ModalFormField>
-
-                <ModalFormField span={4} label="Credit days">
-                  <input
-                    className="mfzInput"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    placeholder="0"
-                    value={String(form.creditDays ?? "")}
-                    disabled={busy}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/[^0-9]/g, "");
-                      setForm((p) => ({ ...p, creditDays: val }));
-                    }}
                   />
                 </ModalFormField>
 
@@ -285,7 +278,7 @@ export default function VendorMasterModal({
                 </ModalFormField>
 
                 {!isRetailer ? (
-                  <ModalFormField span={12} label="Linked manufacturer">
+                  <ModalFormField span={8} label="Linked manufacturer">
                     <MasterSelectWithCreate
                       kind="mfgCompany"
                       selectClassName="mfzInput"
@@ -339,7 +332,7 @@ export default function VendorMasterModal({
                   />
                 </ModalFormField>
 
-                <ModalFormField span={12} label="Email">
+                <ModalFormField span={8} label="Email">
                   <input
                     className="mfzInput"
                     type="email"

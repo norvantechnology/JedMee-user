@@ -11,11 +11,14 @@ async function handler(event) {
   if (!ctx.accountId) return fail(400, "BAD_REQUEST", "account not found");
 
   const qs = event?.queryStringParameters || {};
-  const vendorId = String(qs.vendor_id || qs.vendorId || "").trim() || null;
-  const productId = String(qs.product_id || qs.productId || "").trim() || null;
+  const vendorId      = String(qs.vendor_id      || qs.vendorId      || "").trim() || null;
+  const productId     = String(qs.product_id     || qs.productId     || "").trim() || null;
+  const divisionId    = String(qs.division_id    || qs.divisionId    || "").trim() || null;
+  const mfgCompanyId  = String(qs.mfg_company_id || qs.mfgCompanyId  || "").trim() || null;
 
   const params = [ctx.accountId];
   let where = "sp.account_id = $1";
+
   if (vendorId) {
     params.push(vendorId);
     where += ` AND sp.vendor_id = $${params.length}`;
@@ -23,6 +26,14 @@ async function handler(event) {
   if (productId) {
     params.push(productId);
     where += ` AND sp.product_id = $${params.length}`;
+  }
+  if (divisionId) {
+    params.push(divisionId);
+    where += ` AND sp.division_id = $${params.length}`;
+  }
+  if (mfgCompanyId) {
+    params.push(mfgCompanyId);
+    where += ` AND sp.mfg_company_id = $${params.length}`;
   }
 
   try {
@@ -33,25 +44,47 @@ async function handler(event) {
         sp.account_id,
         sp.vendor_id,
         sp.product_id,
+        sp.division_id,
+        sp.mfg_company_id,
         sp.typical_purchase_rate,
         sp.notes,
         sp.is_preferred,
         sp.last_supplied_on,
         sp.created_at,
         sp.updated_at,
-        v.name        AS vendor_name,
-        v.short_name  AS vendor_short_name,
-        v.phone_number AS vendor_phone,
-        v.address     AS vendor_address,
-        p.code        AS product_code,
-        p.name        AS product_name,
-        p.drug_name   AS product_drug_name,
+        v.name          AS vendor_name,
+        v.short_name    AS vendor_short_name,
+        v.phone_number  AS vendor_phone,
+        v.address       AS vendor_address,
+        p.code          AS product_code,
+        p.name          AS product_name,
+        p.drug_name     AS product_drug_name,
         p.mfg_company_id AS product_mfg_company_id,
-        mc.name       AS product_mfg_name
+        mc.name         AS product_mfg_name,
+        d.name          AS division_name,
+        d.code          AS division_code,
+        mc2.name        AS mfg_company_name,
+        mc2.short_name  AS mfg_company_short_name
       FROM supplier_products sp
-      JOIN vendors v        ON v.id = sp.vendor_id  AND v.account_id = sp.account_id AND v.deleted_at IS NULL
-      JOIN products p       ON p.id = sp.product_id AND p.account_id = sp.account_id AND p.deleted_at IS NULL
-      LEFT JOIN mfg_companies mc ON mc.id = p.mfg_company_id AND mc.account_id = p.account_id
+      JOIN vendors v
+        ON v.id = sp.vendor_id
+       AND v.account_id = sp.account_id
+       AND v.deleted_at IS NULL
+      JOIN products p
+        ON p.id = sp.product_id
+       AND p.account_id = sp.account_id
+       AND p.deleted_at IS NULL
+      LEFT JOIN mfg_companies mc
+        ON mc.id = p.mfg_company_id
+       AND mc.account_id = p.account_id
+      LEFT JOIN divisions d
+        ON d.id = sp.division_id
+       AND d.account_id = sp.account_id
+       AND d.deleted_at IS NULL
+      LEFT JOIN mfg_companies mc2
+        ON mc2.id = sp.mfg_company_id
+       AND mc2.account_id = sp.account_id
+       AND mc2.deleted_at IS NULL
       WHERE ${where}
       ORDER BY p.name ASC, v.name ASC
       `,

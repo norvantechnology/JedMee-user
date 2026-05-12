@@ -241,6 +241,48 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
 
 async function enforceFinancialLimits(q, accountId, customer, mfgCompanyIds, invoiceItems) {
   if (Boolean(customer.is_cash_customer)) return { ok: true };
+
+  // BE-11: Enforce customer-level credit_days and credit_limit
+  const customerCreditDays = Number(customer.credit_days || 0);
+  const customerCreditLimit = Number(customer.credit_limit || 0);
+  if (customerCreditDays > 0 || customerCreditLimit > 0) {
+    const custOutRs = await q(
+      `SELECT id, invoice_date, total_amount, balance_due
+       FROM sales_invoices
+       WHERE account_id = $1 AND customer_id = $2
+         AND status = 'CONFIRMED'::sales_invoice_status
+         AND payment_status IN ('UNPAID'::sales_payment_status, 'PARTIAL'::sales_payment_status)
+       ORDER BY invoice_date ASC`,
+      [accountId, customer.id]
+    );
+    const unpaid = custOutRs.rows || [];
+    const totalOutstanding = unpaid.reduce((s, r) => s + Number(r.balance_due || 0), 0);
+    const invoiceTotal = (invoiceItems || []).reduce((s, it) => s + n(it.line_total ?? it.lineTotal ?? 0), 0);
+
+    if (customerCreditDays > 0 && unpaid.length > 0) {
+      const oldest = unpaid[0];
+      const ageDays = Math.floor((Date.now() - new Date(oldest.invoice_date).getTime()) / (1000 * 60 * 60 * 24));
+      if (ageDays > customerCreditDays) {
+        return {
+          ok: false,
+          message: `Overdue bills for ${customer.name}`,
+          subMessage: `The oldest unpaid bill is ${ageDays} day(s) old. Credit terms allow ${customerCreditDays} day(s). Clear overdue amounts before confirming new sales.`
+        };
+      }
+    }
+
+    if (customerCreditLimit > 0) {
+      const projected = totalOutstanding + invoiceTotal;
+      if (projected > customerCreditLimit) {
+        return {
+          ok: false,
+          message: `Credit limit exceeded for ${customer.name}`,
+          subMessage: `This invoice (₹${invoiceTotal.toFixed(2)}) plus outstanding (₹${totalOutstanding.toFixed(2)}) = ₹${projected.toFixed(2)}, exceeding the ₹${customerCreditLimit.toFixed(2)} credit limit. Collect payments or raise the limit.`
+        };
+      }
+    }
+  }
+
   if (!mfgCompanyIds.length) return { ok: true };
 
   const invoiceTotalsByMfg = new Map();
