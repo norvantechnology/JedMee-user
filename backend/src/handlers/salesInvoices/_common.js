@@ -1,4 +1,4 @@
-const { clean, n, i, isFutureDate, calculateLineItem, calculateInvoiceTotals } = require("../../shared/sales");
+const { clean, n, i, round4, isFutureDate, calculateLineItem, calculateInvoiceTotals } = require("../../shared/sales");
 
 async function validateCustomer(q, accountId, customerId) {
   const rs = await q(`SELECT * FROM customers WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`, [customerId, accountId]);
@@ -12,6 +12,7 @@ const SALES_LINE_BATCH_SELECT = `
        pb.id, pb.batch_no, pb.expiry_date, pb.product_id, pb.mrp, pb.sales_rate,
        pb.purchase_rate, pb.retail_rate, pb.special_rate_1, pb.special_rate_2,
        pb.loose_stock, pb.loose_unit_name,
+       COALESCE(pb.packing_units, p.units_per_strip, 1) AS packing_units,
        COALESCE(p.sales_gst, pb.sales_gst) AS sales_gst,
        pb.current_stock, pb.current_free_stock, pb.is_hold, pb.hold_reason,
        COALESCE(p.is_control, pb.is_control) AS is_control,
@@ -68,7 +69,10 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
     const productId = clean(it.productId || it.product_id);
     const batchId = clean(it.batchId || it.batch_id);
     const qty = i(it.qty);
-    if (!productId || !batchId || qty <= 0) return { ok: false, message: "Each line must include product, batch, and qty > 0." };
+    const looseQtyCheck = Number(it.looseQty ?? it.loose_qty ?? 0);
+    if (!productId || !batchId || (qty <= 0 && looseQtyCheck <= 0)) {
+      return { ok: false, message: "Each line must include product, batch, and qty > 0 (or loose qty > 0 for unit sales)." };
+    }
   }
   const batchIdList = [...new Set(items.map((x) => clean(x.batchId || x.batch_id)).filter(Boolean))];
   if (!batchIdList.length) {
@@ -92,7 +96,10 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
     const batchId = clean(it.batchId || it.batch_id);
     const qty = i(it.qty);
     const freeQty = i(it.freeQty || it.free_qty || 0);
-    if (!productId || !batchId || qty <= 0) return { ok: false, message: "Each line must include product, batch, and qty > 0." };
+    const looseQtyCheck = Number(it.looseQty ?? it.loose_qty ?? 0);
+    if (!productId || !batchId || (qty <= 0 && looseQtyCheck <= 0)) {
+      return { ok: false, message: "Each line must include product, batch, and qty > 0 (or loose qty > 0 for unit sales)." };
+    }
 
     let batch = batchById.get(batchId) || null;
     if (batch && String(batch.product_id) !== String(productId)) batch = null;
@@ -101,6 +108,9 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
     if (Boolean(batch.sale_lock)) {
       return { ok: false, message: `Sales are locked for manufacturer "${batch.mfg_company_name || "policy"}" (batch "${batch.batch_no}").` };
     }
+
+    // packing_units: units per strip — from batch snapshot, fallback to product, fallback to 10
+    const packingUnits = Math.max(1, Number(batch.packing_units || 10));
 
     const originalFreeQty = freeQty;
     const originalDiscount = n(it.discountPercent ?? it.discount_percent ?? 0);
@@ -116,16 +126,77 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
       : (headerRateType ? resolveBatchRate(batch, headerRateType) : n(batch.sales_rate));
     // Pick discount: per-line override wins; else use bill-level global %.
     // Honor manufacturer policy (prevent_discount / prevent_net_rate).
+    const effectiveDiscount = batch.prevent_discount || batch.prevent_net_rate ? 0 : (
+      batch.is_net ? n(batch.net_discount_percent || 0) : (originalDiscount > 0 ? originalDiscount : headerGlobalDiscount)
+    );
     const baseDiscount = batch.is_net
       ? n(batch.net_discount_percent || 0)
       : (originalDiscount > 0 ? originalDiscount : headerGlobalDiscount);
+    const gstPct = n(it.gstPercent ?? it.gst_percent ?? batch.sales_gst ?? 0);
+    const mrpVal = n(it.mrp ?? batch.mrp);
+
+    // ── Loose-only line: qty=0, looseQty>0 ──────────────────────────────────
+    // When selling only individual units (e.g. 1 tablet from a 10-tablet strip),
+    // the frontend sends qty=0 and looseQty=N. Calculate line total from loose rate.
+    if (qty === 0 && looseQtyCheck > 0) {
+      const looseQtyRaw = it.looseQty ?? it.loose_qty;
+      const lq = Number(looseQtyRaw);
+      if (!Number.isFinite(lq) || lq < 0) {
+        return { ok: false, message: `Loose qty must be a non-negative number for batch "${batch.batch_no}".` };
+      }
+      const looseQty = Math.round(lq * 1000) / 1000;
+      // Validate loose qty against available stock (all strips are residual since qty=0)
+      const looseStock = n(batch.loose_stock);
+      const stockBillable = n(batch.current_stock);
+      const batchKey = String(batchId);
+      const usedBillable = invoiceQtyByBatch.get(batchKey) || 0;
+      const residualStrips = Math.max(0, stockBillable - usedBillable);
+      const maxLoose = looseStock + residualStrips * packingUnits;
+      if (looseQty > maxLoose) {
+        return {
+          ok: false,
+          message: `Loose qty ${looseQty} exceeds availability for "${batch.product_name}" batch "${batch.batch_no}". Loose available: ${looseStock} ${batch.loose_unit_name || "TAB"}; can additionally break ${residualStrips} pack(s) → ${residualStrips * packingUnits} loose. Reduce loose qty or pick another batch.`
+        };
+      }
+      // Calculate line total: looseQty × (salesRate / packingUnits) with discount + GST
+      const looseRate = resolvedRate / packingUnits;
+      const gross = round4(looseQty * looseRate);
+      const discountAmount = round4(gross * (effectiveDiscount / 100));
+      const taxableAmount = round4(gross - discountAmount);
+      const gstAmount = round4(taxableAmount * (gstPct / 100));
+      const lineTotal = round4(taxableAmount + gstAmount);
+      // invoiceQtyByBatch unchanged (qty=0 adds nothing to strip count)
+      invoiceQtyByBatch.set(batchKey, usedBillable);
+      out.push({
+        productId, productCode: batch.product_code || "", productName: batch.product_name || "",
+        drugName: batch.drug_name || "", batchId, batchNo: batch.batch_no || "",
+        expiryDate: batch.expiry_date, mfgCompanyId: batch.mfg_company_id || null,
+        mfgCompanyName: batch.mfg_company_name || "", isControl: Boolean(batch.is_control),
+        prescriptionNo: clean(it.prescriptionNo || it.prescription_no),
+        doctorName: clean(it.doctorName || it.doctor_name),
+        patientName: clean(it.patientName || it.patient_name),
+        availableStock: n(batch.current_stock), saleLock: Boolean(batch.sale_lock),
+        preventFreeQty: Boolean(batch.prevent_free_qty), preventDiscount: Boolean(batch.prevent_discount),
+        preventNetRate: Boolean(batch.prevent_net_rate), isHalfScheme: Boolean(batch.is_half_scheme),
+        isNet: Boolean(batch.is_net), netDiscountPercent: n(batch.net_discount_percent),
+        isNonEditableFreeQty: Boolean(batch.is_non_editable_free_qty),
+        qty: 0, freeQty: 0, mrp: mrpVal, salesRate: resolvedRate,
+        discountPercent: effectiveDiscount, discountAmount,
+        netRate: round4(looseRate * (1 - effectiveDiscount / 100)),
+        gstPercent: gstPct, gstAmount, schemeTaxableAdd: 0, taxableAmount, lineTotal,
+        looseQty, looseUnitName: clean(it.looseUnitName || it.loose_unit_name) || (batch.loose_unit_name || null)
+      });
+      continue;
+    }
+    // ── Normal strip line ────────────────────────────────────────────────────
+
     const cal = calculateLineItem({
       qty,
       freeQty: batch.prevent_free_qty ? 0 : lineFreeQty,
       salesRate: resolvedRate,
-      mrp: n(it.mrp ?? batch.mrp),
+      mrp: mrpVal,
       discountPercent: batch.prevent_discount || batch.prevent_net_rate ? 0 : baseDiscount,
-      gstPercent: n(it.gstPercent ?? it.gst_percent ?? batch.sales_gst ?? 0),
+      gstPercent: gstPct,
       halfScheme: Boolean(batch.is_half_scheme)
     });
     if (!cal.ok) return { ok: false, message: cal.message };
@@ -184,7 +255,7 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
     // non-negative; can never exceed the loose stock available on this batch
     // PLUS what could be obtained by breaking the remaining strips after the
     // line's billable qty is reserved. Bound:
-    //   loose_qty <= loose_stock + (stockBillable - needBillable) × loose_unit_factor
+    //   loose_qty <= loose_stock + (stockBillable - needBillable) × packingUnits
     // The actual break-pack inventory write happens in confirm.js.
     const looseQtyRaw = it.looseQty ?? it.loose_qty;
     let looseQty = 0;
@@ -196,13 +267,12 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
       looseQty = Math.round(lq * 1000) / 1000;
       if (looseQty > 0) {
         const looseStock = n(batch.loose_stock);
-        const looseFactor = Math.max(1, Number(options.looseUnitFactor) || 10);
         const residualStrips = Math.max(0, stockBillable - needBillable);
-        const maxLoose = looseStock + residualStrips * looseFactor;
+        const maxLoose = looseStock + residualStrips * packingUnits;
         if (looseQty > maxLoose) {
           return {
             ok: false,
-            message: `Loose qty ${looseQty} exceeds availability for "${batch.product_name}" batch "${batch.batch_no}". Loose available: ${looseStock} ${batch.loose_unit_name || "TAB"}; can additionally break ${residualStrips} pack(s) → ${residualStrips * looseFactor} loose. Reduce loose qty or pick another batch.`
+            message: `Loose qty ${looseQty} exceeds availability for "${batch.product_name}" batch "${batch.batch_no}". Loose available: ${looseStock} ${batch.loose_unit_name || "TAB"}; can additionally break ${residualStrips} pack(s) → ${residualStrips * packingUnits} loose. Reduce loose qty or pick another batch.`
           };
         }
       }

@@ -67,6 +67,7 @@ async function handler(event) {
           pb.product_id,
           COUNT(*)::int AS active_batch_count,
           COALESCE(SUM(COALESCE(st.qty, 0) + COALESCE(st.free_qty, 0)), 0)::numeric(12,3) AS total_quantity,
+          COALESCE(SUM(COALESCE(pb.loose_stock, 0)), 0)::numeric(12,3) AS total_loose_quantity,
           COUNT(*) FILTER (
             WHERE COALESCE(pb.low_stock_alert_enabled, false)
               AND (COALESCE(st.qty, 0) + COALESCE(st.free_qty, 0)) <= COALESCE(pb.low_stock_threshold, 0)
@@ -97,6 +98,7 @@ async function handler(event) {
         COALESCE(d.is_active, true) AS division_is_active,
         COALESCE(bs.active_batch_count, 0)::int AS active_batch_count,
         COALESCE(bs.total_quantity, 0)::numeric(12,3) AS total_quantity,
+        COALESCE(bs.total_loose_quantity, 0)::numeric(12,3) AS total_loose_quantity,
         COALESCE(bs.low_batch_count, 0)::int AS low_batch_count,
         (
           COALESCE(p.low_stock_alert_enabled, false)

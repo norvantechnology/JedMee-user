@@ -158,7 +158,8 @@ async function buildProductFields(
   const numFields = [
     ["scheme_qty_paid", "schemeQtyPaid", "scheme_qty_paid"],
     ["scheme_qty_free", "schemeQtyFree", "scheme_qty_free"],
-    ["low_stock_threshold", "lowStockThreshold", "low_stock_threshold"]
+    ["low_stock_threshold", "lowStockThreshold", "low_stock_threshold"],
+    ["units_per_strip", "unitsPerStrip", "units_per_strip"]
   ];
   for (const [col, ...aliases] of numFields) {
     const raw = coalesceField(body, ...aliases);
@@ -169,6 +170,10 @@ async function buildProductFields(
     }
     if (n !== null && n < 0) {
       return { ok: false, error: { code: "VALIDATION_ERROR", message: `${col.replace(/_/g, " ")} must be non-negative.` } };
+    }
+    // units_per_strip must be at least 1 (1 strip = 1 unit minimum)
+    if (col === "units_per_strip" && n !== null && n < 1) {
+      return { ok: false, error: { code: "VALIDATION_ERROR", message: "units per strip must be at least 1." } };
     }
     out[col] = n;
   }

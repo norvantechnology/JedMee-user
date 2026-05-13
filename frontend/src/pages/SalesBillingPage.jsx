@@ -254,12 +254,24 @@ function lineRemainingStock(items, lineIndex) {
   return Math.max(0, wh - usedElsewhere);
 }
 
+/** How many strips will be broken to fulfill loose units on this line. */
+function stripsToBreakForLoose(it) {
+  const looseQty = Number(it?.looseQty || 0);
+  if (looseQty <= 0) return 0;
+  const looseStock = Number(it?.looseStock || 0);
+  const packingUnits = Math.max(1, Number(it?.packingUnits || 1));
+  const shortfall = Math.max(0, looseQty - looseStock);
+  return shortfall > 0 ? Math.ceil(shortfall / packingUnits) : 0;
+}
+
 function lineStockExceededAtIndex(items, lineIndex) {
   const it = items[lineIndex];
   if (!it?.batchId) return false;
   const rem = lineRemainingStock(items, lineIndex);
   if (rem === null) return false;
-  return Number(it.qty || 0) > rem;
+  // Total strips consumed = full strips sold + strips broken for loose units
+  const totalStrips = Number(it.qty || 0) + stripsToBreakForLoose(it);
+  return totalStrips > rem;
 }
 
 function lineRemainingFreeStock(items, lineIndex) {
@@ -271,9 +283,12 @@ function lineRemainingFreeStock(items, lineIndex) {
 }
 
 function lineAfterCurrentStock(items, lineIndex) {
+  const it = items[lineIndex];
   const rem = lineRemainingStock(items, lineIndex);
   if (rem == null) return null;
-  return Math.max(0, rem - Number(items?.[lineIndex]?.qty || 0));
+  // Subtract full strips sold + strips that will be broken for loose units
+  const totalStrips = Number(it?.qty || 0) + stripsToBreakForLoose(it);
+  return Math.max(0, rem - totalStrips);
 }
 
 function lineLooseCapacity(items, lineIndex) {
@@ -311,11 +326,11 @@ function autoFreeQtyForScheme(it, qtyValue) {
 }
 
 const RATE_TYPES = [
-  { key: "MRP", label: "1. MRP", title: "Maximum Retail Price  default for patients" },
-  { key: "PURCHASE_RATE", label: "2. Pu.Rt", title: "Purchase Rate  your cost price (institutional)" },
-  { key: "SPECIAL_RATE_1", label: "3. Sp.Rt", title: "Special Rate 1  custom negotiated rate" },
-  { key: "SPECIAL_RATE_2", label: "4. Sl-Rt", title: "Special Rate 2 / Salesman Rate" },
-  { key: "SALES_RATE", label: "5. Sl.Rt", title: "Sales Rate  your standard wholesale rate" }
+  { key: "MRP", label: "MRP", title: "Maximum Retail Price — default for patients" },
+  { key: "PURCHASE_RATE", label: "Purchase", title: "Purchase Rate — your cost price (institutional)" },
+  { key: "SPECIAL_RATE_1", label: "Special 1", title: "Special Rate 1 — custom negotiated rate" },
+  { key: "SPECIAL_RATE_2", label: "Special 2", title: "Special Rate 2 / Salesman Rate" },
+  { key: "SALES_RATE", label: "Sales Rt", title: "Sales Rate — your standard wholesale rate" }
 ];
 
 const BILL_TYPES = [
@@ -380,7 +395,7 @@ function buildSalesLineUpdateFromBatch(x, b, rateType) {
     specialRate2: Number(b?.special_rate_2 || 0),
     looseStock: Number(b?.loose_stock || 0),
     looseUnitName: String(b?.loose_unit_name || "TAB"),
-    packingUnits: Math.max(1, Number(b?.packing_units || 10)),
+    packingUnits: Math.max(1, Number(b?.packing_units || x?.productUnitsPerStrip || 10)),
     looseQty: 0,
     salesRate: resolvedRate,
     gstPercent: Number(b?.sales_gst || 0),
@@ -412,7 +427,11 @@ function formHasSaveBlockers(form) {
   for (let i = 0; i < items.length; i++) {
     const it = items[i];
     if (!it.productId || !it.batchId) return true;
-    if (Number(it.qty || 0) < 1) return true;
+    if (it.salesUnitMode === "UNIT") {
+      if (Number(it.looseQty || 0) < 1) return true;
+    } else {
+      if (Number(it.qty || 0) < 1) return true;
+    }
     if (lineStockExceededAtIndex(items, i)) return true;
     if (lineFreeStockExceededAtIndex(items, i)) return true;
     if (lineLooseExceededAtIndex(items, i)) return true;
@@ -561,7 +580,9 @@ function emptyItem() {
     prescriptionNo: "",
     doctorName: "",
     patientName: "",
-    availableBatches: []
+    availableBatches: [],
+    productUnitsPerStrip: 1,
+    salesUnitMode: "STRIP"
   };
 }
 
@@ -757,6 +778,36 @@ export default function SalesBillingPage() {
     });
     await refreshBatchModalMasters();
     setBatchModalOpen(true);
+  }
+
+  function handleToggleUnitMode(idx) {
+    setForm((prev) => ({
+      ...prev,
+      items: prev.items.map((x, i) => {
+        if (i !== idx) return x;
+        if (x.salesUnitMode === "STRIP") {
+          // Switching STRIP → UNIT: move qty into looseQty
+          return {
+            ...x,
+            salesUnitMode: "UNIT",
+            qty: 0,
+            looseQty: Number(x.qty || 0) > 0 ? Number(x.qty) * Math.max(1, Number(x.packingUnits || 1)) : 1
+          };
+        } else {
+          // Switching UNIT → STRIP: convert looseQty back to strips + remainder
+          const totalUnits = Number(x.looseQty || 0);
+          const packingUnits = Math.max(1, Number(x.packingUnits || 1));
+          const fullStrips = Math.floor(totalUnits / packingUnits);
+          const remainder = totalUnits % packingUnits;
+          return {
+            ...x,
+            salesUnitMode: "STRIP",
+            qty: Math.max(1, fullStrips),
+            looseQty: remainder
+          };
+        }
+      })
+    }));
   }
 
   async function loadOutstanding(customerId) {
@@ -1057,6 +1108,9 @@ export default function SalesBillingPage() {
               looseStock: Number(batch?.loose_stock || 0),
               looseUnitName: String(batch?.loose_unit_name || "TAB"),
               packingUnits: Math.max(1, Number(batch?.packing_units || 10)),
+              // Restore UNIT mode for loose-only lines (qty=0, loose_qty>0)
+              salesUnitMode: (Number(x.qty || 0) === 0 && Number(x.loose_qty || 0) > 0) ? "UNIT" : "STRIP",
+              productUnitsPerStrip: Math.max(1, Number(batch?.packing_units || 10)),
               looseQty: Number(x.loose_qty || 0),
               availableStock: batchBillableQtyFromRow(batch),
               availableFreeStock: batchFreeQtyFromRow(batch),
@@ -1708,9 +1762,10 @@ export default function SalesBillingPage() {
         loadingText={busy ? "Saving invoice…" : "Loading invoice and line items…"}
         shortcutsItems={SALES_BILLING_EDITOR_SHORTCUTS}
         onClose={closeSalesEditor}
-        size={1100}
+        size={1600}
         footer={
           <div className="sfmModalFooter">
+            {/* Low-priority: send email — far left, steps back */}
             {editing?.id && canView && String(editing?.status || "").toUpperCase() !== "CANCELLED" && clean(form.customerId) ? (
               <button
                 className="sfmBtnGhost sbmFooterSendBtn"
@@ -1718,24 +1773,37 @@ export default function SalesBillingPage() {
                 title="Email this invoice to the customer"
                 disabled={busy || Boolean(sendingEmailById[String(editing.id)])}
                 onClick={() => runSendInvoices([editing.id])}
+                style={{ marginRight: "auto", opacity: 0.75 }}
               >
                 {sendingEmailById[String(editing.id)] ? <InlineButtonProgress /> : <span className="sbmInlSendSvg" aria-hidden="true"><IconEmail /></span>}
-                <span>Send to customer</span>
+                <span>Send</span>
               </button>
             ) : null}
-            <button className="sfmBtnGhost" type="button" onClick={closeSalesEditor} disabled={busy}>
+            {/* Low-priority: cancel */}
+            <button className="sfmBtnGhost" type="button" onClick={closeSalesEditor} disabled={busy} style={{ opacity: 0.7 }}>
               Cancel
             </button>
+            {/* Secondary: save draft / save changes */}
             <button
-              className={editing?.id ? "sfmBtnPrimary" : "sfmBtnGhost"}
+              className="sfmBtnGhost"
               type="button"
               disabled={busy || (Boolean(editing?.id) && !isDraftModalEdit) || !(editing?.id ? canUpdate : canAdd)}
               onClick={() => { setSubmitted(true); performSaveDraft(); }}
             >
-              {busy ? <InlineButtonProgress label="Working..." /> : editing?.id ? "Save Changes" : "Create Draft"}
+              {busy ? <InlineButtonProgress label="Working..." /> : editing?.id ? "Save Changes" : "Save Draft"}
             </button>
+            {/* Primary actions — dominant */}
             {!editing?.id && canUpdate ? (
               <>
+                <button
+                  className="sfmBtnGhost sbmBtnCreateConfirm"
+                  type="button"
+                  disabled={busy || !canAdd || !canUpdate}
+                  title="Post stock and record full amount as cash received on this bill."
+                  onClick={() => { setSubmitted(true); createAndConfirmPaid(); }}
+                >
+                  {busy ? <InlineButtonProgress label="Working..." /> : "Confirm & Paid"}
+                </button>
                 <button
                   className="sfmBtnPrimary sbmBtnCreateConfirm"
                   data-cm-primary="true"
@@ -1746,19 +1814,19 @@ export default function SalesBillingPage() {
                 >
                   {busy ? <InlineButtonProgress label="Working..." /> : "Create & Confirm"}
                 </button>
-                <button
-                  className="sfmBtnGhost sbmBtnCreateConfirm"
-                  type="button"
-                  disabled={busy || !canAdd || !canUpdate}
-                  title="Post stock and record full amount as cash received on this bill."
-                  onClick={() => { setSubmitted(true); createAndConfirmPaid(); }}
-                >
-                  {busy ? <InlineButtonProgress label="Working..." /> : "Confirm & Mark Paid"}
-                </button>
               </>
             ) : null}
             {isDraftModalEdit && canUpdate ? (
               <>
+                <button
+                  className="sfmBtnGhost sbmBtnCreateConfirm"
+                  type="button"
+                  disabled={busy || !isDraftModalEdit || !canUpdate}
+                  title="Post stock and record full amount as cash on this bill."
+                  onClick={() => { setSubmitted(true); saveAndConfirmDraft({ markPaidAtConfirm: true }); }}
+                >
+                  {busy ? <InlineButtonProgress label="Working..." /> : "Confirm & Paid"}
+                </button>
                 <button
                   className="sfmBtnPrimary sbmBtnCreateConfirm"
                   data-cm-primary="true"
@@ -1768,15 +1836,6 @@ export default function SalesBillingPage() {
                   onClick={() => { setSubmitted(true); saveAndConfirmDraft({ markPaidAtConfirm: false }); }}
                 >
                   {busy ? <InlineButtonProgress label="Working..." /> : "Save & Confirm"}
-                </button>
-                <button
-                  className="sfmBtnGhost sbmBtnCreateConfirm"
-                  type="button"
-                  disabled={busy || !isDraftModalEdit || !canUpdate}
-                  title="Post stock and record full amount as cash on this bill."
-                  onClick={() => { setSubmitted(true); saveAndConfirmDraft({ markPaidAtConfirm: true }); }}
-                >
-                  {busy ? <InlineButtonProgress label="Working..." /> : "Save, Confirm & Mark Paid"}
                 </button>
               </>
             ) : null}
@@ -1788,10 +1847,10 @@ export default function SalesBillingPage() {
           {/* ── Party + dates + notes (same section shell as purchase) ───── */}
           <div className="piSection">
             <div className="piSectionBody">
-              {/* Row 1: Customer + Dates */}
+              {/* Row 1: Customer (wide) + Invoice Date (narrow) + Due Date (narrow) */}
               <div className="piHeaderTop">
-                <div className="raField piHeadField" data-sbm-focus="customer">
-                  <label>Customer </label>
+                <div className="raField piHeadField piHeadField_party" data-sbm-focus="customer">
+                  <label>Customer <span className="piReq">*</span></label>
                   <MasterSelectWithCreate
                     kind="customer"
                     value={form.customerId || ""}
@@ -1815,59 +1874,33 @@ export default function SalesBillingPage() {
                   />
                   {submitted && !form.customerId && <div className="mfzErr">Customer is required.</div>}
                 </div>
-                <div className="raField piHeadField">
-                  <label>Invoice Date </label>
+                <div className="raField piHeadField piHeadField_date">
+                  <label>Invoice Date <span className="piReq">*</span></label>
                   <CommonDatePicker value={form.invoiceDate} onChange={(v) => setForm((p) => ({ ...p, invoiceDate: v }))} ariaLabel="Invoice date" />
                 </div>
-                <div className="raField piHeadField">
+                <div className="raField piHeadField piHeadField_date">
                   <label>Due Date</label>
                   <CommonDatePicker value={form.dueDate} onChange={(v) => setForm((p) => ({ ...p, dueDate: v }))} ariaLabel="Due date" />
                 </div>
               </div>
 
-              {/* Row 2: Division/PatientName + Notes + Phone */}
-              <div className="piHeaderRow2">
-                {!isRetailer ? (
-                  <div className="raField piHeadField">
-                    <label>Division (filters products)</label>
-                    <MasterSelectWithCreate
-                      kind="division"
-                      value={form.divisionId || ""}
-                      onChange={(v) => setForm((p) => ({ ...p, divisionId: v || "" }))}
-                      onListsRefresh={refreshMasterDropdowns}
-                      placeholder="All divisions"
-                      options={[
-                        ...(divisions || [])
-                          .filter((d) => Boolean(d.is_active) || String(d.id) === String(form.divisionId || ""))
-                          .map((d) => toDivisionOption(d))
-                      ]}
-                    />
-                  </div>
-                ) : (
-                  <div className="raField piHeadField">
+              {/* Row 2: compact — patient fields + rate controls (retailer)
+                          OR division + notes (non-retailer) */}
+              {isRetailer ? (
+                <div className="sbmHeaderSecondary" role="group" aria-label="Patient details and bill settings">
+                  {/* Patient Name */}
+                  <div className="raField sbmOptionalField" style={{ flex: "1 1 120px", minWidth: 0 }}>
                     <label>Patient Name</label>
                     <input
                       className="raInput"
                       value={form.walkInPatientName || ""}
                       onChange={(e) => setForm((p) => ({ ...p, walkInPatientName: e.target.value }))}
-                      placeholder={selectedCustomerIsWalkIn ? "Optional" : "Patient / recipient name"}
+                      placeholder={selectedCustomerIsWalkIn ? "Optional" : "Patient name"}
                     />
                   </div>
-                )}
-                <div className="raField piHeadField">
-                  <label>Notes</label>
-                  <input
-                    className="raInput"
-                    value={form.notes}
-                    onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-                    placeholder="Rx ref., phone, ref. no."
-                    maxLength={500}
-                    autoComplete="off"
-                  />
-                </div>
-                {isRetailer ? (
-                  <div className="raField piHeadField">
-                    <label>Patient Phone</label>
+                  {/* Patient Phone */}
+                  <div className="raField sbmOptionalField" style={{ flex: "0 0 100px", minWidth: 0 }}>
+                    <label>Phone</label>
                     <input
                       className="raInput"
                       value={form.walkInPatientPhone || ""}
@@ -1875,63 +1908,53 @@ export default function SalesBillingPage() {
                       placeholder="Optional"
                     />
                   </div>
-                ) : null}
-              </div>
-
-              {/* Credit line – non-retailer */}
-              {!isRetailer && customerOutstanding ? (
-                <div className="piCreditLine" title="Credit and outstanding for selected customer">
-                  {(() => {
-                    const used = Number(customerOutstanding.outstandingAmount || 0);
-                    const limit = Number(customerOutstanding.creditLimit || 0);
-                    const pct = limit > 0 ? Math.round((used / limit) * 100) : 0;
-                    const color = limit <= 0 ? "var(--color-text-3)" : pct >= 100 ? "var(--color-danger)" : pct >= 80 ? "var(--color-warning)" : "var(--color-success)";
-                    return (
-                      <span className="sbmCreditLineStrong" style={{ color }}>
-                        Credit {limit > 0 ? `${pct}%` : ""} · O/s {fmtCurrency(used)} · Bills {customerOutstanding.outstandingBills} · Oldest {customerOutstanding.oldestBillAgeDays}d
-                        {limit > 0 ? ` · Limit ${fmtCurrency(limit)}` : ""}
-                      </span>
-                    );
-                  })()}
-                </div>
-              ) : null}
-
-              {/* Rate Bar – retailer only */}
-              {isRetailer ? (
-                <div className="sbmRateBar" role="group" aria-label="Bill rate, type and global discount">
-                  <div className="sbmRateBarLeft">
-                    <span className="sbmRateBarLabel">Rate</span>
-                    <div className="sbmRateBtns" role="tablist" aria-label="Bill rate type">
-                      {RATE_TYPES.map((rt) => {
-                        const active = String(form.rateType || "MRP").toUpperCase() === rt.key;
-                        return (
-                          <button
-                            key={rt.key}
-                            type="button"
-                            role="tab"
-                            aria-selected={active ? "true" : "false"}
-                            className={`sbmRateBtn${active ? " sbmRateBtn_on" : ""}`}
-                            title={rt.title}
-                            disabled={!hasAnyBatchSelected}
-                            onClick={() => {
-                              setForm((prev) => ({
-                                ...prev,
-                                rateType: rt.key,
-                                items: (prev.items || []).map((x) => {
-                                  if (!x.batchId) return x;
-                                  const newRate = resolveRateForLine(x, rt.key);
-                                  return { ...x, salesRate: Number(newRate.toFixed(4)) };
-                                })
-                              }));
-                            }}
-                          >
-                            {rt.label}
-                          </button>
-                        );
-                      })}
-                    </div>
+                  {/* Notes */}
+                  <div className="raField sbmOptionalField" style={{ flex: "2 1 140px", minWidth: 0 }}>
+                    <label>Notes</label>
+                    <input
+                      className="raInput"
+                      value={form.notes}
+                      onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
+                      placeholder="Rx ref., ref. no."
+                      maxLength={500}
+                      autoComplete="off"
+                    />
                   </div>
-                  <div className="sbmRateBarRight">
+                  {/* Rate controls group — no-wrap so Disc% never orphans on its own row */}
+                  <div className="sbmRateControls">
+                    <div className="sbmRateBarLeft">
+                      <span className="sbmRateBarLabel">Rate</span>
+                      <div className="sbmRateBtns" role="tablist" aria-label="Bill rate type">
+                        {RATE_TYPES.map((rt) => {
+                          const active = String(form.rateType || "MRP").toUpperCase() === rt.key;
+                          return (
+                            <button
+                              key={rt.key}
+                              type="button"
+                              role="tab"
+                              aria-selected={active ? "true" : "false"}
+                              className={`sbmRateBtn${active ? " sbmRateBtn_on" : ""}`}
+                              title={rt.title}
+                              disabled={!hasAnyBatchSelected}
+                              onClick={() => {
+                                setForm((prev) => ({
+                                  ...prev,
+                                  rateType: rt.key,
+                                  items: (prev.items || []).map((x) => {
+                                    if (!x.batchId) return x;
+                                    const newRate = resolveRateForLine(x, rt.key);
+                                    return { ...x, salesRate: Number(newRate.toFixed(4)) };
+                                  })
+                                }));
+                              }}
+                            >
+                              {rt.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {/* Bill Type */}
                     <div className="sbmRateField sbmRateField_btype">
                       <label>Bill Type</label>
                       <CommonSelectField
@@ -1941,8 +1964,9 @@ export default function SalesBillingPage() {
                         placeholder="Bill type"
                       />
                     </div>
+                    {/* Overall Disc % */}
                     <div className="sbmRateField sbmRateField_disc">
-                      <label>Overall Disc %</label>
+                      <label>Disc %</label>
                       <input
                         className="raInput"
                         type="text"
@@ -1967,6 +1991,54 @@ export default function SalesBillingPage() {
                       />
                     </div>
                   </div>
+                </div>
+              ) : (
+                /* Non-retailer: Division + Notes */
+                <div className="piHeaderRow2">
+                  <div className="raField piHeadField piHeadField_invNo">
+                    <label>Division <span className="piReq">*</span></label>
+                    <MasterSelectWithCreate
+                      kind="division"
+                      value={form.divisionId || ""}
+                      onChange={(v) => setForm((p) => ({ ...p, divisionId: v || "" }))}
+                      onListsRefresh={refreshMasterDropdowns}
+                      placeholder="All divisions"
+                      options={[
+                        ...(divisions || [])
+                          .filter((d) => Boolean(d.is_active) || String(d.id) === String(form.divisionId || ""))
+                          .map((d) => toDivisionOption(d))
+                      ]}
+                    />
+                  </div>
+                  <div className="raField piHeadField piHeadField_notes sbmOptionalField">
+                    <label>Notes</label>
+                    <input
+                      className="raInput"
+                      value={form.notes}
+                      onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
+                      placeholder="Rx ref., phone, ref. no."
+                      maxLength={500}
+                      autoComplete="off"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Credit line – non-retailer */}
+              {!isRetailer && customerOutstanding ? (
+                <div className="piCreditLine" title="Credit and outstanding for selected customer">
+                  {(() => {
+                    const used = Number(customerOutstanding.outstandingAmount || 0);
+                    const limit = Number(customerOutstanding.creditLimit || 0);
+                    const pct = limit > 0 ? Math.round((used / limit) * 100) : 0;
+                    const color = limit <= 0 ? "var(--color-text-3)" : pct >= 100 ? "var(--color-danger)" : pct >= 80 ? "var(--color-warning)" : "var(--color-success)";
+                    return (
+                      <span className="sbmCreditLineStrong" style={{ color }}>
+                        Credit {limit > 0 ? `${pct}%` : ""} · O/s {fmtCurrency(used)} · Bills {customerOutstanding.outstandingBills} · Oldest {customerOutstanding.oldestBillAgeDays}d
+                        {limit > 0 ? ` · Limit ${fmtCurrency(limit)}` : ""}
+                      </span>
+                    );
+                  })()}
                 </div>
               ) : null}
             </div>
@@ -2024,7 +2096,7 @@ export default function SalesBillingPage() {
                                 divisionId: clean(prev.divisionId) ? prev.divisionId : (p.division_id ? String(p.division_id) : ""),
                                 items: prev.items.map((x, i) =>
                                   i === idx
-                                    ? { ...emptyItem(), lineKey: lineKey || prev.items[idx]?.lineKey || newLineKey(), productId: p.id, productName: p?.name || "", productCode: p?.code || "", productSearch: formatProductLabel(p), availableBatches: [] }
+                                    ? { ...emptyItem(), lineKey: lineKey || prev.items[idx]?.lineKey || newLineKey(), productId: p.id, productName: p?.name || "", productCode: p?.code || "", productSearch: formatProductLabel(p), availableBatches: [], productUnitsPerStrip: Math.max(1, Number(p?.units_per_strip || 1)), looseUnitName: p?.loose_unit_name || "TAB" }
                                     : x
                                 )
                               }));
@@ -2089,11 +2161,19 @@ export default function SalesBillingPage() {
                           {it.batchId ? (
                             <div
                               className="sbmStockCell"
-                              title={
-                                isRetailer
-                                  ? `After this line: ${afterStock ?? 0} left · WH billable: ${batchWarehouseStock(form.items, it.batchId)}`
-                                  : `After this line: ${afterStock ?? 0} left in division stock`
-                              }
+                              title={(() => {
+                                const wh = batchWarehouseStock(form.items, it.batchId);
+                                const looseQty = Number(it.looseQty || 0);
+                                const looseStock = Number(it.looseStock || 0);
+                                const packingUnits = Math.max(1, Number(it.packingUnits || 1));
+                                const looseShortfall = Math.max(0, looseQty - looseStock);
+                                const stripsBreaking = looseShortfall > 0 ? Math.ceil(looseShortfall / packingUnits) : 0;
+                                let tip = `After sale: ${afterStock ?? 0} strip(s) left · WH: ${wh} strip(s)`;
+                                if (looseQty > 0) tip += ` · Loose: ${looseQty} ${String(it.looseUnitName || "unit")}(s) sold`;
+                                if (stripsBreaking > 0) tip += ` · ${stripsBreaking} strip(s) will be opened`;
+                                if (looseStock > 0) tip += ` · ${looseStock} loose unit(s) in stock`;
+                                return tip;
+                              })()}
                             >
                               <span className={stockChipClass(afterStock ?? 0)}>{afterStock ?? 0}</span>
                               {isRetailer ? <span className="sbmStockWh">/ {batchWarehouseStock(form.items, it.batchId)}</span> : null}
@@ -2108,15 +2188,25 @@ export default function SalesBillingPage() {
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9]*"
-                            value={it.qty}
-                            onChange={(e) => setForm((p) => ({
-                              ...p,
-                              items: p.items.map((x, i) => (i === idx ? {
-                                ...x,
-                                qty: e.target.value,
-                                freeQty: x.isNonEditableFreeQty ? autoFreeQtyForScheme(x, e.target.value) : x.freeQty
-                              } : x))
-                            }))}
+                            value={it.salesUnitMode === "UNIT" ? (it.looseQty || "") : it.qty}
+                            title={it.salesUnitMode === "UNIT" ? `Selling individual ${String(it.looseUnitName || "TAB").toUpperCase()}s` : "Strips quantity"}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, "");
+                              setForm((p) => ({
+                                ...p,
+                                items: p.items.map((x, i) => {
+                                  if (i !== idx) return x;
+                                  if (x.salesUnitMode === "UNIT") {
+                                    return { ...x, looseQty: val, qty: 0 };
+                                  }
+                                  return {
+                                    ...x,
+                                    qty: val,
+                                    freeQty: x.isNonEditableFreeQty ? autoFreeQtyForScheme(x, val) : x.freeQty
+                                  };
+                                })
+                              }));
+                            }}
                           />
                         </td>
 
@@ -2133,28 +2223,40 @@ export default function SalesBillingPage() {
                           />
                         </td>
 
-                        {/* Unit */}
+                        {/* Loose — hidden in UNIT mode (qty field handles individual units) */}
                         <td>
-                          <input
-                            className="raInput sbmNum"
-                            type="text"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
-                            value={it.looseQty || 0}
-                            title={`Loose units (${String(it.looseUnitName || "TAB").toUpperCase()}) available: ${Number(it.looseStock || 0)}`}
-                            onChange={(e) =>
-                              setForm((p) => ({
-                                ...p,
-                                items: p.items.map((x, i) => (i === idx ? { ...x, looseQty: e.target.value.replace(/[^0-9]/g, "") } : x))
-                              }))
-                            }
-                          />
+                          {it.salesUnitMode !== "UNIT" ? (
+                            <input
+                              className="raInput sbmNum"
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              value={it.looseQty || 0}
+                              title={`Loose units (${String(it.looseUnitName || "TAB").toUpperCase()}) available: ${Number(it.looseStock || 0)}`}
+                              onChange={(e) =>
+                                setForm((p) => ({
+                                  ...p,
+                                  items: p.items.map((x, i) => (i === idx ? { ...x, looseQty: e.target.value.replace(/[^0-9]/g, "") } : x))
+                                }))
+                              }
+                            />
+                          ) : null}
                         </td>
 
-                        {/* Unit */}
+                        {/* Unit toggle button — STRIP/UNIT mode switcher */}
                         <td>
-                          <button type="button" className="sbmUnitBtn" title="Billing unit">
-                            {String(it.looseUnitName || "TAB").toUpperCase()}
+                          <button
+                            type="button"
+                            className={`sbmUnitBtn${it.salesUnitMode === "UNIT" ? " sbmUnitBtn--active" : ""}`}
+                            title={Number(it.packingUnits || 1) > 1
+                              ? `Click to switch: currently selling by ${it.salesUnitMode}`
+                              : `1 strip = 1 ${String(it.looseUnitName || "TAB").toUpperCase()}`}
+                            style={{ cursor: Number(it.packingUnits || 1) > 1 ? "pointer" : "default" }}
+                            onClick={() => Number(it.packingUnits || 1) > 1 && handleToggleUnitMode(idx)}
+                          >
+                            {it.salesUnitMode === "UNIT"
+                              ? String(it.looseUnitName || "TAB").toUpperCase()
+                              : "STRIP"}
                           </button>
                         </td>
 
@@ -2303,12 +2405,13 @@ export default function SalesBillingPage() {
                   <label>Change to Return</label>
                   <div
                     className={`sbmCashValue${Number(cashChange) > 0 ? " sbmCashValue_pos" : ""}`}
+                    aria-label="Change to return"
                   >
                     {fmtCurrency(cashChange)}
                   </div>
                 </div>
                 <div className="sbmCashHint sfmFull">
-                  For change only. To record full cash against the bill use <strong>Confirm &amp; Mark Paid</strong>; use <strong>Create &amp; Confirm</strong> to leave the sale unpaid.
+                  For change only. Use Confirm &amp; Paid to record full cash, or Create &amp; Confirm to leave unpaid.
                 </div>
               </div>
             ) : null}

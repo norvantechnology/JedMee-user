@@ -70,7 +70,7 @@ async function handler(event) {
       `INSERT INTO products (
          account_id, code, name, drug_name,
          division_id, mfg_company_id,
-         packing, bulk_pack, case_pack, conversion_unit,
+         packing, bulk_pack, case_pack, units_per_strip, conversion_unit,
          stockable, is_discount_enabled, is_control, is_half_scheme, is_otc,
          sales_gst, purchase_gst,
          sales_scheme, scheme_qty_paid, scheme_qty_free,
@@ -81,13 +81,13 @@ async function handler(event) {
        VALUES (
          $1, $2, $3, $4,
          $5, $6,
-         $7, $8, $9, $10,
-         $11, $12, $13, $14, $15,
-         $16, $17,
-         $18, $19, $20,
-         $21, $22,
-         $23, $24,
-         $25
+         $7, $8, $9, $10, $11,
+         $12, $13, $14, $15, $16,
+         $17, $18,
+         $19, $20, $21,
+         $22, $23,
+         $24, $25,
+         $26
        )
        RETURNING *`,
       [
@@ -100,6 +100,7 @@ async function handler(event) {
         values.packing ?? null,
         values.bulk_pack ?? null,
         values.case_pack ?? null,
+        values.units_per_strip != null ? Math.max(1, Number(values.units_per_strip) || 1) : 1,
         values.conversion_unit ?? null,
         values.stockable ?? true,
         values.is_discount_enabled ?? true,

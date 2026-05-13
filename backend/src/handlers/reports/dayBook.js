@@ -50,12 +50,25 @@ async function handler(event) {
            )::numeric(14,2) AS supplier_payments`,
         [ctx.accountId, date]
       ),
-      // Gross profit: revenue (taxable_amount excl. GST) minus COGS (qty × batch purchase_rate)
+      // Gross profit: revenue (taxable_amount excl. GST) minus COGS.
+      // COGS = (strip qty × purchase_rate) + (loose_qty / packing_units × purchase_rate)
+      // packing_units = units per strip (e.g. 10 tablets per strip).
       // Only confirmed sales on this date; batches without a purchase_rate are treated as 0 cost.
       query(
         `SELECT
-           COALESCE(SUM(sii.taxable_amount), 0)::numeric(14,2)                    AS total_revenue,
-           COALESCE(SUM(sii.qty * COALESCE(pb.purchase_rate, 0)), 0)::numeric(14,2) AS total_cogs
+           COALESCE(SUM(sii.taxable_amount), 0)::numeric(14,2) AS total_revenue,
+           COALESCE(SUM(
+             -- Strip-level COGS
+             sii.qty * COALESCE(pb.purchase_rate, 0)
+             +
+             -- Loose-unit COGS: loose_qty ÷ packing_units × purchase_rate
+             CASE
+               WHEN COALESCE(sii.loose_qty, 0) > 0
+                    AND COALESCE(pb.packing_units, 1) > 0
+               THEN (sii.loose_qty / COALESCE(pb.packing_units, 1)) * COALESCE(pb.purchase_rate, 0)
+               ELSE 0
+             END
+           ), 0)::numeric(14,2) AS total_cogs
          FROM sales_invoice_items sii
          JOIN sales_invoices si
            ON si.id = sii.sales_invoice_id AND si.account_id = sii.account_id

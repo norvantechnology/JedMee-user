@@ -4,7 +4,8 @@
   gap: 12px;
   min-width: 0;
   width: 100%;
-  overflow-x: hidden;
+  /* Do NOT set overflow-x:hidden — it implicitly makes overflow-y:auto,
+     creating a nested scroll container that fights with mcmBody's scroll. */
 }
 
 .piStatusPill {
@@ -31,7 +32,7 @@
 
 /* piItemsTable — column widths only; visual styles come from cliItemsTable in CommonLineItemsSection.css */
 .piItemsTable {
-  min-width: 1580px;
+  min-width: 1420px;
 }
 
 .piItemsTable thead th {
@@ -43,36 +44,37 @@
   text-align: left;
 }
 
+/* Column widths — sized for 1500px modal, all content visible without truncation */
 .piItemsTable thead th:nth-child(1),
-.piItemsTable tbody td:nth-child(1) { width: 42px; }
+.piItemsTable tbody td:nth-child(1) { width: 38px; }
 .piItemsTable thead th:nth-child(2),
-.piItemsTable tbody td:nth-child(2) { width: 320px; }
+.piItemsTable tbody td:nth-child(2) { width: 240px; }
 .piItemsTable thead th:nth-child(3),
-.piItemsTable tbody td:nth-child(3) { width: 380px; }
+.piItemsTable tbody td:nth-child(3) { width: 300px; }
 .piItemsTable thead th:nth-child(4),
-.piItemsTable tbody td:nth-child(4) { width: 100px; min-width: 100px; }
+.piItemsTable tbody td:nth-child(4) { width: 90px; min-width: 90px; }
 .piItemsTable thead th:nth-child(5),
-.piItemsTable tbody td:nth-child(5) { width: 86px; text-align: center; }
+.piItemsTable tbody td:nth-child(5) { width: 80px; text-align: center; }
 .piItemsTable thead th:nth-child(6),
-.piItemsTable tbody td:nth-child(6) { width: 86px; }
+.piItemsTable tbody td:nth-child(6) { width: 80px; }
 .piItemsTable thead th:nth-child(7),
-.piItemsTable tbody td:nth-child(7) { width: 72px; }
+.piItemsTable tbody td:nth-child(7) { width: 70px; }
 .piItemsTable thead th:nth-child(8),
-.piItemsTable tbody td:nth-child(8) { width: 84px; }
+.piItemsTable tbody td:nth-child(8) { width: 80px; }
 .piItemsTable thead th:nth-child(9),
-.piItemsTable tbody td:nth-child(9) { width: 84px; }
+.piItemsTable tbody td:nth-child(9) { width: 80px; }
 .piItemsTable thead th:nth-child(10),
-.piItemsTable tbody td:nth-child(10) { width: 82px; }
+.piItemsTable tbody td:nth-child(10) { width: 78px; }
 .piItemsTable thead th:nth-child(11),
-.piItemsTable tbody td:nth-child(11) { width: 76px; }
+.piItemsTable tbody td:nth-child(11) { width: 72px; }
 .piItemsTable thead th:nth-child(12),
-.piItemsTable tbody td:nth-child(12) { width: 82px; }
+.piItemsTable tbody td:nth-child(12) { width: 78px; }
 .piItemsTable thead th:nth-child(13),
 .piItemsTable tbody td:nth-child(13) { width: 96px; }
 .piItemsTable thead th:nth-child(14),
 .piItemsTable tbody td:nth-child(14) {
-  width: 56px;
-  min-width: 56px;
+  width: 46px;
+  min-width: 46px;
   text-align: center;
   overflow: visible;
 }
@@ -139,6 +141,26 @@
   overflow: hidden;
   min-height: 32px;
   height: 32px;
+}
+
+/* Unit selector for packaging conversion (Case / Box / Strip) */
+.piUnitSelect {
+  min-width: 68px;
+  max-width: 80px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 4px 0 6px;
+  height: 32px;
+  min-height: 32px;
+  text-align: center;
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.piUnitSelect:focus {
+  border-color: var(--color-primary);
 }
 
 /* ── Inline validation error states (shown after submitted=true) ── */
@@ -491,7 +513,8 @@
 
 .piSupplierItem.is-selected {
   border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 28%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--color-primary) 28%, transparent);
+  outline-offset: -1px;
 }
 
 .piSupplierName {
@@ -589,14 +612,12 @@
   font-weight: 700;
 }
 
-/* ── Confirm variant — extra shadow on top of sfmBtnPrimary ── */
+/* ── Confirm variant — no shadow ── */
 .piPrimaryBtn_confirm {
-  box-shadow:
-    0 1px 0 color-mix(in srgb, white 28%, transparent) inset,
-    0 6px 18px color-mix(in srgb, var(--color-primary) 34%, transparent);
+  box-shadow: none;
 }
 
-/* ── Payment / success variant — green fill on top of sfmBtnPrimary ── */
+/* ── Payment / success variant — green fill, no shadow ── */
 .piPrimaryBtn_payment {
   border-color: color-mix(in srgb, var(--color-success) 55%, transparent);
   background: linear-gradient(
@@ -604,9 +625,7 @@
     color-mix(in srgb, var(--color-success) 92%, white 8%),
     var(--color-success)
   );
-  box-shadow:
-    0 1px 0 color-mix(in srgb, white 20%, transparent) inset,
-    0 6px 18px color-mix(in srgb, var(--color-success) 34%, transparent);
+  box-shadow: none;
 }
 .piPrimaryBtn_payment:hover:not(:disabled) {
   background: linear-gradient(
@@ -615,9 +634,7 @@
     var(--color-success-dark)
   );
   border-color: color-mix(in srgb, var(--color-success-dark) 55%, transparent);
-  box-shadow:
-    0 1px 0 color-mix(in srgb, white 20%, transparent) inset,
-    0 8px 22px color-mix(in srgb, var(--color-success) 40%, transparent);
+  box-shadow: none;
 }
 
 /* ── Purchase Return modal ── */
@@ -1123,15 +1140,6 @@
   }
 }
 
-@media (max-width: 1280px) {
-  .piHeaderTop {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .piHeaderTop .piHeadField:first-child {
-    grid-column: 1 / -1;
-  }
-}
 
 @media (max-width: 900px) {
   .piModalFooter {
@@ -1166,14 +1174,6 @@
 }
 
 @media (max-width: 640px) {
-  .piHeaderTop {
-    grid-template-columns: 1fr 1fr;
-    align-items: stretch;
-  }
-
-  .piHeaderRow2 {
-    grid-template-columns: 1fr;
-  }
   .piReturnHeaderGrid {
     grid-template-columns: 1fr;
   }
@@ -1252,7 +1252,8 @@
     padding: 10px;
   }
   .piHeaderTop,
-  .piHeaderRow2 {
+  .piHeaderRow2,
+  .piHeaderRow2_3col {
     gap: 8px;
   }
 }
@@ -1434,4 +1435,91 @@
   font-size: 11px;
   color: var(--color-danger);
   margin-top: 2px;
+}
+
+/* ─── Purchase modal: same layout fixes as SalesBillingPage ─────────────── */
+
+/* Form fills mcmBody as a proper flex child (no nested scroll container) */
+@media (min-width: 721px) {
+  .mcmBody .piModalForm {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* All direct children are fixed-height */
+  .piModalForm > * {
+    flex-shrink: 0;
+  }
+
+  /* Line items section grows to fill available space */
+  .mcm[aria-label="purchase-invoice-editor"] .cliSection {
+    flex: 1 1 auto;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Table rows scroll inside the section */
+  .mcm[aria-label="purchase-invoice-editor"] .cliItemsWrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+  }
+
+  /* Footer and section head always pinned */
+  .mcm[aria-label="purchase-invoice-editor"] .cliFooter,
+  .mcm[aria-label="purchase-invoice-editor"] .cliSectionHead {
+    flex-shrink: 0;
+  }
+}
+
+/* Compact section body padding — matches sales page */
+.piModalForm .piSectionBody {
+  padding: 10px 14px;
+  gap: 8px;
+}
+
+/* Optional / secondary fields — lighter label + softer border */
+.piOptionalField label {
+  color: var(--color-text-4);
+  font-weight: 500;
+}
+
+.piOptionalField .raInput {
+  border-color: color-mix(in srgb, var(--color-border) 65%, transparent);
+  background: color-mix(in srgb, var(--color-bg-1) 60%, var(--color-surface));
+  color: var(--color-text-3);
+}
+
+.piOptionalField .raInput::placeholder {
+  color: var(--color-text-4);
+  font-style: italic;
+}
+
+/* Summary strip hierarchy — matches sales page */
+.piModalForm .cliSummaryStrip .cliSummaryCell:not(.cliSummaryCell_total) .cliSummaryLabel {
+  font-size: 9px;
+  color: var(--color-text-4);
+  letter-spacing: 0.06em;
+}
+
+.piModalForm .cliSummaryStrip .cliSummaryCell:not(.cliSummaryCell_total) .cliSummaryValue {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-text-3);
+}
+
+.piModalForm .cliSummaryStrip .cliSummaryCell_total .cliSummaryLabel {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--color-text-2);
+}
+
+.piModalForm .cliSummaryStrip .cliSummaryCell_total .cliSummaryValue {
+  font-size: 16px;
+  font-weight: 900;
 }

@@ -13,7 +13,7 @@ import { readAuth } from "../services/authStorage.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
 import { can } from "../utils/access.js";
 import { listCustomers } from "../services/customerService.js";
-import { confirmSalesReturn, createSalesReturn, getSalesInvoice, listSalesInvoices, listSalesReturns } from "../services/salesService.js";
+import { confirmSalesReturn, createSalesReturn, getSalesInvoice, getSalesReturn, listSalesInvoices, listSalesReturns } from "../services/salesService.js";
 import { listProducts } from "../services/productService.js";
 import { listProductBatches } from "../services/productBatchService.js";
 import { sortBatchesByExpiryAsc } from "../utils/batchSort.js";
@@ -26,32 +26,45 @@ import { NAV_LABELS } from "../constants/navLabels.js";
 import "../components/StructuredForm.css";
 import MasterSelectWithCreate from "../components/MasterSelectWithCreate.jsx";
 import "./SalesReturnsPage.css";
-import { IconSalesReturn } from "../components/ui/AppIcons.jsx";
-import { IconBtn, IconConfirm } from "../components/TableActionKit.jsx";
+import { IconReturn } from "../components/ui/AppIcons.jsx";
+import { IconBtn, IconConfirm, IconView, IconPrint } from "../components/TableActionKit.jsx";
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
 import { todayYmdLocal } from "../utils/date.js";
+import ReturnViewModal from "../components/ReturnViewModal.jsx";
+import { printReturnDoc } from "../print/returnPrint.js";
 
 function emptyReturnItem() {
-  return { productId: "", batchId: "", productName: "", batchNo: "", expiryDate: "", availableBatches: [], salesInvoiceItemId: "", soldQty: 0, alreadyReturnedQty: 0, maxReturnableQty: 0, returnQty: 1, returnFreeQty: 0, salesRate: 0, netRate: 0, manual: false };
+  return {
+    productId: "", batchId: "", productName: "", batchNo: "", expiryDate: "",
+    availableBatches: [], salesInvoiceItemId: "",
+    soldQty: 0, alreadyReturnedQty: 0, maxReturnableQty: 0,
+    looseQty: 0, alreadyReturnedLooseQty: 0, maxReturnableLooseQty: 0,
+    packingUnits: 1,
+    returnQty: 0, returnLooseQty: 0, returnFreeQty: 0,
+    salesRate: 0, netRate: 0, manual: false
+  };
 }
 
 function mapInvoiceItemToReturnLine(x) {
   const soldQty = Number(x.qty || 0);
   const alreadyReturnedQty = Number(x.already_returned_qty || 0);
   const maxReturnableQty = Math.max(0, soldQty - alreadyReturnedQty);
+  const looseQty = Number(x.loose_qty || 0);
+  const alreadyReturnedLooseQty = Number(x.already_returned_loose_qty || 0);
+  const maxReturnableLooseQty = Math.max(0, looseQty - alreadyReturnedLooseQty);
+  const packingUnits = Math.max(1, Number(x.packing_units || 1));
   return {
     productId: x.product_id || "",
     batchId: x.batch_id || "",
     productName: x.product_name || "",
     batchNo: x.batch_no || "",
     salesInvoiceItemId: x.id || "",
-    soldQty,
-    alreadyReturnedQty,
-    maxReturnableQty,
-    returnQty: 0,
-    returnFreeQty: 0,
+    soldQty, alreadyReturnedQty, maxReturnableQty,
+    looseQty, alreadyReturnedLooseQty, maxReturnableLooseQty,
+    packingUnits,
+    returnQty: 0, returnLooseQty: 0, returnFreeQty: 0,
     salesRate: Number(x.sales_rate || 0),
     netRate: Number(x.net_rate || x.sales_rate || 0)
   };
@@ -84,13 +97,22 @@ export default function SalesReturnsPage() {
   const [form, setForm] = useState({ customerId: "", salesInvoiceId: "", returnDate: todayYmdLocal(), returnReason: "OTHER", notes: "", items: [emptyReturnItem()] });
   const [confirm, setConfirm] = useState({ open: false, id: "" });
   const [importOpen, setImportOpen] = useState(false);
-  const returnTotal = (form.items || []).reduce((s, x) => s + Number(x.returnQty || 0) * Number(x.netRate || 0), 0);
-  const hasAnyReturnQty = (form.items || []).some((x) => Number(x.returnQty || 0) > 0);
+  const [viewModal, setViewModal] = useState({ open: false, id: null });
+  const returnTotal = (form.items || []).reduce((s, x) => {
+    const packingUnits = Math.max(1, Number(x.packingUnits || 1));
+    const looseRate = Number(x.netRate || 0) / packingUnits;
+    return s
+      + Number(x.returnQty || 0) * Number(x.netRate || 0)
+      + Number(x.returnLooseQty || 0) * looseRate;
+  }, 0);
+  const hasAnyReturnQty = (form.items || []).some((x) => Number(x.returnQty || 0) > 0 || Number(x.returnLooseQty || 0) > 0);
   const hasInvalidReturnQty = (form.items || []).some((x) => {
     const q = Number(x.returnQty || 0);
+    const lq = Number(x.returnLooseQty || 0);
     const max = Number(x.maxReturnableQty || 0);
-    if (x.manual) return q < 0;
-    return q < 0 || q > max;
+    const maxLoose = Number(x.maxReturnableLooseQty || 0);
+    if (x.manual) return q < 0 || lq < 0;
+    return q < 0 || q > max || lq < 0 || (x.looseQty > 0 && lq > maxLoose);
   });
   const isManualReturn = isRetailer && !form.salesInvoiceId;
   const hasIncompleteManualLine = isManualReturn
@@ -258,6 +280,23 @@ export default function SalesReturnsPage() {
                 sortable: false,
                 render: (r) => (
                   <div className="ibGroup" onClick={(e) => e.stopPropagation()}>
+                    <IconBtn tooltip="View return details" onClick={() => setViewModal({ open: true, id: r.id })}>
+                      <IconView />
+                    </IconBtn>
+                    <IconBtn
+                      tooltip="Print return"
+                      onClick={async () => {
+                        const res = await getSalesReturn(r.id);
+                        if (res.status >= 200 && res.status < 300 && res.json?.ok) {
+                          const d = res.json?.data ?? {};
+                          printReturnDoc({ ret: d?.return ?? d, items: d?.items ?? [], type: "sales" });
+                        } else {
+                          emitToast({ type: "error", message: "Could not load return for printing." });
+                        }
+                      }}
+                    >
+                      <IconPrint />
+                    </IconBtn>
                     {r.status === "DRAFT" && canUpdate ? (
                       <IconBtn tooltip="Confirm and post return" variant="success" onClick={() => setConfirm({ open: true, id: r.id })}>
                         <IconConfirm />
@@ -274,7 +313,7 @@ export default function SalesReturnsPage() {
       <CommonModal
         open={open}
         title={modalLoading ? "Opening return…" : isRetailer ? "Create Counter Return" : "Create Sales Return"}
-        icon={<IconSalesReturn />}
+        icon={<IconReturn />}
         loading={modalLoading || busy}
         loadingText={busy ? "Creating return…" : "Loading invoice lines…"}
         onClose={() => {
@@ -301,6 +340,7 @@ export default function SalesReturnsPage() {
               variant="primary"
               type="button"
               disabled={busy}
+              className="srmCreateBtn"
               onClick={async () => {
                 setSubmitted(true);
                 if (!form.customerId || (!isRetailer && !form.salesInvoiceId) || !hasAnyReturnQty || hasInvalidReturnQty || hasIncompleteManualLine) return;
@@ -320,8 +360,12 @@ export default function SalesReturnsPage() {
       >
         <div className="sfm srmWrap">
 
-          {/* ── Header section ── */}
+          {/* ── Step 1: Return Details ── */}
           <div className="sfmSection">
+            <div className="sfmSectionHead srmSectionHead">
+              <div className="sfmTitle">Return Details</div>
+              {!form.customerId && <div className="sfmHint">Select customer and invoice to begin</div>}
+            </div>
             <div className="sfmGrid srmHeadGrid">
               <div className="raField">
                 <label>Customer</label>
@@ -336,7 +380,7 @@ export default function SalesReturnsPage() {
                 {submitted && !form.customerId && <div className="mfzErr">Customer is required.</div>}
               </div>
 
-              <div className="raField">
+              <div className="raField srmInvoiceField">
                 <label>
                   Linked Invoice{" "}
                   {isRetailer
@@ -375,235 +419,278 @@ export default function SalesReturnsPage() {
                     ))}
                 </select>
                 {submitted && !isRetailer && !form.salesInvoiceId && <div className="mfzErr">Invoice is required.</div>}
-                {isRetailer ? (
-                  <div className="raHint" style={{ fontSize: 11, color: "var(--color-text-3)", marginTop: 4 }}>
-                    Walk-ins rarely keep their bill. Leave blank and add product, batch and qty manually below.
-                  </div>
-                ) : null}
               </div>
 
-              <div className="raField">
-                <label>Return Date</label>
-                <CommonDatePicker value={form.returnDate} onChange={(v) => setForm((p) => ({ ...p, returnDate: v }))} ariaLabel="Return date" />
+              <div className="srmDateReasonRow">
+                <div className="raField">
+                  <label>Return Date</label>
+                  <CommonDatePicker value={form.returnDate} onChange={(v) => setForm((p) => ({ ...p, returnDate: v }))} ariaLabel="Return date" disabled={!form.customerId} />
+                </div>
+                <div className="raField">
+                  <label>Reason</label>
+                  <select className="raInput" value={form.returnReason} onChange={(e) => setForm((p) => ({ ...p, returnReason: e.target.value }))} disabled={!form.customerId}>
+                    <option>DAMAGED</option>
+                    <option>EXPIRED</option>
+                    <option>WRONG_PRODUCT</option>
+                    <option>EXCESS</option>
+                    <option>PATIENT_RETURNED</option>
+                    <option>OTHER</option>
+                  </select>
+                </div>
               </div>
 
-              <div className="raField">
-                <label>Reason</label>
-                <select className="raInput" value={form.returnReason} onChange={(e) => setForm((p) => ({ ...p, returnReason: e.target.value }))}>
-                  <option>DAMAGED</option>
-                  <option>EXPIRED</option>
-                  <option>WRONG_PRODUCT</option>
-                  <option>EXCESS</option>
-                  <option>PATIENT_RETURNED</option>
-                  <option>OTHER</option>
-                </select>
-              </div>
-
-              <div className="raField sfmFull">
-                <label>Notes</label>
-                <input className="raInput" value={form.notes} onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} />
+              <div className="raField sfmFull srmNotesCompact">
+                <label>Notes <span className="srmOptionalBadge">optional</span></label>
+                <input className="raInput" value={form.notes} onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} placeholder="Any notes about this return…" />
               </div>
             </div>
           </div>
 
-          {/* ── Return Items section ── */}
+          {/* ── Step 2: Return Items ── */}
           <div className="sfmSection srmItemsSection">
-            <div className="srmItemsHead">
+            <div className="sfmSectionHead srmSectionHead">
               <div className="sfmTitle">Return Items</div>
-              <div className="sfmHint">
-                {form.salesInvoiceId
-                  ? "Set return quantity for each line."
-                  : isRetailer
-                    ? "No invoice linked. Add the product, batch and quantity returned across the counter."
-                    : "Set return quantity for each line."}
-              </div>
             </div>
+            <div className="srmItemsBody">
 
+            {!form.customerId ? (
+              <div className="srmLockedMsg">
+                <svg className="srmLockedIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                  <rect x="9" y="3" width="6" height="4" rx="1"/>
+                  <line x1="9" y1="12" x2="15" y2="12"/>
+                  <line x1="9" y1="16" x2="13" y2="16"/>
+                </svg>
+                <span>Select a customer above to load return items.</span>
+              </div>
+            ) : (
+            <>
             {submitted && !hasAnyReturnQty && (
-              <div className="mfzErr srmItemsErr">Enter a return quantity for at least one item.</div>
+              <div className="srmAlertBanner">Enter a return quantity for at least one item.</div>
             )}
 
             {(form.items || []).map((it, idx) => {
               const isManualLine = Boolean(it.manual) || (!form.salesInvoiceId && isRetailer);
+              const lineAmount = Number(it.returnQty || 0) * Number(it.netRate || 0)
+                + Number(it.returnLooseQty || 0) * (Number(it.netRate || 0) / Math.max(1, Number(it.packingUnits || 1)));
               return (
                 <div key={idx} className="srmItemCard">
-                  <div className="srmItemTitle">
-                    Line {idx + 1}
-                    {isManualLine ? (
-                      <button
-                        type="button"
-                        className="mfzBtn appBtn appBtn_secondary appBtn_sm"
-                        style={{ marginLeft: 8, padding: "2px 8px", fontSize: 11 }}
-                        disabled={busy}
-                        onClick={() => setForm((p) => {
-                          const cur = p.items || [];
-                          if (cur.length <= 1) return p;
-                          return { ...p, items: cur.filter((_, i) => i !== idx) };
-                        })}
-                      >
-                        Remove
-                      </button>
-                    ) : null}
-                  </div>
 
-                  <div className="srmBadgeRow">
-                    <div className="srmBadge"><span>Product</span><strong>{it.productName || "—"}</strong></div>
-                    <div className="srmBadge"><span>Batch</span><strong>{it.batchNo || "—"}</strong></div>
-                    {it.expiryDate ? (
-                      <div className="srmBadge srmBadge_expiry" title={formatBatchExpiryRelativePhrase(it.expiryDate)}>
-                        <span>Expiry</span>
-                        <strong>
-                          {String(it.expiryDate).slice(0, 10)}
-                          <span className="srmExpirySub"> · {formatBatchExpiryRelativePhrase(it.expiryDate)}</span>
-                        </strong>
-                      </div>
-                    ) : null}
-                  </div>
-
-                  {!form.salesInvoiceId && !isRetailer ? (
-                    <div className="raField" style={{ marginTop: 8 }}>
-                      <label>Line source</label>
-                      <input className="raInput" readOnly value="Select linked invoice to load product and batch lines." />
-                    </div>
-                  ) : null}
-
+                  {/* ── Manual line: product/batch selects ── */}
                   {isManualLine ? (
-                    <div className="sfmGrid srmItemGrid" style={{ marginTop: 8 }}>
-                      <div className={`raField sfmFull${submitted && !it.productId ? " srmFieldErr" : ""}`}>
-                        <label>Product</label>
-                        <MasterSelectWithCreate
-                          kind="product"
-                          value={it.productId || ""}
-                          placeholder="Search product"
-                          options={(products || []).map((p) => toProductOption(p))}
-                          onChange={async (productId) => {
-                            const p = (products || []).find((x) => String(x.id) === String(productId));
-                            if (!p) {
-                              setForm((prev) => ({ ...prev, items: prev.items.map((x, i) => (i === idx ? { ...emptyReturnItem(), manual: true } : x)) }));
-                              return;
-                            }
-                            setForm((prev) => ({
-                              ...prev,
-                              items: prev.items.map((x, i) =>
-                                i === idx
-                                  ? { ...emptyReturnItem(), manual: true, productId: p.id, productName: p.name || "", availableBatches: [] }
-                                  : x
-                              )
-                            }));
-                            const batches = await loadBatchesForProduct(p.id);
-                            const first = batches[0];
-                            setForm((prev) => ({
-                              ...prev,
-                              items: prev.items.map((x, i) => {
-                                if (i !== idx || String(x.productId || "") !== String(p.id)) return x;
-                                if (!first) return { ...x, availableBatches: batches };
-                                return {
-                                  ...x,
-                                  availableBatches: batches,
-                                  batchId: first.id,
-                                  batchNo: first.batch_no || "",
-                                  expiryDate: String(first.expiry_date || "").slice(0, 10),
-                                  salesRate: Number(first.retail_rate || first.sales_rate || first.mrp || 0),
-                                  netRate: Number(first.retail_rate || first.sales_rate || first.mrp || 0)
-                                };
-                              })
-                            }));
-                          }}
-                        />
-                        {submitted && !it.productId && <div className="mfzErr">Product is required.</div>}
-                      </div>
-
-                      <div className={`raField${submitted && !it.batchId ? " srmFieldErr" : ""}`}>
-                        <label>Batch</label>
-                        <CommonSelectField
-                          value={it.batchId || ""}
-                          placeholder="Pick batch"
-                          options={sortBatchesByExpiryAsc(it.availableBatches || []).map((b) => {
-                            const ex = String(b.expiry_date || "").slice(0, 10);
-                            return { value: b.id, label: `${b.batch_no} | Exp ${ex}${batchExpiryDaysInlineSuffix(ex)}` };
+                    <>
+                      <div className="srmItemTitle">
+                        <span className="srmLineLabel">Line {idx + 1}</span>
+                        <button
+                          type="button"
+                          className="srmRemoveBtn"
+                          title="Remove this line"
+                          disabled={busy || (form.items || []).length <= 1}
+                          onClick={() => setForm((p) => {
+                            const cur = p.items || [];
+                            if (cur.length <= 1) return p;
+                            return { ...p, items: cur.filter((_, i) => i !== idx) };
                           })}
-                          onChange={(batchId) => {
-                            const b = (it.availableBatches || []).find((x) => String(x.id) === String(batchId));
-                            if (!b) return;
-                            setForm((prev) => ({
-                              ...prev,
-                              items: prev.items.map((x, i) => (i === idx ? {
-                                ...x,
-                                batchId: b.id,
-                                batchNo: b.batch_no || "",
-                                expiryDate: String(b.expiry_date || "").slice(0, 10),
-                                salesRate: Number(b.retail_rate || b.sales_rate || b.mrp || 0),
-                                netRate: Number(b.retail_rate || b.sales_rate || b.mrp || 0)
-                              } : x))
-                            }));
-                          }}
-                        />
-                        {submitted && !it.batchId && <div className="mfzErr">Batch is required.</div>}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/></svg>
+                        </button>
                       </div>
-
-                      <div className={`raField${submitted && !(Number(it.returnQty || 0) > 0) ? " srmFieldErr" : ""}`}>
-                        <label>Return Qty</label>
-                        <input
-                          className={`raInput${submitted && !(Number(it.returnQty || 0) > 0) ? " srmInputErr" : ""}`}
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          value={it.returnQty}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9]/g, "");
-                            setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, returnQty: val } : x)) }));
-                          }}
-                        />
-                        {submitted && !(Number(it.returnQty || 0) > 0) && <div className="mfzErr">Return qty must be greater than 0.</div>}
+                      {submitted && (!it.productId || !it.batchId || !(Number(it.returnQty || 0) > 0 || Number(it.returnLooseQty || 0) > 0)) && (
+                        <div className="srmLineErrBanner">This line needs a product, batch, and a return quantity.</div>
+                      )}
+                      <div className="srmManualSelects">
+                        <div className={`raField${submitted && !it.productId ? " srmFieldErr" : ""}`}>
+                          <label>Product</label>
+                          <MasterSelectWithCreate
+                            kind="product"
+                            value={it.productId || ""}
+                            placeholder="Search product"
+                            options={(products || []).map((p) => toProductOption(p))}
+                            onChange={async (productId) => {
+                              const p = (products || []).find((x) => String(x.id) === String(productId));
+                              if (!p) {
+                                setForm((prev) => ({ ...prev, items: prev.items.map((x, i) => (i === idx ? { ...emptyReturnItem(), manual: true } : x)) }));
+                                return;
+                              }
+                              setForm((prev) => ({
+                                ...prev,
+                                items: prev.items.map((x, i) =>
+                                  i === idx
+                                    ? { ...emptyReturnItem(), manual: true, productId: p.id, productName: p.name || "", availableBatches: [] }
+                                    : x
+                                )
+                              }));
+                              const batches = await loadBatchesForProduct(p.id);
+                              const first = batches[0];
+                              setForm((prev) => ({
+                                ...prev,
+                                items: prev.items.map((x, i) => {
+                                  if (i !== idx || String(x.productId || "") !== String(p.id)) return x;
+                                  if (!first) return { ...x, availableBatches: batches };
+                                  return {
+                                    ...x,
+                                    availableBatches: batches,
+                                    batchId: first.id,
+                                    batchNo: first.batch_no || "",
+                                    expiryDate: String(first.expiry_date || "").slice(0, 10),
+                                    salesRate: Number(first.retail_rate || first.sales_rate || first.mrp || 0),
+                                    netRate: Number(first.retail_rate || first.sales_rate || first.mrp || 0)
+                                  };
+                                })
+                              }));
+                            }}
+                          />
+                          {submitted && !it.productId && <div className="mfzErr">Product required.</div>}
+                        </div>
+                        <div className={`raField${submitted && !it.batchId ? " srmFieldErr" : ""}`}>
+                          <label>Batch</label>
+                          <CommonSelectField
+                            value={it.batchId || ""}
+                            placeholder="Pick batch"
+                            options={sortBatchesByExpiryAsc(it.availableBatches || []).map((b) => {
+                              const ex = String(b.expiry_date || "").slice(0, 10);
+                              return { value: b.id, label: `${b.batch_no} | Exp ${ex}${batchExpiryDaysInlineSuffix(ex)}` };
+                            })}
+                            onChange={(batchId) => {
+                              const b = (it.availableBatches || []).find((x) => String(x.id) === String(batchId));
+                              if (!b) return;
+                              setForm((prev) => ({
+                                ...prev,
+                                items: prev.items.map((x, i) => (i === idx ? {
+                                  ...x,
+                                  batchId: b.id,
+                                  batchNo: b.batch_no || "",
+                                  expiryDate: String(b.expiry_date || "").slice(0, 10),
+                                  salesRate: Number(b.retail_rate || b.sales_rate || b.mrp || 0),
+                                  netRate: Number(b.retail_rate || b.sales_rate || b.mrp || 0)
+                                } : x))
+                              }));
+                            }}
+                          />
+                          {submitted && !it.batchId && <div className="mfzErr">Batch required.</div>}
+                        </div>
                       </div>
-
-                      <div className="raField">
-                        <label>Rate</label>
-                        <input
-                          className="raInput"
-                          type="text"
-                          inputMode="decimal"
-                          pattern="[0-9]*\.?[0-9]*"
-                          value={it.netRate ?? ""}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1");
-                            const next = val === "" ? 0 : Math.max(0, Number(val || 0));
-                            setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, netRate: next, salesRate: next } : x)) }));
-                          }}
-                        />
+                      <div className="srmItemActions">
+                        <div className={`srmQtyInput${submitted && !(Number(it.returnQty || 0) > 0 || Number(it.returnLooseQty || 0) > 0) ? " srmFieldErr" : ""}`}>
+                          <label>Return Qty</label>
+                          <input
+                            className={`raInput${submitted && !(Number(it.returnQty || 0) > 0 || Number(it.returnLooseQty || 0) > 0) ? " srmInputErr" : ""}`}
+                            type="text" inputMode="numeric" pattern="[0-9]*" placeholder="0"
+                            value={it.returnQty}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, "");
+                              setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, returnQty: val } : x)) }));
+                            }}
+                          />
+                        </div>
+                        <div className="srmQtyInput">
+                          <label>Loose Qty</label>
+                          <input
+                            className="raInput"
+                            type="text" inputMode="numeric" pattern="[0-9]*" placeholder="0"
+                            value={it.returnLooseQty || ""}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, "");
+                              setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, returnLooseQty: val } : x)) }));
+                            }}
+                          />
+                        </div>
+                        <div className="srmQtyInput srmRateInput">
+                          <label>Rate</label>
+                          <input
+                            className="raInput"
+                            type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*"
+                            value={it.netRate ?? ""}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1");
+                              const next = val === "" ? 0 : Math.max(0, Number(val || 0));
+                              setForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, netRate: next, salesRate: next } : x)) }));
+                            }}
+                          />
+                        </div>
+                        <div className="srmAmountDisplay">
+                          <span className="srmAmountLabel">Line Total</span>
+                          <div className="srmItemAmount">{fmtMoney(lineAmount)}</div>
+                        </div>
                       </div>
-
-                      <div className="raField">
-                        <label>Return Amount</label>
-                        <input className="raInput" readOnly value={fmtMoney(Number(it.returnQty || 0) * Number(it.netRate || 0))} />
-                      </div>
+                    </>
+                  ) : !form.salesInvoiceId && !isRetailer ? (
+                    <div className="srmItemInfo">
+                      <span>Select a linked invoice above to load return lines.</span>
                     </div>
                   ) : (
-                    <div className="sfmGrid srmItemGrid">
-                      <div className="raField"><label>Sold Qty</label><input className="raInput" readOnly value={it.soldQty || 0} /></div>
-                      {Number(it.alreadyReturnedQty || 0) > 0 && (
-                        <div className="raField"><label>Already Returned</label><input className="raInput" readOnly value={it.alreadyReturnedQty} /></div>
-                      )}
-                      <div className="raField"><label>Max Returnable</label><input className="raInput" readOnly value={it.maxReturnableQty || 0} /></div>
-                      <div className="raField">
-                        <label>Return Qty</label>
-                        <input
-                          className="raInput"
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          disabled={Number(it.maxReturnableQty || 0) <= 0}
-                          value={it.returnQty}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/[^0-9]/g, "");
-                            setForm((p) => ({ ...p, items: p.items.map((x, i) => i === idx ? { ...x, returnQty: val } : x) }));
-                          }}
-                        />
-                        {Number(it.returnQty || 0) > Number(it.maxReturnableQty || 0) ? <div className="mfzErr">Return qty cannot exceed max returnable.</div> : null}
+                    <>
+                      {/* ── Invoice-linked line: all info + inputs on one compact row ── */}
+                      <div className="srmItemRow">
+                        <div className="srmItemInfoSide">
+                          <span className="srmItemName">{it.productName || "—"}</span>
+                          <span className="srmItemMetaSep">·</span>
+                          <span className="srmItemBatch">Batch {it.batchNo || "—"}</span>
+                          {it.expiryDate ? (
+                            <>
+                              <span className="srmItemMetaSep">·</span>
+                              <span className="srmItemExpiry">Exp {String(it.expiryDate).slice(0, 10)}</span>
+                            </>
+                          ) : null}
+                          {Number(it.soldQty || 0) > 0 && (
+                            <>
+                              <span className="srmItemMetaSep">·</span>
+                              <span>
+                                Sold <strong>{it.soldQty}</strong>
+                                {Number(it.alreadyReturnedQty || 0) > 0 ? <>, returned <strong>{it.alreadyReturnedQty}</strong></> : null}
+                                , max <strong>{it.maxReturnableQty}</strong>
+                              </span>
+                            </>
+                          )}
+                          {Number(it.looseQty || 0) > 0 && (
+                            <>
+                              <span className="srmItemMetaSep">·</span>
+                              <span>Loose sold <strong>{it.looseQty}</strong>, max <strong>{it.maxReturnableLooseQty}</strong></span>
+                            </>
+                          )}
+                          <span className="srmItemMetaSep">·</span>
+                          <span>Rate <strong>{fmtMoney(it.netRate || 0)}</strong></span>
+                        </div>
+                        <div className="srmItemActionSide">
+                          {Number(it.soldQty || 0) > 0 && (
+                            <div className="srmQtyInput">
+                              <label>Return Qty</label>
+                              <input
+                                className="raInput"
+                                type="text" inputMode="numeric" pattern="[0-9]*" placeholder="0"
+                                disabled={Number(it.maxReturnableQty || 0) <= 0}
+                                value={it.returnQty}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9]/g, "");
+                                  setForm((p) => ({ ...p, items: p.items.map((x, i) => i === idx ? { ...x, returnQty: val } : x) }));
+                                }}
+                              />
+                              {Number(it.returnQty || 0) > Number(it.maxReturnableQty || 0) ? <div className="mfzErr" style={{ fontSize: 11 }}>Max {it.maxReturnableQty}</div> : null}
+                            </div>
+                          )}
+                          {Number(it.looseQty || 0) > 0 && (
+                            <div className="srmQtyInput">
+                              <label>Loose Qty <span className="srmQtyMax">max {it.maxReturnableLooseQty}</span></label>
+                              <input
+                                className="raInput"
+                                type="text" inputMode="numeric" pattern="[0-9]*" placeholder="0"
+                                disabled={Number(it.maxReturnableLooseQty || 0) <= 0}
+                                value={it.returnLooseQty || ""}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/[^0-9]/g, "");
+                                  setForm((p) => ({ ...p, items: p.items.map((x, i) => i === idx ? { ...x, returnLooseQty: val } : x) }));
+                                }}
+                              />
+                              {Number(it.returnLooseQty || 0) > Number(it.maxReturnableLooseQty || 0) ? <div className="mfzErr" style={{ fontSize: 11 }}>Max {it.maxReturnableLooseQty}</div> : null}
+                            </div>
+                          )}
+                          <div className="srmAmountDisplay">
+                            <span className="srmAmountLabel">Line Total</span>
+                            <div className="srmItemAmount">{fmtMoney(lineAmount)}</div>
+                          </div>
+                        </div>
                       </div>
-                      <div className="raField"><label>Rate</label><input className="raInput" readOnly value={it.netRate || 0} /></div>
-                      <div className="raField"><label>Return Amount</label><input className="raInput" readOnly value={fmtMoney(Number(it.returnQty || 0) * Number(it.netRate || 0))} /></div>
-                    </div>
+                    </>
                   )}
                 </div>
               );
@@ -613,11 +700,12 @@ export default function SalesReturnsPage() {
               <div className="srmAddLineWrap">
                 <button
                   type="button"
-                  className="mfzBtn appBtn appBtn_secondary appBtn_md"
+                  className="srmAddLineBtn"
                   disabled={busy}
                   onClick={() => setForm((p) => ({ ...p, items: [...(p.items || []), { ...emptyReturnItem(), manual: true }] }))}
                 >
-                  + Add another product
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="14" height="14"><path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/></svg>
+                  Add another product
                 </button>
               </div>
             ) : null}
@@ -625,13 +713,14 @@ export default function SalesReturnsPage() {
             {hasInvalidReturnQty && (
               <div className="mfzErr srmItemsErr">One or more return quantities are invalid. Please keep qty between 0 and max returnable.</div>
             )}
-            {hasIncompleteManualLine && (
-              <div className="mfzErr srmItemsErr">Each manual line must have product, batch and a return quantity.</div>
-            )}
+            </>
+            )}{/* end customer guard */}
 
-            <div className="srmTotalBar">
-              Total Return Amount: {fmtCurrency(returnTotal || 0)}
+            <div className={`srmTotalBar${!form.customerId ? " srmTotalBarLocked" : ""}`}>
+              <span className="srmTotalLabel">Total Return Amount</span>
+              <span className="srmTotalAmount">{form.customerId ? fmtCurrency(returnTotal || 0) : "—"}</span>
             </div>
+            </div>{/* end srmItemsBody */}
           </div>
 
         </div>
@@ -661,6 +750,14 @@ export default function SalesReturnsPage() {
         entityType="SALES_RETURNS"
         title="Import sales returns"
         onCompleted={() => refresh()}
+      />
+
+      <ReturnViewModal
+        open={viewModal.open}
+        onClose={() => setViewModal({ open: false, id: null })}
+        returnId={viewModal.id}
+        type="sales"
+        fetchFn={getSalesReturn}
       />
     </AppShell>
   );

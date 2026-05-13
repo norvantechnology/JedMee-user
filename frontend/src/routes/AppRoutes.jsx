@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import SalesStockAnalysisPage from "../pages/SalesStockAnalysisPage.jsx";
 import LandingPage from "../pages/LandingPage.jsx";
 import AboutPage from "../pages/AboutPage.jsx";
 import TermsPage from "../pages/TermsPage.jsx";
@@ -234,6 +235,14 @@ export function AppRoutes() {
         }
       />
 
+      {/* Sales & Stock Analysis standalone route */}
+      <Route
+        path="/reports/sales-stock-analysis"
+        element={
+          !authed ? <Navigate to="/login" replace /> : mustChange ? <Navigate to="/first-login-change-password" replace /> : approvalGate ? <Navigate to="/approval" replace /> : <SalesStockAnalysisPage />
+        }
+      />
+
       {/* Backward-compatible report routes (redirect into merged hubs) */}
       <Route
         path="/reports/product-supplier"
@@ -246,6 +255,10 @@ export function AppRoutes() {
       <Route
         path="/reports/non-moving"
         element={<Navigate to="/reports/inventory?tab=non-moving" replace />}
+      />
+      <Route
+        path="/reports/sales-stock"
+        element={<Navigate to="/reports/inventory?tab=sales-stock" replace />}
       />
       <Route path="/reports/customer-ledger" element={<Navigate to="/reports/ledger?tab=customer" replace />} />
       <Route path="/reports/vendor-ledger" element={<Navigate to="/reports/ledger?tab=supplier" replace />} />

@@ -73,6 +73,7 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
     const bRs = await q(
       `SELECT pb.id, pb.batch_no, pb.current_stock, pb.current_free_stock, pb.is_hold, pb.hold_reason,
               pb.loose_stock, pb.loose_unit_name,
+              COALESCE(pb.packing_units, p.units_per_strip, 1) AS packing_units,
               COALESCE(p.is_control, pb.is_control) AS is_control, pb.account_id,
               COALESCE(p.is_half_scheme, pb.is_half_scheme) AS is_half_scheme,
               pb.is_net, pb.net_discount_percent,
@@ -126,11 +127,71 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
       if (!String(item.patient_name || "").trim()) return { err: fail(400, "BUSINESS_RULE", `Patient name is required for controlled batch "${item.batch_no}".`) };
     }
 
+    // packing_units: units per strip for this batch (used for loose break-pack calculation)
+    const batchPackingUnits = Math.max(1, Number(batch.packing_units || looseUnitFactor));
+    const lineQtyInt = Number.parseInt(String(item.qty || 0), 10) || 0;
+    const looseQtySold = Number(item.loose_qty || 0);
+
+    // ── Loose-only line: qty=0, looseQty>0 ──────────────────────────────────
+    // When selling only individual units (e.g. 1 tablet), qty=0 and looseQty>0.
+    // Skip strip-based recalculation; use stored line values from save.
+    if (lineQtyInt === 0 && looseQtySold > 0) {
+      const storedGst = Number(item.gst_amount || 0);
+      const cgstAmt = String(invoice.bill_type || "").toUpperCase() === "TAX_INVOICE" ? Number((storedGst / 2).toFixed(4)) : 0;
+      const sgstAmt = String(invoice.bill_type || "").toUpperCase() === "TAX_INVOICE" ? Number((storedGst / 2).toFixed(4)) : 0;
+      await q(
+        `UPDATE sales_invoice_items
+         SET free_qty = 0, discount_percent = $3::numeric, discount_amount = $4::numeric, net_rate = $5::numeric,
+             taxable_amount = $6::numeric, gst_amount = $7::numeric, line_total = $8::numeric,
+             cgst_amount = $9::numeric, sgst_amount = $10::numeric, igst_amount = 0
+         WHERE id = $1 AND account_id = $2`,
+        [item.id, accountId,
+         Number(item.discount_percent || 0), Number(item.discount_amount || 0), Number(item.net_rate || 0),
+         Number(item.taxable_amount || 0), storedGst, Number(item.line_total || 0),
+         cgstAmt, sgstAmt]
+      );
+      // No SALE inventory txn (qty=0, no full strips deducted)
+      // Handle loose stock deduction (break packs if needed)
+      const looseAvailable = Number(batch.loose_stock || 0);
+      const stockBillable = Number(batch.current_stock || 0);
+      let packsToBreak = 0;
+      let extraLooseFromBreak = 0;
+      if (looseQtySold > looseAvailable) {
+        const shortfall = looseQtySold - looseAvailable;
+        packsToBreak = Math.ceil(shortfall / batchPackingUnits);
+        extraLooseFromBreak = packsToBreak * batchPackingUnits;
+      }
+      if (packsToBreak > 0) {
+        if (stockBillable < packsToBreak) {
+          return {
+            err: fail(400, "BUSINESS_RULE",
+              `Cannot break ${packsToBreak} pack(s) for loose sale of "${item.product_name}" batch "${item.batch_no}". Need ${packsToBreak} strip(s) but only ${stockBillable} available.`)
+          };
+        }
+        await q(
+          `INSERT INTO inventory_txns (account_id, batch_id, txn_type, qty, free_qty, ref_type, ref_id, note, created_by_user_id, created_at)
+           VALUES ($1,$2,$3::inventory_txn_type,$4::numeric,0,$5,$6,$7,$8,now())`,
+          [accountId, item.batch_id, "BREAK_PACK", -packsToBreak, "SALE_INVOICE_ITEM", item.id,
+           `Break ${packsToBreak} pack(s) → +${extraLooseFromBreak} loose ${batch.loose_unit_name || "TAB"} (Invoice ${invoice.invoice_number})`, actorId]
+        );
+        await q(`UPDATE product_batches SET loose_stock = loose_stock + $3, updated_at = now() WHERE id = $1 AND account_id = $2`, [item.batch_id, accountId, extraLooseFromBreak]);
+      }
+      await q(
+        `INSERT INTO inventory_txns (account_id, batch_id, txn_type, qty, free_qty, ref_type, ref_id, note, created_by_user_id, created_at)
+         VALUES ($1,$2,$3::inventory_txn_type,0,0,$4,$5,$6,$7,now())`,
+        [accountId, item.batch_id, "LOOSE_SALE", "SALE_INVOICE_ITEM", item.id,
+         `Loose sale: ${looseQtySold} ${batch.loose_unit_name || "TAB"} to ${invoice.customer_name} (Invoice ${invoice.invoice_number})`, actorId]
+      );
+      await q(`UPDATE product_batches SET loose_stock = GREATEST(0, loose_stock - $3), updated_at = now() WHERE id = $1 AND account_id = $2`, [item.batch_id, accountId, looseQtySold]);
+      lowStockBatches.add(String(item.batch_id));
+      continue;
+    }
+    // ── Normal strip line ────────────────────────────────────────────────────
+
     const originalFreeQty = Number(item.free_qty || 0);
     const originalDiscount = Number(item.discount_percent || 0);
     const schemePaid = Number.parseInt(String(batch.scheme_qty_paid || 0), 10) || 0;
     const schemeFree = Number.parseInt(String(batch.scheme_qty_free || 0), 10) || 0;
-    const lineQtyInt = Number.parseInt(String(item.qty || 0), 10) || 0;
     const autoSchemeFree = schemePaid > 0 && schemeFree > 0 ? Math.floor(lineQtyInt / schemePaid) * schemeFree : 0;
     const lineFreeQty = batch.is_non_editable_free_qty ? autoSchemeFree : item.free_qty;
     const baseDiscount = batch.is_net ? Number(batch.net_discount_percent || 0) : originalDiscount;
@@ -223,15 +284,14 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
       [accountId, item.batch_id, "SALE", -Math.abs(Number(item.qty || 0)), -Math.abs(Number(final.freeQty || 0)), "SALE_INVOICE_ITEM", item.id, `Sale to ${invoice.customer_name}, Invoice: ${invoice.invoice_number}${controlledNote}`, actorId]
     );
 
-    const looseQtySold = Number(item.loose_qty || 0);
     if (isRetailer && looseQtySold > 0) {
       const looseAvailable = Number(batch.loose_stock || 0);
       let packsToBreak = 0;
       let extraLooseFromBreak = 0;
       if (looseQtySold > looseAvailable) {
         const shortfall = looseQtySold - looseAvailable;
-        packsToBreak = Math.ceil(shortfall / looseUnitFactor);
-        extraLooseFromBreak = packsToBreak * looseUnitFactor;
+        packsToBreak = Math.ceil(shortfall / batchPackingUnits);
+        extraLooseFromBreak = packsToBreak * batchPackingUnits;
       }
 
       if (packsToBreak > 0) {
@@ -264,8 +324,8 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
     lowStockBatches.add(String(item.batch_id));
   }
 
-  const refreshed = await q(`SELECT qty, sales_rate, discount_amount, gst_amount FROM sales_invoice_items WHERE sales_invoice_id = $1 AND account_id = $2`, [invoiceId, accountId]);
-  const t = calculateInvoiceTotals((refreshed.rows || []).map((r) => ({ qty: Number(r.qty || 0), salesRate: Number(r.sales_rate || 0), discountAmount: Number(r.discount_amount || 0), gstAmount: Number(r.gst_amount || 0) })));
+  const refreshed = await q(`SELECT qty, sales_rate, discount_amount, gst_amount, line_total FROM sales_invoice_items WHERE sales_invoice_id = $1 AND account_id = $2`, [invoiceId, accountId]);
+  const t = calculateInvoiceTotals((refreshed.rows || []).map((r) => ({ qty: Number(r.qty || 0), salesRate: Number(r.sales_rate || 0), discountAmount: Number(r.discount_amount || 0), gstAmount: Number(r.gst_amount || 0), lineTotal: Number(r.line_total || 0) })));
   const autoCashFromProfile = isRetailer && (Boolean(invoice.is_walk_in_sale) || Boolean(customer.is_cash_customer));
   const markPaidFlag = confirmOptions && Object.prototype.hasOwnProperty.call(confirmOptions, "markPaidAtConfirm") ? confirmOptions.markPaidAtConfirm : undefined;
   let shouldAutoCashSettle;

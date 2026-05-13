@@ -1,3 +1,13 @@
+/* ─── Rate controls group — no-wrap so Disc% never orphans on its own row ── */
+.sbmRateControls {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 8px;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
 /* ─── Sales Billing Modal – matches HTML mockup exactly ─────────────────── */
 
 .sbmModalForm {
@@ -6,7 +16,9 @@
   gap: 12px;
   min-width: 0;
   width: 100%;
-  overflow-x: hidden;
+  /* Do NOT set overflow-x:hidden here — it implicitly makes overflow-y:auto,
+     creating a nested scroll container that fights with mcmBody's own scroll.
+     Horizontal overflow is handled per-section (cliItemsWrap). */
 }
 
 /* Invoice header / sections use shared `.piSection` / `.piHeaderTop` (PurchaseInvoicesPage.css). */
@@ -22,15 +34,16 @@
 
 /* ─── Rate Bar (retailer): compact on desktop, stacks on small screens ───── */
 .sbmRateBar {
-  margin-top: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  background: var(--color-surface);
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--color-bg-1);
   border: 1px solid var(--color-border);
+  box-shadow: none;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 12px 16px;
+  gap: 6px 10px;
   justify-content: flex-start;
   min-height: 0;
 }
@@ -69,12 +82,12 @@
   border: 1px solid var(--color-border);
   background: var(--color-bg-1);
   color: var(--color-text-2);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 600;
-  min-height: 30px;
+  min-height: 32px;
   height: auto;
-  padding: 6px 10px;
-  border-radius: 8px;
+  padding: 5px 10px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.12s;
   font-family: var(--font);
@@ -104,32 +117,40 @@
 .sbmRateField {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--mcm-field-stack-gap, 8px);
   min-width: 0;
 }
 
+/* Rate bar labels: compact uppercase — intentionally smaller than piHeadField labels
+   since the rate bar is a dense control strip, not a primary form section */
 .sbmRateField label {
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   color: var(--color-text-3);
+  line-height: 1.2;
 }
 
+/* Inputs in rate bar match the modal control height for visual consistency */
 .sbmRateField .raInput {
-  height: 36px;
-  min-height: 36px;
-  font-size: 13px;
+  height: var(--mcm-ctrl-h, 42px);
+  min-height: var(--mcm-ctrl-h, 42px);
+  font-size: var(--mcm-ctrl-fs, 14px);
+  font-weight: var(--mcm-ctrl-fw, 500);
+  box-sizing: border-box;
 }
 
+/* Bill Type: slightly wider to fit label text */
 .sbmRateField_btype {
-  width: 148px;
+  width: 160px;
   max-width: 100%;
   flex: 0 0 auto;
 }
 
+/* Overall Disc %: narrow — it's a short numeric field */
 .sbmRateField_disc {
-  width: 96px;
+  width: 88px;
   max-width: 100%;
   flex: 0 0 auto;
 }
@@ -138,8 +159,8 @@
   .sbmRateBar {
     flex-direction: column;
     align-items: stretch;
-    gap: 14px;
-    padding: 12px;
+    gap: 12px;
+    padding: 12px 14px;
   }
 
   .sbmRateBarLeft {
@@ -154,7 +175,7 @@
   }
 
   .sbmRateBtn {
-    min-height: 34px;
+    min-height: 36px;
     padding: 6px 10px;
     font-size: 11.5px;
   }
@@ -172,6 +193,7 @@
     flex: none;
   }
 
+  /* Touch-friendly height on mobile */
   .sbmRateField .raInput {
     min-height: 44px;
     height: 44px;
@@ -203,8 +225,9 @@
 }
 
 /* sbmItemsTable — column widths only; visual styles come from cliItemsTable in CommonLineItemsSection.css */
+/* Table has 15 columns: #, PRODUCT, BATCH, EXPIRY, STOCK, QTY, FREE, LOOSE, UNIT, MRP, RATE, DISC%, GST%, AMOUNT, DELETE */
 .sbmItemsTable {
-  min-width: 1500px;
+  min-width: 1400px;
 }
 
 .sbmItemsTable thead th.num,
@@ -212,37 +235,39 @@
 .sbmItemsTable thead th.center,
 .sbmItemsTable thead th.c { text-align: center; }
 
-/* Column widths – identical to HTML mockup */
+/* Column widths — sized for 1500px modal, all content visible without truncation */
 .sbmItemsTable thead th:nth-child(1),
-.sbmItemsTable tbody td:nth-child(1) { width: 42px; text-align: center; }
+.sbmItemsTable tbody td:nth-child(1) { width: 38px; text-align: center; }
 .sbmItemsTable thead th:nth-child(2),
-.sbmItemsTable tbody td:nth-child(2) { width: 320px; }
+.sbmItemsTable tbody td:nth-child(2) { width: 220px; }
 .sbmItemsTable thead th:nth-child(3),
-.sbmItemsTable tbody td:nth-child(3) { width: 380px; }
+.sbmItemsTable tbody td:nth-child(3) { width: 280px; }
 .sbmItemsTable thead th:nth-child(4),
-.sbmItemsTable tbody td:nth-child(4) { width: 100px; min-width: 100px; text-align: center; }
+.sbmItemsTable tbody td:nth-child(4) { width: 90px; min-width: 90px; text-align: center; }
 .sbmItemsTable thead th:nth-child(5),
-.sbmItemsTable tbody td:nth-child(5) { width: 86px; text-align: center; }
+.sbmItemsTable tbody td:nth-child(5) { width: 80px; text-align: center; }
 .sbmItemsTable thead th:nth-child(6),
-.sbmItemsTable tbody td:nth-child(6) { width: 82px; text-align: right; }
+.sbmItemsTable tbody td:nth-child(6) { width: 68px; text-align: right; }
 .sbmItemsTable thead th:nth-child(7),
-.sbmItemsTable tbody td:nth-child(7) { width: 82px; text-align: right; }
+.sbmItemsTable tbody td:nth-child(7) { width: 62px; text-align: right; }
 .sbmItemsTable thead th:nth-child(8),
-.sbmItemsTable tbody td:nth-child(8) { width: 70px; text-align: center; }
+.sbmItemsTable tbody td:nth-child(8) { width: 60px; text-align: center; }
 .sbmItemsTable thead th:nth-child(9),
-.sbmItemsTable tbody td:nth-child(9) { width: 96px; text-align: right; }
+.sbmItemsTable tbody td:nth-child(9) { width: 62px; text-align: right; }
 .sbmItemsTable thead th:nth-child(10),
-.sbmItemsTable tbody td:nth-child(10) { width: 96px; text-align: right; }
+.sbmItemsTable tbody td:nth-child(10) { width: 78px; text-align: right; }
 .sbmItemsTable thead th:nth-child(11),
-.sbmItemsTable tbody td:nth-child(11) { width: 90px; text-align: right; }
+.sbmItemsTable tbody td:nth-child(11) { width: 78px; text-align: right; }
 .sbmItemsTable thead th:nth-child(12),
-.sbmItemsTable tbody td:nth-child(12) { width: 92px; text-align: center; }
+.sbmItemsTable tbody td:nth-child(12) { width: 68px; text-align: center; }
 .sbmItemsTable thead th:nth-child(13),
-.sbmItemsTable tbody td:nth-child(13) { width: 110px; text-align: right; }
+.sbmItemsTable tbody td:nth-child(13) { width: 72px; text-align: center; }
 .sbmItemsTable thead th:nth-child(14),
-.sbmItemsTable tbody td:nth-child(14) {
-  width: 56px;
-  min-width: 56px;
+.sbmItemsTable tbody td:nth-child(14) { width: 96px; text-align: right; }
+.sbmItemsTable thead th:nth-child(15),
+.sbmItemsTable tbody td:nth-child(15) {
+  width: 44px;
+  min-width: 44px;
   text-align: center;
   overflow: visible;
 }
@@ -252,7 +277,8 @@
 .sbmItemsTable td:nth-child(7) .raInput,
 .sbmItemsTable td:nth-child(9) .raInput,
 .sbmItemsTable td:nth-child(10) .raInput,
-.sbmItemsTable td:nth-child(11) .raInput { text-align: right; }
+.sbmItemsTable td:nth-child(11) .raInput,
+.sbmItemsTable td:nth-child(12) .raInput { text-align: right; }
 
 .sbmItemRow:hover {
   background: color-mix(in srgb, var(--color-primary) 2.5%, transparent);
@@ -385,14 +411,20 @@
   color: var(--color-text);
 }
 
-/* ─── Trash button ───────────────────────────────────────────────────────── */
+/* ─── Trash button — less aggressive ─────────────────────────────────────── */
 .sbmTrashBtn {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
   padding: 0;
   border-radius: 5px;
   margin: auto;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.sbmTrashBtn:hover {
+  opacity: 1;
 }
 
 /* ─── Batch Add Button (inline in batch cell) ────────────────────────────── */
@@ -427,10 +459,22 @@
   transition: all 0.12s;
 }
 
-.sbmUnitBtn:hover {
+.sbmUnitBtn:hover:not([style*="default"]) {
   border-color: var(--color-primary);
   color: var(--color-primary);
   background: color-mix(in srgb, var(--color-primary) 7%, var(--color-surface));
+}
+
+/* Active state: selling by individual unit */
+.sbmUnitBtn--active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+.sbmUnitBtn--active:hover {
+  background: color-mix(in srgb, var(--color-primary) 85%, #000);
+  border-color: color-mix(in srgb, var(--color-primary) 85%, #000);
 }
 
 .sbmTotalNow {
@@ -450,36 +494,67 @@
 
 /* Summary strip — now uses .cliSummaryStrip / .cliSummaryCell etc. from CommonLineItemsSection.css */
 
-/* Sales-specific: discount cell value shown in danger color */
+/* Top border separator for summary strip */
+.sbmModalForm .cliSummaryStrip {
+  border-top: 2px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  margin-top: 0;
+}
+
+/* Sales-specific: discount cell value — softer amber instead of alarming red */
 .cliSummaryStrip .cliSummaryCell:nth-child(2) .cliSummaryValue {
-  color: var(--color-danger, #dc2626);
+  color: color-mix(in srgb, var(--color-warning-darker, #b45309) 90%, var(--color-text-2));
+}
+
+/* TOTAL PAYABLE — more dominant */
+.sbmModalForm .cliSummaryCell_total {
+  background: color-mix(in srgb, var(--color-primary) 16%, var(--color-card)) !important;
+  border-left: 3px solid var(--color-primary) !important;
+}
+
+.sbmModalForm .cliSummaryCell_total .cliSummaryLabel {
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: color-mix(in srgb, var(--color-primary) 70%, var(--color-text-2)) !important;
+  letter-spacing: 0.06em;
+}
+
+.sbmModalForm .cliSummaryCell_total .cliSummaryValue {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: var(--color-primary) !important;
 }
 
 /* ─── Cash row ───────────────────────────────────────────────────────────── */
 .sbmCashRow {
-  padding: 11px 18px;
+  padding: 12px 14px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 11px;
+  gap: 12px;
   background: var(--color-bg-1);
+  border-top: 1px solid var(--color-border);
 }
 
+/* Change to Return display — visually distinct output field */
 .sbmCashValue {
-  height: 34px;
-  padding: 0 10px;
-  border-radius: 8px;
-  background: var(--color-surface, var(--color-bg-2));
-  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-  font-size: 13.5px;
-  font-weight: 800;
+  height: var(--mcm-ctrl-h, 42px);
+  min-height: var(--mcm-ctrl-h, 42px);
+  padding: 0 var(--mcm-ctrl-pad-x, 12px);
+  border-radius: var(--mcm-ctrl-radius, 10px);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-bg-1));
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  font-size: 15px;
+  font-weight: 900;
   color: var(--color-text-3);
   display: flex;
   align-items: center;
   font-variant-numeric: tabular-nums;
-  transition: color 0.2s;
+  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .sbmCashValue_pos {
+  background: color-mix(in srgb, var(--color-success, #16a34a) 6%, var(--color-bg-1));
+  border-color: color-mix(in srgb, var(--color-success, #16a34a) 32%, var(--color-border));
   color: var(--color-success, #16a34a);
 }
 
@@ -512,11 +587,11 @@
 }
 
 .sbmBtnCreateConfirm {
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--color-primary) 34%, transparent);
+  box-shadow: none;
 }
 
 .sbmBtnCreateConfirm:hover {
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--color-primary) 40%, transparent);
+  box-shadow: none;
 }
 
 /* ─── Footer send button ─────────────────────────────────────────────────── */
@@ -660,6 +735,58 @@
 .sbmModalForm .mscAddBtn {
   width: 32px;
   min-height: 29px;
+}
+
+/* ─── Line items: internal vertical scroll so footer stays visible ─────────
+   Strategy (desktop only):
+   1. sbmModalForm fills mcmBody as a flex child (flex:1 1 auto, min-height:0)
+      so the modal body itself does NOT need to scroll.
+   2. cliSection is the only flex-grow child — it fills remaining vertical space.
+   3. cliItemsWrap scrolls the table rows internally (overflow-y:auto).
+   4. cliFooter (Add line item) is flex-shrink:0 — always visible.
+   5. All other sections (header, rate bar, summary, cash) are flex-shrink:0.
+   Mobile (≤720px) keeps the existing card-row layout unchanged.              */
+@media (min-width: 721px) {
+  /* Form fills the modal body — becomes the single scroll container */
+  .mcmBody .sfm.piModalForm.sbmModalForm {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Every direct child of the form is fixed-height by default */
+  .sbmModalForm > * {
+    flex-shrink: 0;
+  }
+
+  /* Line items section is the only growing child */
+  .mcm[aria-label="sales-billing-editor"] .cliSection {
+    flex: 1 1 auto;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Table wrap scrolls vertically inside the section */
+  .mcm[aria-label="sales-billing-editor"] .cliItemsWrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: none;
+  }
+
+  /* Footer always pinned at the bottom of the section */
+  .mcm[aria-label="sales-billing-editor"] .cliFooter {
+    flex-shrink: 0;
+  }
+
+  /* Section head always pinned at the top */
+  .mcm[aria-label="sales-billing-editor"] .cliSectionHead {
+    flex-shrink: 0;
+  }
 }
 
 
@@ -1093,4 +1220,172 @@
     min-width: 36px !important;
     min-height: 36px !important;
   }
+}
+/* ─── Optional / secondary fields — lighter label + softer border ────────── */
+.sbmOptionalField label {
+  color: var(--color-text-4);
+  font-weight: 500;
+}
+
+.sbmOptionalField .raInput {
+  border-color: color-mix(in srgb, var(--color-border) 65%, transparent);
+  background: color-mix(in srgb, var(--color-bg-1) 60%, var(--color-surface));
+  color: var(--color-text-3);
+}
+
+.sbmOptionalField .raInput::placeholder {
+  color: var(--color-text-4);
+  font-style: italic;
+}
+
+/* ─── Summary strip hierarchy overrides ─────────────────────────────────── */
+/* Supporting values (subtotal, discount, gst, round-off, items) are lighter */
+.sbmModalForm .cliSummaryStrip .cliSummaryCell:not(.cliSummaryCell_total) .cliSummaryLabel {
+  font-size: 9px;
+  color: var(--color-text-4);
+  letter-spacing: 0.06em;
+}
+
+.sbmModalForm .cliSummaryStrip .cliSummaryCell:not(.cliSummaryCell_total) .cliSummaryValue {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-text-3);
+}
+
+/* Discount cell keeps danger color but lighter weight */
+.sbmModalForm .cliSummaryStrip .cliSummaryCell:nth-child(2) .cliSummaryValue {
+  color: var(--color-danger, #dc2626);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+/* Total Payable cell — dominant emphasis */
+.sbmModalForm .cliSummaryStrip .cliSummaryCell_total .cliSummaryLabel {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--color-text-2);
+  letter-spacing: 0.05em;
+}
+
+.sbmModalForm .cliSummaryStrip .cliSummaryCell_total .cliSummaryValue {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+/* ─── Section flow: reduce border noise on piSection inside sbmModalForm ─── */
+.sbmModalForm .piSection {
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+/* Rate bar inside section body — no extra top margin when inside section */
+.sbmModalForm .piSectionBody .sbmRateBar {
+  margin-top: 10px;
+}
+
+/* ─── Cash row label for output field ────────────────────────────────────── */
+.sbmCashOutputLabel {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-4);
+  margin-bottom: 2px;
+}
+
+/* ─── Cash hint — de-emphasised ──────────────────────────────────────────── */
+.sbmCashHint {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  color: var(--color-text-4);
+  line-height: 1.4;
+}
+
+/* ─── Customer + button tight grouping ───────────────────────────────────── */
+.piHeaderTop .msw {
+  gap: 0 !important;
+}
+
+.piHeaderTop .msw .csf {
+  border-radius: 8px 0 0 8px !important;
+}
+
+.piHeaderTop .msw .mswAdd {
+  border-left: none !important;
+  border-radius: 0 8px 8px 0 !important;
+}
+
+/* ─── Due Date visual distinction ────────────────────────────────────────── */
+.piHeaderTop .piHeadField_date:last-child .cdpInput,
+.piHeaderTop .piHeadField_date:last-child input {
+  background: color-mix(in srgb, var(--color-warning, #f59e0b) 5%, var(--color-card)) !important;
+  border-color: color-mix(in srgb, var(--color-warning, #f59e0b) 30%, var(--color-border)) !important;
+}
+
+/* ─── Shortcuts button lighter ───────────────────────────────────────────── */
+.kshTrigger {
+  opacity: 0.65;
+  font-size: 11px;
+  min-height: 26px;
+  padding: 3px 8px;
+  border-color: color-mix(in srgb, var(--color-border) 70%, transparent);
+}
+
+.kshTrigger:hover {
+  opacity: 1;
+}
+
+/* ─── Compact secondary header row (retailer) ────────────────────────────── */
+/* Merges patient fields + rate controls into one flex row, saving ~60px      */
+.sbmHeaderSecondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  align-items: flex-end;
+  padding: 6px 0 2px;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  margin-top: 2px;
+}
+
+.sbmHeaderSecondary .raField {
+  min-width: 0;
+}
+
+.sbmHeaderSecondary .sbmRateBarLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 auto;
+  padding-bottom: 1px;
+}
+
+.sbmHeaderSecondary .sbmRateField {
+  flex: 0 0 auto;
+}
+
+.sbmHeaderSecondary .sbmRateField_btype {
+  width: 130px;
+}
+
+.sbmHeaderSecondary .sbmRateField_disc {
+  width: 68px;
+}
+
+/* Compact the section body padding for the billing header */
+.sbmModalForm .piSectionBody {
+  padding: 10px 14px;
+  gap: 8px;
+}
+
+/* ─── Footer visual grouping ─────────────────────────────────────────────── */
+.sbmModalForm ~ * .sfmModalFooter,
+.mcmFooter .sfmModalFooter {
+  gap: 6px;
+}
+
+/* Separate primary actions from secondary with a subtle gap */
+.sfmModalFooter .sbmBtnCreateConfirm:first-of-type {
+  margin-left: 8px;
+  border-left: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  padding-left: 14px;
 }

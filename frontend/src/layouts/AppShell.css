@@ -25,7 +25,7 @@
 }
 
 .appShell2Content {
-  padding: var(--layout-shell-pad-y) var(--layout-shell-pad-x);
+  padding: 12px var(--layout-shell-pad-x) var(--layout-shell-pad-y);
   overflow: visible;
 }
 
@@ -36,31 +36,35 @@
   justify-content: space-between;
   gap: var(--layout-stack-gap);
   flex-wrap: wrap;
-  margin-bottom: var(--layout-stack-gap);
+  margin-bottom: calc(var(--layout-stack-gap) + 4px);
 }
 
 .raTitle {
-  font-size: clamp(18px, 2vw, 22px);
-  font-weight: 700;
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 800;
   color: var(--color-text);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 
 .raSub {
-  margin-top: 4px;
-  font-size: 13px;
+  margin-top: 5px;
+  font-size: 14px;
   color: var(--color-text-3);
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 @media (max-width: 720px) {
   .raTitle {
-    font-size: clamp(17px, 4.2vw, 20px);
+    font-size: clamp(18px, 4.2vw, 22px);
     line-height: 1.2;
   }
 
   .raSub {
-    margin-top: 2px;
-    font-size: 12px;
-    line-height: 1.35;
+    margin-top: 3px;
+    font-size: 13px;
+    line-height: 1.4;
   }
 }
 
@@ -77,7 +81,9 @@
   border: 1px solid var(--color-border);
   border-radius: var(--layout-card-radius);
   padding: var(--layout-card-pad-y) var(--layout-card-pad-x);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text) 6%, transparent);
+  box-shadow:
+    0 2px 8px color-mix(in srgb, var(--color-text) 5%, transparent),
+    0 8px 28px color-mix(in srgb, var(--color-text) 6%, transparent);
 }
 
 @media (max-width: 768px) {

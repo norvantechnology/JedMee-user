@@ -6,9 +6,9 @@
 
 /* ── Page header ── */
 .mrPageHeader {
-  margin-bottom: 20px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid color-mix(in srgb, var(--color-border) 70%, transparent);
 }
 
 .mrPageHeaderText {
@@ -17,30 +17,31 @@
 
 .mrPageTitle {
   margin: 0;
-  font-size: 20px;
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 900;
   color: var(--color-text-heading, var(--color-text));
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
   line-height: 1.2;
 }
 
 .mrPageSub {
-  margin: 3px 0 0;
-  font-size: 13px;
+  margin: 5px 0 0;
+  font-size: 14px;
   color: var(--color-text-3, var(--color-text-muted));
-  line-height: 1.4;
+  line-height: 1.45;
+  font-weight: 500;
 }
 
 /* ── Tab bar ── */
 .mrTabs {
   display: flex;
-  gap: 6px;
-  padding: 0 0 14px;
-  margin: 0 0 18px;
+  gap: 8px;
+  padding: 0 0 10px;
+  margin: 0 0 10px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1.5px solid var(--color-border);
   scrollbar-width: none;
 }
 
@@ -53,13 +54,13 @@
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  border: 1px solid var(--color-border);
+  gap: 8px;
+  border: 1.5px solid var(--color-border-strong);
   background: var(--color-card);
   color: var(--color-text-2);
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-size: 13px;
+  padding: 9px 18px;
+  border-radius: 11px;
+  font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
   transition:
@@ -73,8 +74,8 @@
 }
 
 .mrTab:hover {
-  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
-  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-primary) 50%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-card));
   color: var(--color-primary);
 }
 
@@ -85,9 +86,12 @@
 
 .mrTab_active {
   background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
-  border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border));
+  border-color: var(--color-primary);
   color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+  font-weight: 800;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent),
+    0 2px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
 
 /* Tab icon wrapper */
@@ -121,39 +125,51 @@
   min-width: 0;
 }
 
+/* ── Reduce card padding inside tabs so more table rows are visible ── */
+.mrBody .pageCard {
+  padding: 14px 18px;
+}
+
+/* ── Product Supplier tab: remove centering so it matches other tabs ── */
+.mrBody .psrReport.page {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
 /* ── Responsive: 900px ── */
 @media (max-width: 900px) {
   .mrPageTitle {
-    font-size: 18px;
+    font-size: 20px;
   }
 }
 
 /* ── Responsive: 640px ── */
 @media (max-width: 640px) {
   .mrPageHeader {
-    margin-bottom: 14px;
-    padding-bottom: 12px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
   }
 
   .mrPageTitle {
-    font-size: 17px;
+    font-size: 18px;
   }
 
   .mrPageSub {
-    font-size: 12px;
+    font-size: 13px;
   }
 
   .mrTabs {
-    gap: 5px;
-    padding-bottom: 12px;
-    margin-bottom: 14px;
+    gap: 6px;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
   }
 
   .mrTab {
-    padding: 8px 12px;
-    font-size: 12.5px;
-    border-radius: 9px;
-    gap: 5px;
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 10px;
+    gap: 6px;
   }
 
   .mrTabIcon {
@@ -174,15 +190,15 @@
   }
 
   .mrPageTitle {
-    font-size: 16px;
+    font-size: 17px;
   }
 
   /* Always show tab labels — never hide them */
   .mrTab {
-    padding: 7px 10px;
-    font-size: 11.5px;
-    border-radius: 8px;
-    gap: 4px;
+    padding: 7px 11px;
+    font-size: 12px;
+    border-radius: 9px;
+    gap: 5px;
   }
 
   .mrTabIcon {

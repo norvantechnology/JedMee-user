@@ -1,0 +1,174 @@
+/* ── ReturnViewModal — shared view/print modal for Sales & Purchase Returns ── */
+
+.rvmBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 2px 0;
+}
+
+/* ── Info grid ── */
+.rvmInfoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 16px;
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--color-primary) 3%, var(--color-bg-1));
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+}
+
+.rvmInfoCell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.rvmInfoCell_full {
+  grid-column: 1 / -1;
+}
+
+.rvmInfoLabel {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-4);
+}
+
+.rvmInfoVal {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  word-break: break-word;
+}
+
+/* ── Status pill ── */
+.rvmStatusPill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  width: fit-content;
+  background: color-mix(in srgb, var(--color-text-4) 12%, transparent);
+  color: var(--color-text-3);
+  border: 1px solid color-mix(in srgb, var(--color-text-4) 20%, transparent);
+}
+
+.rvmStatusPill_confirmed {
+  background: color-mix(in srgb, var(--color-success) 12%, transparent);
+  color: var(--color-success-dark, #15803d);
+  border-color: color-mix(in srgb, var(--color-success) 25%, transparent);
+}
+
+.rvmStatusPill_draft {
+  background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+  color: var(--color-warning-darker, #b45309);
+  border-color: color-mix(in srgb, var(--color-warning) 25%, transparent);
+}
+
+.rvmStatusPill_cancelled {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  color: var(--color-danger, #dc2626);
+  border-color: color-mix(in srgb, var(--color-danger) 22%, transparent);
+}
+
+/* ── Items table ── */
+.rvmTableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.rvmTable {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.rvmTh {
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.rvmTd {
+  padding: 9px 10px;
+  color: var(--color-text-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  vertical-align: middle;
+}
+
+.rvmRow:last-child .rvmTd {
+  border-bottom: none;
+}
+
+.rvmNum {
+  text-align: right;
+}
+
+.rvmAmtCell {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.rvmFreeQty {
+  font-size: 10px;
+  color: var(--color-success-dark, #15803d);
+  font-weight: 700;
+}
+
+/* ── Total row ── */
+.rvmTotalRow {
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-bg-1));
+  border-top: 1.5px solid var(--color-border);
+}
+
+.rvmTotalLabel {
+  padding: 10px 10px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-3);
+}
+
+.rvmTotalVal {
+  padding: 10px 10px;
+  font-size: 15px;
+  font-weight: 900;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Empty state ── */
+.rvmEmpty {
+  padding: 24px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-4);
+  font-weight: 500;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .rvmInfoGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .rvmInfoGrid {
+    grid-template-columns: 1fr;
+  }
+}

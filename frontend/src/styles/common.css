@@ -20,27 +20,27 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
 }
 
 .pgTitle {
   margin: 0;
-  font-size: clamp(17px, 2vw, 20px);
-  font-weight: 800;
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 900;
   color: var(--color-text-heading);
-  letter-spacing: -0.025em;
-  line-height: 1.2;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
   font-family: var(--font);
 }
 
 .pgSub {
-  margin: 4px 0 0;
-  font-size: 13px;
+  margin: 5px 0 0;
+  font-size: 14px;
   color: var(--color-text-3);
-  font-weight: 450;
-  line-height: 1.4;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .pgActions {
@@ -55,17 +55,17 @@
    SECTION HEADING  (inside cards / modals / forms)
    ═══════════════════════════════════════════════════════ */
 .cmSectionHead {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--color-primary);
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 8px;
-  margin-bottom: 14px;
+  border-bottom: 1.5px solid var(--color-border);
+  padding-bottom: 10px;
+  margin-bottom: 18px;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
 }
 
 .cmSectionHead::after {
@@ -92,13 +92,13 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-2);
   line-height: 1.2;
-  padding-bottom: 1px;
+  padding-bottom: 2px;
 }
 
 /* Accent dot before each label */
@@ -132,15 +132,15 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--field-label-text);
-  padding: 3px 8px 3px 6px;
+  padding: 3px 9px 3px 7px;
   border-radius: 4px;
   width: fit-content;
-  margin: 0 0 2px;
+  margin: 0 0 3px;
   line-height: 1.2;
 }
 
@@ -181,13 +181,13 @@
 /* Base input — white background */
 .raInput {
   width: 100%;
-  height: 36px;
-  padding: 0 12px;
+  height: 40px;
+  padding: 0 14px;
   border: var(--control-border-width, 1px) solid var(--control-border-default);
   border-radius: var(--radius);
   background: var(--color-card);
   color: var(--color-text);
-  font-size: 13.5px;
+  font-size: 14px;
   font-family: var(--font);
   font-weight: 500;
   outline: none;
@@ -291,13 +291,13 @@ select.raInput {
    ═══════════════════════════════════════════════════════ */
 .cmInput {
   width: 100%;
-  height: 36px;
-  padding: 0 12px;
+  height: 40px;
+  padding: 0 14px;
   border: var(--control-border-width, 1px) solid var(--control-border-default);
   border-radius: var(--radius);
   background: var(--color-card);
   color: var(--color-text);
-  font-size: 13.5px;
+  font-size: 14px;
   font-family: var(--font);
   font-weight: 500;
   outline: none;
@@ -376,13 +376,13 @@ select.raInput {
    ═══════════════════════════════════════════════════════ */
 .cmSelect {
   width: 100%;
-  height: 36px;
-  padding: 0 32px 0 12px;
+  height: 40px;
+  padding: 0 34px 0 14px;
   border: var(--control-border-width, 1px) solid var(--control-border-default);
   border-radius: var(--radius);
   background: var(--color-card);
   color: var(--color-text);
-  font-size: 13.5px;
+  font-size: 14px;
   font-family: var(--font);
   font-weight: 500;
   outline: none;
@@ -390,7 +390,7 @@ select.raInput {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24' stroke='%234b5563' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 12px center;
   box-sizing: border-box;
   box-shadow: var(--field-rest-shadow);
   transition: border-color 0.16s ease, box-shadow 0.16s ease;
@@ -424,7 +424,7 @@ select.raInput {
    ═══════════════════════════════════════════════════════ */
 .cmGrid {
   display: grid;
-  gap: 12px;
+  gap: 16px;
 }
 
 .cmGrid2 {
@@ -474,7 +474,7 @@ select.raInput {
   gap: 7px;
   font-family: var(--font);
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: 14px;
   line-height: 1.2;
   white-space: nowrap;
   border-radius: var(--radius);
@@ -484,8 +484,8 @@ select.raInput {
   user-select: none;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease,
               box-shadow 0.15s ease, transform 0.14s ease, filter 0.14s ease;
-  height: 40px;
-  padding: 0 16px;
+  height: 42px;
+  padding: 0 18px;
 }
 
 .cmBtn:hover:not(:disabled) { transform: translateY(-1px); }
@@ -494,17 +494,17 @@ select.raInput {
 
 /* Small variant */
 .cmBtn_sm {
-  height: 34px;
-  padding: 0 12px;
-  font-size: 13px;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 13.5px;
   border-radius: calc(var(--radius) - 2px);
 }
 
 /* Extra-small variant */
 .cmBtn_xs {
-  height: 28px;
-  padding: 0 10px;
-  font-size: 12px;
+  height: 30px;
+  padding: 0 11px;
+  font-size: 12.5px;
   border-radius: calc(var(--radius) - 2px);
 }
 
@@ -654,14 +654,14 @@ select.raInput {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 9px;
+  padding: 3px 12px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
   border: 1px solid transparent;
   white-space: nowrap;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
 .cmBadge_primary {
@@ -702,24 +702,24 @@ select.raInput {
   border: 1px solid var(--color-border);
   border-radius: var(--layout-card-radius);
   padding: var(--layout-card-pad-y) var(--layout-card-pad-x);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-card);
 }
 
 .cmCardHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding-bottom: 12px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid var(--color-border);
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 18px;
+  border-bottom: 1.5px solid var(--color-border);
 }
 
 .cmCardTitle {
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 14px;
+  font-weight: 900;
   color: var(--color-text-heading);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -793,36 +793,40 @@ select.raInput {
    COMMON STAT TILE  (KPI / summary tile)
    ═══════════════════════════════════════════════════════ */
 .cmTile {
-  border-radius: var(--radius);
-  padding: 10px 12px;
-  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
   background: color-mix(in srgb, var(--color-card) 96%, var(--color-surface));
-  transition: border-color 140ms ease;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 140ms ease, box-shadow 140ms ease;
   min-width: 0;
+  min-height: 90px;
 }
 
 .cmTile:hover {
-  border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-border));
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
+  box-shadow: var(--shadow-sm);
 }
 
 .cmTileLabel {
-  font-size: 10.5px;
+  font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--color-text-4);
-  margin-bottom: 4px;
+  color: var(--color-text-3);
+  margin-bottom: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .cmTileVal {
-  font-size: 15px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--color-text-heading);
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -850,11 +854,11 @@ select.raInput {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 40px 20px;
+  gap: 12px;
+  padding: 48px 24px;
   text-align: center;
-  color: var(--color-text-4);
-  font-size: 13px;
+  color: var(--color-text-3);
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -883,12 +887,16 @@ select.raInput {
   }
 
   .pgHead {
-    margin-bottom: 12px;
-    gap: 8px;
+    margin-bottom: 16px;
+    gap: 10px;
   }
 
   .pgTitle {
-    font-size: clamp(15px, 4.5vw, 18px);
+    font-size: clamp(18px, 4.5vw, 22px);
+  }
+
+  .pgSub {
+    font-size: 13px;
   }
 
   .cmGrid2,
@@ -908,21 +916,21 @@ select.raInput {
   }
 
   .cmBtn {
-    min-height: 36px;
+    min-height: 40px;
     height: auto;
-    padding: 8px 12px;
-    font-size: clamp(12px, 3vw, 13.5px);
+    padding: 9px 14px;
+    font-size: clamp(13px, 3vw, 14px);
   }
 
   .cmBtn_sm {
-    min-height: 32px;
-    padding: 6px 10px;
-    font-size: 12.5px;
+    min-height: 36px;
+    padding: 7px 12px;
+    font-size: 13px;
   }
 
   .cmInput,
   .cmSelect {
-    height: 44px;
+    height: 46px;
     font-size: 16px; /* prevent iOS zoom */
   }
 
@@ -931,7 +939,7 @@ select.raInput {
   }
 
   .cmLabel {
-    font-size: 10.5px;
+    font-size: 11px;
     letter-spacing: 0.05em;
   }
 
@@ -941,12 +949,13 @@ select.raInput {
   }
 
   .cmCheck {
-    padding: 8px 10px;
-    font-size: 13px;
+    padding: 9px 12px;
+    font-size: 13.5px;
   }
 
   .cmTile {
-    padding: 8px 10px;
+    padding: 12px 14px;
+    min-height: 80px;
   }
 }
 

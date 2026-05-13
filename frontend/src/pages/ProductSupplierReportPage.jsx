@@ -8,15 +8,31 @@ import { can } from "../utils/access.js";
 import { getProductSupplierReport } from "../services/reportService.js";
 import { sortBatchesByExpiryAsc } from "../utils/batchSort.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
-import { ReportShell, ReportDenied } from "../components/reports/index.js";
+import {
+  ReportShell,
+  ReportDenied,
+  ReportCard,
+  ReportToolbar,
+  ReportToolbarPrim,
+  ReportSearchInput,
+  ReportCountChip,
+  ReportListEmpty,
+  ReportTableScroll,
+  ReportPaneBody,
+} from "../components/reports/index.js";
 import { formatExpiryShort, expiryStatus } from "../components/reports/reportExpiry.js";
 import { formatBatchExpiryRelativePhrase } from "../utils/batchExpiryDisplay.js";
-import CommonLoading from "../components/CommonLoading.jsx";
-import { IconAlert, IconPsrChevronDown, IconPsrGrid, IconPsrOutOfStock, IconPsrPackage, IconPsrSearch, IconPsrSuppliers, IconX } from "../components/ui/AppIcons.jsx";
+import {
+  IconAlert,
+  IconPsrGrid,
+  IconPsrOutOfStock,
+  IconPsrSuppliers,
+  IconX,
+} from "../components/ui/AppIcons.jsx";
 import { useLocale } from "../context/LocaleContext.jsx";
 import "./ProductSupplierReportPage.css";
 
-const DD_PAGE = 4;
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function normalizeSummary(data) {
   const s = data.summary;
@@ -28,7 +44,7 @@ function normalizeSummary(data) {
       total_products: Number(s.total_products) || 0,
       active_suppliers: Number(s.active_suppliers) || 0,
       expiring_soon_batches: Number(s.expiring_soon_batches) || 0,
-      out_of_stock_products: Number(s.out_of_stock_products) || 0
+      out_of_stock_products: Number(s.out_of_stock_products) || 0,
     };
   }
   const vendorIds = new Set(suppliers.map((x) => String(x.vendor_id || "")).filter(Boolean));
@@ -43,109 +59,16 @@ function normalizeSummary(data) {
     total_products: products.length,
     active_suppliers: vendorIds.size,
     expiring_soon_batches: expiring,
-    out_of_stock_products: oos
+    out_of_stock_products: oos,
   };
 }
 
-function DdSkeletonRows() {
-  const rows = [0, 1, 2];
-  return (
-    <>
-      {rows.map((i) => (
-        <div key={i} className="dd-skel">
-          <div className="skel" style={{ width: 34, height: 34, borderRadius: 8, flexShrink: 0 }} />
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-            <div className="skel" style={{ height: 13, width: "60%" }} />
-            <div className="skel" style={{ height: 11, width: "40%" }} />
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5 }}>
-            <div className="skel" style={{ height: 14, width: 28 }} />
-            <div className="skel" style={{ height: 10, width: 44 }} />
-          </div>
-        </div>
-      ))}
-    </>
-  );
-}
-
 function productInitials(name) {
-  const n = String(name || "")
-    .replace(/[^A-Za-z0-9 ]/g, "")
-    .trim();
+  const n = String(name || "").replace(/[^A-Za-z0-9 ]/g, "").trim();
   if (!n) return "??";
   const parts = n.split(/\s+/).filter(Boolean);
-  const s = parts
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const s = parts.map((w) => w[0]).join("").slice(0, 2).toUpperCase();
   return s || String(name).slice(0, 2).toUpperCase();
-}
-
-/** Shared row UI for dropdown suggestions and main product list (single implementation). */
-function PsrProductPickRow({ variant, product, selectedId, needle, onPick }) {
-  const st = Number(product.total_stock || 0);
-  const stkCls = st === 0 ? " zero" : "";
-  const subDefault = [product.mfg_name || product.mfg_short || "", product.drug_name || product.packing || ""].filter(Boolean).join(" · ");
-
-  if (variant === "dropdown") {
-    const q = String(needle || "").trim();
-    return (
-      <button type="button" className="dd-item" onClick={() => onPick(product.id)}>
-        <div className="dd-av">{productInitials(product.name)}</div>
-        <div className="dd-info">
-          <div className="dd-name">
-            <HighlightChunks text={product.name || product.code || ""} query={q} />
-          </div>
-          <div className="dd-sub">
-            <HighlightChunks text={subDefault} query={q} />
-          </div>
-        </div>
-        <div className="dd-right">
-          <div className={`dd-stk${stkCls}`}>{st.toFixed(0)}</div>
-          <div className="dd-stk-lbl">{st === 0 ? "out of stock" : "in stock"}</div>
-        </div>
-      </button>
-    );
-  }
-
-  return (
-    <button type="button" className={`p-item${product.id === selectedId ? " sel" : ""}`} onClick={() => onPick(product.id)}>
-      <div className="p-av">{productInitials(product.name)}</div>
-      <div className="p-info">
-        <div className="p-name">{product.name || product.code}</div>
-        <div className="p-mfg">{product.mfg_name || product.mfg_short || "—"}</div>
-      </div>
-      <div className="p-meta">
-        <div className={`p-stk${stkCls}`}>{st.toFixed(0)}</div>
-        <div className="p-stk-lbl">{st === 0 ? "out of stock" : "in stock"}</div>
-      </div>
-    </button>
-  );
-}
-
-function HighlightChunks({ text, query }) {
-  const q = String(query || "").trim();
-  if (!q) return text;
-  const low = String(text).toLowerCase();
-  const n = q.toLowerCase();
-  const out = [];
-  let i = 0;
-  while (i < text.length) {
-    const j = low.indexOf(n, i);
-    if (j === -1) {
-      out.push(text.slice(i));
-      break;
-    }
-    if (j > i) out.push(text.slice(i, j));
-    out.push(
-      <mark key={`${j}-${i}`} className="hl-mark">
-        {text.slice(j, j + n.length)}
-      </mark>
-    );
-    i = j + n.length;
-  }
-  return out;
 }
 
 function formatRs(n) {
@@ -159,17 +82,7 @@ function formatDateChip(d) {
   return t.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function groupByFirstLetter(items) {
-  const g = new Map();
-  for (const p of items) {
-    const L = String(p.name || "?")[0].toUpperCase();
-    if (!g.has(L)) g.set(L, []);
-    g.get(L).push(p);
-  }
-  return [...g.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-}
-
-// (moved to shared icons) IconPsrPackage in `components/ui/AppIcons.jsx`
+// ── Product Detail Modal ──────────────────────────────────────────────────────
 
 function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
   const { taxLabel } = useLocale();
@@ -218,33 +131,19 @@ function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
     const expCls = st === "expired" ? "psrExpired" : st === "near" ? "psrNear" : "psrOk";
     return (
       <tr key={b.id}>
-        <td>
-          <span className="psrBNum">{i + 1}</span>
-        </td>
-        <td>
-          <span className="psrBNo">{b.batch_no || ""}</span>
-        </td>
+        <td><span className="psrBNum">{i + 1}</span></td>
+        <td><span className="psrBNo">{b.batch_no || ""}</span></td>
         <td>
           <div className={`psrExpWrap ${expCls}`}>
             <span className="psrExpDate">{formatExpiryShort(b.expiry_date) || ""}</span>
             <span className="psrExpBadge">{b.expiry_date ? formatBatchExpiryRelativePhrase(b.expiry_date) : ""}</span>
           </div>
         </td>
-        <td className="psrR">
-          <span className="psrRate">{formatRs(b.mrp)}</span>
-        </td>
-        <td className="psrR">
-          <span className="psrRate">{formatRs(b.purchase_rate)}</span>
-        </td>
-        <td className="psrR">
-          <span className="psrRate">{formatRs(b.sales_rate)}</span>
-        </td>
-        <td className="psrR">
-          <span className="psrRateSoft">{b.special_rate_1 != null ? formatRs(b.special_rate_1) : ""}</span>
-        </td>
-        <td className="psrR">
-          <span className="psrRateSoft">{b.special_rate_2 != null ? formatRs(b.special_rate_2) : ""}</span>
-        </td>
+        <td className="psrR"><span className="psrRate">{formatRs(b.mrp)}</span></td>
+        <td className="psrR"><span className="psrRate">{formatRs(b.purchase_rate)}</span></td>
+        <td className="psrR"><span className="psrRate">{formatRs(b.sales_rate)}</span></td>
+        <td className="psrR"><span className="psrRateSoft">{b.special_rate_1 != null ? formatRs(b.special_rate_1) : ""}</span></td>
+        <td className="psrR"><span className="psrRateSoft">{b.special_rate_2 != null ? formatRs(b.special_rate_2) : ""}</span></td>
         <td className="psrR">
           <span className={`psrStkVal${Number(b.current_stock || 0) < 0 ? " psrStkNeg" : Number(b.current_stock || 0) === 0 ? " psrStkZero" : ""}`}>
             {Number(b.current_stock || 0).toFixed(0)}
@@ -256,9 +155,7 @@ function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
         <td className="psrR">
           <span className="psrGstVal">{b.sales_gst != null ? `${Number(b.sales_gst).toFixed(2)}%` : ""}</span>
         </td>
-        <td>
-          <span className="psrSupPill">{b.supplier_name || ""}</span>
-        </td>
+        <td><span className="psrSupPill">{b.supplier_name || ""}</span></td>
       </tr>
     );
   });
@@ -279,18 +176,9 @@ function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
           </div>
         </div>
         <div className="psrBCardRows">
-          <div>
-            <div className="psrBLbl">MRP</div>
-            <div className="psrBFval">{formatRs(b.mrp)}</div>
-          </div>
-          <div>
-            <div className="psrBLbl">Purchase Rate</div>
-            <div className="psrBFval">{formatRs(b.purchase_rate)}</div>
-          </div>
-          <div>
-            <div className="psrBLbl">Selling Rate</div>
-            <div className="psrBFval">{formatRs(b.sales_rate)}</div>
-          </div>
+          <div><div className="psrBLbl">MRP</div><div className="psrBFval">{formatRs(b.mrp)}</div></div>
+          <div><div className="psrBLbl">Purchase Rate</div><div className="psrBFval">{formatRs(b.purchase_rate)}</div></div>
+          <div><div className="psrBLbl">Selling Rate</div><div className="psrBFval">{formatRs(b.sales_rate)}</div></div>
           <div>
             <div className="psrBLbl">Sp. Rate 1</div>
             <div className="psrBFval" style={{ color: "var(--color-text-3)" }}>
@@ -399,8 +287,7 @@ function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
               <span className="psrFefo">⏱ FEFO Order</span>
             </div>
             <div className="psrMsecNote" style={{ marginBottom: 14, fontSize: 12 }}>
-              {batches.length} batch{batches.length !== 1 ? "es" : ""} &nbsp;·&nbsp; {batchStock} total units &nbsp;·&nbsp; Earliest
-              expiry shown first
+              {batches.length} batch{batches.length !== 1 ? "es" : ""} &nbsp;·&nbsp; {batchStock} total units &nbsp;·&nbsp; Earliest expiry shown first
             </div>
             {batches.length === 0 ? (
               <div className="psrNoBatch">
@@ -441,20 +328,16 @@ function ProductDetailModal({ open, product, suppliers, batches, onClose }) {
   return createPortal(tree, document.body);
 }
 
+// ── Main content ──────────────────────────────────────────────────────────────
+
 export function ProductSupplierReportContent({ embedded = false } = {}) {
   const canView = can("PRODUCT_BATCHES", "VIEW");
   const [busy, setBusy] = useState(false);
   const [search, setSearch] = useState("");
   const [data, setData] = useState({ products: [], suppliers: [], batches: [], summary: null });
-  const [selectedProductId, setSelectedProductId] = useState("");
   const [modalProductId, setModalProductId] = useState(null);
-  const [ddOpen, setDdOpen] = useState(false);
-  const [ddVisible, setDdVisible] = useState(false);
-  const [ddPage, setDdPage] = useState(1);
   const [initialLoaded, setInitialLoaded] = useState(false);
-  const [loadMoreBusy, setLoadMoreBusy] = useState(false);
   const debounceRef = useRef(null);
-  const searchWrapRef = useRef(null);
   const lastPickedProductRef = useRef(null);
 
   async function refresh(query) {
@@ -464,8 +347,6 @@ export function ProductSupplierReportContent({ embedded = false } = {}) {
       const next = resp.json?.data || { products: [], suppliers: [], batches: [], summary: null };
       setData(next);
       setInitialLoaded(true);
-      const ids = (next.products || []).map((p) => p.id);
-      setSelectedProductId((prev) => (ids.includes(prev) ? prev : ""));
     } else if (resp.status !== 401) {
       emitToast({ type: "error", message: parseApiError(resp) });
     }
@@ -491,42 +372,13 @@ export function ProductSupplierReportContent({ embedded = false } = {}) {
   const products = data.products || [];
   const displaySummary = useMemo(() => normalizeSummary(data), [data]);
 
-  const openDd = useCallback(() => {
-    setDdOpen(true);
-    requestAnimationFrame(() => requestAnimationFrame(() => setDdVisible(true)));
-  }, []);
-
-  const closeDd = useCallback(() => {
-    setDdVisible(false);
-    setTimeout(() => setDdOpen(false), 180);
-  }, []);
-
-  useEffect(() => {
-    function onDocClick(e) {
-      if (!searchWrapRef.current?.contains(e.target)) closeDd();
-    }
-    document.addEventListener("click", onDocClick);
-    return () => document.removeEventListener("click", onDocClick);
-  }, [closeDd]);
-
-  useEffect(() => {
-    setDdPage(1);
-  }, [search, products]);
-
-  const ddSlice = useMemo(() => products.slice(0, DD_PAGE * ddPage), [products, ddPage]);
-  const ddGrouped = useMemo(() => groupByFirstLetter(ddSlice), [ddSlice]);
-  const hasMoreDd = products.length > ddSlice.length;
-
   const pickProduct = useCallback(
     (id) => {
       const row = products.find((p) => p.id === id);
       if (row) lastPickedProductRef.current = row;
-      setSelectedProductId(id);
       setModalProductId(id);
-      setSearch("");
-      closeDd();
     },
-    [closeDd, products]
+    [products]
   );
 
   const modalProduct = useMemo(() => {
@@ -551,132 +403,151 @@ export function ProductSupplierReportContent({ embedded = false } = {}) {
     return sortBatchesByExpiryAsc(list);
   }, [data.batches, modalProduct]);
 
-  const needle = search.trim().toLowerCase();
-  const ddEmpty = !busy && needle && products.length === 0;
-
   if (!canView) {
     return (
       <ReportDenied
         title={NAV_LABELS.reportProductSupplier}
-        message="You don’t have permission to view product batches."
+        message="You don't have permission to view product batches."
       />
     );
   }
 
   const body = (
-    <div className="psrReport page">
-        {busy ? (
-          <div className="psrBusyStrip" role="status" aria-live="polite" aria-busy="true">
-            <CommonLoading variant="bar" />
-            <span className="psrBusyStripLabel">Updating results…</span>
-          </div>
-        ) : null}
-        <div className="stats-row" aria-label="Summary statistics">
-          <div className="stat-card">
-            <div className="stat-icon stat-icon_primary">
-              <IconPsrGrid />
+    <div className={embedded ? "" : "pageWrap"}>
+
+      {/* ── Stat cards ── */}
+      <div className="psrStatsRow" aria-label="Summary statistics">
+        <div className="psrStatCard">
+          <div className="psrStatIcon psrStatIcon_primary"><IconPsrGrid /></div>
+          <div>
+            <div className="psrStatVal">
+              {!initialLoaded && busy ? "…" : displaySummary.total_products}
             </div>
-            <div>
-              <div className="stat-val">
-                {!initialLoaded && busy ? <span className="stat-val-skel skel" /> : displaySummary.total_products}
-              </div>
-              <div className="stat-lbl">Total Products</div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon stat-icon_success">
-              <IconPsrSuppliers />
-            </div>
-            <div>
-              <div className="stat-val">
-                {!initialLoaded && busy ? <span className="stat-val-skel skel" /> : displaySummary.active_suppliers}
-              </div>
-              <div className="stat-lbl">Active Suppliers</div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon stat-icon_warn">
-              <IconAlert />
-            </div>
-            <div>
-              <div className="stat-val stat-val_warn">
-                {!initialLoaded && busy ? <span className="stat-val-skel skel" /> : displaySummary.expiring_soon_batches}
-              </div>
-              <div className="stat-lbl">Expiring Soon</div>
-            </div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-icon stat-icon_danger">
-              <IconPsrOutOfStock />
-            </div>
-            <div>
-              <div className="stat-val stat-val_danger">
-                {!initialLoaded && busy ? <span className="stat-val-skel skel" /> : displaySummary.out_of_stock_products}
-              </div>
-              <div className="stat-lbl">Out of Stock</div>
-            </div>
+            <div className="psrStatLbl">Total Products</div>
           </div>
         </div>
+        <div className="psrStatCard">
+          <div className="psrStatIcon psrStatIcon_success"><IconPsrSuppliers /></div>
+          <div>
+            <div className="psrStatVal">
+              {!initialLoaded && busy ? "…" : displaySummary.active_suppliers}
+            </div>
+            <div className="psrStatLbl">Active Suppliers</div>
+          </div>
+        </div>
+        <div className="psrStatCard">
+          <div className="psrStatIcon psrStatIcon_warn"><IconAlert /></div>
+          <div>
+            <div className="psrStatVal psrStatVal_warn">
+              {!initialLoaded && busy ? "…" : displaySummary.expiring_soon_batches}
+            </div>
+            <div className="psrStatLbl">Expiring Soon</div>
+          </div>
+        </div>
+        <div className="psrStatCard">
+          <div className="psrStatIcon psrStatIcon_danger"><IconPsrOutOfStock /></div>
+          <div>
+            <div className="psrStatVal psrStatVal_danger">
+              {!initialLoaded && busy ? "…" : displaySummary.out_of_stock_products}
+            </div>
+            <div className="psrStatLbl">Out of Stock</div>
+          </div>
+        </div>
+      </div>
 
-        <div className="search-hero">
-          <h2>Search Product</h2>
-          <p>Type a product name, manufacturer, category, or code  results appear alphabetically</p>
-          <div className="search-wrap" ref={searchWrapRef}>
-            <IconPsrSearch className="s-icon" />
-            <input
-              className="search-input"
-              type="search"
-              placeholder="e.g. Dolo, Cipla, Antibiotic, AMOX500…"
-              autoComplete="off"
-              spellCheck={false}
+      {/* ── Report card with table ── */}
+      <ReportCard busy={busy}>
+        <ReportToolbar>
+          <ReportToolbarPrim>
+            <ReportSearchInput
+              placeholder="Search product, drug name or manufacturer…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") setSearch("");
-              }}
+              autoFocus
             />
-            {search ? (
-              <button
-                type="button"
-                className="s-clear"
-                aria-label="Clear search"
-                onClick={() => setSearch("")}
-              >
-                <IconX width={12} height={12} />
-              </button>
-            ) : null}
-          </div>
-        </div>
+            {!busy && (
+              <ReportCountChip>{`${products.length} product(s)`}</ReportCountChip>
+            )}
+          </ReportToolbarPrim>
+        </ReportToolbar>
 
-        <div className="main-grid">
-          <div className="card">
-            <div className="card-hdr">
-              <span className="card-hdr-title">All Products</span>
-              <div className="card-hdr-meta">
-                <span className="card-hdr-az">A → Z</span>
-                <span className="pill">
-                  {busy && !initialLoaded ? "…" : `${products.length} product${products.length !== 1 ? "s" : ""}`}
-                </span>
-              </div>
-            </div>
-            <div className="product-list-scroll">
-              {busy && products.length === 0 ? (
-                <div className="product-list-skel">
-                  <DdSkeletonRows />
-                </div>
-              ) : products.length === 0 ? (
-                <div className="dd-empty">
-                  <p>No products match your search.</p>
-                </div>
-              ) : (
-                products.map((p) => (
-                  <PsrProductPickRow key={p.id} variant="list" product={p} selectedId={selectedProductId} onPick={pickProduct} />
-                ))
-              )}
-            </div>
-          </div>
-        </div>
+        <ReportPaneBody>
+          {!busy && products.length === 0 ? (
+            <ReportListEmpty>
+              {search ? "No products match your search." : "No products found."}
+            </ReportListEmpty>
+          ) : !busy ? (
+            <ReportTableScroll>
+              <table className="rptBatchTable psrTable">
+                <thead>
+                  <tr>
+                    <th className="psrColIdx">#</th>
+                    <th>Product</th>
+                    <th>Manufacturer</th>
+                    <th className="rptNum psrColSuppliers">Suppliers</th>
+                    <th className="rptNum psrColStock">Stock</th>
+                    <th className="rptNum psrColExpiring">Expiring</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.map((p, idx) => {
+                    const supplierCount = (data.suppliers || []).filter((s) => s.product_id === p.id).length;
+                    const productBatches = (data.batches || []).filter((b) => b.product_id === p.id);
+                    const expiringCount = productBatches.filter((b) => {
+                      const st = expiryStatus(b.expiry_date);
+                      return (st === "near" || st === "expired") && Number(b.current_stock || 0) > 0;
+                    }).length;
+                    const stock = Number(p.total_stock || 0);
+                    const stockOut = stock === 0;
 
+                    return (
+                      <tr
+                        key={p.id}
+                        className={`psrTableRow${stockOut ? " psrRow_out" : ""}`}
+                        onClick={() => pickProduct(p.id)}
+                        title="Click to view batch & supplier details"
+                      >
+                        <td className="psrColIdx psrIdxVal">{idx + 1}</td>
+                        <td>
+                          <div className="rptVendorContact">
+                            <span className="rptVendorName">{p.name || p.code || "—"}</span>
+                            {p.drug_name ? <span className="rptVendorAddress">{p.drug_name}</span> : null}
+                            {p.code ? (
+                              <span className="rptVendorAddress psrCodePill">{p.code}</span>
+                            ) : null}
+                          </div>
+                        </td>
+                        <td className="psrMfgCell">{p.mfg_name || p.mfg_short || <span className="psrMuted">—</span>}</td>
+                        <td className="rptNum psrColSuppliers">
+                          {supplierCount > 0 ? (
+                            <span className="psrSupCount">{supplierCount}</span>
+                          ) : (
+                            <span className="psrMuted">—</span>
+                          )}
+                        </td>
+                        <td className="rptNum psrColStock">
+                          <span className={`rptExpiryChip ${stockOut ? "is-expired" : "is-ok"}`}>
+                            {stock}
+                          </span>
+                        </td>
+                        <td className="rptNum psrColExpiring">
+                          {expiringCount > 0 ? (
+                            <span className="rptExpiryChip is-soon">{expiringCount}</span>
+                          ) : (
+                            <span className="psrMuted">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </ReportTableScroll>
+          ) : null}
+        </ReportPaneBody>
+      </ReportCard>
+
+      {/* ── Product detail modal ── */}
       {modalProductId && modalProduct ? (
         <ProductDetailModal
           open={Boolean(modalProductId)}
@@ -694,6 +565,5 @@ export function ProductSupplierReportContent({ embedded = false } = {}) {
 
 export default function ProductSupplierReportPage() {
   useSeoMeta({ title: "Product Supplier Report" });
-  const { taxLabel } = useLocale();
   return <ProductSupplierReportContent embedded={false} />;
 }

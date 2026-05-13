@@ -1305,26 +1305,16 @@ export default function CommonTable({
                 effectivePagination.from != null &&
                 effectivePagination.to != null ? (
                   <span>
-                    Showing <strong>{effectivePagination.from}</strong>–<strong>{effectivePagination.to}</strong> of{" "}
-                    <strong>{effectivePagination.totalItems}</strong>
+                    <strong>{effectivePagination.from}</strong>–<strong>{effectivePagination.to}</strong>{" "}
+                    of <strong>{effectivePagination.totalItems}</strong>
                   </span>
                 ) : hasRows ? (
                   <span>
-                    <strong>{displayRows.length}</strong> {displayRows.length === 1 ? "row" : "rows"} on this page
+                    <strong>{displayRows.length}</strong> {displayRows.length === 1 ? "row" : "rows"}
                   </span>
                 ) : (
                   <span>No results</span>
                 )}
-                {!isMobile && effectivePagination.totalPages ? (
-                  <>
-                    <span className="tblFootSep" aria-hidden="true">
-                      ·
-                    </span>
-                    <span className="tblFootPages">
-                      Page <strong>{effectivePagination.page}</strong> / <strong>{effectivePagination.totalPages}</strong>
-                    </span>
-                  </>
-                ) : null}
               </div>
             </div>
 

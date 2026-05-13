@@ -72,6 +72,7 @@ async function handler(event) {
     "packing",
     "bulk_pack",
     "case_pack",
+    "units_per_strip",
     "conversion_unit",
     "stockable",
     "is_discount_enabled",
@@ -130,6 +131,11 @@ async function handler(event) {
     if (values.division_id !== undefined) {
       syncSets.push(`division_id = $${j++}`);
       syncArgs.push(values.division_id);
+    }
+    // units_per_strip on products → packing_units on batches (different column names)
+    if (values.units_per_strip !== undefined && values.units_per_strip !== null) {
+      syncSets.push(`packing_units = $${j++}`);
+      syncArgs.push(Math.max(1, Number(values.units_per_strip) || 1));
     }
     if (syncSets.length) {
       await query(

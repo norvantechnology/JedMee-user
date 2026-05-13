@@ -1,1518 +1,1426 @@
 /* ============================================================
-   CommonTable  Premium Redesign
-   - Refined luxury SaaS aesthetic (Plum Silk palette)
+   CommonTable — Professional SaaS data table
    - Theme tokens only, zero hardcoded colors
-   - Mobile-first: converts rows into cards on small screens
+   - Mobile-first: rows become cards on small screens
    - All class names preserved for JSX compatibility
+   - Updated: Better hierarchy, contrast, readability, alignment
    ============================================================ */
 
-  /* Visually hidden, read by screen readers (pagination current page, etc.) */
-  .tblSrOnly {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+/* ── Accessibility helper ──────────────────────────────────── */
+.tblSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
-   .tbl {
-    /* Local surface tokens */
-    --tbl-surface: color-mix(in srgb, var(--color-surface) 90%, var(--color-primary) 3%);
-    --tbl-card:    color-mix(in srgb, var(--color-card)    94%, var(--color-primary) 2%);
-    --tbl-border:  color-mix(in srgb, var(--color-border) 88%, transparent);
-    --tbl-line:    color-mix(in srgb, var(--color-border) 40%, transparent);
-    --tbl-shadow:     0 4px 24px -4px  color-mix(in srgb, var(--color-primary) 12%, transparent),
-                      0 1px 4px         color-mix(in srgb, var(--color-text) 5%, transparent);
-    --tbl-shadow-soft: 0 1px 3px color-mix(in srgb, var(--color-text) 5%, transparent);
-  
-    font-family: var(--font);
-    padding: 8px 4px 20px;
+/* ── Root wrapper ──────────────────────────────────────────── */
+.tbl {
+  --tbl-surface:     color-mix(in srgb, var(--color-surface) 92%, var(--color-primary) 2%);
+  --tbl-card:        var(--color-card);
+  --tbl-border:      var(--color-border);
+  --tbl-line:        color-mix(in srgb, var(--color-border) 55%, transparent);
+  --tbl-head-bg:     color-mix(in srgb, var(--color-surface) 85%, var(--color-primary) 4%);
+  --tbl-row-hover:   color-mix(in srgb, var(--color-primary) 5%, var(--color-card));
+  --tbl-row-alt:     color-mix(in srgb, var(--color-surface) 45%, transparent);
+  --tbl-row-active:  color-mix(in srgb, var(--color-primary) 9%, var(--color-card));
+  --tbl-accent:      var(--color-primary);
+  --tbl-radius:      10px;
+
+  font-family: var(--font);
+  padding: 8px 4px 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tbl_compact { padding: 0; }
+
+/* ── Page header zone ──────────────────────────────────────── */
+.tblHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.tblHead_controlsTop {
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tblHeadTop {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.tblHead_controlsTop .tblHeadMain {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+/* Action buttons group */
+.tblToolsRowActions {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.tblToolsRowActions .appBtn,
+.tblHeadToolbarInner .appBtn {
+  height: 36px !important;
+  border-radius: 7px !important;
+  font-size: 13px !important;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  box-shadow: none !important;
+}
+
+@media (max-width: 720px) {
+  .tblToolsRowActions { display: none; }
+}
+
+/* Columns button */
+.tblColsBtn.tblFilterBtn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 7px;
+}
+
+.tblColsBtn.tblFilterBtn .tblFilterBtnIcon svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ── Toolbar ───────────────────────────────────────────────── */
+.tblHeadToolbarActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 6px 4px 8px;
+  margin: 2px 0 0 auto;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tblHeadToolbarInner {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.tblHeadToolbarInner > * { flex-shrink: 0; }
+
+.tblHeadFilters { flex: 1 1 auto; min-width: 0; }
+.tblHeadFilters .tblTools { margin-bottom: 0; }
+
+.tblHeadMain {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+@media (min-width: 961px) {
+  .tblHeadMain { min-width: min(520px, 100%); }
+  .tblHead_controlsTop .tblHeadMain { flex: 0 0 auto; min-width: 0; }
+}
+
+/* ── Title block ───────────────────────────────────────────── */
+.tblTitles { display: grid; gap: 2px; }
+
+.tblTitle {
+  margin: 0;
+  font-size: clamp(18px, 1.75vw, 22px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--color-text-heading);
+  line-height: 1.2;
+  font-family: var(--font);
+}
+
+.tblSub {
+  margin: 0;
+  font-size: clamp(12.5px, 1.2vw, 13.5px);
+  color: var(--color-text-3);
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+/* ── Count badge (KPI chip) ────────────────────────────────── */
+.tblKpi {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 20%, var(--tbl-border));
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--tbl-card));
+  color: var(--color-primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  width: fit-content;
+  max-width: 100%;
+  flex-wrap: wrap;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.tblKpi_toolbar {
+  flex: 0 0 auto;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  margin-left: 0;
+}
+
+/* Primary action */
+.tblPrimary.appBtn { box-shadow: none !important; }
+
+/* ── Filter / tools bar ────────────────────────────────────── */
+.tblTools {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  box-shadow: none;
+}
+
+.tblTools_top {
+  padding: 0;
+  margin-bottom: 0;
+  border: none;
+  background: transparent;
+}
+
+.tblToolsRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.tblToolsRow .tcSearch {
+  flex: 1 1 auto;
+  min-width: 180px;
+}
+
+@media (max-width: 720px) {
+  .tblToolsRow .tcSearch {
+    min-width: 0;
     width: 100%;
-    box-sizing: border-box;
   }
-  
-  .tbl_compact { padding: 0; }
-  
-  /* ── Header zone ── */
-  .tblHead {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 14px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-  
-  .tblHead_controlsTop {
+}
+
+.tblMobileActions {
+  display: none;
+  width: 100%;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tblMobileAct { flex: 0 0 auto; }
+
+/* ── Filter buttons ────────────────────────────────────────── */
+.tblFilterBtn {
+  flex: 0 0 auto;
+  height: 36px;
+  border-radius: 7px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-2);
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 12.5px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  box-shadow: none;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.tblFilterBtn:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 50%, var(--tbl-border));
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--tbl-card));
+  color: var(--color-primary);
+}
+
+.tblFilterBtn_on {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--tbl-card));
+  color: var(--color-primary);
+}
+
+.tblFilterBtnIcon svg { width: 14px; height: 14px; }
+
+.tblFilterBtnBadge {
+  margin-left: 2px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.tblColsBtn.tblFilterBtn {
+  border-color: var(--color-border);
+  background: var(--color-card);
+}
+
+.tblColsBtn.tblFilterBtn:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 50%, var(--tbl-border));
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--tbl-card));
+  color: var(--color-primary);
+}
+
+/* ── Column visibility popover ─────────────────────────────── */
+.tblColsWrap { position: relative; flex: 0 0 auto; }
+
+.tblColsPop {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: min(260px, calc(100vw - 24px));
+  max-height: min(56vh, 400px);
+  border-radius: 10px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-text) 10%, transparent);
+  overflow: hidden;
+  z-index: 420;
+  animation: tblColsPopIn 130ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes tblColsPopIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.tblColsPopHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--tbl-line);
+  background: var(--tbl-head-bg);
+}
+
+.tblColsPopTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: 0.01em;
+}
+
+.tblColsPopReset {
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-2);
+  border-radius: 999px;
+  height: 26px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms, color 120ms;
+  white-space: nowrap;
+}
+
+.tblColsPopReset:hover {
+  background: color-mix(in srgb, var(--color-primary) 7%, var(--tbl-card));
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.tblColSettingsList_pop {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 5px 5px 8px;
+  max-height: calc(min(56vh, 400px) - 45px);
+  overflow-y: auto;
+}
+
+.tblColSettingsFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+.tblColSettingsBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  max-height: min(70vh, 480px);
+  overflow: hidden;
+}
+
+.tblColSettingsHint {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-3);
+  line-height: 1.45;
+}
+
+.tblColSettingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 4px 2px 6px;
+  min-height: 0;
+  border-radius: 8px;
+  border: 1px solid var(--tbl-line);
+  background: var(--tbl-surface);
+}
+
+.tblColSettingsRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  user-select: none;
+  min-width: 0;
+  transition: background 100ms ease;
+}
+
+.tblColSettingsRow:hover {
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+
+.tblColSettingsCheck {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+  margin: 0;
+}
+
+.tblColSettingsLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+/* ── Secondary action button ────────────────────────────────── */
+.tblActionBtn {
+  flex: 0 0 auto;
+  height: 36px;
+  border-radius: 7px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-2);
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 12.5px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  box-shadow: none;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.tblActionBtn:hover {
+  border-color: color-mix(in srgb, var(--color-primary) 50%, var(--tbl-border));
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--tbl-card));
+  color: var(--color-primary);
+}
+
+.tblActionBtnCount {
+  margin-left: 2px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--tbl-border);
+  background: var(--tbl-surface);
+  color: var(--color-text-3);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+/* ── Filter / action sheet (mobile modal body) ─────────────── */
+.tblActionSheet  { display: grid; gap: 8px; padding: 2px 2px 6px; }
+.tblFilterSheet  { display: grid; gap: 8px; padding: 0 0 4px; }
+.tblFilterRow    { display: grid; gap: 6px; align-content: start; }
+
+.tblFilterLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+}
+
+.tblFilterCtrl { min-width: 0; }
+
+.tblFilterSheetFoot {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.tblToolSlot      { min-width: 150px; }
+.tblToolSlot_date { min-width: 180px; }
+.tblDateFilter    { width: 100%; }
+
+/* ── Header actions bar ────────────────────────────────────── */
+.tblHeadActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: nowrap;
+  margin-left: auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 6px 4px 8px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tblHeadToolbarInner_below {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.tblHeadExtras {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.tblHeadExtras > * { flex-shrink: 0; }
+
+/* ── Table card wrapper ────────────────────────────────────── */
+.tblCard {
+  border-radius: var(--tbl-radius);
+  background: color-mix(in srgb, var(--color-primary) 2%, var(--color-card));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
+  box-shadow: none;
+  overflow: hidden;
+  width: 100%;
+  min-width: 0;
+}
+
+.tblCardTop {
+  min-height: 2px;
+  border-radius: 10px 10px 0 0;
+  overflow: hidden;
+}
+
+/* ── Bulk selection bar ────────────────────────────────────── */
+.tblBulk {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--tbl-line);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--tbl-card));
+}
+
+@media (min-width: 640px) {
+  .tblBulk {
     flex-direction: row;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between;
     flex-wrap: wrap;
   }
+}
 
-  .tblHeadTop {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-    flex-wrap: wrap;
+.tblBulkLead { flex: 0 0 auto; }
+
+.tblBulkMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 2px 2px 0;
+}
+
+.tblBulkCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.9rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.tblBulkText {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+}
+
+.tblBulkRail  { flex: 1 1 auto; min-width: 0; }
+
+.tblBulkActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+  overflow-x: auto;
+  padding-bottom: 1px;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 640px) {
+  .tblBulkRail { display: flex; justify-content: flex-end; }
+}
+
+/* ── Bulk action buttons ────────────────────────────────────── */
+.tblBulkBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: background 120ms, border-color 120ms, color 120ms, transform 120ms;
+  white-space: nowrap;
+}
+
+.tblBulkBtn:hover:not(:disabled) { transform: translateY(-1px); }
+.tblBulkBtn:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+
+.tblBulkBtnIcon { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.tblBulkBtnIcon svg { width: 14px; height: 14px; }
+
+.tblBulkBtn_neutral {
+  border-color: var(--tbl-border);
+  background: var(--tbl-card);
+  color: var(--color-text-2);
+}
+
+.tblBulkBtn_neutral:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--tbl-border));
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--tbl-card));
+}
+
+.tblBulkBtn_danger {
+  border-color: color-mix(in srgb, var(--color-danger) 25%, var(--tbl-border));
+  background: color-mix(in srgb, var(--color-danger-light) 60%, var(--tbl-card));
+  color: var(--color-danger);
+}
+
+.tblBulkBtn_danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger-light) 85%, var(--tbl-card));
+  border-color: color-mix(in srgb, var(--color-danger) 40%, var(--tbl-border));
+}
+
+@media (max-width: 480px) {
+  .tblBulkActions { justify-content: stretch; }
+  .tblBulkBtn { flex: 1 1 calc(50% - 3px); min-width: min(140px, 100%); justify-content: center; }
+}
+
+/* ── Horizontal scroll container ───────────────────────────── */
+.tblScroller {
+  margin: 0;
+  background: var(--tbl-card);
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-primary) 15%, transparent) transparent;
+}
+
+.tblScroller::-webkit-scrollbar { height: 5px; width: 5px; }
+.tblScroller::-webkit-scrollbar-track { background: transparent; }
+.tblScroller::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
+  border-radius: 999px;
+}
+
+/* ── Table element ─────────────────────────────────────────── */
+.tblTable {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+}
+
+/* ── Sticky header ─────────────────────────────────────────── */
+.tblThead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--tbl-head-bg);
+  border-bottom: 1.5px solid var(--tbl-border);
+}
+
+.tblTh {
+  text-align: left;
+  padding: 9px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-3);
+  user-select: none;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.tblTh_right { text-align: right; }
+.tblTh_num   { width: 42px; }
+.tblTh_check { width: 36px; }
+
+.tblTh_sortable { cursor: pointer; }
+
+.tblTh_sortable:hover {
+  color: var(--color-primary);
+}
+
+.tblTh_sorted { color: var(--color-primary-darker); }
+
+.tblThInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.tblThText {
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sort glyph */
+.tblSortGlyph {
+  width: 13px;
+  height: 13px;
+  display: inline-grid;
+  place-items: center;
+  color: var(--color-text-4);
+  transition: transform 0.15s ease, color 0.12s;
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+
+.tblSortGlyph svg { width: 13px; height: 13px; }
+.tblSortGlyph_asc  { transform: rotate(-90deg); color: var(--color-primary); opacity: 1; }
+.tblSortGlyph_desc { transform: rotate(90deg);  color: var(--color-primary); opacity: 1; }
+
+/* ── Rows ──────────────────────────────────────────────────── */
+.tblRow { transition: background 90ms ease; }
+
+/* Subtle alternating rows — improves scanability without distraction */
+.tblRow:nth-child(even) td {
+  background: var(--tbl-row-alt);
+}
+
+.tblRow:hover td {
+  background: var(--tbl-row-hover) !important;
+}
+
+/* Active / keyboard row */
+.tblRow_active td {
+  background: var(--tbl-row-active) !important;
+}
+
+.tblRow_active td:first-child {
+  box-shadow: inset 3px 0 0 var(--tbl-accent);
+}
+
+/* ── Cells ─────────────────────────────────────────────────── */
+.tblTd {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--tbl-line);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text);
+  background: transparent;
+  vertical-align: middle;
+  transition: background 90ms;
+  line-height: 1.45;
+}
+
+.tblCellVal {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.tblTable tbody tr:last-child .tblTd { border-bottom: none; }
+
+.tblTd_right  { text-align: right; }
+.tblTd_check  { width: 36px; }
+.tblTd_num    {
+  color: var(--color-text-4);
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.tblTd_empty  { color: var(--color-text-4); font-style: italic; }
+
+.tblTd_actions {
+  min-width: max(90px, max-content);
+  white-space: nowrap;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* Center alignment for non-mobile */
+@media (min-width: 721px) {
+  .tblTh,
+  .tblTh_right { text-align: center; }
+
+  .tblThInner { justify-content: center; }
+
+  .tblTd,
+  .tblTd_right { text-align: center; }
+
+  .tblActionsCell   { justify-content: center; }
+  .tblInlineActions { justify-content: center; }
+
+  .tblTd_check { padding-left: 6px; padding-right: 6px; }
+  .tblTh_check { padding-left: 6px; padding-right: 6px; }
+}
+
+.tblActionsCell {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.tblInlineActions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+/* Compact icon buttons in rows */
+.tbl .tblActionsCell .xib {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.tbl .tblActionsCell .xib:hover {
+  background: color-mix(in srgb, var(--color-primary) 9%, transparent) !important;
+  border-color: transparent !important;
+}
+
+.tbl .tblActionsCell .xib svg,
+.tbl .tblActionsCell .xib svg.lucide {
+  width: 15px !important;
+  height: 15px !important;
+  stroke-width: 2;
+}
+
+.tbl .tblActionsCell a.xib.xibLink {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+.tbl .tblActionsCell a.xib.xibLink:hover {
+  background: color-mix(in srgb, var(--color-primary) 9%, transparent) !important;
+}
+
+/* ── Checkbox ──────────────────────────────────────────────── */
+.tblCheck {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tblCheckInput {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+  border-radius: 4px;
+  vertical-align: middle;
+  margin: 0;
+}
+
+/* ── Status / role badges ──────────────────────────────────── */
+.tblBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  border: 1px solid transparent;
+  width: fit-content;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.tblBadge_ok {
+  background: color-mix(in srgb, var(--color-success) 10%, var(--tbl-card));
+  color: var(--color-success-dark);
+  border-color: color-mix(in srgb, var(--color-success) 20%, var(--tbl-border));
+}
+
+.tblBadge_wait {
+  background: color-mix(in srgb, var(--color-warning) 10%, var(--tbl-card));
+  color: var(--color-warning-dark);
+  border-color: color-mix(in srgb, var(--color-warning) 20%, var(--tbl-border));
+}
+
+.tblBadge_bad {
+  background: color-mix(in srgb, var(--color-danger) 9%, var(--tbl-card));
+  color: var(--color-danger-dark);
+  border-color: color-mix(in srgb, var(--color-danger) 20%, var(--tbl-border));
+}
+
+.tblBadge_info {
+  background: color-mix(in srgb, var(--color-primary) 9%, var(--tbl-card));
+  color: var(--color-primary-darker);
+  border-color: color-mix(in srgb, var(--color-primary) 20%, var(--tbl-border));
+}
+
+.tblBadge_muted {
+  background: color-mix(in srgb, var(--color-text) 5%, var(--tbl-card));
+  color: var(--color-text-3);
+  border-color: color-mix(in srgb, var(--color-text) 9%, var(--tbl-border));
+}
+
+/* ── Empty state ───────────────────────────────────────────── */
+.tblEmpty {
+  padding: 48px 16px;
+  text-align: center;
+  background: color-mix(in srgb, var(--tbl-surface) 40%, var(--tbl-card));
+}
+
+.tblEmptyTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-2);
+  letter-spacing: -0.01em;
+}
+
+.tblEmptySub {
+  margin-top: 5px;
+  font-size: 12.5px;
+  color: var(--color-text-3);
+  line-height: 1.5;
+}
+
+/* ── Footer / pagination ───────────────────────────────────── */
+.tblFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 14px;
+  border-top: 1.5px solid var(--tbl-line);
+  background: var(--tbl-head-bg);
+}
+
+.tblFootLeft { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tblPageSize { display: inline-flex; align-items: center; gap: 6px; }
+
+.tblPageSizeLabel {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-4);
+  white-space: nowrap;
+}
+
+.tblPageSizeSelect {
+  height: 28px;
+  border-radius: 6px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text);
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 0 6px;
+  cursor: pointer;
+  box-shadow: none;
+  transition: border-color 0.12s;
+}
+
+.tblPageSizeSelect:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.tblFootMeta {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-3);
+  white-space: nowrap;
+}
+
+.tblFootMeta strong { color: var(--color-text-2); font-weight: 700; }
+.tblFootSep  { margin: 0 4px; color: var(--color-text-4); }
+.tblFootPages { white-space: nowrap; }
+.tblFootRight { margin-left: auto; }
+
+/* ── Pagination controls ───────────────────────────────────── */
+.tblPager {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tblPagerBtn,
+.tblPageBtn {
+  height: 28px;
+  min-width: 28px;
+  border-radius: 6px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-2);
+  cursor: pointer;
+  font-family: var(--font);
+  font-weight: 600;
+  font-size: 12px;
+  box-shadow: none;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+}
+
+.tblPagerBtn {
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.tblPagerBtn svg { width: 14px; height: 14px; }
+
+/* Mobile current page indicator */
+.tblPagerCur {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tblPagerCurInner {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  font-size: clamp(13px, 3.5vw, 14px);
+  font-weight: 800;
+  color: var(--color-text-2);
+  letter-spacing: -0.02em;
+}
+
+.tblPagerCurNum { color: var(--color-primary); font-size: 1.05em; }
+.tblPagerCurSep { color: var(--color-text-4); font-weight: 600; padding: 0 1px; }
+.tblPagerCurTot { color: var(--color-text-3); font-weight: 600; }
+
+.tblPagerBtn:hover:not(:disabled),
+.tblPageBtn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-primary) 50%, var(--tbl-border));
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--tbl-card));
+}
+
+.tblPagerBtn:active:not(:disabled),
+.tblPageBtn:active:not(:disabled) {
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--tbl-card));
+}
+
+.tblPagerBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.tblPageBtn { padding: 0 8px; }
+
+.tblPageBtn_active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 10%, var(--tbl-card));
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* ── Mobile: card rows ─────────────────────────────────────── */
+@media (max-width: 720px) {
+  .tbl {
+    padding: 4px 2px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .tblHead { gap: 8px; }
+
+  .tblHeadMain,
+  .tblHead_controlsTop .tblHeadMain {
+    min-width: 0;
     width: 100%;
   }
 
-  .tblHead_controlsTop .tblHeadMain {
-    flex: 0 0 auto;
-    min-width: 0;
-  }
-
-  /* Action buttons group — lives inside .tblToolsRow, pushed to the right */
-  .tblToolsRowActions {
-    display: inline-flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
-    flex: 0 0 auto;
-    margin-left: auto;
-  }
-
-  /* Action buttons match filter-dropdown height (40 px) */
-  .tblToolsRowActions .appBtn,
-  .tblHeadToolbarInner .appBtn {
-    height: 40px !important;
-    border-radius: 12px !important;
-    font-size: 13px !important;
-    padding-left: 14px !important;
-    padding-right: 14px !important;
-  }
-
-  /* Safety: hide action group on mobile (JSX already guards with !isMobile,
-     but this prevents any flash if the breakpoint fires before JS hydrates) */
-  @media (max-width: 720px) {
-    .tblToolsRowActions {
-      display: none;
-    }
-  }
-
-  /* Columns button: icon-only — small square */
-  .tblColsBtn.tblFilterBtn {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    justify-content: center;
-  }
-
-  .tblColsBtn.tblFilterBtn .tblFilterBtnIcon svg {
-    width: 14px;
-    height: 14px;
-  }
-  
-  /* ── Toolbar ── */
-  .tblHeadToolbarActions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    min-width: 0;
+  .tblHeadActions {
+    width: 100%;
     max-width: 100%;
-    overflow-x: auto;
+    margin-left: 0;
+    justify-content: flex-start;
+    overflow-x: visible;
+  }
+
+  .tblHeadTop { flex-direction: column; align-items: stretch; }
+
+  .tblHeadToolbarActions {
+    width: 100%;
+    max-width: 100%;
+    justify-content: flex-start;
+    overflow-x: visible;
     overflow-y: visible;
-    padding: 8px 6px 10px;
-    margin: 2px 0 0 auto;
-    scrollbar-width: thin;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin: 0;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .tblHeadToolbarInner {
-    display: inline-flex;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
-  
-  .tblHeadToolbarInner > * { flex-shrink: 0; }
-  
-  .tblHeadFilters { flex: 1 1 auto; min-width: 0; }
-  .tblHeadFilters .tblTools { margin-bottom: 0; }
-  
-  .tblHeadMain {
-    display: grid;
-    gap: 6px;
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-  
-  @media (min-width: 961px) {
-    .tblHeadMain { min-width: min(520px, 100%); }
-    .tblHead_controlsTop .tblHeadMain { flex: 0 0 auto; min-width: 0; }
-  }
-  
-  /* ── Title block ── */
-  .tblTitles { display: grid; gap: 3px; }
-  
-  .tblTitle {
-    margin: 0;
-    font-size: clamp(17px, 1.8vw, 21px);
-    font-weight: 800;
-    letter-spacing: -0.025em;
-    color: var(--color-text-heading);
-    line-height: 1.15;
-    font-family: var(--font);
-  }
-  
-  .tblSub {
-    margin: 0;
-    font-size: clamp(12.5px, 1.3vw, 13.5px);
-    color: var(--color-text-3);
-    line-height: 1.4;
-    font-weight: 430;
-  }
-  
-  /* ── KPI chip (count badge) ── */
-  .tblKpi {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--tbl-border));
-    background: color-mix(in srgb, var(--color-primary) 9%, var(--tbl-card));
-    color: var(--color-primary);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    width: fit-content;
-    max-width: 100%;
     flex-wrap: wrap;
-    min-width: 0;
-    line-height: 1.35;
+    width: 100%;
+    justify-content: flex-start;
   }
 
-  /* Toolbar-inline variant — compact pill beside the search bar */
-  .tblKpi_toolbar {
-    flex: 0 0 auto;
-    height: 28px;
-    padding: 0 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 800;
-    flex-wrap: nowrap;
-    white-space: nowrap;
-    margin-left: 0;
+  .tblHeadExtras {
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-start;
   }
-  
-  /* ── Primary action button ── */
-  .tblPrimary.appBtn {
-    box-shadow:
-      0 1px 0 color-mix(in srgb, white 22%, transparent) inset,
-      0 4px 14px -2px color-mix(in srgb, var(--color-primary) 30%, transparent);
-  }
-  
-  /* ── Filter/tools bar ── */
+
   .tblTools {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    padding: clamp(10px, 1.8vw, 12px) clamp(10px, 2vw, 14px);
-    margin-bottom: 10px;
-    border-radius: var(--radius);
-    border: 1px solid color-mix(in srgb, var(--tbl-border) 55%, transparent);
-    background: color-mix(in srgb, var(--tbl-surface) 65%, var(--tbl-card));
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+    padding: 5px;
+    margin-bottom: 6px;
   }
 
-  /* Strip card chrome when toolbar is inlined into the header row */
-  .tblTools_top {
-    padding: 0;
-    margin-bottom: 0;
-    border: none;
-    background: transparent;
-  }
-
-  /* Mobile-first compact row containing Search + Filter trigger.
-     flex-wrap: wrap allows many-filter pages (e.g. Purchases wholesaler with
-     6 filters) to flow onto a second line cleanly instead of overflowing. */
   .tblToolsRow {
-    display: flex;
-    align-items: center;
+    gap: 7px;
     flex-wrap: wrap;
-    gap: 8px;
-    width: 100%;
-    min-width: 0;
+    align-items: stretch;
   }
 
-  /* Search input grows to fill available space on the first line so filter
-     dropdowns that don't fit wrap to the next line as a tidy group. */
-  .tblToolsRow .tcSearch {
-    flex: 1 1 auto;
-    min-width: 160px;
-  }
-
-  /* On mobile the search bar takes the full row width */
-  @media (max-width: 720px) {
+  @media (max-width: 560px) {
     .tblToolsRow .tcSearch {
+      flex: 1 1 100%;
       min-width: 0;
-      width: 100%;
+      order: -1;
     }
-  }
-
-  /* Mobile actions row: Add / Import / Export / etc. */
-  .tblMobileActions {
-    display: none;
-    width: 100%;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .tblMobileAct {
-    flex: 0 0 auto;
   }
 
   .tblFilterBtn {
-    flex: 0 0 auto;
-    height: 40px;
-    border-radius: 12px;
-    border: 1.5px solid var(--color-border);
-    background: var(--color-card);
-    color: var(--color-text-2);
-    font-family: var(--font);
-    font-weight: 800;
-    font-size: 13px;
-    padding: 0 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-  }
-
-  .tblFilterBtn:hover {
-    border-color: var(--color-border-focus);
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-  }
-
-  .tblFilterBtn_on {
-    border-color: var(--color-primary);
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-  }
-
-  .tblFilterBtnIcon svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .tblFilterBtnBadge {
-    margin-left: 2px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: var(--color-primary);
-    color: var(--color-on-primary);
-    font-size: 12px;
-    font-weight: 900;
-    line-height: 1.2;
-  }
-
-  /* Column visibility (gear)  reuses tblFilterBtn sizing; subtle hue */
-  .tblColsBtn.tblFilterBtn {
-    border-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
-    background: color-mix(in srgb, var(--color-primary) 6%, var(--color-card));
-  }
-
-  .tblColsBtn.tblFilterBtn:hover {
-    border-color: color-mix(in srgb, var(--color-primary) 45%, var(--color-border));
-    background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
-  }
-
-  .tblColsWrap {
-    position: relative;
-    flex: 0 0 auto;
-  }
-
-  .tblColsPop {
-    position: absolute;
-    top: calc(100% + 8px);
-    right: 0;
-    width: min(280px, calc(100vw - 24px));
-    max-height: min(56vh, 420px);
-    border-radius: 14px;
-    border: 1.5px solid var(--color-border);
-    background: var(--color-card);
-    box-shadow: 0 20px 60px -10px color-mix(in srgb, var(--color-primary) 18%, transparent),
-      0 8px 24px -4px color-mix(in srgb, var(--color-text) 12%, transparent);
-    overflow: hidden;
-    z-index: 420;
-    animation: tblColsPopIn 140ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .tblColsPopHead {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 10px 12px;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
-    background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
-  }
-
-  .tblColsPopTitle {
+    min-height: 36px;
+    height: auto;
+    padding: 0 8px;
+    border-radius: 8px;
     font-size: 12.5px;
-    font-weight: 900;
-    color: var(--color-text);
-    letter-spacing: -0.01em;
-  }
-
-  .tblColsPopReset {
-    border: 1px solid var(--color-border);
-    background: var(--color-card);
-    color: var(--color-text-2);
-    border-radius: 999px;
-    height: 28px;
-    padding: 0 10px;
-    font-size: 11.5px;
-    font-weight: 850;
-    cursor: pointer;
-    transition: background 140ms, border-color 140ms, color 140ms;
-    white-space: nowrap;
-  }
-
-  .tblColsPopReset:hover {
-    background: var(--color-primary-light);
-    border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
-    color: var(--color-primary);
-  }
-
-  .tblColSettingsList_pop {
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    padding: 6px 6px 10px;
-    max-height: calc(min(56vh, 420px) - 49px);
-  }
-
-  .tblColSettingsFoot {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .tblColSettingsBody {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    min-width: 0;
-    max-height: min(70vh, 520px);
-    overflow: hidden;
-  }
-
-  .tblColSettingsHint {
-    margin: 0;
-    font-size: 12.5px;
-    font-weight: 650;
-    color: var(--color-text-3);
-    line-height: 1.45;
-  }
-
-  .tblColSettingsList {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    overflow: auto;
-    overscroll-behavior: contain;
-    padding: 4px 2px 8px;
-    min-height: 0;
-    border-radius: 12px;
-    border: 1px solid color-mix(in srgb, var(--tbl-border) 65%, transparent);
-    background: color-mix(in srgb, var(--tbl-surface) 55%, var(--tbl-card));
-  }
-
-  .tblColSettingsRow {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    user-select: none;
-    min-width: 0;
-  }
-
-  .tblColSettingsRow:hover {
-    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
-  }
-
-  .tblColSettingsCheck {
-    margin-top: 2px;
-    flex-shrink: 0;
-    width: 17px;
-    height: 17px;
-    accent-color: var(--color-primary);
-  }
-
-  .tblColSettingsLabel {
-    font-size: 13.5px;
-    font-weight: 750;
-    color: var(--color-text);
-    line-height: 1.35;
-    word-break: break-word;
   }
 
   .tblActionBtn {
-    flex: 0 0 auto;
-    height: 40px;
-    border-radius: 12px;
-    border: 1.5px solid var(--color-border);
-    background: var(--color-card);
-    color: var(--color-text-2);
-    font-family: var(--font);
-    font-weight: 800;
-    font-size: 13px;
-    padding: 0 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
+    min-height: 36px;
+    height: auto;
+    padding: 0 8px;
+    border-radius: 8px;
+    font-size: 12.5px;
   }
 
-  .tblActionBtn:hover {
-    border-color: var(--color-border-focus);
-    background: var(--color-primary-light);
-    color: var(--color-primary);
+  .tblFilterBtnIcon svg { width: 15px; height: 15px; }
+
+  @media (max-width: 420px) {
+    .tblToolsRow {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: stretch;
+    }
+
+    .tblToolsRow .tcSearch { grid-column: 1 / -1; order: 0; }
+
+    .tblToolsRow .tblFilterBtn,
+    .tblToolsRow .tblActionBtn,
+    .tblToolsRow .tblColsBtn {
+      width: 100%;
+      justify-content: center;
+    }
   }
 
-  .tblActionBtnCount {
-    margin-left: 2px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    border: 1px solid var(--tbl-border);
-    background: color-mix(in srgb, var(--color-text) 4%, var(--tbl-card));
-    color: var(--color-text-3);
-    font-size: 12px;
-    font-weight: 900;
-    line-height: 1.2;
+  .tblToolSlot, .tblToolSlot_date { width: 100%; min-width: 0; }
+
+  /* Mobile: card layout */
+  .tblScroller { overflow-x: hidden; overflow-y: visible; overscroll-behavior: auto; }
+
+  .tblTable {
+    min-width: 0;
+    width: 100%;
+    display: block;
   }
 
-  .tblActionSheet {
+  .tblThead { display: none; }
+
+  .tblTable tbody {
     display: grid;
-    gap: 10px;
-    padding: 2px 2px 8px;
+    gap: 5px;
+    padding: 4px 2px;
+    width: 100%;
+    min-width: 0;
   }
 
-  /* Filter bottom-sheet content */
-  .tblFilterSheet {
+  .tblTable tbody tr {
     display: grid;
-    gap: 10px;
-    padding: 0 0 6px;
+    grid-template-columns: 1fr;
+    gap: 3px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1.5px solid var(--tbl-border);
+    background: var(--tbl-card);
+    min-width: 0;
+    overflow: hidden;
+    box-shadow: none;
+    transition: border-color 0.12s;
+    touch-action: pan-y;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .tblFilterRow {
+  .tblTable tbody tr:hover {
+    border-color: color-mix(in srgb, var(--color-primary) 28%, var(--tbl-border));
+  }
+
+  .tblTable tbody td {
     display: grid;
-    gap: 7px;
-    align-content: start;
+    grid-template-columns: minmax(68px, 30%) minmax(0, 1fr);
+    gap: 6px;
+    padding: 2px 0;
+    border: none;
+    background: transparent;
+    font-size: 12.5px;
+    align-items: start;
+    min-width: 0;
   }
 
-  .tblFilterLabel {
-    font-size: 12px;
-    font-weight: 800;
+  .tblTable tbody td.tblTd_right { text-align: left; }
+  .tblTable tbody td.tblTd_right .tblCellVal { justify-self: start; text-align: left; }
+  .tblTable tbody td .tblCellVal { justify-self: start; }
+
+  .tblTable tbody td > * {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .tblTable tbody .cl__skel { max-width: 100%; width: 100%; }
+
+  /* Column label from data-label */
+  .tblTable tbody td::before {
+    content: attr(data-label);
+    font-size: 10px;
+    font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-text-4);
+    padding-top: 1px;
+    align-self: start;
+    justify-self: start;
   }
 
-  .tblFilterCtrl {
-    min-width: 0;
-  }
-
-  .tblFilterSheetFoot {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  
-  .tblToolSlot     { min-width: 160px; }
-  .tblToolSlot_date { min-width: 190px; }
-  .tblDateFilter   { width: 100%; }
-  
-  /* Actions bar */
-  .tblHeadActions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    flex-wrap: nowrap;
-    margin-left: auto;
+  .tblTable tbody td .tblCellVal {
     min-width: 0;
     max-width: 100%;
-    overflow-x: auto;
-    overflow-y: visible;
-    padding: 8px 6px 10px;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    align-self: start;
   }
-  
-  .tblHeadToolbarInner_below {
-    display: inline-flex;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
+
+  .tblTd_check, .tblTd_num   { display: none !important; }
+  .tblTd_mobileHidden         { display: none !important; }
+  .tblTd_actions              { grid-template-columns: 1fr; min-width: 0; white-space: normal; }
+  .tblTd_actions::before      { display: none; }
+  .tblActionsCell             { justify-content: flex-start; }
+  .tblInlineActions           { flex-wrap: wrap; justify-content: flex-start; }
+
+  .tbl .tblActionsCell .appBtn {
+    min-height: 34px;
+    padding-left: 8px;
+    padding-right: 8px;
   }
-  
-  .tblHeadExtras {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    flex-shrink: 0;
+
+  .tbl .tblActionsCell .xib,
+  .tbl .tblActionsCell a.xib.xibLink {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
   }
-  
-  .tblHeadExtras > * { flex-shrink: 0; }
-  
-  /* ── Table card wrapper ── */
-  .tblCard {
-    border-radius: clamp(12px, 2vw, 16px);
-    background: var(--tbl-card);
-    border: 1px solid color-mix(in srgb, var(--tbl-border) 65%, transparent);
-    box-shadow: var(--tbl-shadow);
-    overflow: hidden;
-    width: 100%;
-    min-width: 0;
-  }
-  
-  .tblCardTop {
-    min-height: 2px;
-    border-radius: 16px 16px 0 0;
-    overflow: hidden;
-  }
-  
-  /* ── Bulk action bar ── */
-  .tblBulk {
-    display: flex;
+
+  /* Mobile pagination */
+  .tblFoot {
+    gap: 6px;
+    padding: 6px 10px max(8px, env(safe-area-inset-bottom, 0px));
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
-    padding: clamp(10px, 1.8vw, 12px) clamp(12px, 2.2vw, 16px);
-    border-bottom: 1px solid var(--tbl-line);
-    background: color-mix(in srgb, var(--color-primary) 6%, var(--tbl-card));
+    position: sticky;
+    bottom: 0;
+    background: var(--tbl-card);
+    border-top: 1.5px solid var(--tbl-line);
+    z-index: 1;
   }
-  
-  @media (min-width: 640px) {
-    .tblBulk {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
+
+  .tblPageSize { display: none; }
+
+  .tblFootLeft {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px 10px;
   }
-  
-  .tblBulkLead { flex: 0 0 auto; }
-  
-  .tblBulkMeta {
-    display: inline-flex;
+
+  .tblFootRight {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .tblPager {
+    width: 100%;
+    justify-content: space-between;
     align-items: center;
     gap: 8px;
-    padding: 3px 3px 3px 0;
-  }
-  
-  .tblBulkCount {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 1.9rem;
-    padding: 3px 9px;
-    border-radius: 999px;
-    font-size: clamp(12.5px, 2vw, 13.5px);
-    font-weight: 800;
-    color: var(--color-on-primary);
-    background: linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--color-primary) 85%, white 15%),
-      var(--color-primary)
-    );
-    font-variant-numeric: tabular-nums;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 30%, transparent);
-  }
-  
-  .tblBulkText {
-    font-size: clamp(11.5px, 1.8vw, 12.5px);
-    font-weight: 700;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--color-text-3);
-  }
-  
-  .tblBulkRail { flex: 1 1 auto; min-width: 0; }
-  
-  .tblBulkActions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
-    flex-wrap: wrap;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    scrollbar-gutter: stable;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  @media (min-width: 640px) {
-    .tblBulkRail {
-      display: flex;
-      justify-content: flex-end;
-    }
-  }
-  
-  /* Bulk action buttons */
-  .tblBulkBtn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-height: clamp(33px, 5.5vw, 36px);
-    padding: 0 clamp(10px, 1.8vw, 13px);
-    border-radius: 10px;
-    font-family: var(--font);
-    font-size: clamp(11.5px, 1.8vw, 12.5px);
-    font-weight: 700;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: transform 0.16s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.16s, background 0.16s, border-color 0.16s, color 0.16s;
-    white-space: nowrap;
-  }
-  
-  .tblBulkBtn:hover:not(:disabled) { transform: translateY(-1px); }
-  .tblBulkBtn:active:not(:disabled) { transform: translateY(0) scale(0.97); }
-  
-  .tblBulkBtnIcon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-  }
-  .tblBulkBtnIcon svg { width: 15px; height: 15px; }
-  
-  .tblBulkBtn_neutral {
-    border-color: color-mix(in srgb, var(--tbl-border) 90%, var(--color-text) 5%);
-    background: var(--tbl-card);
-    color: var(--color-text-2);
-    box-shadow: 0 1px 3px color-mix(in srgb, var(--color-text) 7%, transparent);
-  }
-  .tblBulkBtn_neutral:hover:not(:disabled) {
-    border-color: color-mix(in srgb, var(--color-primary) 30%, var(--tbl-border));
-    color: var(--color-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent),
-                0 3px 8px color-mix(in srgb, var(--color-primary) 10%, transparent);
-  }
-  
-  .tblBulkBtn_danger {
-    border-color: color-mix(in srgb, var(--color-danger) 30%, var(--tbl-border));
-    background: color-mix(in srgb, var(--color-danger-light) 70%, var(--tbl-card));
-    color: var(--color-danger);
-  }
-  .tblBulkBtn_danger:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--color-danger-light) 90%, var(--tbl-card));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 12%, transparent);
-  }
-  
-  @media (max-width: 480px) {
-    .tblBulkActions { justify-content: stretch; }
-    .tblBulkBtn { flex: 1 1 calc(50% - 3px); min-width: min(150px, 100%); justify-content: center; }
-  }
-  
-  /* ── Horizontal scroll container ──
-     Only contain horizontal overscroll (rubber-band) inside the table.
-     Vertical wheel events MUST be allowed to chain up to the page so the
-     user can scroll the page while the cursor is over the table. Setting a
-     blanket `overscroll-behavior: contain` here used to trap page scroll. */
-  .tblScroller {
-    margin: 0;
-    background: var(--color-card);
-    width: 100%;
-    min-width: 0;
-    overflow-x: auto;
-    overflow-y: auto;
-    overscroll-behavior-x: contain;
-    overscroll-behavior-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: color-mix(in srgb, var(--color-primary) 18%, transparent) transparent;
   }
 
-  @media (max-width: 720px) {
-    /* On mobile we render rows as full-width cards. We deliberately drop the
-       nested scroll container so that touching a card lets the BODY scroll the
-       page (instead of being trapped inside .tblScroller). */
-    .tblScroller {
-      overflow-x: hidden;
-      overflow-y: visible;
-      overscroll-behavior: auto;
-      -webkit-overflow-scrolling: auto;
-    }
-  }
-  
-  .tblScroller::-webkit-scrollbar { height: 6px; width: 6px; }
-  .tblScroller::-webkit-scrollbar-track { background: transparent; }
-  .tblScroller::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
-    border-radius: 999px;
-  }
-  
-  /* ── Table element ── */
-  .tblTable {
-    width: max-content;
-    min-width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    table-layout: auto;
-  }
-  
-  /* ── Sticky header ── */
-  .tblThead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    background: color-mix(in srgb, var(--color-surface-2) 45%, var(--tbl-card) 55%);
-    border-bottom: 1px solid var(--tbl-line);
-  }
-  
-  .tblTh {
-    text-align: left;
-    padding: 9px 14px;
-    font-size: clamp(10px, 1.5vw, 11px);
-    font-weight: 800;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--color-text-4);
-    user-select: none;
-    vertical-align: top;
-    white-space: nowrap;
-  }
-  
-  .tblTh_right { text-align: right; }
-  .tblTh_num   { width: 56px; }
-  .tblTh_check { width: 42px; }
-  
-  .tblTh_sortable { cursor: pointer; }
-  .tblTh_sortable:hover { color: var(--color-primary); }
-  .tblTh_sorted { color: var(--color-primary-darker); }
-  
-  .tblThInner {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    max-width: 100%;
-  }
-  
-  .tblThText {
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  /* Sort glyph */
-  .tblSortGlyph {
-    width: 14px;
-    height: 14px;
-    display: inline-grid;
-    place-items: center;
-    color: var(--color-text-4);
-    transition: transform 0.18s ease, color 0.16s;
-    opacity: 0.85;
-    flex-shrink: 0;
-  }
-  .tblSortGlyph svg { width: 14px; height: 14px; }
-  .tblSortGlyph_asc  { transform: rotate(-90deg); color: var(--color-primary); opacity: 1; }
-  .tblSortGlyph_desc { transform: rotate(90deg);  color: var(--color-primary); opacity: 1; }
-  
-  /* ── Rows ── */
-  .tblRow {
-    transition: background 0.12s ease;
-  }
-  
-  .tblRow:hover td {
-    background: color-mix(in srgb, var(--color-primary) 4%, transparent);
-  }
-  
-  .tblRow_active td {
-    background: color-mix(in srgb, var(--color-primary) 7%, transparent);
-  }
-  
-  /* Subtle left accent on active/hover rows */
-  .tblRow_active td:first-child {
-    box-shadow: inset 3px 0 0 var(--color-primary);
-  }
-  
-  /* ── Cells ── */
-  .tblTd {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--tbl-line);
-    font-size: clamp(12.5px, 1.6vw, 13.5px);
-    color: var(--color-text);
-    background: transparent;
-    vertical-align: middle;
-    transition: background 0.12s;
-  }
-
-  /* Normalize cell value wrapper so alignment is consistent */
-  .tblCellVal {
-    min-width: 0;
-    max-width: 100%;
-  }
-  
-  .tblTable tbody tr:last-child .tblTd { border-bottom: none; }
-  
-  .tblTd_right  { text-align: right; }
-  .tblTd_check  { width: 42px; }
-  .tblTd_num    { color: var(--color-text-4); font-variant-numeric: tabular-nums; font-size: 12px; }
-  .tblTd_empty  { color: var(--color-text-4); }
-  
-  .tblTd_actions {
-    min-width: max(140px, max-content);
-    white-space: nowrap;
-  }
-
-  /* ── Global table alignment (desktop/table view) ──────────────────────────
-     Requirement: center align all headings and values.
-     Keep mobile card layout rules (<=720px) separate for readability. */
-  @media (min-width: 721px) {
-    .tblTh,
-    .tblTh_right {
-      text-align: center;
-    }
-
-    .tblThInner {
-      justify-content: center;
-    }
-
-    .tblTd,
-    .tblTd_right {
-      text-align: center;
-    }
-
-    .tblActionsCell {
-      justify-content: center;
-    }
-
-    .tblInlineActions {
-      justify-content: center;
-    }
-  }
-  
-  .tblActionsCell {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    width: 100%;
-    white-space: nowrap;
-  }
-  
-  .tblInlineActions {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 4px;
-    flex-wrap: nowrap;
-    flex-shrink: 0;
-    overflow: visible;
-  }
-  
-  /* Compact icon buttons in rows */
-  .tbl .tblActionsCell .xib {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-  }
-  
-  .tbl .tblActionsCell .xib svg,
-  .tbl .tblActionsCell .xib svg.lucide {
-    width: 16px !important;
-    height: 16px !important;
-    stroke-width: 2;
-  }
-  
-  .tbl .tblActionsCell a.xib.xibLink {
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-  }
-  
-  /* ── Checkbox ── */
-  .tblCheck {
-    width: 18px;
-    height: 18px;
-    display: inline-grid;
-    place-items: center;
-  }
-  .tblCheckInput {
-    width: 15px;
-    height: 15px;
-    accent-color: var(--color-primary);
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  
-  /* ── Status / role badges ── */
-  .tblBadge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2px 9px;
-    border-radius: 999px;
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    border: 1px solid transparent;
-    width: fit-content;
-  }
-  
-  .tblBadge_ok   {
-    background: color-mix(in srgb, var(--color-success) 9%, var(--tbl-card));
-    color: var(--color-success-dark);
-    border-color: color-mix(in srgb, var(--color-success) 22%, var(--tbl-border));
-  }
-  .tblBadge_wait {
-    background: color-mix(in srgb, var(--color-warning) 9%, var(--tbl-card));
-    color: var(--color-warning-dark);
-    border-color: color-mix(in srgb, var(--color-warning) 22%, var(--tbl-border));
-  }
-  .tblBadge_bad  {
-    background: color-mix(in srgb, var(--color-danger) 8%, var(--tbl-card));
-    color: var(--color-danger-dark);
-    border-color: color-mix(in srgb, var(--color-danger) 22%, var(--tbl-border));
-  }
-  .tblBadge_info {
-    background: color-mix(in srgb, var(--color-primary) 8%, var(--tbl-card));
-    color: var(--color-primary-darker);
-    border-color: color-mix(in srgb, var(--color-primary) 20%, var(--tbl-border));
-  }
-  .tblBadge_muted {
-    background: color-mix(in srgb, var(--color-text) 4%, var(--tbl-card));
-    color: var(--color-text-3);
-    border-color: color-mix(in srgb, var(--color-text) 10%, var(--tbl-border));
-  }
-  
-  /* ── Empty state ── */
-  .tblEmpty {
-    padding: 40px 14px;
-    text-align: center;
-    background: color-mix(in srgb, var(--tbl-surface) 40%, var(--tbl-card));
-  }
-  .tblEmptyTitle {
-    font-size: 14px;
-    font-weight: 750;
-    color: var(--color-text);
-    letter-spacing: -0.01em;
-  }
-  .tblEmptySub {
-    margin-top: 5px;
-    font-size: 12.5px;
-    color: var(--color-text-3);
-    line-height: 1.45;
-  }
-  
-  /* ── Footer / pagination ── */
-  .tblFoot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    padding: 10px 14px;
-    border-top: 1px solid var(--tbl-line);
-    background: color-mix(in srgb, var(--tbl-surface) 35%, var(--tbl-card) 65%);
-  }
-  
-  .tblFootLeft   { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .tblPageSize   { display: inline-flex; align-items: center; gap: 6px; }
-  
-  .tblPageSizeLabel {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--color-text-3);
-    white-space: nowrap;
-  }
-  
-  .tblPageSizeSelect {
-    height: 32px;
-    border-radius: 9px;
-    border: 1px solid var(--tbl-border);
-    background: var(--tbl-card);
-    color: var(--color-text);
-    font-family: var(--font);
-    font-weight: 700;
-    font-size: 12.5px;
-    padding: 0 8px;
-    cursor: pointer;
-    transition: border-color 0.15s;
-  }
-  .tblPageSizeSelect:focus { border-color: var(--color-primary); }
-  
-  .tblFootMeta {
-    font-size: 12px;
-    color: var(--color-text-3);
-    white-space: nowrap;
-  }
-  .tblFootMeta strong { color: var(--color-text-2); font-weight: 700; }
-  .tblFootSep    { margin: 0 5px; color: var(--color-text-4); }
-  .tblFootPages  { white-space: nowrap; }
-  .tblFootRight  { margin-left: auto; }
-  
-  .tblPager {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-  
-  /* Pagination buttons */
-  .tblPagerBtn,
-  .tblPageBtn {
-    height: 32px;
-    min-width: 32px;
-    border-radius: 9px;
-    border: 1px solid var(--tbl-border);
-    background: var(--tbl-card);
-    color: var(--color-text-2);
-    cursor: pointer;
-    font-family: var(--font);
-    font-weight: 700;
-    font-size: 12.5px;
-    transition:
-      transform 0.15s cubic-bezier(0.34,1.56,0.64,1),
-      box-shadow 0.15s,
-      border-color 0.15s,
-      background 0.15s,
-      color 0.15s;
-  }
-  
   .tblPagerBtn {
-    display: grid;
-    place-items: center;
+    min-height: 44px;
+    min-width: 44px;
+    height: auto;
+    border-radius: 10px;
+    flex-shrink: 0;
     padding: 0;
   }
-  
-  .tblPagerBtn svg { width: 15px; height: 15px; }
 
-  /* Mobile / narrow: current page between chevrons (page number buttons render only on desktop) */
-  .tblPagerCur {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 1 1 auto;
-    min-width: 0;
-    padding: 0 6px;
-    font-variant-numeric: tabular-nums;
+  .tblPagerBtn svg { width: 18px; height: 18px; }
+
+  .tblFootMeta {
+    white-space: normal;
+    line-height: 1.45;
+    font-size: clamp(11px, 3.2vw, 12px);
   }
 
-  .tblPagerCurInner {
-    display: inline-flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 2px;
-    font-size: clamp(13px, 3.5vw, 15px);
-    font-weight: 800;
-    color: var(--color-text-2);
-    letter-spacing: -0.02em;
-  }
+  .tblBulkBtn { min-height: 38px; padding: 0 10px; font-size: 12.5px; }
+  .tblPageBtn { min-height: 30px; padding: 0 6px; font-size: 11.5px; }
 
-  .tblPagerCurNum {
-    color: var(--color-primary);
-    font-size: 1.05em;
-  }
+  .tblFilterSheet { gap: 7px; padding: 0 0 4px; }
+  .tblFilterRow   { gap: 5px; }
+  .tblFilterLabel { font-size: 10.5px; letter-spacing: 0.055em; margin-bottom: 0; }
+  .tblFilterSheetFoot { gap: 6px; padding-top: 0; }
+  .tblActionSheet { gap: 7px; padding: 0 0 4px; }
+}
 
-  .tblPagerCurSep {
-    color: var(--color-text-4);
-    font-weight: 700;
-    padding: 0 1px;
-  }
+@media (max-width: 380px) {
+  .tblFilterSheet     { gap: 6px; }
+  .tblFilterSheetFoot { gap: 5px; }
+}
 
-  .tblPagerCurTot {
-    color: var(--color-text-3);
-    font-weight: 750;
-  }
-  
+/* ── Reduced motion ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .tbl * { transition: none !important; }
+  .tblBulkBtn:hover:not(:disabled),
   .tblPagerBtn:hover:not(:disabled),
-  .tblPageBtn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--color-primary) 30%, var(--tbl-border));
-    color: var(--color-primary);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
-  }
-  
-  .tblPagerBtn:active:not(:disabled),
-  .tblPageBtn:active:not(:disabled) {
-    transform: scale(0.95);
-  }
-  
-  .tblPagerBtn:disabled { opacity: 0.4; cursor: not-allowed; }
-  
-  .tblPageBtn { padding: 0 10px; }
-  
-  .tblPageBtn_active {
-    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--tbl-border));
-    background: color-mix(in srgb, var(--color-primary) 11%, var(--tbl-card));
-    color: var(--color-primary-darker);
-    font-weight: 800;
-  }
-  
-  /* ── Mobile: card rows ── */
-  @media (max-width: 720px) {
-    .tbl {
-      padding: 4px 2px calc(12px + env(safe-area-inset-bottom, 0px));
-    }
-
-    .tblHead { gap: 8px; }
-  
-    .tblHeadMain,
-    .tblHead_controlsTop .tblHeadMain {
-      min-width: 0;
-      width: 100%;
-    }
-  
-    .tblHeadActions {
-      width: 100%;
-      max-width: 100%;
-      margin-left: 0;
-      justify-content: flex-start;
-      overflow-x: visible;
-    }
-  
-    .tblHeadTop { flex-direction: column; align-items: stretch; }
-  
-    .tblHeadToolbarActions {
-      width: 100%;
-      max-width: 100%;
-      justify-content: flex-start;
-      overflow-x: visible;
-      overflow-y: visible;
-      padding-top: 6px;
-      padding-bottom: 6px;
-      margin: 0;
-      -webkit-overflow-scrolling: touch;
-    }
-  
-    .tblHeadToolbarInner {
-      flex-wrap: wrap;
-      width: 100%;
-      justify-content: flex-start;
-    }
-
-    .tblHeadExtras {
-      flex-wrap: wrap;
-      width: 100%;
-      justify-content: flex-start;
-    }
-  
-    .tblTools {
-      width: 100%;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 5px;
-      padding: 6px 6px;
-      margin-bottom: 6px;
-    }
-  
-    .tblToolsRow {
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: stretch;
-    }
-
-    /* Search on its own row when the bar would otherwise crowd (tablet–small phone) */
-    @media (max-width: 560px) {
-      .tblToolsRow .tcSearch {
-        flex: 1 1 100%;
-        min-width: 0;
-        order: -1;
-      }
-    }
-
-    .tblFilterBtn {
-      min-height: 36px;
-      height: auto;
-      padding: 0 8px;
-      gap: 6px;
-      border-radius: 10px;
-      font-size: 12.5px;
-    }
-
-    .tblActionBtn {
-      min-height: 36px;
-      height: auto;
-      padding: 0 8px;
-      gap: 6px;
-      border-radius: 10px;
-      font-size: 12.5px;
-    }
-
-    .tblFilterBtnIcon svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    /* Very small screens: stack Search full-width, then Filters + Actions */
-    @media (max-width: 420px) {
-      .tblToolsRow {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        align-items: stretch;
-      }
-
-      .tblToolsRow .tcSearch {
-        grid-column: 1 / -1;
-        order: 0;
-      }
-
-      .tblToolsRow .tblFilterBtn,
-      .tblToolsRow .tblActionBtn,
-      .tblToolsRow .tblColsBtn {
-        width: 100%;
-        justify-content: center;
-      }
-    }
-
-    .tblToolSlot, .tblToolSlot_date { width: 100%; min-width: 0; }
-
-    /* Mobile card mode: never scroll horizontally, and let vertical scrolling
-       bubble up to the page so touching a card scrolls the body smoothly. */
-    .tblScroller {
-      overflow-x: hidden;
-      overflow-y: visible;
-      overscroll-behavior: auto;
-    }
-  
-    /* Card layout for rows */
-    .tblTable {
-      min-width: 0;
-      width: 100%;
-      display: block;
-    }
-    .tblThead { display: none; }
-  
-    .tblTable tbody {
-      display: grid;
-      gap: 5px;
-      padding: 4px 2px;
-      width: 100%;
-      min-width: 0;
-    }
-  
-    .tblTable tbody tr {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 3px;
-      padding: 6px 8px;
-      border-radius: 12px;
-      border: 1px solid color-mix(in srgb, var(--tbl-border) 80%, transparent);
-      background: var(--tbl-card);
-      min-width: 0;
-      overflow: hidden;
-      box-shadow: none;
-      transition: border-color 0.15s;
-      /* Allow native vertical scrolling even when a row is being touched. */
-      touch-action: pan-y;
-      -webkit-tap-highlight-color: transparent;
-    }
-  
-    .tblTable tbody tr:hover {
-      border-color: color-mix(in srgb, var(--color-primary) 25%, var(--tbl-border));
-    }
-  
-    .tblTable tbody td {
-      display: grid;
-      /* Tighter label column on mobile */
-      grid-template-columns: minmax(68px, 30%) minmax(0, 1fr);
-      gap: 6px;
-      padding: 0;
-      border: none;
-      background: transparent;
-      font-size: 12px;
-      /* Important: many labels wrap to 2 lines; keep values aligned consistently */
-      align-items: start;
-      min-width: 0;
-    }
-
-    /* Mobile cards: keep ALL values aligned like other fields (left). */
-    .tblTable tbody td.tblTd_right { text-align: left; }
-    .tblTable tbody td.tblTd_right .tblCellVal { justify-self: start; text-align: left; }
-    .tblTable tbody td .tblCellVal { justify-self: start; }
-  
-    /* Prevent long values from forcing horizontal scroll */
-    .tblTable tbody td > * {
-      min-width: 0;
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
-
-    /* Skeletons should also respect card width */
-    .tblTable tbody .cl__skel {
-      max-width: 100%;
-      width: 100%;
-    }
-  
-    .tblTable tbody td::before {
-      content: attr(data-label);
-      font-size: 9.5px;
-      font-weight: 800;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: var(--color-text-4);
-      padding-top: 1px;
-      align-self: start;
-    }
-
-    .tblTable tbody td::before { justify-self: start; }
-
-    /* Ensure values never overflow on mobile */
-    .tblTable tbody td .tblCellVal {
-      min-width: 0;
-      max-width: 100%;
-      overflow-wrap: anywhere;
-      word-break: break-word;
-      align-self: start;
-    }
-  
-    .tblTd_check, .tblTd_num { display: none !important; }
-    .tblTd_mobileHidden       { display: none !important; }
-    .tblTd_actions            { grid-template-columns: 1fr; min-width: 0; white-space: normal; }
-    .tblTd_actions::before    { display: none; }
-    .tblActionsCell           { justify-content: flex-start; }
-    .tblInlineActions         { flex-wrap: wrap; justify-content: flex-start; }
-
-    .tbl .tblActionsCell .appBtn {
-      min-height: 34px;
-      padding-left: 8px;
-      padding-right: 8px;
-    }
-
-    .tbl .tblActionsCell .xib,
-    .tbl .tblActionsCell a.xib.xibLink {
-      width: 40px;
-      height: 40px;
-      min-width: 40px;
-      min-height: 40px;
-    }
-  
-    /* Mobile pagination: thumb-friendly; page numbers are a compact center readout in JSX */
-    .tblFoot {
-      gap: 6px;
-      padding: 6px 8px max(8px, env(safe-area-inset-bottom, 0px));
-      flex-direction: column;
-      align-items: stretch;
-      position: sticky;
-      bottom: 0;
-      background: var(--tbl-card);
-      border-top: 1px solid var(--tbl-line);
-      z-index: 1;
-    }
-
-    .tblPageSize { display: none; }
-
-    .tblFootLeft {
-      width: 100%;
-      justify-content: flex-start;
-      gap: 8px 12px;
-    }
-
-    .tblFootRight {
-      width: 100%;
-      margin-left: 0;
-    }
-
-    .tblPager {
-      width: 100%;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .tblPagerBtn {
-      min-height: 44px;
-      min-width: 44px;
-      height: auto;
-      border-radius: 12px;
-      flex-shrink: 0;
-      padding: 0;
-    }
-
-    .tblPagerBtn svg {
-      width: 18px;
-      height: 18px;
-    }
-
-    /* Footer meta wraps instead of overflowing */
-    .tblFootMeta {
-      white-space: normal;
-      line-height: 1.45;
-      font-size: clamp(11px, 3.2vw, 12.5px);
-    }
-
-    .tblBulkBtn {
-      min-height: 40px;
-      padding: 0 12px;
-      font-size: 12.5px;
-    }
-
-    .tblPageBtn {
-      min-height: 32px;
-      padding: 0 7px;
-      font-size: 11.5px;
-    }
-
-    /* Filter modal / sheet: tighter rhythm on phones */
-    .tblFilterSheet {
-      gap: 8px;
-      padding: 0 0 4px;
-    }
-
-    .tblFilterRow {
-      gap: 5px;
-    }
-
-    .tblFilterLabel {
-      font-size: 10.5px;
-      letter-spacing: 0.055em;
-      margin-bottom: 0;
-    }
-
-    .tblFilterSheetFoot {
-      gap: 6px;
-      padding-top: 0;
-    }
-
-    .tblActionSheet {
-      gap: 8px;
-      padding: 0 0 4px;
-    }
-  }
-
-  @media (max-width: 380px) {
-    .tblFilterSheet {
-      gap: 7px;
-    }
-
-    .tblFilterSheetFoot {
-      gap: 5px;
-    }
-  }
-
-  /* ── Reduced motion ── */
-  @media (prefers-reduced-motion: reduce) {
-    .tbl * { transition: none !important; }
-    .tblBulkBtn:hover:not(:disabled),
-    .tblPagerBtn:hover:not(:disabled),
-    .tblPageBtn:hover:not(:disabled) { transform: none; }
-  }
+  .tblPageBtn:hover:not(:disabled) { transform: none; }
+}

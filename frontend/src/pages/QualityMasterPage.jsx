@@ -947,7 +947,17 @@ export default function QualityMasterPage() {
                 sortable: true,
                 render: (r) => {
                   const total = Number(r.total_quantity ?? 0);
-                  return <span style={{ fontWeight: 700 }}>{Number.isFinite(total) ? total.toFixed(3).replace(/\.?0+$/, "") : "0"}</span>;
+                  const loose = Number(r.total_loose_quantity ?? 0);
+                  return (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      <span style={{ fontWeight: 700 }}>{Number.isFinite(total) ? total.toFixed(3).replace(/\.?0+$/, "") : "0"}</span>
+                      {loose > 0 ? (
+                        <span style={{ fontSize: 11, color: "var(--color-text-3)", fontVariantNumeric: "tabular-nums" }}>
+                          {loose.toFixed(3).replace(/\.?0+$/, "")} loose
+                        </span>
+                      ) : null}
+                    </div>
+                  );
                 }
               },
               {
@@ -1170,6 +1180,9 @@ export default function QualityMasterPage() {
                     <th className="qmBDTh qmBDTh_num" scope="col">
                       Stock
                     </th>
+                    <th className="qmBDTh qmBDTh_num" scope="col">
+                      Loose
+                    </th>
                     <th className="qmBDTh qmBDTh_center" scope="col">
                       Status
                     </th>
@@ -1226,11 +1239,11 @@ export default function QualityMasterPage() {
                         <td className="qmBDTd qmBDTd_num" data-label="Sales">{fmtMoney(b.sales_rate)}</td>
                         <td className="qmBDTd qmBDTd_num" data-label="Net">{fmtMoney(b.net_rate)}</td>
                         <td className="qmBDTd qmBDTd_num" data-label="Stock">
-                          <span className="qmBDStockNum" title="Billable (paid) units  sales invoice Qty uses this bucket">
+                          <span className="qmBDStockNum" title="Billable (paid) units — sales invoice Qty uses this bucket">
                             {stockNum}
                           </span>
                           {freeStock > 0 ? (
-                            <div className="qmBDStockSub" title="Free balance  use Free Qty on sales lines">
+                            <div className="qmBDStockSub" title="Free balance — use Free Qty on sales lines">
                               {freeStock} free · {billStock + freeStock} total
                             </div>
                           ) : null}
@@ -1239,6 +1252,19 @@ export default function QualityMasterPage() {
                               Low stock ({"<="} {Number(b.low_stock_threshold ?? 0)})
                             </div>
                           ) : null}
+                        </td>
+                        <td className="qmBDTd qmBDTd_num" data-label="Loose">
+                          {(() => {
+                            const ls = Number(b.loose_stock ?? 0);
+                            const lu = String(b.loose_unit_name || "").trim();
+                            if (ls <= 0) return <span style={{ color: "var(--color-text-4)", fontSize: 12 }}>—</span>;
+                            return (
+                              <div>
+                                <span className="qmBDStockNum" title="Loose units in stock">{ls}</span>
+                                {lu ? <div className="qmBDStockSub">{lu}</div> : null}
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td className="qmBDTd qmBDTd_center" data-label="Status">
                           <div style={{ display: "flex", flexDirection: "column", gap: 2, alignItems: "center" }}>

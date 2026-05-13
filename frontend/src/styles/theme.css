@@ -32,6 +32,7 @@
      SURFACES — soft canvas, not stark white everywhere
      ───────────────────────────────────────── */
   --bg:        #F8FAFC;
+  --modal-bg : #f0f4f7;
   --surface:   #F1F5F9;
   --surface-2: #E2E8F0;
   --card:      #FFFFFF;
@@ -48,10 +49,10 @@
      ───────────────────────────────────────── */
   --text:       #0F172A;
   --text-2:     #1E293B;
-  --text-3:     #475569;
-  --text-4:     #64748B;
-  --text-muted: #475569;
-  --text-faint: #94A3B8;
+  --text-3:     #374151;
+  --text-4:     #4B5563;
+  --text-muted: #374151;
+  --text-faint: #6B7280;
 
   /* ─────────────────────────────────────────
      ON-COLOR
@@ -62,7 +63,7 @@
   /* ─────────────────────────────────────────
      SIDEBAR — deep slate (same family as text, darker)
      ───────────────────────────────────────── */
-  --sidebar-bg:            #0F172A;
+  --sidebar-bg:            #17223d;
   --sidebar-border:        #1E293B;
   --sidebar-text:          #94A3B8;
   --sidebar-text-active:   #F8FAFC;
@@ -89,7 +90,7 @@
   --modal-panel-head-border:     var(--border);
 
   /* Scrollable body behind stacked panels */
-  --modal-form-bg:               var(--bg);
+  --modal-form-bg:               var(--modal-bg);
 
   /* Inside each .mfzPanel — sits under section rail; lighter than fields so controls read as “cards” */
   --modal-panel-body-bg:         color-mix(in srgb, var(--surface) 14%, var(--card));
@@ -115,12 +116,12 @@
   /* ─────────────────────────────────────────
      SHADOWS
      ───────────────────────────────────────── */
-  --shadow-xs:   0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-sm:   0 1px 3px 0 rgb(0 0 0 / 0.08);
-  --shadow-md:   0 4px 6px -1px rgb(0 0 0 / 0.08);
-  --shadow-lg:   0 10px 15px -3px rgb(0 0 0 / 0.08);
-  --shadow-xl:   0 20px 25px -5px rgb(0 0 0 / 0.08);
-  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05), 0 1px 3px 0 rgb(0 0 0 / 0.06);
+  --shadow-xs:   0 1px 2px 0 rgb(0 0 0 / 0.06);
+  --shadow-sm:   0 1px 4px 0 rgb(0 0 0 / 0.10), 0 1px 2px 0 rgb(0 0 0 / 0.06);
+  --shadow-md:   0 4px 8px -1px rgb(0 0 0 / 0.10), 0 2px 4px -1px rgb(0 0 0 / 0.06);
+  --shadow-lg:   0 10px 18px -3px rgb(0 0 0 / 0.10), 0 4px 8px -2px rgb(0 0 0 / 0.06);
+  --shadow-xl:   0 20px 30px -5px rgb(0 0 0 / 0.10), 0 8px 16px -4px rgb(0 0 0 / 0.06);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 2px 6px 0 rgb(0 0 0 / 0.06);
 
   /* ─────────────────────────────────────────
      MODAL / DIALOG ELEVATION & FOCUS (neutral + brand)
@@ -178,15 +179,15 @@
   /* ─────────────────────────────────────────
      LAYOUT RHYTHM
      ───────────────────────────────────────── */
-  --layout-shell-pad-x: 20px;
-  --layout-shell-pad-y: 20px;
+  --layout-shell-pad-x: 24px;
+  --layout-shell-pad-y: 24px;
   --layout-page-x:       8px;
-  --layout-page-y:      24px;
-  --layout-page-bottom: 32px;
-  --layout-card-pad-x:  24px;
-  --layout-card-pad-y:  20px;
-  --layout-card-radius: 12px;
-  --layout-stack-gap:   16px;
+  --layout-page-y:      28px;
+  --layout-page-bottom: 44px;
+  --layout-card-pad-x:  28px;
+  --layout-card-pad-y:  24px;
+  --layout-card-radius: 14px;
+  --layout-stack-gap:   20px;
 
   /* ─────────────────────────────────────────
      SHELL DIMENSIONS
@@ -318,13 +319,13 @@
     --radius:             6px;
     --radius-sm:          4px;
     --radius-md:          8px;
-    --layout-shell-pad-x: 12px;
-    --layout-shell-pad-y: 12px;
-    --layout-page-x:       4px;
-    --layout-page-y:      12px;
+    --layout-shell-pad-x: 8px;
+    --layout-shell-pad-y: 10px;
+    --layout-page-x:       0px;
+    --layout-page-y:      10px;
     --layout-page-bottom: 16px;
-    --layout-card-pad-x:  16px;
-    --layout-card-pad-y:  14px;
+    --layout-card-pad-x:  12px;
+    --layout-card-pad-y:  12px;
     --layout-card-radius: 10px;
     --layout-stack-gap:   10px;
     --sidebar-width:       0;
@@ -341,8 +342,8 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 14.5px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -427,8 +428,8 @@ button::-moz-focus-inner                           { border: 0; }
   align-items: flex-start;
   gap: 16px;
 }
-.page-title    { font-size: 22px; font-weight: 700; color: var(--color-text-heading); margin: 0; letter-spacing: -0.02em; }
-.page-subtitle { font-size: 14px; color: var(--color-text-4); margin: 4px 0 0; }
+.page-title    { font-size: 24px; font-weight: 800; color: var(--color-text-heading); margin: 0; letter-spacing: -0.025em; }
+.page-subtitle { font-size: 14px; color: var(--color-text-3); margin: 4px 0 0; }
 
 .toolbar {
   padding: 12px 24px;
@@ -471,28 +472,29 @@ button::-moz-focus-inner                           { border: 0; }
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--layout-card-radius);
-  padding: 20px;
-  box-shadow: var(--shadow-sm);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
   transition: all .2s ease;
+  min-height: 110px;
 }
 .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .stat-card .stat-label {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 700;
   letter-spacing: .06em;
   text-transform: uppercase;
-  color: var(--color-text-4);
-  margin-bottom: 8px;
+  color: var(--color-text-3);
+  margin-bottom: 10px;
 }
 .stat-card .stat-value {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 34px;
+  font-weight: 800;
   color: var(--color-text-heading);
   font-family: var(--font-mono);
   line-height: 1.2;
   margin-bottom: 4px;
 }
-.stat-card .stat-sub    { font-size: 13px; color: var(--color-text-4); margin-top: 8px; }
+.stat-card .stat-sub    { font-size: 13.5px; color: var(--color-text-3); margin-top: 10px; }
 .stat-card.accent-blue  { border-top: 3px solid var(--color-primary); }
 .stat-card.accent-green { border-top: 3px solid var(--color-success); }
 .stat-card.accent-amber { border-top: 3px solid var(--color-warning); }
@@ -704,10 +706,10 @@ kbd {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   letter-spacing: .04em;
   border: 1px solid transparent;
   white-space: nowrap;
@@ -734,22 +736,22 @@ kbd {
   background: var(--color-card);
   box-shadow: var(--shadow-sm);
 }
-.data-table                    { width: 100%; border-collapse: collapse; font-size: 14px; }
+.data-table                    { width: 100%; border-collapse: collapse; font-size: 14.5px; }
 .data-table thead th {
   background: var(--color-surface);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .08em;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .07em;
   text-transform: uppercase;
-  color: var(--color-text-muted);
-  padding: 12px 16px;
-  border-bottom: 1.5px solid var(--color-border);
+  color: var(--color-text-3);
+  padding: 13px 18px;
+  border-bottom: 2px solid var(--color-border);
   text-align: left;
   white-space: nowrap;
 }
-.data-table thead th:first-child   { padding-left: 20px; }
-.data-table td                     { padding: 12px 16px; color: var(--color-text); border-bottom: 1px solid var(--color-border); vertical-align: middle; }
-.data-table td:first-child         { padding-left: 20px; }
+.data-table thead th:first-child   { padding-left: 22px; }
+.data-table td                     { padding: 13px 18px; color: var(--color-text); border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.data-table td:first-child         { padding-left: 22px; }
 .data-table tbody tr:last-child td { border-bottom: none; }
 .data-table tbody tr               { cursor: pointer; transition: background .1s; }
 .data-table tbody tr:hover td      { background: var(--color-primary-light); }
@@ -767,20 +769,20 @@ kbd {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 36px;
-  padding: 0 14px;
-  border: 1.5px solid var(--color-border);
-  border-radius: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: 10px;
   background: var(--color-card);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text-3);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text-2);
   cursor: pointer;
   transition: all .1s ease;
   white-space: nowrap;
 }
-.filter-chip:hover  { border-color: var(--color-border-strong); background: var(--color-surface); }
-.filter-chip.active { border-color: var(--color-primary); background: var(--color-primary-light); color: var(--color-primary); }
+.filter-chip:hover  { border-color: var(--color-border-strong); background: var(--color-surface); color: var(--color-text); }
+.filter-chip.active { border-color: var(--color-primary); background: var(--color-primary-light); color: var(--color-primary); font-weight: 700; box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 15%, transparent); }
 
 /* ═══════════════════════════════════════════
    TOOLTIP

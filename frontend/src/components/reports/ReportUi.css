@@ -174,17 +174,21 @@
 
 .rptSearchInput {
   flex: 1;
-  padding: 9px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--color-border-strong);
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-border-strong);
   font-size: 14px;
+  font-family: var(--font);
   background: var(--color-card);
+  color: var(--color-text);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .rptSearchInput:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-soft);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 
 .rptSearchInput_narrow {
@@ -192,45 +196,73 @@
   flex: 0 0 auto;
 }
 
+/* ── Table scroll wrapper ──────────────────────────────────────────────────
+   Clips the table to rounded corners and enables horizontal scroll on
+   narrow viewports. overflow-x must come AFTER the overflow shorthand so
+   it isn't overridden.
+   ─────────────────────────────────────────────────────────────────────── */
 .rptTableScroll {
   width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;          /* clips table corners to border-radius */
+  overflow-x: auto;          /* re-enable horizontal scroll after clip */
   -webkit-overflow-scrolling: touch;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.04);
 }
 
-/*
- * Use border-collapse: collapse so thead/td columns share one grid.
- * Sticky thead inside overflow-x:auto wrappers caused column drift in Chromium/WebKit.
- */
+/* ── Base table ────────────────────────────────────────────────────────────
+   border-collapse: collapse keeps column lines aligned with headers.
+   min-width prevents columns from squishing on narrow screens.
+   ─────────────────────────────────────────────────────────────────────── */
 .rptBatchTable {
   width: 100%;
   min-width: 36rem;
   border-collapse: collapse;
-  font-size: 12.5px;
+  font-size: 13.5px;
 }
 
+/* ── Header row ─────────────────────────────────────────────────────────── */
 .rptBatchTable thead th {
-  background: var(--color-bg-soft);
+  background: color-mix(in srgb, var(--color-surface-2) 60%, var(--color-card));
   text-align: left;
-  font-weight: 600;
-  font-size: 10px;
-  letter-spacing: 0.04em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-text-3);
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--color-border);
-  vertical-align: bottom;
+  padding: 10px 16px;
+  border-bottom: 1.5px solid var(--color-border);
+  white-space: nowrap;
 }
 
+/* Right-align numeric header cells */
 .rptBatchTable thead th.rptNum {
   text-align: right;
 }
 
+/* ── Body rows ──────────────────────────────────────────────────────────── */
 .rptBatchTable tbody td {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--color-border-soft);
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--color-border);
   vertical-align: middle;
+  color: var(--color-text);
+}
+
+/* Remove border on the very last row */
+.rptBatchTable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Subtle alternating row background */
+.rptBatchTable tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--color-surface) 40%, transparent);
+}
+
+/* Row hover highlight */
+.rptBatchTable tbody tr:hover td {
+  background: color-mix(in srgb, var(--color-primary) 5%, transparent) !important;
+  transition: background 100ms ease;
 }
 
 /* FEFO / wide batch grid: stable column widths (Product–Supplier bottom table) */
@@ -457,10 +489,6 @@
 .rptBatchTable.rptBatchTable--supplierList {
   table-layout: fixed;
   min-width: 100%;
-}
-
-.rptBatchTable tbody tr:hover {
-  background: var(--color-bg-soft);
 }
 
 .rptNum {
@@ -718,12 +746,14 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 10px;
+  padding: 4px 12px;
   border-radius: 999px;
   background: var(--color-primary-soft);
   color: var(--color-primary);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 700;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+  white-space: nowrap;
 }
 
 .rptCountChip .cl--inline {
@@ -739,23 +769,27 @@
 .rptVendorContact {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .rptVendorName {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
   color: var(--color-text-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rptVendorPhone {
-  font-size: 11px;
+  font-size: 11.5px;
   color: var(--color-text-3);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .rptVendorAddress {
-  font-size: 10.5px;
+  font-size: 11.5px;
   color: var(--color-text-3);
   white-space: nowrap;
   overflow: hidden;
@@ -775,19 +809,20 @@
 
 .rptExpiryChip {
   display: inline-block;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
+  padding: 3px 11px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   background: var(--color-success-light);
   color: var(--color-success-dark);
+  border: 1.5px solid color-mix(in srgb, var(--color-success) 28%, transparent);
 }
 
-.rptExpiryChip.is-expired { background: var(--color-danger-light); color: var(--color-danger-dark); }
-.rptExpiryChip.is-soon    { background: var(--color-warning-light); color: var(--color-warning-dark); }
-.rptExpiryChip.is-warn    { background: var(--color-warning-light); color: var(--color-warning-dark); }
-.rptExpiryChip.is-ok      { background: var(--color-success-light); color: var(--color-success-dark); }
+.rptExpiryChip.is-expired { background: var(--color-danger-light);  color: var(--color-danger-dark);  border-color: color-mix(in srgb, var(--color-danger)  28%, transparent); }
+.rptExpiryChip.is-soon    { background: var(--color-warning-light); color: var(--color-warning-dark); border-color: color-mix(in srgb, var(--color-warning) 28%, transparent); }
+.rptExpiryChip.is-warn    { background: var(--color-warning-light); color: var(--color-warning-dark); border-color: color-mix(in srgb, var(--color-warning) 28%, transparent); }
+.rptExpiryChip.is-ok      { background: var(--color-success-light); color: var(--color-success-dark); border-color: color-mix(in srgb, var(--color-success) 28%, transparent); }
 
 /* Optional: indeterminate bar while any report fetch is in flight */
 .rptCard {

@@ -133,7 +133,7 @@ export function MfgStockistReportContent({ embedded = false } = {}) {
                 onChange={(e) => setSearch(e.target.value)}
                 autoFocus
               />
-              <ReportCountChip busy={busy}>{`${manufacturers.length} mfg(s)`}</ReportCountChip>
+              {!busy && <ReportCountChip>{`${manufacturers.length} mfg(s)`}</ReportCountChip>}
             </ReportToolbarPrim>
             <ReportToolbarFilters className="rptToolbarFilters--tight">
               <ReportToolbarHint className="rptToolbarHint--end">
@@ -158,9 +158,9 @@ export function MfgStockistReportContent({ embedded = false } = {}) {
                 <ReportPaneSub className="rptPaneSub--muted">Sorted A → Z</ReportPaneSub>
               </ReportPaneHead>
               <ReportPaneBody>
-                {manufacturers.length === 0 ? (
-                  <ReportListEmpty busy={busy}>
-                    {busy ? null : "No manufacturers match your search."}
+                {!busy && manufacturers.length === 0 ? (
+                  <ReportListEmpty>
+                    {"No manufacturers match your search."}
                   </ReportListEmpty>
                 ) : (
                   <div className="rptList" role="listbox" aria-label="Manufacturer list">

@@ -2,7 +2,9 @@
 
 .dbPage {
   width: 100%;
-  padding-bottom: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding-bottom: 32px;
 }
 
 /* ── Page header ── */
@@ -58,10 +60,11 @@
   gap: 8px;
   margin-bottom: 20px;
   flex-wrap: wrap;
-  background: var(--color-surface);
-  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
   border-radius: 12px;
   padding: 10px 14px;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-text) 6%, transparent);
 }
 
 /* grouped date-picker pill */
@@ -69,15 +72,16 @@
   display: flex;
   align-items: center;
   gap: 0;
-  border: 1.5px solid var(--color-border-strong);
+  border: 1.5px solid var(--color-border);
   border-radius: 8px;
-  background: var(--color-card);
+  background: var(--color-surface);
   overflow: hidden;
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--color-text) 8%, transparent);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .dbFilterGroup:focus-within {
-  border-color: var(--color-border-focus);
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 
@@ -105,7 +109,7 @@
 /* Today quick button */
 .dbTodayBtn {
   padding: 7px 13px;
-  border: 1.5px solid var(--color-border-strong);
+  border: 1.5px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-card);
   font-family: var(--font);
@@ -114,7 +118,8 @@
   color: var(--color-text-2);
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--color-text) 7%, transparent);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   line-height: 1;
 }
 
@@ -134,19 +139,19 @@
 
 .dbSumCard {
   background: var(--color-card);
-  border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  border: 1.5px solid var(--color-border);
   border-radius: 14px;
   padding: 20px 22px;
   display: flex;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 1px 8px color-mix(in srgb, var(--color-primary) 6%, transparent);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--color-text) 7%, transparent);
   transition: box-shadow 0.15s ease, transform 0.15s ease;
   min-width: 0;
 }
 
 .dbSumCard:hover {
-  box-shadow: 0 6px 20px color-mix(in srgb, var(--color-primary) 12%, transparent);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--color-primary) 14%, transparent);
   transform: translateY(-2px);
 }
 
@@ -205,10 +210,10 @@
 /* ── Section cards ── */
 .dbSection {
   background: var(--color-card);
-  border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  border: 1.5px solid var(--color-border);
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 1px 8px color-mix(in srgb, var(--color-primary) 5%, transparent);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--color-text) 7%, transparent);
 }
 
 .dbSectionHdr {
@@ -337,10 +342,10 @@
 /* ── Profit card ── */
 .dbProfitCard {
   background: var(--color-card);
-  border: 1px solid color-mix(in srgb, var(--color-success) 28%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--color-success) 40%, var(--color-border));
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 1px 8px color-mix(in srgb, var(--color-success) 8%, transparent);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--color-text) 7%, transparent);
   margin-bottom: 16px;
 }
 
@@ -380,10 +385,10 @@
 /* ── Cash Position card ── */
 .dbCashCard {
   background: var(--color-card);
-  border: 1.5px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
   border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 2px 16px color-mix(in srgb, var(--color-primary) 10%, transparent);
+  box-shadow: 0 2px 12px color-mix(in srgb, var(--color-text) 8%, transparent);
 }
 
 .dbCashHdr {

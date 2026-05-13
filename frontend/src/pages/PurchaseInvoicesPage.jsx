@@ -2,6 +2,15 @@ import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { AppButton, AsyncButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
 import { clean, fmtMoney, fmtCurrency } from "../utils/format.js";
+import {
+  getPackagingFactors,
+  getUnitOptions,
+  displayQtyToStrips,
+  stripsToDisplayQty,
+  stripRateToDisplayRate,
+  displayRateToStripRate,
+  UNIT_TYPES
+} from "../utils/packagingConversion.js";
 import { useLocale } from "../context/LocaleContext.jsx";
 import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
@@ -178,9 +187,9 @@ function emptyLine() {
     batchSearch: "",
     expiryDate: "",
     mfgDate: "",
-    qty: 1,
+    qty: 1,           // always in STRIPS (base unit) — sent to backend
     freeQty: 0,
-    purchaseRate: 0,
+    purchaseRate: 0,  // always per STRIP — sent to backend
     mrp: 0,
     salesRate: 0,
     discountPercent: 0,
@@ -191,13 +200,34 @@ function emptyLine() {
     currentStock: 0,
     mfgPurchaseLocked: false,
     mfgCompanyName: "",
-    availableBatches: []
+    availableBatches: [],
+    // Packaging unit conversion (display only — not sent to backend)
+    unitType: UNIT_TYPES.STRIP,  // selected display unit
+    packingFactors: { stripsPerBox: 1, boxesPerCase: 1, stripsPerCase: 1, unitsPerStrip: 1 }
+  };
+}
+
+/**
+ * Convert a line item's display qty/rate to strip-based values for backend payload.
+ * qty in form = display qty in selected unit; purchaseRate = rate per selected unit.
+ * Backend always expects qty in strips and purchaseRate per strip.
+ */
+function lineToStripPayload(it) {
+  const unitType = it.unitType || UNIT_TYPES.STRIP;
+  const factors = it.packingFactors || {};
+  const stripQty = displayQtyToStrips(Number(it.qty || 0), unitType, factors);
+  const stripRate = displayRateToStripRate(Number(it.purchaseRate || 0), unitType, factors);
+  return {
+    ...it,
+    qty: Math.round(stripQty * 1000) / 1000,
+    purchaseRate: Math.round(stripRate * 100) / 100
   };
 }
 
 function computeLineAmount(it) {
-  const qty = n(it.qty);
-  const purchaseRate = n(it.purchaseRate);
+  const converted = lineToStripPayload(it);
+  const qty = n(converted.qty);
+  const purchaseRate = n(converted.purchaseRate);
   const discountPercent = n(it.discountPercent);
   const gstPercent = n(it.gstPercent);
   const taxable = qty * purchaseRate - qty * purchaseRate * (discountPercent / 100);
@@ -206,8 +236,10 @@ function computeLineAmount(it) {
 }
 
 function computeLineParts(it) {
-  const qty = n(it.qty);
-  const rate = n(it.purchaseRate);
+  // Use strip-based values for amount calculation
+  const converted = lineToStripPayload(it);
+  const qty = n(converted.qty);
+  const rate = n(converted.purchaseRate);
   const discPct = n(it.discountPercent);
   const gstPct = n(it.gstPercent);
   const gross = qty * rate;
@@ -738,9 +770,10 @@ export default function PurchaseInvoicesPage() {
       { key: "batch", label: "Batch No" },
       { key: "expiry", label: "Expiry Date" },
       { key: "stock", label: "Stock", className: "center" },
+      { key: "unit", label: "Unit", className: "center" },
       { key: "qty", label: "Qty", className: "num" },
       { key: "free", label: "Free", className: "num" },
-      { key: "purchaseRate", label: "Purchase Rate", className: "num" },
+      { key: "purchaseRate", label: "Rate/Unit", className: "num" },
       { key: "mrp", label: "MRP", className: "num" },
       { key: "salesRate", label: "Sales Rate", className: "num" },
       { key: "disc", label: "Disc %", className: "num" },
@@ -748,7 +781,7 @@ export default function PurchaseInvoicesPage() {
       { key: "amount", label: "Amount", className: "num" },
       { key: "actions", label: "" }
     ];
-  }, []);
+  }, [taxLabel]);
 
   useEffect(() => {
     if (!isRetailer) return;
@@ -1018,31 +1051,37 @@ export default function PurchaseInvoicesPage() {
           invoiceDate: String(invoice.invoice_date || "").slice(0, 10),
           dueDate: String(invoice.due_date || "").slice(0, 10),
           notes: invoice.notes || "",
-          items: items.map((x) => ({
-            productId: x.product_id || "",
-            productName: x.product_name || "",
-            productCode: x.product_code || "",
-            productSearch: formatProductLabel({ name: x.product_name || "", code: x.product_code || "", drug_name: x.drug_name || "" }),
-            batchId: x.batch_id || "",
-            batchNo: x.batch_no || "",
-            batchSearch: `${x.batch_no || ""} | Exp ${String(x.expiry_date || "").slice(0, 10)}${batchExpiryDaysInlineSuffix(x.expiry_date)}`,
-            expiryDate: String(x.expiry_date || "").slice(0, 10),
-            mfgDate: String(x.mfg_date || "").slice(0, 10),
-            qty: n(x.qty),
-            freeQty: n(x.free_qty),
-            purchaseRate: n(x.purchase_rate),
-            mrp: n(x.mrp),
-            salesRate: n(x.sales_rate ?? x.purchase_rate),
-            discountPercent: n(x.discount_percent),
-            gstPercent: n(x.gst_percent),
-            landingCost: n(x.landing_cost),
-            hsnCode: x.hsn_code || "",
-            isNewBatch: Boolean(x.is_new_batch || !x.batch_id),
-            currentStock: n((batchMap.get(String(x.product_id || "")) || []).find((b) => String(b.id) === String(x.batch_id || ""))?.total_stock ?? x.batch_current_stock),
-            mfgPurchaseLocked: Boolean(productIndex.get(String(x.product_id || ""))?.mfg_purchase_order_lock),
-            mfgCompanyName: productIndex.get(String(x.product_id || ""))?.mfg_company_name || "",
-            availableBatches: batchMap.get(String(x.product_id || "")) || []
-          }))
+          items: items.map((x) => {
+            const prod = productIndex.get(String(x.product_id || ""));
+            const factors = prod ? getPackagingFactors(prod) : { stripsPerBox: 1, boxesPerCase: 1, stripsPerCase: 1, unitsPerStrip: 1 };
+            return {
+              productId: x.product_id || "",
+              productName: x.product_name || "",
+              productCode: x.product_code || "",
+              productSearch: formatProductLabel({ name: x.product_name || "", code: x.product_code || "", drug_name: x.drug_name || "" }),
+              batchId: x.batch_id || "",
+              batchNo: x.batch_no || "",
+              batchSearch: `${x.batch_no || ""} | Exp ${String(x.expiry_date || "").slice(0, 10)}${batchExpiryDaysInlineSuffix(x.expiry_date)}`,
+              expiryDate: String(x.expiry_date || "").slice(0, 10),
+              mfgDate: String(x.mfg_date || "").slice(0, 10),
+              qty: n(x.qty),           // stored in strips — display as-is (unitType=STRIP)
+              freeQty: n(x.free_qty),
+              purchaseRate: n(x.purchase_rate), // stored per strip
+              mrp: n(x.mrp),
+              salesRate: n(x.sales_rate ?? x.purchase_rate),
+              discountPercent: n(x.discount_percent),
+              gstPercent: n(x.gst_percent),
+              landingCost: n(x.landing_cost),
+              hsnCode: x.hsn_code || "",
+              isNewBatch: Boolean(x.is_new_batch || !x.batch_id),
+              currentStock: n((batchMap.get(String(x.product_id || "")) || []).find((b) => String(b.id) === String(x.batch_id || ""))?.total_stock ?? x.batch_current_stock),
+              mfgPurchaseLocked: Boolean(prod?.mfg_purchase_order_lock),
+              mfgCompanyName: prod?.mfg_company_name || "",
+              availableBatches: batchMap.get(String(x.product_id || "")) || [],
+              unitType: UNIT_TYPES.STRIP,  // loaded invoices always show in strips
+              packingFactors: factors
+            };
+          })
         });
       } else if (r.status !== 401) {
         emitToast({ type: "error", message: parseApiError(r) });
@@ -1058,7 +1097,9 @@ export default function PurchaseInvoicesPage() {
 
   async function performSaveDraft({ confirmAfterSave = false } = {}) {
     setSaveBusy(true);
-    const payload = { ...form, items: form.items, clientToday: localCalendarYmd() };
+    // Convert display qty/rate to strip-based values before sending to backend
+    const strippedItems = (form.items || []).map(lineToStripPayload);
+    const payload = { ...form, items: strippedItems, clientToday: localCalendarYmd() };
     const r = editing?.id ? await updatePurchaseInvoice(editing.id, payload) : await createPurchaseInvoice(payload);
     if (r.status >= 200 && r.status < 300 && r.json?.ok) {
       const savedId = String(r.json?.data?.invoice?.id || editing?.id || "");
@@ -1459,7 +1500,20 @@ export default function PurchaseInvoicesPage() {
                                     const items = d.json?.data?.items || [];
                                     setReturnForm((p) => ({
                                       ...p,
-                                      items: items.map((x) => ({ purchaseInvoiceItemId: x.id, productName: x.product_name || "", batchNo: x.batch_no || "", purchasedQty: n(x.qty), purchasedFreeQty: n(x.free_qty), alreadyReturnedQty: n(x.already_returned_qty), alreadyReturnedFreeQty: n(x.already_returned_free_qty), returnQty: 0, returnFreeQty: 0 }))
+                                      items: items.map((x) => ({
+                                        purchaseInvoiceItemId: x.id,
+                                        productName: x.product_name || "",
+                                        batchNo: x.batch_no || "",
+                                        purchasedQty: n(x.qty),
+                                        purchasedFreeQty: n(x.free_qty),
+                                        alreadyReturnedQty: n(x.already_returned_qty),
+                                        alreadyReturnedFreeQty: n(x.already_returned_free_qty),
+                                        packingUnits: Math.max(1, Number(x.packing_units || 1)),
+                                        purchaseRate: n(x.purchase_rate),
+                                        returnQty: 0,
+                                        returnFreeQty: 0,
+                                        returnLooseQty: 0
+                                      }))
                                     }));
                                   } else if (d.status !== 401) {
                                     emitToast({ type: "error", message: "Could not load invoice items for return." });
@@ -1486,7 +1540,20 @@ export default function PurchaseInvoicesPage() {
                                   const items = d.json?.data?.items || [];
                                   setReturnForm((p) => ({
                                     ...p,
-                                    items: items.map((x) => ({ purchaseInvoiceItemId: x.id, productName: x.product_name || "", batchNo: x.batch_no || "", purchasedQty: n(x.qty), purchasedFreeQty: n(x.free_qty), alreadyReturnedQty: n(x.already_returned_qty), alreadyReturnedFreeQty: n(x.already_returned_free_qty), returnQty: 0, returnFreeQty: 0 }))
+                                    items: items.map((x) => ({
+                                      purchaseInvoiceItemId: x.id,
+                                      productName: x.product_name || "",
+                                      batchNo: x.batch_no || "",
+                                      purchasedQty: n(x.qty),
+                                      purchasedFreeQty: n(x.free_qty),
+                                      alreadyReturnedQty: n(x.already_returned_qty),
+                                      alreadyReturnedFreeQty: n(x.already_returned_free_qty),
+                                      packingUnits: Math.max(1, Number(x.packing_units || 1)),
+                                      purchaseRate: n(x.purchase_rate),
+                                      returnQty: 0,
+                                      returnFreeQty: 0,
+                                      returnLooseQty: 0
+                                    }))
                                   }));
                                 } else if (d.status !== 401) {
                                   emitToast({ type: "error", message: "Could not load invoice items for return." });
@@ -1556,15 +1623,18 @@ export default function PurchaseInvoicesPage() {
           setLoadingEditId(null);
           setOpen(false);
         }}
-        size={1100}
+        size={1500}
         footer={
           <div className="piModalFooter sfmModalFooter">
-            <button className="piGhostBtn sfmBtnGhost" type="button" onClick={() => setOpen(false)} disabled={busy}>
+            {/* Low-priority: cancel steps back */}
+            <button className="piGhostBtn sfmBtnGhost" type="button" onClick={() => setOpen(false)} disabled={busy} style={{ opacity: 0.7 }}>
               Cancel
             </button>
-            <button className={`${editing?.id ? "piPrimaryBtn sfmBtnPrimary" : "piGhostBtn sfmBtnGhost"}`} type="button" disabled={busy || !(editingStatus === "DRAFT" || !editing?.id) || !(isEditingDraft ? canUpdate : canAdd)} onClick={() => { setSubmitted(true); saveDraft(); }}>
-              {saveBusy ? <InlineButtonProgress label="Saving..." /> : editing?.id ? "Save Draft" : "Create Draft"}
+            {/* Secondary: save draft */}
+            <button className="piGhostBtn sfmBtnGhost" type="button" disabled={busy || !(editingStatus === "DRAFT" || !editing?.id) || !(isEditingDraft ? canUpdate : canAdd)} onClick={() => { setSubmitted(true); saveDraft(); }}>
+              {saveBusy ? <InlineButtonProgress label="Saving..." /> : editing?.id ? "Save Draft" : "Save Draft"}
             </button>
+            {/* Primary actions — dominant */}
             {editing?.id && editingStatus === "CONFIRMED" ? (
               <button
                 className="piPrimaryBtn piPrimaryBtn_confirm sfmBtnPrimary"
@@ -1572,7 +1642,8 @@ export default function PurchaseInvoicesPage() {
                 disabled={!canUpdateConfirmedFromModal}
                 onClick={async () => {
                   setUpdateConfirmedBusy(true);
-                  const payload = { ...form, items: form.items, clientToday: localCalendarYmd(), allowConfirmedEdit: true };
+                  const strippedItems = (form.items || []).map(lineToStripPayload);
+                  const payload = { ...form, items: strippedItems, clientToday: localCalendarYmd(), allowConfirmedEdit: true };
                   const r = await updatePurchaseInvoice(editing.id, payload);
                   if (r.status >= 200 && r.status < 300 && r.json?.ok) {
                     resetEditor();
@@ -1592,13 +1663,14 @@ export default function PurchaseInvoicesPage() {
               </button>
             ) : null}
             {!editing?.id ? (
-              <button className="piPrimaryBtn piPrimaryBtn_confirm sfmBtnPrimary" type="button" disabled={busy || !canAdd} onClick={() => { setSubmitted(true); createAndConfirm(); }}>
+              <button className="piPrimaryBtn piPrimaryBtn_confirm sfmBtnPrimary" data-cm-primary="true" type="button" disabled={busy || !canAdd} onClick={() => { setSubmitted(true); createAndConfirm(); }}>
                 {saveBusy ? <InlineButtonProgress label="Working..." /> : "Create & Confirm"}
               </button>
             ) : null}
             {editing?.id && editingStatus === "DRAFT" ? (
               <button
                 className="piPrimaryBtn piPrimaryBtn_confirm sfmBtnPrimary"
+                data-cm-primary="true"
                 type="button"
                 disabled={busy || !canUpdate || !isEditingDraft}
                 onClick={() => { setSubmitted(true); setConfirm({ open: true, id: editing.id, type: "confirm", invoiceNumber: editing.invoice_number || "" }); }}
@@ -1614,7 +1686,7 @@ export default function PurchaseInvoicesPage() {
             <div className="piSectionBody">
               <div className="piHeaderTop">
                 <div className="raField piHeadField piHeadField_party" data-pi-focus="party">
-                  <label>{isRetailer ? "Supplier" : "Division"} </label>
+                  <label>{isRetailer ? "Supplier" : "Division"} <span className="piReq">*</span></label>
                   {isRetailer ? (
                     <MasterSelectWithCreate
                       kind="vendor"
@@ -1655,8 +1727,8 @@ export default function PurchaseInvoicesPage() {
                   )}
                   {submitted && !form.divisionId && !form.vendorId && <div className="mfzErr">{isRetailer ? "Supplier" : "Division"} is required.</div>}
                 </div>
-                <div className="raField piHeadField piHeadField_invDate">
-                  <label>Invoice Date </label>
+                <div className="raField piHeadField piHeadField_date">
+                  <label>Invoice Date <span className="piReq">*</span></label>
                   <CommonDatePicker
                     value={form.invoiceDate}
                     onChange={(v) =>
@@ -1674,19 +1746,19 @@ export default function PurchaseInvoicesPage() {
                     ariaLabel="Invoice date"
                   />
                 </div>
-                <div className="raField piHeadField piHeadField_dueDate">
+                <div className="raField piHeadField piHeadField_date">
                   <label>Due Date</label>
                   <CommonDatePicker value={form.dueDate} onChange={(v) => setForm((p) => ({ ...p, dueDate: v }))} ariaLabel="Due date" />
                 </div>
               </div>
               <div className="piHeaderRow2">
-                <div className="raField piHeadField piHeadField_invNo">
+                <div className="raField piHeadField piHeadField_invNo piOptionalField">
                   <label>{isRetailer ? "Supplier Invoice No" : "Division Invoice No"}</label>
-                  <input className="raInput" value={form.vendorInvoiceNumber} onChange={(e) => setForm((p) => ({ ...p, vendorInvoiceNumber: e.target.value }))} placeholder={isRetailer ? "Bill no. printed on supplier's invoice" : ""} />
+                  <input className="raInput" value={form.vendorInvoiceNumber} onChange={(e) => setForm((p) => ({ ...p, vendorInvoiceNumber: e.target.value }))} placeholder={isRetailer ? "Bill no. from supplier" : "Optional"} />
                 </div>
-                <div className="raField piHeadField piHeadField_notes">
+                <div className="raField piHeadField piHeadField_notes piOptionalField">
                   <label>Notes</label>
-                  <input className="raInput" value={form.notes || ""} placeholder="Optional: refs, memo" onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} />
+                  <input className="raInput" value={form.notes || ""} placeholder="Refs, memo" onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} />
                 </div>
               </div>
               {!isRetailer && clean(form.divisionId) ? (
@@ -1748,7 +1820,10 @@ export default function PurchaseInvoicesPage() {
                               isNewBatch: false,
                               availableBatches: [],
                               mfgPurchaseLocked: Boolean(selected?.mfg_purchase_order_lock),
-                              mfgCompanyName: selected?.mfg_company_name || ""
+                              mfgCompanyName: selected?.mfg_company_name || "",
+                              // Reset unit to STRIP when product changes; populate packaging factors
+                              unitType: UNIT_TYPES.STRIP,
+                              packingFactors: selected ? getPackagingFactors(selected) : { stripsPerBox: 1, boxesPerCase: 1, stripsPerCase: 1, unitsPerStrip: 1 }
                             });
                             // Auto-populate header division from the product's division
                             // when the user picked a product without first choosing a division.
@@ -1805,7 +1880,12 @@ export default function PurchaseInvoicesPage() {
                                 });
                                 return;
                               }
-                              setItem(idx, buildPurchaseLineUpdateFromBatch(selectedBatch));
+                              const batchUpdate = buildPurchaseLineUpdateFromBatch(selectedBatch);
+                              // Convert per-strip rate to current display unit
+                              const currentUnit = it.unitType || UNIT_TYPES.STRIP;
+                              const factors = it.packingFactors || {};
+                              const displayRate = stripRateToDisplayRate(batchUpdate.purchaseRate, currentUnit, factors);
+                              setItem(idx, { ...batchUpdate, purchaseRate: Math.round(displayRate * 100) / 100 });
                             }}
                           />
                           <CommonInlineAddButton
@@ -1847,10 +1927,62 @@ export default function PurchaseInvoicesPage() {
                         )}
                       </td>
                       <td>
-                        <input className={`raInput piNum${submitted && !(Number(it.qty || 0) > 0) ? " piInput_err" : ""}`} type="text" inputMode="numeric" pattern="[0-9]*" value={it.qty} onChange={(e) => setItem(idx, { qty: e.target.value.replace(/[^0-9]/g, "") })} />
+                        {/* Unit selector — converts qty/rate between Case/Box/Strip */}
+                        {(() => {
+                          const unitOpts = getUnitOptions(it.packingFactors || {});
+                          if (unitOpts.length <= 1) return null;
+                          return (
+                            <select
+                              className="raInput piNum piUnitSelect"
+                              value={it.unitType || UNIT_TYPES.STRIP}
+                              title="Select purchase unit"
+                              onChange={(e) => {
+                                const newUnit = e.target.value;
+                                const oldUnit = it.unitType || UNIT_TYPES.STRIP;
+                                const factors = it.packingFactors || {};
+                                // Convert current strip qty/rate to new display unit
+                                const stripQty = displayQtyToStrips(Number(it.qty || 0), oldUnit, factors);
+                                const stripRate = displayRateToStripRate(Number(it.purchaseRate || 0), oldUnit, factors);
+                                const newDisplayQty = stripsToDisplayQty(stripQty, newUnit, factors);
+                                const newDisplayRate = stripRateToDisplayRate(stripRate, newUnit, factors);
+                                setItem(idx, {
+                                  unitType: newUnit,
+                                  qty: Math.round(newDisplayQty * 1000) / 1000 || 1,
+                                  purchaseRate: Math.round(newDisplayRate * 100) / 100
+                                });
+                              }}
+                            >
+                              {unitOpts.map((o) => (
+                                <option key={o.value} value={o.value} title={o.title}>{o.label}</option>
+                              ))}
+                            </select>
+                          );
+                        })()}
+                      </td>
+                      <td>
+                        <input
+                          className={`raInput piNum${submitted && !(Number(it.qty || 0) > 0) ? " piInput_err" : ""}`}
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*\.?[0-9]*"
+                          value={it.qty}
+                          title={`Qty in ${it.unitType || "strips"} — stored as ${Math.round(displayQtyToStrips(Number(it.qty || 0), it.unitType || UNIT_TYPES.STRIP, it.packingFactors || {}) * 1000) / 1000} strips`}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1");
+                            setItem(idx, { qty: raw });
+                          }}
+                        />
                       </td>
                       <td><input className="raInput piNum" type="text" inputMode="numeric" pattern="[0-9]*" value={it.freeQty} onChange={(e) => setItem(idx, { freeQty: e.target.value.replace(/[^0-9]/g, "") })} /></td>
-                      <td><AmountInput className={`raInput piNum${submitted && !(Number(it.purchaseRate || 0) > 0) ? " piInput_err" : ""}`} value={String(it.purchaseRate ?? "")} onChange={(raw) => setItem(idx, { purchaseRate: raw })} inputMode="decimal" /></td>
+                      <td>
+                        <AmountInput
+                          className={`raInput piNum${submitted && !(Number(it.purchaseRate || 0) > 0) ? " piInput_err" : ""}`}
+                          value={String(it.purchaseRate ?? "")}
+                          title={`Rate per ${it.unitType || "strip"} — stored as ${Math.round(displayRateToStripRate(Number(it.purchaseRate || 0), it.unitType || UNIT_TYPES.STRIP, it.packingFactors || {}) * 100) / 100}/strip`}
+                          onChange={(raw) => setItem(idx, { purchaseRate: raw })}
+                          inputMode="decimal"
+                        />
+                      </td>
                       <td><AmountInput className={`raInput piNum${submitted && !(Number(it.mrp || 0) > 0) ? " piInput_err" : ""}`} value={String(it.mrp ?? "")} onChange={(raw) => setItem(idx, { mrp: raw })} inputMode="decimal" /></td>
                       <td><AmountInput className="raInput piNum" value={String(it.salesRate ?? "")} onChange={(raw) => setItem(idx, { salesRate: raw })} inputMode="decimal" /></td>
                       <td><input className="raInput piNum" type="text" inputMode="decimal" pattern="[0-9]*\.?[0-9]*" value={it.discountPercent} onChange={(e) => setItem(idx, { discountPercent: e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1") })} /></td>
@@ -2216,7 +2348,7 @@ export default function PurchaseInvoicesPage() {
               type="button"
               disabled={
                 busy || returnBusy || returnLoadingItems ||
-                !(returnForm.items || []).some((it) => n(it.returnQty) > 0) ||
+                !(returnForm.items || []).some((it) => n(it.returnQty) > 0 || n(it.returnLooseQty) > 0) ||
                 (returnForm.items || []).some((it) => {
                   const maxQty = it.purchasedQty != null ? Math.max(0, n(it.purchasedQty) - n(it.alreadyReturnedQty)) : Infinity;
                   const maxFreeQty = it.purchasedFreeQty != null ? Math.max(0, n(it.purchasedFreeQty) - n(it.alreadyReturnedFreeQty)) : Infinity;
@@ -2236,7 +2368,8 @@ export default function PurchaseInvoicesPage() {
                   items: (returnForm.items || []).map((it) => ({
                     purchaseInvoiceItemId: it.purchaseInvoiceItemId,
                     returnQty: Number(it.returnQty || 0),
-                    returnFreeQty: Number(it.returnFreeQty || 0)
+                    returnFreeQty: Number(it.returnFreeQty || 0),
+                    returnLooseQty: Number(it.returnLooseQty || 0)
                   }))
                 });
                 if (draft.status >= 200 && draft.status < 300 && draft.json?.ok) {
@@ -2322,9 +2455,11 @@ export default function PurchaseInvoicesPage() {
                       </div>
                     ) : null}
                     <div className="piReturnQtyFields">
+                      {/* ── Strip return qty ── */}
                       <div className="piReturnQtyField">
                         <label className="piReturnFieldLabel">
                           Return Qty
+                          <span style={{ color: "var(--color-text-4)", fontWeight: 500, fontSize: 11 }}> (strips)</span>
                           {it.purchasedQty != null ? <span className="piReturnMaxHint"> · max {maxQty}</span> : null}
                         </label>
                         <input
@@ -2339,6 +2474,25 @@ export default function PurchaseInvoicesPage() {
                         />
                         {qtyExceeds ? <span className="piReturnQtyErr">Exceeds max ({maxQty})</span> : null}
                       </div>
+
+                      {/* ── Loose return qty ── */}
+                      <div className="piReturnQtyField">
+                        <label className="piReturnFieldLabel">
+                          Loose Qty
+                          <span style={{ color: "var(--color-text-4)", fontWeight: 500, fontSize: 11 }}> (units)</span>
+                        </label>
+                        <input
+                          className="raInput piReturnQtyInput"
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          placeholder="0"
+                          value={it.returnLooseQty || ""}
+                          onChange={(e) => setReturnForm((p) => ({ ...p, items: p.items.map((x, i) => (i === idx ? { ...x, returnLooseQty: e.target.value.replace(/[^0-9]/g, "") } : x)) }))}
+                        />
+                      </div>
+
+                      {/* ── Free qty ── */}
                       {maxFreeQty > 0 || n(it.purchasedFreeQty) > 0 ? (
                         <div className="piReturnQtyField">
                           <label className="piReturnFieldLabel">

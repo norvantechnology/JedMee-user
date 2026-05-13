@@ -18,6 +18,7 @@ async function handler(event) {
     const [items, payments] = await Promise.all([
       query(
         `SELECT sii.*,
+          COALESCE(pb.packing_units, p.units_per_strip, 1) AS packing_units,
           COALESCE((
             SELECT SUM(sri.return_qty)
             FROM sales_return_items sri
@@ -33,8 +34,18 @@ async function handler(event) {
             WHERE sri.sales_invoice_item_id = sii.id
               AND sri.account_id = sii.account_id
               AND sr.status IN ('DRAFT'::sales_return_status, 'CONFIRMED'::sales_return_status)
-          ), 0) AS already_returned_free_qty
+          ), 0) AS already_returned_free_qty,
+          COALESCE((
+            SELECT SUM(sri.return_loose_qty)
+            FROM sales_return_items sri
+            JOIN sales_returns sr ON sr.id = sri.sales_return_id
+            WHERE sri.sales_invoice_item_id = sii.id
+              AND sri.account_id = sii.account_id
+              AND sr.status IN ('DRAFT'::sales_return_status, 'CONFIRMED'::sales_return_status)
+          ), 0) AS already_returned_loose_qty
          FROM sales_invoice_items sii
+         LEFT JOIN product_batches pb ON pb.id = sii.batch_id AND pb.account_id = sii.account_id
+         LEFT JOIN products p ON p.id = sii.product_id AND p.account_id = sii.account_id
          WHERE sii.sales_invoice_id = $1 AND sii.account_id = $2
          ORDER BY sii.created_at ASC`,
         [id, ctx.accountId]

@@ -20,3 +20,7 @@ export async function getNonMovingReport(params) {
 export async function getDayBookReport(params) {
   return await apiGet("/reports/day-book", { toast: "none", params });
 }
+
+export async function getSalesStockAnalysisReport(params) {
+  return await apiGet("/reports/sales-stock-analysis", { toast: "none", params });
+}

@@ -1,5 +1,5 @@
 /* ============================================================
-   CommonModal.css — Refined Modal System
+   CommonModal.css — Refined Modal System (Enhanced)
    Design goals:
    • Comfortable width + inner padding; clear section & field rhythm
    • Strong hierarchy: section rail → labels → values → hints/errors
@@ -13,7 +13,7 @@
   to   { opacity: 1; }
 }
 @keyframes mcmPanelIn {
-  from { opacity: 0; transform: scale(0.97) translateY(10px); }
+  from { opacity: 0; transform: scale(0.96) translateY(14px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 @keyframes mcmSheetIn {
@@ -38,26 +38,26 @@
   font-family: var(--font);
 
   /* ── Type scale ── */
-  --mcm-fs-title:   clamp(14px, 0.95rem + 0.3vw, 17px);   /* modal title          */
-  --mcm-fs-body:    clamp(13px, 0.84rem + 0.15vw, 14px);  /* body / input value   */
-  --mcm-fs-sub:     clamp(11.5px, 0.76rem + 0.14vw, 12.5px); /* subtitle           */
-  --mcm-fs-label:   clamp(14px, 0.9rem + 0.25vw, 15px);    /* field labels — bumped for readability */
-  --mcm-fs-hint:    11.5px;                                 /* helper — visible     */
-  --mcm-fs-kicker:  clamp(11.5px, 0.78rem + 0.25vw, 13px); /* section header caps  */
-  --mcm-fs-error:   11.5px;                                 /* validation — visible */
-  --mcm-fs-btn:     13.5px;                                 /* footer CTA buttons   */
+  --mcm-fs-title:   clamp(15px, 1.05rem + 0.3vw, 18px);
+  --mcm-fs-body:    clamp(13px, 0.84rem + 0.15vw, 14px);
+  --mcm-fs-sub:     clamp(11.5px, 0.76rem + 0.14vw, 12.5px);
+  --mcm-fs-label:   clamp(11.5px, 0.78rem + 0.2vw, 12.5px);
+  --mcm-fs-hint:    11.5px;
+  --mcm-fs-kicker:  clamp(10px, 0.72rem + 0.2vw, 11px);
+  --mcm-fs-error:   11.5px;
+  --mcm-fs-btn:     13.5px;
 
-  /* ── Spacing — more air between groups & sections ── */
-  --mcm-field-stack-gap: 11px;    /* label → control — more breathing room */
-  --mcm-section-gap:    20px;     /* between section cards / stacks in body */
-  --mcm-field-gap:      14px;     /* within section grids */
+  /* ── Spacing ── */
+  --mcm-field-stack-gap: 6px;
+  --mcm-section-gap:    16px;
+  --mcm-field-gap:      12px;
 
   /* ── Surface tokens ── */
   --mcm-surface: var(--color-surface);
   --mcm-card:    var(--color-card);
   --mcm-border:  var(--color-border-strong);
-  /* Readable 1px edge for cards, inner panels, and row bands inside `.mcmBody` */
-  --mcm-chrome-border: 1px solid color-mix(in srgb, var(--color-border) 78%, var(--color-text-3));
+  /* Chrome border — clearly visible, used for section card edges and inner separators */
+  --mcm-chrome-border: 1.5px solid var(--color-border-strong, var(--color-border));
 
   /* ── Field colour tokens ── */
   --mcm-field-bg:           var(--modal-field-bg);
@@ -69,58 +69,52 @@
   --mcm-field-border-focus:  var(--color-primary);
   --mcm-field-border-width:  var(--modal-field-border-width, 1.5px);
   --mcm-field-text:          var(--color-text);
-  /* Placeholder — visible hint, not invisible */
-  --mcm-field-ph:            color-mix(in srgb, var(--color-text-3) 75%, var(--color-border));
+  --mcm-field-ph:            color-mix(in srgb, var(--color-text-3) 60%, var(--color-border));
 
-  /* ── Label — strong reading colour, bold ── */
-  --mcm-label-color:         var(--color-text-heading, var(--color-text));
+  /* ── Label ── */
+  --mcm-label-color: var(--color-text-2, var(--color-text));
 
-  /* ── Control metrics — taller touch, softer chrome, smoother corners ── */
-  --mcm-ctrl-h:          42px;
-  --mcm-ctrl-fs:         14.5px;
+  /* ── Control metrics ── */
+  --mcm-ctrl-h:          40px;
+  --mcm-ctrl-fs:         13.5px;
   --mcm-ctrl-fw:         500;
-  --mcm-ctrl-radius:     var(--radius-md, 10px);
-  --mcm-ctrl-pad-x:      12px;
-  --mcm-ctrl-icon-gap:   36px;
-  --mcm-ctrl-textarea-min: 76px;
+  --mcm-ctrl-radius:     8px;
+  --mcm-ctrl-pad-x:      11px;
+  --mcm-ctrl-icon-gap:   34px;
+  --mcm-ctrl-textarea-min: 72px;
 
-  /* Crisper default strokes (modal-only) — clearly visible borders */
-  --modal-field-border:       color-mix(in srgb, var(--color-text-3) 48%, var(--color-border-strong));
-  --modal-field-border-hover: color-mix(in srgb, var(--color-text-3) 65%, var(--color-border-strong));
+  /* Modal-only border tokens */
+  --modal-field-border:       color-mix(in srgb, var(--color-text-3) 38%, var(--color-border-strong));
+  --modal-field-border-hover: color-mix(in srgb, var(--color-text-3) 55%, var(--color-border-strong));
 
-  /* Focus: clear ring + gentle lift */
-  --field-focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent);
+  /* Focus ring */
+  --field-focus-ring: 0 0 0 3px color-mix(in srgb, var(--color-primary) 22%, transparent);
   --field-focus-shadow-layer:
-    0 3px 14px color-mix(in srgb, var(--color-text) 6%, transparent),
-    0 1px 4px color-mix(in srgb, var(--color-primary) 14%, transparent);
+    0 2px 8px color-mix(in srgb, var(--color-text) 5%, transparent),
+    0 1px 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
   --field-rest-shadow:
-    0 1px 3px color-mix(in srgb, var(--color-text) 2.5%, transparent),
-    0 0 1px color-mix(in srgb, var(--color-text-3) 8%, var(--color-border));
-  --field-error-ring: 0 0 0 3px color-mix(in srgb, var(--color-danger) 22%, transparent);
+    0 1px 2px color-mix(in srgb, var(--color-text) 3%, transparent);
+  --field-error-ring: 0 0 0 3px color-mix(in srgb, var(--color-danger) 18%, transparent);
 
-  /* Disabled — visibly “off” vs resting (not only opacity) */
   --mcm-field-disabled-border: color-mix(in srgb, var(--color-border) 55%, var(--color-text-4));
-  --mcm-field-error-bg:        color-mix(in srgb, var(--color-danger) 7%, var(--mcm-field-bg));
+  --mcm-field-error-bg:        color-mix(in srgb, var(--color-danger) 6%, var(--mcm-field-bg));
   --mcm-focus-border-w:        2px;
 
-  /* Scrollbars — neutral slate, readable (Firefox `scrollbar-color` inherits) */
-  --mcm-sb-track: color-mix(in srgb, var(--color-border) 50%, var(--modal-form-bg, var(--color-bg)));
-  --mcm-sb-thumb: color-mix(in srgb, var(--color-text-3) 45%, var(--color-border-strong));
-  --mcm-sb-thumb-hover: color-mix(in srgb, var(--color-text-2) 38%, var(--color-border-strong));
+  /* Scrollbars */
+  --mcm-sb-track: color-mix(in srgb, var(--color-border) 40%, var(--modal-form-bg, var(--color-bg)));
+  --mcm-sb-thumb: color-mix(in srgb, var(--color-text-3) 35%, var(--color-border-strong));
+  --mcm-sb-thumb-hover: color-mix(in srgb, var(--color-text-2) 30%, var(--color-border-strong));
   scrollbar-width: thin;
   scrollbar-color: var(--mcm-sb-thumb) var(--mcm-sb-track);
 
-  /* Panel elevation without a 1px “frame” around the whole shell */
+  /* Panel elevation */
   --modal-card-shadow:
-    0 12px 36px color-mix(in srgb, var(--color-text) 5.5%, transparent),
-    0 2px 10px color-mix(in srgb, var(--color-text) 3.5%, transparent);
+    0 20px 60px color-mix(in srgb, var(--color-text) 10%, transparent),
+    0 4px 16px color-mix(in srgb, var(--color-text) 5%, transparent),
+    0 1px 0 color-mix(in srgb, var(--color-text) 2%, transparent);
 }
 
-/* ── Stacked modals (sub-dialogs / quick-create over a master modal) ─────────
-   Front layer: full size. Each layer *behind* scales its panel only (see
-   `commonModalStack.js`: first behind ≈0.75, then smaller steps).
-   IMPORTANT: Do not scale the `.mcm` root — that also scales `.mcmOverlay`,
-   which looks like a small grey box instead of a full-viewport scrim. */
+/* ── Stacked modals ── */
 .mcm.mcm_stackBehind {
   pointer-events: none;
 }
@@ -147,15 +141,19 @@
   justify-content: flex-end;
   padding: 0;
 }
-/* Drawer width follows --mcm-w from CommonModal (size prop), capped by viewport — not a fixed 88vw slab */
 .mcm_drawer .mcmPanel {
   width: min(100vw, var(--mcm-w, 560px));
   max-height: 100%;
   height: 100%;
   border-radius: 0;
   border: none;
-  animation: mcmDrawerIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: mcmDrawerIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
   transform-origin: right center;
+  /* Left edge shadow for drawer depth */
+  box-shadow:
+    -1px 0 0 color-mix(in srgb, var(--color-border) 60%, transparent),
+    -8px 0 32px color-mix(in srgb, var(--color-text) 8%, transparent),
+    -2px 0 8px color-mix(in srgb, var(--color-text) 4%, transparent);
 }
 .mcm_drawer .mcmPanel_sm,
 .mcm_drawer .mcmPanel_md,
@@ -164,8 +162,8 @@
 }
 .mcm_drawer .mcmOverlay {
   background: var(--overlay-scrim);
-  backdrop-filter: blur(3px) saturate(1.05);
-  -webkit-backdrop-filter: blur(3px) saturate(1.05);
+  backdrop-filter: blur(2px) saturate(1.04);
+  -webkit-backdrop-filter: blur(2px) saturate(1.04);
 }
 
 @media (max-width: 720px) {
@@ -182,6 +180,9 @@
     border-bottom: none;
     animation: mcmSheetIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
     transform-origin: bottom center;
+    box-shadow:
+      0 -4px 24px color-mix(in srgb, var(--color-text) 8%, transparent),
+      0 -1px 0 color-mix(in srgb, var(--color-border) 50%, transparent);
   }
 }
 
@@ -191,9 +192,9 @@
   inset: 0;
   border: none;
   background: var(--overlay-scrim-strong);
-  backdrop-filter: blur(4px) saturate(1.06);
-  -webkit-backdrop-filter: blur(4px) saturate(1.06);
-  animation: mcmOverlayIn 0.28s ease both;
+  backdrop-filter: blur(3px) saturate(1.04);
+  -webkit-backdrop-filter: blur(3px) saturate(1.04);
+  animation: mcmOverlayIn 0.22s ease both;
 }
 .mcm_portal .mcmOverlay {
   background: var(--overlay-scrim);
@@ -209,13 +210,12 @@
   position: relative;
   z-index: 1;
   border-radius: clamp(12px, 2vw, 16px);
-  /* No left/right rim — depth from shadow only (avoids “frame” lines on the shell) */
   border: none;
   background: var(--color-card);
   box-shadow: var(--modal-card-shadow);
   display: flex;
   flex-direction: column;
-  animation: mcmPanelIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: mcmPanelIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
   transform-origin: center bottom;
 }
 .mcmPanel_sm { --mcm-w: 448px; }
@@ -223,7 +223,7 @@
 .mcmPanel_lg { --mcm-w: 1000px; }
 
 /* ════════════════════════════════════════════════════════════
-   HEADER
+   HEADER — refined with subtle gradient and better hierarchy
    ════════════════════════════════════════════════════════════ */
 .mcmHead {
   position: relative;
@@ -231,17 +231,19 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: clamp(12px, 2vw, 16px) clamp(14px, 2.4vw, 20px);
+  padding: clamp(14px, 2vw, 18px) clamp(16px, 2.4vw, 22px);
   flex: 0 0 auto;
   overflow: clip;
   background: var(--modal-head-bg);
   border-bottom: 1px solid var(--modal-head-separator);
+  /* Subtle bottom line with a touch of depth */
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-border) 60%, transparent);
 }
 
 .mcmHeadMain {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   min-width: 0;
   flex: 1;
 }
@@ -262,25 +264,26 @@
     width: 100%;
     max-width: none;
     justify-content: flex-start;
-    padding-left: calc(clamp(32px, 7vw, 40px) + 10px);
+    padding-left: calc(clamp(32px, 7vw, 40px) + 12px);
   }
   .mcmClose { order: 2; margin-left: auto; }
 }
 
-/* ── Icon mark ── */
+/* ── Icon mark — more polished ── */
 .mcmMark {
   flex: 0 0 auto;
-  width: clamp(34px, 5.5vw, 38px);
-  height: clamp(34px, 5.5vw, 38px);
-  border-radius: clamp(8px, 1.5vw, 10px);
+  width: clamp(34px, 5.5vw, 40px);
+  height: clamp(34px, 5.5vw, 40px);
+  border-radius: clamp(9px, 1.5vw, 11px);
   display: grid;
   place-items: center;
   background: var(--modal-head-icon-bg);
   border: 1px solid var(--modal-head-border);
   color: var(--modal-head-accent);
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-text) 6%, transparent);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.mcmMark:hover { transform: scale(1.05) rotate(-2deg); }
+.mcmMark:hover { transform: scale(1.06) rotate(-3deg); }
 .mcmMark_danger {
   background: var(--color-danger);
   border-color: color-mix(in srgb, var(--color-danger) 40%, transparent);
@@ -292,22 +295,22 @@
   height: clamp(15px, 2.4vw, 17px);
 }
 
-/* ── Titles ── */
+/* ── Titles — better weight + spacing ── */
 .mcmTitles {
   min-width: 0;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1px;
+  gap: 2px;
 }
 .mcmTitle {
   margin: 0;
   font-size: var(--mcm-fs-title);
   font-weight: 700;
   color: var(--modal-head-text);
-  line-height: 1.22;
-  letter-spacing: -0.018em;
+  line-height: 1.2;
+  letter-spacing: -0.022em;
   font-family: var(--font);
 }
 .mcmSub {
@@ -319,35 +322,35 @@
   font-weight: 400;
 }
 
-/* ── Close button — high contrast, always visible ── */
+/* ── Close button — refined ── */
 .mcmClose {
   flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
-  border: 1.5px solid color-mix(in srgb, var(--modal-head-border, var(--color-border)) 90%, var(--color-text-3));
-  background: color-mix(in srgb, var(--color-surface) 60%, var(--color-card));
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--modal-head-border, var(--color-border)) 80%, var(--color-text-3));
+  background: color-mix(in srgb, var(--color-surface) 50%, var(--color-card));
   color: var(--modal-head-text, var(--color-text-2));
   cursor: pointer;
   display: grid;
   place-items: center;
   transition:
-    background  0.14s ease,
-    border-color 0.14s ease,
-    color       0.14s ease,
-    transform   0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background  0.13s ease,
+    border-color 0.13s ease,
+    color       0.13s ease,
+    transform   0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .mcmClose svg { width: 14px; height: 14px; }
 .mcmClose:hover {
-  background: color-mix(in srgb, var(--color-danger) 10%, var(--color-card));
-  border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border));
   color: var(--color-danger);
-  transform: scale(1.1) rotate(90deg);
+  transform: scale(1.08) rotate(90deg);
 }
 .mcmClose:active { transform: scale(0.9); }
 
 /* ════════════════════════════════════════════════════════════
-   BODY
+   BODY — clean, well-spaced, with subtle background
    ════════════════════════════════════════════════════════════ */
 .mcmBody {
   padding: clamp(14px, 2.2vw, 20px) clamp(16px, 2.6vw, 22px);
@@ -363,32 +366,21 @@
   flex-direction: column;
   gap: var(--mcm-section-gap);
 }
-/* WebKit scrollbars anywhere inside the modal (body + nested panes) */
-.mcm *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.mcm *::-webkit-scrollbar-track {
-  background: var(--mcm-sb-track);
-  border-radius: 999px;
-}
+
+/* WebKit scrollbars */
+.mcm *::-webkit-scrollbar { width: 6px; height: 6px; }
+.mcm *::-webkit-scrollbar-track { background: var(--mcm-sb-track); border-radius: 999px; }
 .mcm *::-webkit-scrollbar-thumb {
   background-color: var(--mcm-sb-thumb);
   border-radius: 999px;
-  border: 2px solid transparent;
+  border: 1px solid transparent;
   background-clip: padding-box;
 }
-.mcm *::-webkit-scrollbar-thumb:hover {
-  background-color: var(--mcm-sb-thumb-hover);
-  background-clip: padding-box;
-}
-.mcm *::-webkit-scrollbar-corner {
-  background: transparent;
-}
+.mcm *::-webkit-scrollbar-thumb:hover { background-color: var(--mcm-sb-thumb-hover); }
+.mcm *::-webkit-scrollbar-corner { background: transparent; }
 
 /* ════════════════════════════════════════════════════════════
-   SECTION CARDS — same chrome for .sfmSection / .piSection / .cliSection / .mfzPanel
-   (invoice + master modals). Real border — not border:none, so page CSS cannot erase edges.
+   SECTION CARDS — clearly visible borders + depth shadow
    ════════════════════════════════════════════════════════════ */
 .mcmBody .sfmSection,
 .mcmBody .piSection,
@@ -396,24 +388,26 @@
 .mcmBody .cliSection,
 .mcmBody .mfzPanel {
   background: var(--color-card);
-  border: var(--mcm-chrome-border);
-  border-radius: var(--radius-md, 12px);
+  /* Solid visible border — not mixed with transparent */
+  border: 1.5px solid color-mix(in srgb, var(--color-border) 100%, var(--color-text-4) 0%);
+  border-radius: 12px;
   overflow: hidden;
+  /* Stronger shadow for clear card elevation */
   box-shadow:
-    0 4px 6px -2px color-mix(in srgb, var(--color-text) 3.5%, transparent),
-    0 14px 32px -12px color-mix(in srgb, var(--color-text) 7%, transparent);
+    0 1px 4px color-mix(in srgb, var(--color-text) 8%, transparent),
+    0 4px 16px color-mix(in srgb, var(--color-text) 7%, transparent);
 }
 
-/* Section head — clean band, no decorative separator line */
+/* Section heads — clean tinted band, monospaced kicker */
 .mcmBody .sfmSectionHead,
 .mcmBody .piSectionHead,
 .mcmBody .sbmSecHd,
 .mcmBody .cliSectionHead,
 .mcmBody .mfzPanelHead {
-  background: color-mix(in srgb, var(--color-surface) 42%, var(--color-card));
-  border-bottom: none;
-  box-shadow: none;
-  padding: 10px 14px;
+  background: color-mix(in srgb, var(--color-surface) 50%, var(--color-card));
+  /* Visible separator between head and body */
+  border-bottom: 1.5px solid color-mix(in srgb, var(--color-border) 100%, var(--color-text-4) 0%);
+  padding: 9px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -421,7 +415,7 @@
   min-height: 0;
 }
 
-/* Kicker / section title — brand purple, clearly above field labels */
+/* Kicker — uppercase, tracked, primary color */
 .mcmBody .sfmSectionHead .sfmTitle,
 .mcmBody .sfmSectionTitle,
 .mcmBody .piSectionTitle,
@@ -430,70 +424,62 @@
 .mcmBody .pbmBar {
   font-size: var(--mcm-fs-kicker);
   font-weight: 800;
-  letter-spacing: 0.11em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-primary);
-  line-height: 1.25;
+  line-height: 1.3;
 }
 
-/* Section body — inner frame only when a head exists (outer card already has --mcm-chrome-border) */
+/* Section body */
 .mcmBody .piSectionBody,
 .mcmBody .mfzPanelBody {
-  padding: 12px 14px;
+  padding: 14px 16px;
   display: grid;
   gap: var(--mcm-field-gap);
   box-sizing: border-box;
 }
 .mcmBody .piSection:has(.piSectionHead) .piSectionBody,
 .mcmBody .mfzPanel:has(.mfzPanelHead) .mfzPanelBody {
-  background: color-mix(in srgb, var(--color-surface) 6%, var(--color-card));
-  border: var(--mcm-chrome-border);
-  border-top: none;
-  border-radius: 0 0 var(--radius-md, 12px) var(--radius-md, 12px);
+  background: var(--color-card);
+  border: none;
+  border-radius: 0 0 12px 12px;
 }
 .mcmBody .piSection:not(:has(.piSectionHead)) .piSectionBody,
 .mcmBody .mfzPanel:not(:has(.mfzPanelHead)) .mfzPanelBody {
-  /* Single outer border on the shell — tint body so the block still reads as a form surface */
-  background: color-mix(in srgb, var(--color-surface) 5%, var(--color-card));
+  background: color-mix(in srgb, var(--color-surface) 4%, var(--color-card));
   border: none;
 }
 
-/* StructuredForm — inner block bordered only when a section head exists (avoids double ring with outer .sfmSection) */
+/* StructuredForm inner blocks */
 .mcmBody .sfmSection > *:not(.sfmSectionHead) {
-  padding: 12px 14px;
+  padding: 14px 16px;
   box-sizing: border-box;
 }
 .mcmBody .sfmSection:has(.sfmSectionHead) > *:not(.sfmSectionHead) {
-  background: color-mix(in srgb, var(--color-surface) 6%, var(--color-card));
-  border: var(--mcm-chrome-border);
-  border-top: none;
-  border-radius: 0 0 var(--radius-md, 12px) var(--radius-md, 12px);
+  background: var(--color-card);
+  border: none;
+  border-radius: 0 0 12px 12px;
 }
 .mcmBody .sfmSection:not(:has(.sfmSectionHead)) > *:not(.sfmSectionHead) {
   background: transparent;
   border: none;
 }
-.mcmBody .sfmGrid {
-  gap: var(--mcm-field-gap) clamp(12px, 1.8vw, 18px);
-}
-
-/* Modal form grids — extra row breathing room */
+.mcmBody .sfmGrid { gap: var(--mcm-field-gap) clamp(10px, 1.6vw, 16px); }
 .mcmBody .mfzGrid {
   row-gap: var(--mcm-field-gap);
   column-gap: clamp(10px, 1.2vw, 14px);
 }
 
 /* ════════════════════════════════════════════════════════════
-   Line items + totals (CommonLineItemsSection / .cli*) inside modals
-   Same section title scale, field tokens, and card chrome as .mfz* / .piSection*
+   Line items + totals
    ════════════════════════════════════════════════════════════ */
 .mcmBody .cliSectionTitle {
   font-size: var(--mcm-fs-kicker);
   font-weight: 800;
-  letter-spacing: 0.11em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-text-2);
-  line-height: 1.25;
+  line-height: 1.3;
 }
 .mcmBody .cliSectionHint {
   font-size: var(--mcm-fs-hint);
@@ -503,29 +489,26 @@
 }
 .mcmBody .cliItemsWrap {
   background: var(--color-card);
-  /* Table sits between head + footer — inset stroke ties scroll area to the card edge */
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-border) 72%, var(--color-text-3)),
-    inset 1px 0 0 color-mix(in srgb, var(--color-border) 55%, transparent),
-    inset -1px 0 0 color-mix(in srgb, var(--color-border) 55%, transparent);
+    inset 0 1px 0 color-mix(in srgb, var(--color-border) 65%, var(--color-text-3)),
+    inset 1px 0 0 color-mix(in srgb, var(--color-border) 45%, transparent),
+    inset -1px 0 0 color-mix(in srgb, var(--color-border) 45%, transparent);
 }
-.mcmBody .cliItemsTable {
-  background: var(--color-card);
-}
+.mcmBody .cliItemsTable { background: var(--color-card); }
 .mcmBody .cliItemsTable thead th {
   background: color-mix(in srgb, var(--color-surface) 38%, var(--color-card));
   color: var(--color-text-2);
   font-size: var(--mcm-fs-kicker);
   font-weight: 700;
   letter-spacing: 0.08em;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 78%, var(--color-text-3));
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, var(--color-text-3));
 }
 .mcmBody .cliItemsTable th,
 .mcmBody .cliItemsTable td {
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
 }
 .mcmBody .cliItemsTable tbody tr:hover td {
-  background: color-mix(in srgb, var(--color-primary) 5%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 4%, transparent);
 }
 .mcmBody .cliItemsTable td .raInput {
   min-height: var(--mcm-ctrl-h);
@@ -556,21 +539,19 @@
   box-shadow: var(--field-rest-shadow);
 }
 .mcmBody .cliFooter {
-  padding: 12px 14px;
-  border-top: 1px solid color-mix(in srgb, var(--color-border) 75%, var(--color-text-3));
+  padding: 11px 14px;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 65%, var(--color-text-3));
   background: color-mix(in srgb, var(--color-surface) 28%, var(--color-card));
 }
 .mcmBody .cliSummaryStrip {
   margin-top: var(--mcm-section-gap);
-  border: var(--mcm-chrome-border);
-  border-radius: var(--radius-md, 12px);
+  border: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+  border-radius: 12px;
   background: var(--color-card);
-  box-shadow:
-    0 4px 6px -2px color-mix(in srgb, var(--color-text) 3.5%, transparent),
-    0 14px 32px -12px color-mix(in srgb, var(--color-text) 7%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-text) 4%, transparent);
 }
 .mcmBody .cliSummaryCell {
-  border-right: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
+  border-right: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
 }
 .mcmBody .cliSummaryLabel {
   font-size: var(--mcm-fs-kicker);
@@ -582,9 +563,8 @@
   font-size: var(--mcm-fs-body);
   color: var(--color-text);
 }
-/* Total column: strong but same “card” language as the rest (not a separate widget) */
 .mcmBody .cliSummaryCell_total {
-  background: color-mix(in srgb, var(--color-primary) 16%, var(--color-card));
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--color-card));
   box-shadow: inset 3px 0 0 var(--color-primary);
 }
 .mcmBody .cliSummaryCell_total .cliSummaryLabel {
@@ -595,26 +575,26 @@
   font-weight: 800;
 }
 
-/* ── Invoice / dense-form bands (sales, purchase, …) — visible blocks in .mcmBody ── */
+/* Invoice / dense-form bands */
 .mcmBody .piHeaderTop {
   padding-bottom: var(--mcm-field-gap);
   margin-bottom: var(--mcm-field-gap);
-  border-bottom: var(--mcm-chrome-border);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
 }
 .mcmBody .sbmRateBar {
-  border: var(--mcm-chrome-border);
+  border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
   background: color-mix(in srgb, var(--color-surface) 40%, var(--color-card));
   border-radius: var(--mcm-ctrl-radius);
 }
 .mcmBody .sbmCashRow {
-  border: var(--mcm-chrome-border);
+  border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
   background: color-mix(in srgb, var(--color-surface) 35%, var(--color-card));
   border-radius: var(--mcm-ctrl-radius);
 }
 .mcmBody .sbmControlBlock {
   margin-left: 0;
   margin-right: 0;
-  border: var(--mcm-chrome-border);
+  border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
   border-radius: var(--mcm-ctrl-radius);
   background: color-mix(in srgb, var(--color-surface) 22%, var(--color-card));
 }
@@ -625,33 +605,28 @@
   flex-wrap: wrap;
   gap: 4px 8px;
   padding: 8px 12px;
-  border: var(--mcm-chrome-border);
+  border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
   border-radius: var(--mcm-ctrl-radius);
   background: color-mix(in srgb, var(--color-surface) 40%, var(--color-card));
 }
 .mcmBody .mfzNote {
-  border: var(--mcm-chrome-border);
-  background: color-mix(in srgb, var(--color-primary) 6%, var(--mcm-field-bg));
+  border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--mcm-field-bg));
 }
-/* Checkbox rows: one flat cell (no inner “card” per option) */
-.mcmBody .mfzField.mfzChecks {
-  padding-top: 2px;
-  padding-bottom: 2px;
-}
+.mcmBody .mfzField.mfzChecks { padding-top: 2px; padding-bottom: 2px; }
 .mcmBody .psErr {
   margin-left: 0;
   margin-right: 0;
-  border: var(--mcm-chrome-border);
-  border-color: color-mix(in srgb, var(--color-danger) 38%, var(--color-border));
+  border: 1px solid color-mix(in srgb, var(--color-danger) 35%, var(--color-border));
 }
 .mcmBody .sbmBulkPayBanner {
-  border: var(--mcm-chrome-border);
+  border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
   border-radius: var(--mcm-ctrl-radius);
   background: color-mix(in srgb, var(--color-surface) 35%, var(--color-card));
 }
 
 /* ════════════════════════════════════════════════════════════
-   FIELD LABEL SYSTEM — unified across all modal variants
+   FIELD LABEL SYSTEM — smaller, lighter, cleaner
    ════════════════════════════════════════════════════════════ */
 .mcmBody .raField > label,
 .mcmBody .piHeadField label,
@@ -664,11 +639,11 @@
 .mcm_drawer .mcmBody .raField > label,
 .mcm_drawer .mcmBody .sfm .raField label {
   font-size: var(--mcm-fs-label);
-  font-weight: 700;
-  letter-spacing: 0.015em;
+  font-weight: 600;
+  letter-spacing: 0.008em;
   text-transform: none;
   color: var(--mcm-label-color);
-  line-height: 1.25;
+  line-height: 1.3;
   margin: 0;
   display: inline-flex;
   align-items: center;
@@ -676,7 +651,7 @@
   padding: 0;
 }
 
-/* No lead-in dots in modal */
+/* No lead-in dots */
 .mcmBody .raField > label::before,
 .mcmBody .sfm .raField label::before,
 .mcm_drawer .mcmBody .raField > label::before,
@@ -693,8 +668,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   INPUT / SELECT / TEXTAREA — unified control appearance
-   Crisper borders, comfortable but not bloated
+   INPUT / SELECT / TEXTAREA — polished, consistent
    ════════════════════════════════════════════════════════════ */
 .mcmBody input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .mcmBody select,
@@ -702,7 +676,7 @@
 .mcmBody .raInput,
 .mcmBody .cdpInput {
   background: var(--mcm-field-bg);
-  border: var(--mcm-field-border-width) solid var(--mcm-field-border);
+  border: 1.5px solid var(--mcm-field-border);
   color: var(--mcm-field-text);
   border-radius: var(--mcm-ctrl-radius);
   font-family: var(--font);
@@ -716,7 +690,7 @@
     box-shadow   0.12s ease;
 }
 
-/* Single-line controls — uniform height across all field types */
+/* Single-line controls */
 .mcmBody input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .mcmBody select:not(.csfSelect),
 .mcmBody .raInput {
@@ -736,9 +710,9 @@
 
 .mcmBody textarea {
   min-height: var(--mcm-ctrl-textarea-min);
-  padding: 6px var(--mcm-ctrl-pad-x);
+  padding: 8px var(--mcm-ctrl-pad-x);
   resize: vertical;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 .mcmBody .cdpInput {
   min-height: var(--mcm-ctrl-h);
@@ -750,6 +724,7 @@
 .mcmBody .raInput::placeholder {
   color: var(--mcm-field-ph);
   font-weight: 400;
+  font-size: calc(var(--mcm-ctrl-fs) - 0.5px);
 }
 
 /* ── Hover ── */
@@ -761,7 +736,7 @@
   background: var(--mcm-field-bg-hover);
 }
 
-/* ── Focus — clear, high-contrast ring ── */
+/* ── Focus — clean, unmissable ── */
 .mcmBody input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
 .mcmBody input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus-visible,
 .mcmBody select:focus,
@@ -776,9 +751,7 @@
   border-width: var(--mcm-focus-border-w, 2px);
   border-color: var(--color-primary);
   background: var(--mcm-field-bg-focus);
-  box-shadow:
-    var(--field-focus-ring),
-    var(--field-focus-shadow-layer, 0 1px 3px color-mix(in srgb, var(--color-primary) 8%, transparent));
+  box-shadow: var(--field-focus-ring), var(--field-focus-shadow-layer);
   outline: none;
 }
 
@@ -790,10 +763,10 @@
 .mcmBody .cdpInput:disabled {
   background: var(--mcm-field-bg-disabled);
   border-color: var(--mcm-field-disabled-border, var(--color-border));
-  border-width: var(--mcm-field-border-width);
+  border-width: 1.5px;
   color: var(--color-text-4);
   cursor: not-allowed;
-  opacity: 0.88;
+  opacity: 0.75;
   box-shadow: none;
   -webkit-text-fill-color: var(--color-text-4);
 }
@@ -809,7 +782,7 @@
 .mcmBody .csf.mfzInputErr {
   border-width: var(--mcm-focus-border-w, 2px);
   border-color: var(--color-danger) !important;
-  background: var(--mcm-field-error-bg, color-mix(in srgb, var(--color-danger) 6%, var(--mcm-field-bg))) !important;
+  background: var(--mcm-field-error-bg) !important;
   box-shadow: var(--field-error-ring) !important;
 }
 
@@ -824,7 +797,7 @@
   border-color: var(--color-danger) !important;
   border-width: var(--mcm-focus-border-w, 2px) !important;
   box-shadow: var(--field-error-ring) !important;
-  background: var(--mcm-field-error-bg, color-mix(in srgb, var(--color-danger) 6%, var(--mcm-field-bg))) !important;
+  background: var(--mcm-field-error-bg) !important;
 }
 
 .mcmBody .mfzField > .msw > .csf.mfzInput_err:focus-within,
@@ -834,33 +807,31 @@
   box-shadow: var(--field-error-ring) !important;
 }
 
-/* ── Error / hint — clearly visible rhythm under controls ── */
+/* ── Error / hint text ── */
 .mcmBody .field-error,
 .mcmBody .raFieldError,
 .mcmBody .mfzErr {
   font-size: var(--mcm-fs-error);
   color: var(--color-danger-dark, #c0392b);
-  font-weight: 700;
-  margin-top: 5px;
+  font-weight: 600;
+  margin-top: 4px;
   display: flex;
   align-items: center;
   gap: 4px;
   line-height: 1.35;
-  letter-spacing: 0.01em;
 }
 .mcmBody .field-hint,
 .mcmBody .raFieldHint,
 .mcmBody .mfzHelp {
   font-size: var(--mcm-fs-hint);
-  color: var(--color-text-2);
-  margin-top: 5px;
+  color: var(--color-text-3);
+  margin-top: 4px;
   line-height: 1.4;
-  font-weight: 500;
-  letter-spacing: 0.01em;
+  font-weight: 400;
 }
 
 /* ════════════════════════════════════════════════════════════
-   CommonSelectField (.csf) — outer shell carries chrome
+   CommonSelectField (.csf)
    ════════════════════════════════════════════════════════════ */
 .mcmBody .csf > select,
 .mcmBody .csf > select.csfSelect {
@@ -894,10 +865,10 @@
 }
 .mcmBody .csf.mfzInput { min-height: 0; }
 
-/* MasterSelect in modal (grid fields + invoice line-item table cells) */
+/* MasterSelect in modal */
 .mcmBody .mfzField > .msw > .csf,
 .mcmBody .cliItemsTable td .msw > .csf {
-  border: var(--mcm-field-border-width) solid var(--mcm-field-border);
+  border: 1.5px solid var(--mcm-field-border);
   background: var(--mcm-field-bg);
   box-shadow: var(--field-rest-shadow);
 }
@@ -911,19 +882,17 @@
   border-width: var(--mcm-focus-border-w, 2px);
   border-color: var(--color-primary);
   background: var(--mcm-field-bg-focus);
-  box-shadow:
-    var(--field-focus-ring),
-    var(--field-focus-shadow-layer, none);
+  box-shadow: var(--field-focus-ring), var(--field-focus-shadow-layer);
 }
 .mcmBody .mfzField > .msw > .csf.csf_disabled,
 .mcmBody .cliItemsTable td .msw > .csf.csf_disabled {
   border-color: var(--mcm-field-disabled-border, var(--mcm-field-border));
   background: var(--mcm-field-bg-disabled);
-  opacity: 0.88;
+  opacity: 0.75;
   box-shadow: none;
 }
 
-/* Inline "+" add button in MasterSelectWithCreate */
+/* Add button in MasterSelectWithCreate */
 .mcmBody .mfzField > .msw.msw_mfz > .mswAdd.ciab_icon,
 .mcmBody .cliItemsTable td .msw.msw_mfz > .mswAdd.ciab_icon {
   width: var(--mcm-ctrl-h);
@@ -954,11 +923,11 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   FOOTER
+   FOOTER — clean, well-weighted CTAs
    ════════════════════════════════════════════════════════════ */
 .mcmFooter {
-  padding: 12px clamp(14px, 2.4vw, 20px);
-  border-top: 1px solid color-mix(in srgb, var(--modal-head-separator) 85%, transparent);
+  padding: 12px clamp(16px, 2.4vw, 22px);
+  border-top: 1px solid color-mix(in srgb, var(--modal-head-separator) 70%, transparent);
   background: var(--color-card);
   flex: 0 0 auto;
 }
@@ -972,18 +941,18 @@
 
 .mcmFooter .appBtn:not(.appBtn_sm),
 .mcmFooter .mfzBtn.appBtn:not(.appBtn_sm) {
-  min-height: 40px;
+  min-height: 38px;
   padding: 0 18px;
   font-size: var(--mcm-fs-btn);
-  font-weight: 700;
-  border-radius: var(--mcm-ctrl-radius, 10px);
+  font-weight: 650;
+  border-radius: var(--mcm-ctrl-radius, 8px);
   line-height: 1.2;
 }
 .mcmFooter .mfzBtn,
 .mcmFooter .cdlgBtn {
-  min-height: 40px;
-  border-radius: var(--mcm-ctrl-radius, 10px);
-  font-weight: 700;
+  min-height: 38px;
+  border-radius: var(--mcm-ctrl-radius, 8px);
+  font-weight: 650;
 }
 
 /* ── Ghost button ── */
@@ -998,20 +967,20 @@
   line-height: 1.2;
   user-select: none;
   cursor: pointer;
-  transition: background 0.13s, border-color 0.13s, color 0.13s, transform 0.13s;
-  min-height: 40px;
+  transition: background 0.12s, border-color 0.12s, color 0.12s, transform 0.14s;
+  min-height: 38px;
   padding: 0 16px;
   font-size: var(--mcm-fs-btn);
   font-weight: 600;
-  border-radius: var(--mcm-ctrl-radius, 10px);
-  background: color-mix(in srgb, var(--color-surface) 35%, var(--color-card));
+  border-radius: var(--mcm-ctrl-radius, 8px);
+  background: color-mix(in srgb, var(--color-surface) 40%, var(--color-card));
   color: var(--color-text-2);
-  border: 1px solid color-mix(in srgb, var(--color-border-strong) 70%, var(--color-border));
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border-strong) 65%, var(--color-border));
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text) 3%, transparent);
 }
 .mcmFooter .sfmBtnGhost:hover:not(:disabled) {
-  background: var(--color-primary-light);
-  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary-light) 25%, var(--color-card));
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
   color: var(--color-primary);
   transform: translateY(-1px);
 }
@@ -1029,23 +998,23 @@
   line-height: 1.2;
   user-select: none;
   cursor: pointer;
-  transition: filter 0.13s, transform 0.13s, box-shadow 0.13s;
-  min-height: 40px;
+  transition: filter 0.12s, transform 0.14s, box-shadow 0.12s;
+  min-height: 38px;
   padding: 0 18px;
   font-size: var(--mcm-fs-btn);
   font-weight: 700;
-  border-radius: var(--mcm-ctrl-radius, 10px);
+  border-radius: var(--mcm-ctrl-radius, 8px);
   background: var(--color-primary);
   color: var(--on-primary);
   border: 1px solid color-mix(in srgb, var(--color-primary) 55%, var(--color-text-3));
   box-shadow:
-    var(--shadow-btn-inset-highlight, 0 1px 0 rgb(255 255 255 / 0.12) inset),
-    0 4px 14px -2px color-mix(in srgb, var(--color-primary) 38%, transparent);
+    0 1px 0 rgb(255 255 255 / 0.1) inset,
+    0 3px 10px -2px color-mix(in srgb, var(--color-primary) 32%, transparent);
 }
 .mcmFooter .sfmBtnPrimary:hover:not(:disabled) {
-  filter: brightness(1.06);
+  filter: brightness(1.05);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-btn-primary-hover, 0 4px 10px color-mix(in srgb, var(--color-primary) 35%, transparent));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 .mcmFooter .sfmBtnPrimary:active:not(:disabled) { transform: translateY(0) scale(0.98); filter: brightness(0.97); }
 
@@ -1061,16 +1030,16 @@
   line-height: 1.2;
   user-select: none;
   cursor: pointer;
-  transition: filter 0.13s, transform 0.13s;
-  min-height: 40px;
+  transition: filter 0.12s, transform 0.14s;
+  min-height: 38px;
   padding: 0 16px;
   font-size: var(--mcm-fs-btn);
   font-weight: 700;
-  border-radius: var(--mcm-ctrl-radius, 10px);
+  border-radius: var(--mcm-ctrl-radius, 8px);
   background: var(--color-danger);
   color: var(--on-danger);
   border: 1px solid var(--color-danger-dark);
-  box-shadow: var(--shadow-btn-danger, 0 2px 5px color-mix(in srgb, var(--color-danger) 28%, transparent));
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--color-danger) 24%, transparent);
 }
 .mcmFooter .sfmBtnDanger:hover:not(:disabled) { filter: brightness(1.05); transform: translateY(-1px); }
 .mcmFooter .sfmBtnDanger:active:not(:disabled) { transform: translateY(0) scale(0.98); }
@@ -1093,7 +1062,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -1107,13 +1076,13 @@
     --mcm-fs-title:  clamp(13.5px, 4vw, 16px);
     --mcm-fs-body:   clamp(13px, 3.5vw, 14px);
     --mcm-fs-sub:    clamp(11px, 3vw, 12.5px);
-    --mcm-fs-label:  clamp(13px, 3.4vw, 14.5px);
-    --mcm-field-stack-gap: 9px;
-    --mcm-section-gap: 16px;
-    --mcm-field-gap: 12px;
+    --mcm-fs-label:  clamp(11px, 3vw, 12.5px);
+    --mcm-field-stack-gap: 5px;
+    --mcm-section-gap: 14px;
+    --mcm-field-gap: 10px;
     --mcm-fs-hint:   11px;
     --mcm-fs-btn:    12.5px;
-    --mcm-fs-kicker: 11px;
+    --mcm-fs-kicker: 10px;
   }
   .mcmPanel {
     width: 100%;
@@ -1123,7 +1092,6 @@
     animation: mcmSheetIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
     transform-origin: bottom center;
   }
-  /* Drag handle */
   .mcmHead::after {
     content: '';
     position: absolute;
@@ -1133,7 +1101,7 @@
     width: 28px;
     height: 3px;
     border-radius: 2px;
-    background: color-mix(in srgb, var(--modal-head-text) 20%, transparent);
+    background: color-mix(in srgb, var(--modal-head-text) 18%, transparent);
   }
   .mcmHead {
     padding-top: 18px;
@@ -1152,9 +1120,9 @@
     padding-bottom: max(16px, calc(12px + env(safe-area-inset-bottom)));
     gap: var(--mcm-section-gap);
     --mcm-ctrl-h: 42px;
-    --mcm-ctrl-fs: 16px;     /* iOS auto-zoom prevention */
+    --mcm-ctrl-fs: 16px;
     --mcm-ctrl-icon-gap: 38px;
-    --mcm-ctrl-textarea-min: 68px;
+    --mcm-ctrl-textarea-min: 64px;
   }
   .mcm[aria-label="order-place-wizard"] .mcmBody,
   .mcm[aria-label="order-catalog-product-details"] .mcmBody,
@@ -1213,10 +1181,10 @@
   .mcm {
     --mcm-fs-title:  clamp(12.5px, 3.8vw, 15px);
     --mcm-fs-body:   12.5px;
-    --mcm-fs-label:  clamp(12px, 3.2vw, 13.5px);
+    --mcm-fs-label:  clamp(11px, 3vw, 12px);
     --mcm-fs-hint:   11px;
     --mcm-fs-btn:    12px;
-    --mcm-fs-kicker: 10.5px;
+    --mcm-fs-kicker: 10px;
   }
   .mcmHead { padding-left: 8px; padding-right: 8px; }
   .mcmMark { width: 32px; height: 32px; border-radius: 9px; }
@@ -1251,23 +1219,25 @@
    Shared Invoice Modal — piSection, piHeaderTop, credit line
    ════════════════════════════════════════════════════════════ */
 .piSection {
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--color-border-strong, var(--color-border));
   border-radius: 10px;
   overflow: hidden;
   background: var(--color-card);
   min-width: 0;
-  box-shadow: 0 1px 3px color-mix(in srgb, var(--color-text) 4%, transparent);
+  box-shadow:
+    0 1px 4px color-mix(in srgb, var(--color-text) 8%, transparent),
+    0 4px 16px color-mix(in srgb, var(--color-text) 7%, transparent);
 }
 .piSectionHead {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 7px 12px;
-  border-bottom: 1.5px solid color-mix(in srgb, var(--color-primary) 14%, var(--color-border));
-  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface-2));
+  padding: 8px 12px;
+  border-bottom: 1.5px solid var(--color-border-strong, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface-2));
 }
-.piSectionBody { padding: 10px 12px; min-width: 0; background: var(--color-card); }
+.piSectionBody { padding: 12px 14px; min-width: 0; background: var(--color-card); }
 .piSectionTitle {
   font-size: 10px;
   font-weight: 800;
@@ -1275,32 +1245,48 @@
   letter-spacing: 0.1em;
   color: var(--color-primary);
 }
-.piSectionHint { font-size: 11px; color: var(--color-text-4); font-weight: 600; }
+.piSectionHint { font-size: 11px; color: var(--color-text-4); font-weight: 500; }
 
+/* ── Row 1: party field wider (2fr), date fields narrower (1fr each) ── */
 .piHeaderTop {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
-  align-items: stretch;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 12px;
+  align-items: start;
   min-width: 0;
 }
+
+/* ── Row 2: two equal columns by default ── */
 .piHeaderRow2 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 10px;
-  align-items: stretch;
-  margin-top: 10px;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+  margin-top: 12px;
   min-width: 0;
 }
+
+/* 3-column variant: name (1fr) | narrow field (0.75fr) | notes (1.25fr) */
+.piHeaderRow2_3col {
+  grid-template-columns: 1fr 0.75fr 1.25fr;
+}
+
 .piHeadField {
   padding: 0;
   border-right: none;
   min-width: 0;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: var(--mcm-field-stack-gap);
-  align-content: start;
+  align-items: stretch;
   background: transparent;
 }
+
+/* ── Field width modifier: spans full row ── */
+.piHeadField_full {
+  grid-column: 1 / -1;
+}
+
 .piHeadField label {
   margin: 0;
   padding: 0;
@@ -1315,28 +1301,52 @@
 .mcmBody .piHeadField .raInput,
 .mcmBody .piHeadField .cdpInput {
   min-height: var(--mcm-ctrl-h);
-  height: auto;
+  height: var(--mcm-ctrl-h);
   font-size: var(--mcm-ctrl-fs);
   font-weight: var(--mcm-ctrl-fw);
   padding: 0 var(--mcm-ctrl-pad-x);
+  box-sizing: border-box;
 }
 .mcmBody .piHeadField .cdpInput { padding-right: var(--mcm-ctrl-icon-gap); }
+
+/* ── Responsive: tablet (≤1100px) — party spans full width, dates side-by-side ── */
+@media (max-width: 1100px) {
+  .piHeaderTop {
+    grid-template-columns: 1fr 1fr;
+  }
+  .piHeaderTop .piHeadField:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── Responsive: mobile (≤640px) — single column stack ── */
+@media (max-width: 640px) {
+  .piHeaderTop {
+    grid-template-columns: 1fr;
+  }
+  .piHeaderTop .piHeadField:first-child {
+    grid-column: auto;
+  }
+  .piHeaderRow2,
+  .piHeaderRow2_3col {
+    grid-template-columns: 1fr;
+  }
+}
 
 .piCreditLine {
   margin-top: 8px;
   padding: 6px 10px;
   border-radius: 7px;
   background: var(--color-primary-light);
-  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 16%, var(--color-border));
   font-size: 11.5px;
   line-height: 1.4;
   color: var(--color-text-3);
 }
 
 .mcmBody .piCreditLine {
-  border: var(--mcm-chrome-border);
-  border-color: color-mix(in srgb, var(--color-primary) 28%, var(--color-border));
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 
 .piReturnStatusBadge {
@@ -1377,7 +1387,7 @@
   --mfz-surface:     var(--modal-field-bg);
   --mfz-card:       var(--color-card);
   --mfz-border:     var(--mcm-field-border, var(--modal-field-border));
-  --mfz-shadow:     0 1px 3px color-mix(in srgb, var(--color-text) 5%, transparent);
+  --mfz-shadow:     0 1px 3px color-mix(in srgb, var(--color-text) 4%, transparent);
   --mfz-shadow-soft: none;
   font-family: var(--font);
 }
@@ -1389,7 +1399,7 @@
   gap: 8px;
   flex-wrap: wrap;
 }
-.mfzFooterMeta { font-size: 12px; color: var(--color-text-3); font-weight: 600; }
+.mfzFooterMeta { font-size: 12px; color: var(--color-text-3); font-weight: 500; }
 .mfzFooterActions {
   margin-left: auto;
   display: inline-flex;
@@ -1399,9 +1409,9 @@
   flex-wrap: wrap;
 }
 .mfzBtn {
-  min-height: 40px;
-  border-radius: var(--mcm-ctrl-radius, 10px);
-  font-weight: 700;
+  min-height: 38px;
+  border-radius: var(--mcm-ctrl-radius, 8px);
+  font-weight: 650;
   font-size: 13px;
   font-family: var(--font);
 }
@@ -1411,32 +1421,34 @@
   gap: var(--mcm-section-gap, 16px);
 }
 
+/* Panel card — clearly visible border + depth shadow */
 .mfzPanel {
-  border-radius: var(--radius-md, 12px);
-  border: none;
+  border-radius: 12px;
+  border: 1.5px solid var(--color-border-strong, var(--color-border));
   background: var(--color-card);
   box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--color-border) 65%, transparent),
-    0 4px 6px -2px color-mix(in srgb, var(--color-text) 3.5%, transparent),
-    0 14px 32px -12px color-mix(in srgb, var(--color-text) 7%, transparent);
+    0 1px 4px color-mix(in srgb, var(--color-text) 8%, transparent),
+    0 4px 16px color-mix(in srgb, var(--color-text) 7%, transparent);
   overflow: hidden;
 }
 
+/* Panel head — tight, readable kicker */
 .mfzPanelHead {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
-  padding: 10px 14px;
-  border-bottom: none;
+  padding: 9px 14px;
   box-shadow: none;
-  background: color-mix(in srgb, var(--color-surface) 42%, var(--color-card));
+  background: color-mix(in srgb, var(--color-surface) 45%, var(--color-card));
+  /* Visible separator between head and body */
+  border-bottom: 1.5px solid var(--color-border-strong, var(--color-border));
 }
 
-/* Section kicker — mono, tracking, clearly above field labels */
+/* Kicker — mono, tracked, primary */
 .mfzHeadKicker {
   font-family: var(--font-mono, monospace);
-  font-size: clamp(11.5px, 1.8vw, 13px);
+  font-size: clamp(10px, 1.6vw, 11px);
   font-weight: 800;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1451,9 +1463,9 @@
 }
 
 .mfzHeadHint {
-  margin-top: 3px;
-  font-size: 12px;
-  font-weight: 500;
+  margin-top: 2px;
+  font-size: 11.5px;
+  font-weight: 400;
   color: var(--color-text-3);
   line-height: 1.4;
 }
@@ -1475,39 +1487,40 @@
 }
 
 .mfzToggle {
-  height: 28px;
+  height: 26px;
   padding: 0 10px;
   border-radius: 999px;
-  border: 1.5px solid var(--mfz-border);
+  border: 1px solid var(--mfz-border);
   background: var(--color-card);
   color: var(--color-text-2);
   font-family: var(--font);
-  font-weight: 700;
-  font-size: 11.5px;
+  font-weight: 650;
+  font-size: 11px;
   cursor: pointer;
-  transition: border-color 0.14s ease, color 0.14s ease, background 0.14s ease;
+  transition: border-color 0.13s ease, color 0.13s ease, background 0.13s ease;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 .mfzToggle:hover {
-  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--mfz-border));
+  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--mfz-border));
   color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary-light) 30%, var(--color-card));
+  background: color-mix(in srgb, var(--color-primary-light) 25%, var(--color-card));
 }
 .mfzToggleIcon { width: 14px; height: 14px; display: inline-grid; place-items: center; color: currentColor; }
 .mfzToggleIcon svg { width: 14px; height: 14px; }
 .mfzRot90 { transform: rotate(90deg); }
 .mfzTop12 { margin-top: 10px; }
 
+/* Panel body — clean grid */
 .mfzPanelBody {
   padding: 14px 16px;
   display: grid;
-  gap: 14px;
-  background: var(--modal-panel-body-bg, color-mix(in srgb, var(--color-surface) 6%, var(--color-card)));
+  gap: 12px;
+  background: var(--modal-panel-body-bg, var(--color-card));
 }
 
-/* Vertical bands inside one panel (grids, check groups, …) — shared by master + any modal using .mcmBody */
+/* Stack variant — hairline separators */
 .mcmBody .mfzPanelBody.mfzPanelBody_stack {
   display: flex;
   flex-direction: column;
@@ -1519,13 +1532,14 @@
 .mcmBody .mfzPanelBody.mfzPanelBody_stack > * + * {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, var(--color-primary) 6%);
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
 }
 
+/* Grid */
 .mfzGrid {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 13px clamp(10px, 1.2vw, 14px);
+  gap: 12px clamp(10px, 1.2vw, 14px);
 }
 
 .mfz3  { grid-column: span 3; }
@@ -1543,17 +1557,18 @@
   min-width: 0;
 }
 .mfzField > label:not(.mfzCheck),
-.mfzField > .mfzLabel { margin: 0; padding: 0; line-height: 1.2; }
+.mfzField > .mfzLabel { margin: 0; padding: 0; line-height: 1.3; }
 .mfzField > .cdp,
 .mfzField > .mfzInput,
 .mfzField > input.mfzInput,
 .mfzField > select.mfzInput,
 .mfzField > textarea.mfzInput { margin-top: 0; }
 
+/* Label — smaller, clean, secondary color */
 .mfzLabel {
   font-size: var(--mcm-fs-label);
-  font-weight: 700;
-  letter-spacing: 0.015em;
+  font-weight: 600;
+  letter-spacing: 0.008em;
   text-transform: none;
   color: var(--mcm-label-color);
   display: inline-flex;
@@ -1561,17 +1576,18 @@
   gap: 0;
   padding: 0;
   margin: 0;
-  line-height: 1.25;
+  line-height: 1.3;
   width: fit-content;
 }
 .mfzLabel::before { content: none; display: none; }
 
+/* Input / textarea — polished */
 .mfzInput,
 .mfzTextarea {
   width: 100%;
   min-height: var(--mcm-ctrl-h);
   border-radius: var(--mcm-ctrl-radius);
-  border: var(--mcm-field-border-width) solid var(--mcm-field-border);
+  border: 1.5px solid var(--mcm-field-border);
   background: var(--modal-field-bg);
   color: var(--color-text);
   font-family: var(--font);
@@ -1585,14 +1601,15 @@
 }
 .mfzTextarea {
   min-height: var(--mcm-ctrl-textarea-min);
-  padding: 6px var(--mcm-ctrl-pad-x);
+  padding: 8px var(--mcm-ctrl-pad-x);
   resize: vertical;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 .mfzInput::placeholder,
 .mfzTextarea::placeholder {
   color: var(--mcm-field-ph);
   font-weight: 400;
+  font-size: calc(var(--mcm-ctrl-fs) - 0.5px);
 }
 
 .mfzInput:focus,
@@ -1615,7 +1632,7 @@
   color: var(--color-text-4);
   cursor: not-allowed;
   border-color: var(--mcm-field-disabled-border, var(--mcm-field-border));
-  opacity: 0.88;
+  opacity: 0.75;
   box-shadow: none;
   -webkit-text-fill-color: var(--color-text-4);
 }
@@ -1623,7 +1640,7 @@
 .mfzInputErr {
   border-width: var(--mcm-focus-border-w, 2px) !important;
   border-color: var(--color-danger) !important;
-  background: var(--mcm-field-error-bg, color-mix(in srgb, var(--color-danger) 6%, var(--modal-field-bg))) !important;
+  background: var(--mcm-field-error-bg) !important;
   box-shadow: var(--field-error-ring) !important;
 }
 
@@ -1634,23 +1651,23 @@
   border-color: var(--color-danger) !important;
   border-width: var(--mcm-focus-border-w, 2px) !important;
   box-shadow: var(--field-error-ring) !important;
-  background: var(--mcm-field-error-bg, color-mix(in srgb, var(--color-danger) 6%, var(--modal-field-bg))) !important;
+  background: var(--mcm-field-error-bg) !important;
 }
 
-.mfzHelp { font-size: 11.5px; color: var(--color-text-2); line-height: 1.4; font-weight: 500; letter-spacing: 0.01em; margin-top: 4px; }
-.mfzErr  { font-size: 11.5px; color: var(--color-danger-dark, #c0392b); font-weight: 700; letter-spacing: 0.01em; margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+.mfzHelp { font-size: 11.5px; color: var(--color-text-3); line-height: 1.4; font-weight: 400; margin-top: 3px; }
+.mfzErr  { font-size: 11.5px; color: var(--color-danger-dark, #c0392b); font-weight: 600; margin-top: 3px; display: flex; align-items: center; gap: 4px; }
 
 .mfzNote {
-  border-radius: 9px;
-  border: 1.5px solid var(--mfz-border);
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
   background: color-mix(in srgb, var(--color-primary) 5%, var(--modal-field-bg));
   color: var(--color-text-2);
-  padding: 9px 12px;
+  padding: 8px 12px;
   line-height: 1.5;
   font-size: 12.5px;
-  font-weight: 600;
+  font-weight: 500;
 }
-.mfzNoteStrong { border-color: color-mix(in srgb, var(--color-primary) 22%, var(--mfz-border)); }
+.mfzNoteStrong { border-color: color-mix(in srgb, var(--color-primary) 20%, var(--mfz-border)); }
 
 .mfzChips { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .mfzChip {
@@ -1663,25 +1680,26 @@
   background: var(--modal-field-bg);
   color: var(--color-text-2);
   font-size: 11.5px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
+/* Checkboxes — clean, compact grid */
 .mfzChecks {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));
-  gap: 6px 14px;
+  gap: 5px 12px;
   align-items: center;
 }
 .mfzCheck {
   display: inline-flex;
-  gap: 8px;
+  gap: 7px;
   align-items: center;
   margin: 0;
   padding: 0;
   border: none;
   border-radius: 0;
   background: transparent;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 13px;
   color: var(--color-text);
   cursor: pointer;
@@ -1694,9 +1712,9 @@
   color: color-mix(in srgb, var(--color-primary) 35%, var(--color-text-2));
 }
 .mfzCheck input { width: 15px; height: 15px; accent-color: var(--color-primary); flex-shrink: 0; }
-.mfzCheck span { font-size: 13px; font-weight: 600; color: var(--color-text-2); line-height: 1.35; }
+.mfzCheck span { font-size: 13px; font-weight: 500; color: var(--color-text-2); line-height: 1.35; }
 
-/* Telx (phone field) — strip external shadows inside modal */
+/* Phone field */
 .mfz .telx,
 .mfz .telxRibbonMark,
 .mfz .telxSlot { box-shadow: none !important; }
@@ -1708,12 +1726,9 @@
 }
 
 @media (max-width: 720px) {
-  .mfzPanelHead { padding: 8px 12px; gap: 8px; }
-  .mfzPanelBody { padding: 12px 14px; gap: 11px; }
-  .mcmBody .mfzPanelBody.mfzPanelBody_stack > * + * {
-    margin-top: 9px;
-    padding-top: 9px;
-  }
+  .mfzPanelHead { padding: 8px 12px; gap: 6px; border-bottom: 1px solid color-mix(in srgb, var(--color-border) 35%, transparent); }
+  .mfzPanelBody { padding: 12px 14px; gap: 10px; }
+  .mcmBody .mfzPanelBody.mfzPanelBody_stack > * + * { margin-top: 9px; padding-top: 9px; }
   .mfzGrid { gap: 10px 10px; }
   .mfzBody { gap: 12px; }
   .mfz6, .mfz4, .mfz8, .mfz9 { grid-column: span 12; }
@@ -1724,7 +1739,7 @@
   .mfz3, .mfz4, .mfz6, .mfz8, .mfz9, .mfz12 { grid-column: auto; }
   .mfzFooter { gap: 5px; }
   .mfzFooterActions { gap: 5px; }
-  .mfzBtn { min-height: 38px; padding: 0 11px; border-radius: var(--mcm-ctrl-radius, 10px); font-size: 12.5px; }
+  .mfzBtn { min-height: 38px; padding: 0 11px; border-radius: var(--mcm-ctrl-radius, 8px); font-size: 12.5px; }
 }
 @media (max-width: 520px) {
   .mfzFooter { flex-direction: column; align-items: stretch; }
@@ -1734,12 +1749,12 @@
 }
 @media (max-width: 480px) {
   .mfzPanel { border-radius: 9px; }
-  .mfzPanelHead { padding: 8px 10px; gap: 6px; }
+  .mfzPanelHead { padding: 7px 10px; gap: 5px; }
   .mfzPanelBody { padding: 9px 10px; gap: 9px; }
   .mfzGrid { gap: 9px; }
   .mfzBody { gap: 10px; }
-  .mfzChecks { gap: 8px 12px; }
-  .mfzNote { padding: 8px 10px; border-radius: 8px; font-size: 12px; }
+  .mfzChecks { gap: 7px 10px; }
+  .mfzNote { padding: 7px 10px; border-radius: 7px; font-size: 12px; }
 }
 @media (max-width: 380px) {
   .mfzPanel { border-radius: 8px; }
@@ -1747,16 +1762,14 @@
   .mfzPanelBody { padding: 6px 8px; }
   .mfzBtn { min-height: 32px; padding: 0 8px; font-size: 12px; border-radius: 7px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .mfz * { transition: none !important; }
-}
+@media (prefers-reduced-motion: reduce) { .mfz * { transition: none !important; } }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Per-modal bundles
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── ModalFooterShell ── */
-.mfsAppActions { display: flex; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+.mfsAppActions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
 
 /* ── KeyboardShortcutsModal (.ksh*) ── */
 .kshTrigger {
@@ -1770,17 +1783,17 @@
   color: var(--color-text-3);
   font-family: var(--font);
   font-size: 11.5px;
-  font-weight: 750;
+  font-weight: 650;
   line-height: 1;
   cursor: pointer;
   user-select: none;
-  min-height: 30px;
+  min-height: 28px;
   box-sizing: border-box;
 }
 .kshTrigger:hover {
-  border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+  border-color: color-mix(in srgb, var(--color-primary) 30%, var(--color-border));
   color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary-light) 55%, var(--color-surface));
+  background: color-mix(in srgb, var(--color-primary-light) 40%, var(--color-surface));
 }
 .kshTriggerIcon { flex-shrink: 0; color: var(--color-primary); }
 .kshTriggerLabel { line-height: 1; }
@@ -1792,10 +1805,10 @@
   align-items: center;
   min-width: 0;
   padding: 4px 0;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 40%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 35%, transparent);
 }
 .kshRow:last-child { border-bottom: none; padding-bottom: 0; }
-.kshDesc { font-size: 12.5px; font-weight: 650; color: var(--color-text-2); line-height: 1.3; }
+.kshDesc { font-size: 12.5px; font-weight: 600; color: var(--color-text-2); line-height: 1.3; }
 .kshKeysInner {
   display: inline-flex;
   flex-wrap: wrap;
@@ -1805,11 +1818,11 @@
   max-width: 100%;
 }
 .kshKeyWrap { display: inline-flex; align-items: center; gap: 3px; }
-.kshPlus { font-size: 10.5px; font-weight: 750; color: var(--color-text-4); }
+.kshPlus { font-size: 10.5px; font-weight: 700; color: var(--color-text-4); }
 .kshKbd {
   font: inherit;
   font-size: 10.5px;
-  font-weight: 850;
+  font-weight: 800;
   border: 1px solid var(--color-border);
   border-bottom-width: 2px;
   border-radius: 5px;
@@ -1821,7 +1834,7 @@
 .kshFooter.sfmModalFooter { justify-content: flex-end; }
 
 @media (max-width: 720px) {
-  .kshTrigger { min-height: 32px; padding: 4px 9px; font-size: 10.5px; gap: 5px; }
+  .kshTrigger { min-height: 30px; padding: 4px 9px; font-size: 10.5px; gap: 5px; }
   .kshTriggerIcon svg { width: 14px; height: 14px; }
   .kshList { gap: 5px; }
   .kshRow { gap: 7px; padding: 4px 0; }
@@ -1837,19 +1850,19 @@
 /* ── MfgCompanyMasterModal (.mfg*) ── */
 .mfgInlineRow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .mfgInlineRowEnd { justify-content: space-between; }
-.mfgMiniBtn { height: 30px; border-radius: 999px; font-weight: 800; }
-.mfgTwoColChecks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 8px 12px; }
-.mfgCheckDesc { display: block; margin-top: 3px; font-size: 12px; font-weight: 600; color: var(--color-text-3); line-height: 1.35; }
+.mfgMiniBtn { height: 28px; border-radius: 999px; font-weight: 700; }
+.mfgTwoColChecks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 7px 12px; }
+.mfgCheckDesc { display: block; margin-top: 2px; font-size: 11.5px; font-weight: 500; color: var(--color-text-3); line-height: 1.35; }
 
 @media (max-width: 720px) {
   .mfgInlineRow { gap: 6px; }
-  .mfgMiniBtn { height: 30px; padding: 0 10px; font-size: 11.5px; }
+  .mfgMiniBtn { height: 28px; padding: 0 10px; font-size: 11.5px; }
   .mfgTwoColChecks { grid-template-columns: 1fr; gap: 6px; }
   .mfgCheckDesc { font-size: 11px; margin-top: 2px; }
 }
 @media (max-width: 480px) {
   .mfgInlineRow { gap: 5px; }
-  .mfgMiniBtn { height: 28px; padding: 0 9px; font-size: 11px; }
+  .mfgMiniBtn { height: 26px; padding: 0 9px; font-size: 11px; }
 }
 
 /* ── VendorMasterModal (.vm*) ── */
@@ -1862,7 +1875,7 @@
 @media (prefers-reduced-motion: reduce) { .vmShell.mfz * { transition: none !important; } }
 
 /* Compact compliance toggle */
-.mcmComplianceToggle { height: 28px; padding: 0 9px; font-size: 11.5px; }
+.mcmComplianceToggle { height: 26px; padding: 0 9px; font-size: 11px; }
 
 /* ── OrderCatalogProductDetailsModal (.cpd*) ── */
 .cpd_wrap { display: flex; flex-direction: column; gap: clamp(10px, 2.8vw, 16px); }
@@ -1872,24 +1885,24 @@
   flex-direction: column;
   gap: 12px;
   padding: 12px;
-  border-radius: 12px;
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
   background: color-mix(in srgb, var(--color-surface) 55%, var(--color-card));
 }
 .cpd_sectionHeader { display: flex; align-items: center; gap: 8px; }
 .cpd_sectionIcon {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
-.cpd_sectionIcon svg { width: 16px; height: 16px; }
-.cpd_iconBlue { background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card)); border: 1.5px solid color-mix(in srgb, var(--color-primary) 22%, transparent); color: var(--color-primary); }
-.cpd_iconGreen { background: color-mix(in srgb, var(--color-success) 12%, var(--color-card)); border: 1.5px solid color-mix(in srgb, var(--color-success) 22%, transparent); color: var(--color-success); }
-.cpd_sectionTitle { font-size: 11px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; color: var(--color-primary); }
+.cpd_sectionIcon svg { width: 15px; height: 15px; }
+.cpd_iconBlue { background: color-mix(in srgb, var(--color-primary) 10%, var(--color-card)); border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent); color: var(--color-primary); }
+.cpd_iconGreen { background: color-mix(in srgb, var(--color-success) 10%, var(--color-card)); border: 1px solid color-mix(in srgb, var(--color-success) 20%, transparent); color: var(--color-success); }
+.cpd_sectionTitle { font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-primary); }
 
 .cpd_grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; }
 .cpd_span12 { grid-column: span 12; }
@@ -1902,8 +1915,8 @@
   font-weight: 600;
   color: var(--color-text);
   background: color-mix(in srgb, var(--color-card) 85%, var(--color-surface));
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 55%, transparent);
-  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+  border-radius: 7px;
   padding: 6px 10px;
   line-height: 1.4;
   min-height: 34px;
@@ -1916,17 +1929,17 @@
 
 .cpd_statsRow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .cpd_statChip {
-  border-radius: 11px;
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 60%, transparent);
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
   background: color-mix(in srgb, var(--color-surface) 75%, var(--color-card));
   padding: 8px 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-.cpd_chipPrimary { border-color: color-mix(in srgb, var(--color-primary) 28%, transparent); background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card)); }
+.cpd_chipPrimary { border-color: color-mix(in srgb, var(--color-primary) 25%, transparent); background: color-mix(in srgb, var(--color-primary) 7%, var(--color-card)); }
 .cpd_chipPrimary .cpd_statValue { color: var(--color-primary); }
-.cpd_chipStock { border-color: color-mix(in srgb, var(--color-success) 28%, transparent); background: color-mix(in srgb, var(--color-success) 8%, var(--color-card)); }
+.cpd_chipStock { border-color: color-mix(in srgb, var(--color-success) 25%, transparent); background: color-mix(in srgb, var(--color-success) 7%, var(--color-card)); }
 .cpd_chipStock .cpd_statValue { color: var(--color-success); }
 .cpd_statLabel { font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-text-3); }
 .cpd_statValue { font-size: 15px; font-weight: 900; color: var(--color-text); line-height: 1.1; }
@@ -1937,8 +1950,8 @@
   align-items: center;
   gap: 8px;
   padding: 9px 10px;
-  border-radius: 9px;
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
   background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
   color: var(--color-text-3);
 }
@@ -1946,8 +1959,8 @@
 .cpd_qtyLimitValue { font-size: 13.5px; font-weight: 800; color: var(--color-text); margin-top: 2px; }
 
 .cpd_notes {
-  border-radius: 10px;
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
   background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card));
   padding: 9px 11px;
   display: flex;
@@ -1960,7 +1973,7 @@
 
 @media (max-width: 768px) { .cpd_statsRow { grid-template-columns: repeat(2, 1fr); } .cpd_span4 { grid-column: span 6; } }
 @media (max-width: 520px) { .cpd_span6, .cpd_span4 { grid-column: span 12; } .cpd_statsRow { grid-template-columns: 1fr 1fr; } .cpd_qtyLimitRow { grid-template-columns: 1fr; } }
-@media (max-width: 640px) { .cpd_section { padding: 10px; border-radius: 11px; gap: 10px; } .cpd_grid { gap: 7px; } .cpd_value { min-height: 40px; } .cpd_statsRow { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; } }
+@media (max-width: 640px) { .cpd_section { padding: 10px; border-radius: 10px; gap: 10px; } .cpd_grid { gap: 7px; } .cpd_value { min-height: 40px; } .cpd_statsRow { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; } }
 @media (max-width: 420px) { .cpd_statsRow { grid-template-columns: 1fr; } .cpd_section { padding: 9px; } }
 
 /* ── SchemeDiscountPopup (.sdp*) ── */
@@ -1968,11 +1981,11 @@
 
 .sdpKpiBoard {
   border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--color-border) 82%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent);
   background: linear-gradient(
     165deg,
     color-mix(in srgb, var(--color-card) 94%, var(--color-surface)),
-    color-mix(in srgb, var(--color-primary-light) 26%, var(--color-card))
+    color-mix(in srgb, var(--color-primary-light) 22%, var(--color-card))
   );
   overflow: hidden;
 }
@@ -1981,7 +1994,7 @@
   align-items: center;
   gap: 10px;
   padding: clamp(10px, 2vw, 12px) clamp(12px, 2.4vw, 14px);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
 }
 .sdpKpiHeadIcon {
   width: clamp(32px, 6vw, 36px);
@@ -1990,56 +2003,56 @@
   display: grid;
   place-items: center;
   color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, var(--color-border));
   flex-shrink: 0;
 }
 .sdpKpiHeadKicker { margin: 0; font-size: clamp(9.5px, 1.7vw, 10.5px); font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-4); }
-.sdpKpiHeadTitle { margin: 2px 0 0; font-size: clamp(13px, 2.4vw, 14px); font-weight: 850; color: var(--color-text-heading); }
+.sdpKpiHeadTitle { margin: 2px 0 0; font-size: clamp(13px, 2.4vw, 14px); font-weight: 800; color: var(--color-text-heading); }
 .sdpKpiTiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(6px, 1.5vw, 8px); padding: clamp(10px, 2vw, 12px); }
 .sdpKpiTile {
   padding: clamp(8px, 1.8vw, 10px);
-  border-radius: clamp(8px, 1.6vw, 10px);
-  border: 1px solid color-mix(in srgb, var(--color-border) 78%, transparent);
+  border-radius: clamp(7px, 1.4vw, 9px);
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
   background: color-mix(in srgb, var(--color-card) 92%, var(--color-surface));
   display: flex;
   flex-direction: column;
   gap: 3px;
   min-width: 0;
   font-variant-numeric: tabular-nums;
-  transition: border-color 0.14s ease, box-shadow 0.14s ease;
+  transition: border-color 130ms ease, box-shadow 130ms ease;
 }
-.sdpKpiTile:hover { border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-border)); box-shadow: 0 1px 4px color-mix(in srgb, var(--color-text) 6%, transparent); }
+.sdpKpiTile:hover { border-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-border)); box-shadow: 0 1px 4px color-mix(in srgb, var(--color-text) 5%, transparent); }
 .sdpKpiTileLab { font-size: clamp(9px, 1.7vw, 10.5px); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-4); }
 .sdpKpiTileVal { font-size: clamp(13.5px, 2.4vw, 15px); font-weight: 900; color: var(--color-text-heading); word-break: break-word; }
 
-.sdpSchemePanel { border-radius: 10px; border: 1px dashed color-mix(in srgb, var(--color-warning) 38%, var(--color-border)); background: color-mix(in srgb, var(--color-warning-light) 55%, var(--color-card)); padding: clamp(10px, 2.2vw, 14px); }
+.sdpSchemePanel { border-radius: 10px; border: 1px dashed color-mix(in srgb, var(--color-warning) 35%, var(--color-border)); background: color-mix(in srgb, var(--color-warning-light) 50%, var(--color-card)); padding: clamp(10px, 2.2vw, 14px); }
 .sdpSchemeInner { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: clamp(10px, 2.2vw, 14px); }
 .sdpSchemeCopy { display: flex; gap: 10px; min-width: min(100%, 200px); flex: 1 1 180px; }
-.sdpSchemeIcon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; color: var(--color-warning-darker); background: color-mix(in srgb, var(--color-warning) 12%, var(--color-card)); border: 1px solid color-mix(in srgb, var(--color-warning) 28%, var(--color-border)); }
+.sdpSchemeIcon { width: 38px; height: 38px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0; color: var(--color-warning-darker); background: color-mix(in srgb, var(--color-warning) 10%, var(--color-card)); border: 1px solid color-mix(in srgb, var(--color-warning) 25%, var(--color-border)); }
 .sdpSchemeKicker { margin: 0; font-size: clamp(9.5px, 1.7vw, 10.5px); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-warning-darker); }
 .sdpSchemeTitle { margin: 3px 0 0; font-size: clamp(15px, 2.8vw, 17px); font-weight: 900; color: var(--color-text-heading); }
-.sdpSchemeHint { margin: 5px 0 0; font-size: clamp(11.5px, 2vw, 12.5px); font-weight: 600; color: var(--color-text-2); line-height: 1.4; max-width: 36rem; }
+.sdpSchemeHint { margin: 5px 0 0; font-size: clamp(11.5px, 2vw, 12.5px); font-weight: 500; color: var(--color-text-2); line-height: 1.4; max-width: 36rem; }
 .sdpSchemeBtn { flex-shrink: 0; align-self: center; }
-.sdpSchemeEmpty { margin: 0; font-size: clamp(12px, 2vw, 13.5px); font-weight: 600; color: var(--color-text-3); text-align: center; padding: 6px 4px; }
+.sdpSchemeEmpty { margin: 0; font-size: clamp(12px, 2vw, 13.5px); font-weight: 500; color: var(--color-text-3); text-align: center; padding: 6px 4px; }
 
-.sdpAdjust { border-radius: 10px; border: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent); background: var(--color-card); padding: clamp(10px, 2vw, 14px); }
+.sdpAdjust { border-radius: 10px; border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent); background: var(--color-card); padding: clamp(10px, 2vw, 14px); }
 .sdpAdjustHead { display: flex; align-items: flex-start; gap: 8px; margin-bottom: clamp(10px, 2vw, 12px); color: var(--color-primary); }
 .sdpAdjustKicker { margin: 0; font-size: clamp(9.5px, 1.7vw, 10.5px); font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-4); }
-.sdpAdjustTitle { margin: 2px 0 0; font-size: clamp(14px, 2.6vw, 15px); font-weight: 850; color: var(--color-text-heading); }
+.sdpAdjustTitle { margin: 2px 0 0; font-size: clamp(14px, 2.6vw, 15px); font-weight: 800; color: var(--color-text-heading); }
 .sdpAdjustGrid { gap: clamp(8px, 1.8vw, 10px); }
 
-.sdpLedger { border-radius: 10px; border: 1px solid color-mix(in srgb, var(--color-border) 82%, transparent); background: color-mix(in srgb, var(--color-surface) 65%, var(--color-card)); overflow: hidden; }
-.sdpLedgerHead { display: flex; align-items: center; gap: 7px; padding: clamp(8px, 1.8vw, 10px) clamp(12px, 2.4vw, 14px); font-size: clamp(10px, 1.8vw, 11.5px); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-4); border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent); background: color-mix(in srgb, var(--color-text) 3%, transparent); }
+.sdpLedger { border-radius: 10px; border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent); background: color-mix(in srgb, var(--color-surface) 65%, var(--color-card)); overflow: hidden; }
+.sdpLedgerHead { display: flex; align-items: center; gap: 7px; padding: clamp(8px, 1.8vw, 10px) clamp(12px, 2.4vw, 14px); font-size: clamp(10px, 1.8vw, 11.5px); font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-4); border-bottom: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); background: color-mix(in srgb, var(--color-text) 2.5%, transparent); }
 .sdpLedgerList { list-style: none; margin: 0; padding: clamp(7px, 1.6vw, 9px) clamp(12px, 2.4vw, 14px); display: flex; flex-direction: column; gap: 1px; font-variant-numeric: tabular-nums; }
-.sdpLedgerRow { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 5px 0; font-size: clamp(12.5px, 2.2vw, 14px); font-weight: 600; color: var(--color-text-2); }
-.sdpLedgerRow strong { font-weight: 850; color: var(--color-text-heading); }
+.sdpLedgerRow { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 5px 0; font-size: clamp(12.5px, 2.2vw, 14px); font-weight: 500; color: var(--color-text-2); }
+.sdpLedgerRow strong { font-weight: 800; color: var(--color-text-heading); }
 .sdpLedgerRow_muted strong { color: var(--color-text-2); }
-.sdpLedgerRow_net { margin-top: 3px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent); font-size: clamp(13.5px, 2.4vw, 15px); color: var(--color-text-heading); }
+.sdpLedgerRow_net { margin-top: 3px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent); font-size: clamp(13.5px, 2.4vw, 15px); color: var(--color-text-heading); }
 .sdpLedgerRow_net strong { font-size: clamp(15px, 2.7vw, 17px); color: var(--color-primary); }
-.sdpLedgerMeta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; padding: clamp(8px, 1.8vw, 10px) clamp(12px, 2.4vw, 14px); border-top: 1px dashed color-mix(in srgb, var(--color-border) 72%, transparent); font-size: clamp(11px, 1.8vw, 12px); font-weight: 600; color: var(--color-text-3); }
+.sdpLedgerMeta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; padding: clamp(8px, 1.8vw, 10px) clamp(12px, 2.4vw, 14px); border-top: 1px dashed color-mix(in srgb, var(--color-border) 60%, transparent); font-size: clamp(11px, 1.8vw, 12px); font-weight: 500; color: var(--color-text-3); }
 
-.sdpLockBanner { display: flex; gap: 10px; align-items: flex-start; padding: clamp(9px, 1.8vw, 11px) clamp(10px, 2vw, 13px); border-radius: clamp(8px, 1.8vw, 10px); border: 1px solid color-mix(in srgb, var(--color-danger) 28%, var(--color-border)); background: color-mix(in srgb, var(--color-danger-light) 50%, var(--color-card)); color: var(--color-danger-dark); }
+.sdpLockBanner { display: flex; gap: 10px; align-items: flex-start; padding: clamp(9px, 1.8vw, 11px) clamp(10px, 2vw, 13px); border-radius: clamp(8px, 1.8vw, 10px); border: 1px solid color-mix(in srgb, var(--color-danger) 25%, var(--color-border)); background: color-mix(in srgb, var(--color-danger-light) 45%, var(--color-card)); color: var(--color-danger-dark); }
 .sdpLockIcon { flex-shrink: 0; display: grid; place-items: center; color: var(--color-danger); }
 .sdpLockBody { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .sdpLockBody p { margin: 0; font-size: clamp(12px, 2vw, 13px); font-weight: 700; line-height: 1.4; }
@@ -2061,8 +2074,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  border-radius: 9px;
-  border: 1.5px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent);
   background: color-mix(in srgb, var(--color-surface) 80%, var(--color-card));
   padding: 6px 9px;
   transition: all 0.18s ease;
@@ -2073,7 +2086,7 @@
 .cmpStepNum {
   width: 20px; height: 20px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--color-border) 50%, transparent);
+  background: color-mix(in srgb, var(--color-border) 45%, transparent);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2084,15 +2097,15 @@
   transition: all 0.18s ease;
 }
 .cmpStepLabel { font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; font-size: 9.5px; color: var(--color-text-3); transition: color 0.18s ease; }
-.cmpOrderStepPill.isActive { border-color: color-mix(in srgb, var(--color-primary) 55%, transparent); background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card)); }
+.cmpOrderStepPill.isActive { border-color: color-mix(in srgb, var(--color-primary) 50%, transparent); background: color-mix(in srgb, var(--color-primary) 7%, var(--color-card)); }
 .cmpOrderStepPill.isActive .cmpStepNum { background: var(--color-primary); color: var(--on-primary); }
 .cmpOrderStepPill.isActive .cmpStepLabel { color: var(--color-primary); }
-.cmpOrderStepPill.isDone { border-color: color-mix(in srgb, var(--color-secondary) 45%, transparent); background: color-mix(in srgb, var(--color-secondary) 8%, var(--color-card)); }
+.cmpOrderStepPill.isDone { border-color: color-mix(in srgb, var(--color-secondary) 40%, transparent); background: color-mix(in srgb, var(--color-secondary) 7%, var(--color-card)); }
 .cmpOrderStepPill.isDone .cmpStepNum { background: var(--color-secondary); color: var(--on-primary); }
 .cmpOrderStepPill.isDone .cmpStepLabel { color: var(--color-secondary); }
-.cmpOrderStepPill.isDisabled { opacity: 0.5; cursor: not-allowed; }
+.cmpOrderStepPill.isDisabled { opacity: 0.45; cursor: not-allowed; }
 
-.cmpOrderContextMuted { margin: 0; padding: 0 2px; font-size: 10.5px; font-weight: 600; line-height: 1.3; color: var(--color-text-3); word-break: break-word; }
+.cmpOrderContextMuted { margin: 0; padding: 0 2px; font-size: 10.5px; font-weight: 500; line-height: 1.3; color: var(--color-text-3); word-break: break-word; }
 .cmpOrderContextSep { opacity: 0.85; }
 .cmpOrderContextTag { font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; font-size: 9.5px; color: var(--color-text-3); }
 
@@ -2107,71 +2120,71 @@
 @media (min-width: 781px) { .cmpOrderFieldGroup { grid-template-columns: minmax(0, 1fr) minmax(200px, min(32vw, 280px)); gap: 12px 18px; } }
 
 .cmpOrderQtyBlock { display: flex; flex-direction: column; gap: 7px; }
-.cmpOrderFieldLabel { font-size: 12px; font-weight: 700; letter-spacing: 0.02em; color: var(--color-text-2); display: block; }
-.cmpOrderOptional { font-weight: 500; text-transform: none; letter-spacing: 0; font-size: 10.5px; opacity: 0.7; }
+.cmpOrderFieldLabel { font-size: 11.5px; font-weight: 650; letter-spacing: 0.01em; color: var(--color-text-2); display: block; }
+.cmpOrderOptional { font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 10.5px; opacity: 0.7; }
 
-.cmpOrderQtyRow { display: flex; align-items: center; gap: 0; border: var(--mcm-field-border-width) solid var(--mcm-field-border); border-radius: 10px; overflow: hidden; background: var(--color-card); width: 150px; }
-.cmpOrderQtyBtn { width: 38px; height: 40px; background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card)); border: none; cursor: pointer; font-size: 18px; font-weight: 300; color: var(--color-text-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.13s; line-height: 1; }
-.cmpOrderQtyBtn:hover:not(:disabled) { background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card)); color: var(--color-primary); }
+.cmpOrderQtyRow { display: flex; align-items: center; gap: 0; border: 1.5px solid var(--mcm-field-border); border-radius: 9px; overflow: hidden; background: var(--color-card); width: 150px; }
+.cmpOrderQtyBtn { width: 38px; height: 40px; background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card)); border: none; cursor: pointer; font-size: 18px; font-weight: 300; color: var(--color-text-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.12s; line-height: 1; }
+.cmpOrderQtyBtn:hover:not(:disabled) { background: color-mix(in srgb, var(--color-primary) 10%, var(--color-card)); color: var(--color-primary); }
 .cmpOrderQtyBtn:disabled { opacity: 0.35; cursor: not-allowed; }
 .cmpOrderQtyInput { flex: 1; min-width: 0; height: 40px; text-align: center; font-size: 16px; font-weight: 800; color: var(--color-text); background: transparent; border: none; outline: none; padding: 0; -moz-appearance: textfield; }
 .cmpOrderQtyInput::-webkit-inner-spin-button, .cmpOrderQtyInput::-webkit-outer-spin-button { -webkit-appearance: none; }
 .cmpOrderQtyHint { font-size: 11px; color: var(--color-text-3); text-align: center; }
 
 .cmpOrderCartList { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-.cmpOrderCartItem { display: flex; flex-direction: column; gap: 7px; padding: 8px 9px; border-radius: 10px; border: 1.5px solid color-mix(in srgb, var(--color-border) 70%, transparent); background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card)); }
+.cmpOrderCartItem { display: flex; flex-direction: column; gap: 7px; padding: 8px 9px; border-radius: 9px; border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card)); }
 .cmpOrderCartItemHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 7px; }
 .cmpOrderCartFoot { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.cmpOrderCartItem.isInvalid { border-color: color-mix(in srgb, var(--color-danger) 40%, var(--color-border)); }
+.cmpOrderCartItem.isInvalid { border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border)); }
 .cmpOrderCartMain { min-width: 0; }
 .cmpOrderCartName { font-weight: 800; font-size: 13px; color: var(--color-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 .cmpOrderCartMeta { margin-top: 3px; font-size: 11px; color: var(--color-text-3); line-height: 1.3; }
 .cmpOrderCartMetaLine { margin-top: 4px; font-size: 11.5px; color: var(--color-text-2); line-height: 1.4; word-break: break-word; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 .cmpOrderCartQty { display: flex; align-items: center; gap: 0; }
 .cmpOrderCartTotal { font-weight: 900; color: var(--color-text); font-size: 12.5px; white-space: nowrap; }
-.cmpOrderCartRemove { width: 34px; height: 34px; border-radius: 9px; border: 1.5px solid color-mix(in srgb, var(--color-border) 70%, transparent); background: transparent; color: var(--color-text-2); cursor: pointer; line-height: 1; font-size: 18px; font-weight: 300; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.cmpOrderCartRemove:hover:not(:disabled) { color: var(--color-danger); border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-border)); background: color-mix(in srgb, var(--color-danger) 6%, transparent); }
+.cmpOrderCartRemove { width: 32px; height: 32px; border-radius: 7px; border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); background: transparent; color: var(--color-text-2); cursor: pointer; line-height: 1; font-size: 18px; font-weight: 300; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cmpOrderCartRemove:hover:not(:disabled) { color: var(--color-danger); border-color: color-mix(in srgb, var(--color-danger) 30%, var(--color-border)); background: color-mix(in srgb, var(--color-danger) 5%, transparent); }
 .cmpOrderCartRemove:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.cmpOrderEmpty { padding: 10px; border-radius: 11px; border: 1.5px dashed color-mix(in srgb, var(--color-border) 65%, transparent); color: var(--color-text-3); background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card)); font-size: 12px; }
+.cmpOrderEmpty { padding: 10px; border-radius: 10px; border: 1px dashed color-mix(in srgb, var(--color-border) 60%, transparent); color: var(--color-text-3); background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card)); font-size: 12px; }
 
-.cmpOrderLivePreview { background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card)); border: 1.5px solid color-mix(in srgb, var(--color-border) 70%, transparent); border-radius: 10px; padding: 9px 10px; display: flex; flex-direction: column; gap: 5px; }
+.cmpOrderLivePreview { background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card)); border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); border-radius: 9px; padding: 9px 10px; display: flex; flex-direction: column; gap: 5px; }
 @media (min-width: 781px) { .cmpOrderLivePreview { position: sticky; top: 4px; align-self: start; } }
 .cmpOrderLivePreviewHead { font-size: 10.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-text-3); margin: -2px 0 2px; }
 .cmpOrderLiveRow { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--color-text-2); }
 .cmpOrderLiveDiscount { color: var(--color-success); }
-.cmpOrderLiveTotal { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; font-weight: 800; color: var(--color-primary); padding-top: 7px; margin-top: 2px; border-top: 1.5px dashed color-mix(in srgb, var(--color-border) 60%, transparent); }
+.cmpOrderLiveTotal { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; font-weight: 800; color: var(--color-primary); padding-top: 7px; margin-top: 2px; border-top: 1px dashed color-mix(in srgb, var(--color-border) 55%, transparent); }
 
 .cmpOrderNotesBlock { display: flex; flex-direction: column; gap: 6px; }
-.cmpOrderNotesInput { width: 100%; min-height: 66px; border-radius: 9px; border: var(--mcm-field-border-width) solid var(--mcm-field-border); background: var(--mcm-field-bg); color: var(--color-text); font-size: 13px; padding: 8px 10px; resize: vertical; font-family: var(--font); line-height: 1.5; box-sizing: border-box; transition: border-color 0.13s, box-shadow 0.13s, background 0.13s; }
+.cmpOrderNotesInput { width: 100%; min-height: 66px; border-radius: 8px; border: 1.5px solid var(--mcm-field-border); background: var(--mcm-field-bg); color: var(--color-text); font-size: 13px; padding: 8px 10px; resize: vertical; font-family: var(--font); line-height: 1.5; box-sizing: border-box; transition: border-color 0.12s, box-shadow 0.12s, background 0.12s; }
 .cmpOrderNotesInput:hover:not(:focus) { border-color: var(--mcm-field-border-hover); background: var(--mcm-field-bg-hover); }
-.cmpOrderNotesInput::placeholder { color: var(--color-text-3); opacity: 0.7; }
-.cmpOrderNotesInput:focus { outline: none; border-color: var(--color-primary); background: var(--mcm-field-bg-focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14%, transparent); }
+.cmpOrderNotesInput::placeholder { color: var(--color-text-3); opacity: 0.65; }
+.cmpOrderNotesInput:focus { outline: none; border-color: var(--color-primary); background: var(--mcm-field-bg-focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent); }
 
 .cmpOrderStep2 { display: flex; flex-direction: column; gap: 9px; }
-.cmpOrderNotesReadonly { display: flex; flex-direction: column; gap: 3px; color: var(--color-text-2); background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card)); border: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); border-radius: 8px; padding: 7px 9px; }
+.cmpOrderNotesReadonly { display: flex; flex-direction: column; gap: 3px; color: var(--color-text-2); background: color-mix(in srgb, var(--color-surface) 70%, var(--color-card)); border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent); border-radius: 7px; padding: 7px 9px; }
 .cmpOrderNotesReadonlyLabel { font-weight: 800; color: var(--color-text-3); font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
 .cmpOrderNotesReadonlyText { font-size: 12.5px; line-height: 1.4; word-break: break-word; }
 
-.cmpOrderSummaryCompact { border-radius: 10px; border: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent); background: color-mix(in srgb, var(--color-card) 92%, var(--color-surface)); padding: 9px 11px; display: flex; flex-direction: column; gap: 4px; }
+.cmpOrderSummaryCompact { border-radius: 9px; border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); background: color-mix(in srgb, var(--color-card) 92%, var(--color-surface)); padding: 9px 11px; display: flex; flex-direction: column; gap: 4px; }
 .cmpOrderSummaryCompactTitle { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-3); margin-bottom: 1px; }
 .cmpOrderSumRow { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12.5px; color: var(--color-text-2); }
 .cmpOrderSumRow span:last-child { font-weight: 700; color: var(--color-text); font-variant-numeric: tabular-nums; text-align: right; }
 .cmpOrderSumCaption { font-size: 10.5px; color: var(--color-text-3); margin-top: -2px; margin-bottom: 1px; }
 .cmpOrderSumRowDiscount span:last-child { color: var(--color-success); }
-.cmpOrderSumGrand { margin-top: 4px; padding-top: 7px; border-top: 1px dashed color-mix(in srgb, var(--color-border) 55%, transparent); font-size: 13.5px; font-weight: 800; color: var(--color-primary); }
+.cmpOrderSumGrand { margin-top: 4px; padding-top: 7px; border-top: 1px dashed color-mix(in srgb, var(--color-border) 50%, transparent); font-size: 13.5px; font-weight: 800; color: var(--color-primary); }
 .cmpOrderSumGrand span:last-child { font-size: clamp(16px, 4.2vw, 19px); font-weight: 900; color: var(--color-primary); }
 
 @media (max-width: 640px) {
   .cmpOrderStepRow { gap: 4px; }
-  .cmpOrderStepPill { padding: 5px 7px; gap: 4px; border-radius: 8px; min-height: 32px; }
+  .cmpOrderStepPill { padding: 5px 7px; gap: 4px; border-radius: 7px; min-height: 30px; }
   .cmpStepNum { width: 18px; height: 18px; font-size: 10px; }
   .cmpStepLabel { font-size: 8.5px; }
   .cmpOrderFieldGroup { grid-template-columns: 1fr; gap: 9px; }
   .cmpOrderQtyRow { width: 100%; max-width: 100%; }
   .cmpOrderQtyBtn { width: 42px; min-width: 42px; height: 42px; }
   .cmpOrderQtyInput { height: 42px; font-size: 16px; }
-  .cmpOrderCartItem { gap: 7px; padding: 7px 8px; border-radius: 9px; }
+  .cmpOrderCartItem { gap: 7px; padding: 7px 8px; border-radius: 8px; }
   .cmpOrderCartFoot { flex-wrap: nowrap; }
   .cmpOrderCartQty { justify-content: stretch; flex: 1; min-width: 0; max-width: none; }
   .cmpOrderNotesInput { min-height: 70px; font-size: 16px; }
@@ -2180,19 +2193,19 @@
   .cmpOrderStep1, .cmpOrderStep2 { gap: 9px; }
   .cmpOrderEmpty { padding: 9px; font-size: clamp(11px, 2.8vw, 12px); }
 }
-@media (max-width: 480px) { .cmpOrderWizard { gap: 5px; } .cmpOrderStepPill { padding: 4px 6px; min-height: 30px; gap: 4px; } .cmpStepNum { width: 17px; height: 17px; font-size: 9px; } .cmpStepLabel { font-size: 8px; } .cmpOrderNotesReadonly { padding: 6px 8px; } .cmpOrderNotesReadonlyText { font-size: clamp(11.5px, 3vw, 12.5px); } }
+@media (max-width: 480px) { .cmpOrderWizard { gap: 5px; } .cmpOrderStepPill { padding: 4px 6px; min-height: 28px; gap: 4px; } .cmpStepNum { width: 17px; height: 17px; font-size: 9px; } .cmpStepLabel { font-size: 8px; } .cmpOrderNotesReadonly { padding: 6px 8px; } .cmpOrderNotesReadonlyText { font-size: clamp(11.5px, 3vw, 12.5px); } }
 @media (max-width: 380px) { .cmpOrderWizard { gap: 4px; } .cmpOrderStepPill { padding: 3px 5px; min-height: 26px; gap: 3px; } .cmpStepNum { width: 15px; height: 15px; font-size: 8px; } .cmpStepLabel { font-size: 7.5px; } .cmpOrderEmpty { padding: 7px; } }
 
 /* ── Delivery details block (Step 2) ── */
-.cmpOrderDeliveryBlock { background: color-mix(in srgb, var(--color-surface) 60%, var(--color-card)); border: 1.5px solid var(--mcm-border); border-radius: 9px; padding: 10px 12px; display: flex; flex-direction: column; gap: 9px; }
+.cmpOrderDeliveryBlock { background: color-mix(in srgb, var(--color-surface) 60%, var(--color-card)); border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); border-radius: 9px; padding: 10px 12px; display: flex; flex-direction: column; gap: 9px; }
 .cmpOrderDeliveryTitle { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-3); margin: 0 0 1px; }
 .cmpOrderDeliveryTitle svg { flex-shrink: 0; width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; }
 .cmpOrderDeliveryRow { display: flex; flex-direction: column; gap: 3px; }
 .cmpOrderDeliveryLabel { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: var(--color-text-2); margin: 0; line-height: 1.3; }
 .cmpOrderDeliveryLabel svg { flex-shrink: 0; width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; color: var(--color-text-3); }
-.cmpOrderDeliveryInput, .cmpOrderDeliveryTextarea { width: 100%; box-sizing: border-box; border: var(--mcm-field-border-width) solid var(--mcm-field-border); border-radius: 7px; background: var(--mcm-field-bg); color: var(--color-text-1); font-family: var(--font); font-size: 13px; padding: 6px 9px; transition: border-color 0.13s, box-shadow 0.13s, background 0.13s; outline: none; }
+.cmpOrderDeliveryInput, .cmpOrderDeliveryTextarea { width: 100%; box-sizing: border-box; border: 1.5px solid var(--mcm-field-border); border-radius: 7px; background: var(--mcm-field-bg); color: var(--color-text-1); font-family: var(--font); font-size: 13px; padding: 6px 9px; transition: border-color 0.12s, box-shadow 0.12s, background 0.12s; outline: none; }
 .cmpOrderDeliveryInput:hover:not(:focus), .cmpOrderDeliveryTextarea:hover:not(:focus) { border-color: var(--mcm-field-border-hover); background: var(--mcm-field-bg-hover); }
-.cmpOrderDeliveryInput:focus, .cmpOrderDeliveryTextarea:focus { border-color: var(--color-primary); background: var(--mcm-field-bg-focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 14%, transparent); }
+.cmpOrderDeliveryInput:focus, .cmpOrderDeliveryTextarea:focus { border-color: var(--color-primary); background: var(--mcm-field-bg-focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent); }
 .cmpOrderDeliveryTextarea { resize: vertical; min-height: 54px; }
 .cmpOrderDeliveryGrid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
 @media (max-width: 480px) { .cmpOrderDeliveryGrid2 { grid-template-columns: 1fr; gap: 9px; } }
@@ -2201,49 +2214,48 @@
 .pbm { font-family: var(--font); }
 .pbmDashWrap { margin-bottom: 5px; }
 .pbmDash { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
-.pbmTile { border-radius: 10px; padding: 7px 9px; border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent); background: color-mix(in srgb, var(--color-card) 96%, var(--color-surface)); transition: border-color 130ms ease; min-width: 0; }
-.pbmTile:hover { border-color: color-mix(in srgb, var(--color-primary) 24%, var(--color-border)); }
-.pbmTile_band_low  { border-color: color-mix(in srgb, var(--color-danger) 36%, var(--color-border)); }
-.pbmTile_band_mid  { border-color: color-mix(in srgb, var(--color-warning) 34%, var(--color-border)); }
-.pbmTile_band_hi   { border-color: color-mix(in srgb, var(--color-success) 32%, var(--color-border)); }
+.pbmTile { border-radius: 9px; padding: 7px 9px; border: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent); background: color-mix(in srgb, var(--color-card) 96%, var(--color-surface)); transition: border-color 130ms ease; min-width: 0; }
+.pbmTile:hover { border-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-border)); }
+.pbmTile_band_low  { border-color: color-mix(in srgb, var(--color-danger) 32%, var(--color-border)); }
+.pbmTile_band_mid  { border-color: color-mix(in srgb, var(--color-warning) 30%, var(--color-border)); }
+.pbmTile_band_hi   { border-color: color-mix(in srgb, var(--color-success) 28%, var(--color-border)); }
 .pbmTileLab { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-3); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pbmTileVal { font-size: 13.5px; font-weight: 850; letter-spacing: -0.01em; color: var(--color-text-heading); word-break: break-word; }
 
-.pbmBanner { margin: 0 0 7px; padding: 7px 9px; border-radius: 9px; border: 1px solid color-mix(in srgb, var(--color-warning) 30%, var(--color-border)); background: color-mix(in srgb, var(--color-warning-light) 40%, var(--color-card)); color: var(--color-warning-darker); font-size: 11.5px; font-weight: 700; line-height: 1.4; }
+.pbmBanner { margin: 0 0 7px; padding: 7px 9px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--color-warning) 28%, var(--color-border)); background: color-mix(in srgb, var(--color-warning-light) 35%, var(--color-card)); color: var(--color-warning-darker); font-size: 11.5px; font-weight: 700; line-height: 1.4; }
 
 .pbmRail { display: flex; gap: 5px; overflow-x: auto; padding: 2px 2px 4px; margin-bottom: 7px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
 .pbmRail::-webkit-scrollbar { display: none; }
-.pbmRailBtn { flex: 0 0 auto; scroll-snap-align: start; display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--color-border) 75%, transparent); background: var(--color-card); color: var(--color-text-2); font-size: 11.5px; font-weight: 700; cursor: pointer; transition: background 130ms ease, color 130ms ease, border-color 130ms ease; }
-.pbmRailBtn:hover { border-color: color-mix(in srgb, var(--color-primary) 26%, var(--color-border)); color: var(--color-text-heading); }
-.pbmRailBtn_on { border-color: color-mix(in srgb, var(--color-primary) 38%, var(--color-border)); background: color-mix(in srgb, var(--color-primary-light) 30%, var(--color-card)); color: var(--color-primary-darker); }
+.pbmRailBtn { flex: 0 0 auto; scroll-snap-align: start; display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent); background: var(--color-card); color: var(--color-text-2); font-size: 11.5px; font-weight: 650; cursor: pointer; transition: background 130ms ease, color 130ms ease, border-color 130ms ease; }
+.pbmRailBtn:hover { border-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-border)); color: var(--color-text-heading); }
+.pbmRailBtn_on { border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border)); background: color-mix(in srgb, var(--color-primary-light) 25%, var(--color-card)); color: var(--color-primary-darker); }
 .pbmRailGlyph { width: 16px; height: 16px; display: grid; place-items: center; color: currentColor; }
 .pbmRailGlyph svg { width: 13px; height: 13px; }
 .pbmRailCount { min-width: 1rem; height: 1rem; padding: 0 4px; border-radius: 999px; font-size: 10px; font-weight: 800; line-height: 1rem; text-align: center; background: var(--color-danger); color: var(--on-danger); border: 0; }
 
 .pbmStage { display: grid; gap: 7px; }
-.pbmPanel { border-radius: 10px; border: 1px solid color-mix(in srgb, var(--color-border) 72%, transparent); background: var(--color-card); overflow: hidden; }
-.pbmBar { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border-bottom: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent); background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface-2)); font-size: 11.5px; font-weight: 850; letter-spacing: 0.02em; color: var(--color-primary); }
+.pbmPanel { border-radius: 9px; border: 1px solid color-mix(in srgb, var(--color-border) 65%, transparent); background: var(--color-card); overflow: hidden; }
+.pbmBar { display: flex; align-items: center; gap: 7px; padding: 7px 10px; border-bottom: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent); background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface-2)); font-size: 11.5px; font-weight: 800; letter-spacing: 0.02em; color: var(--color-primary); }
 .pbmBar > svg { width: 13px; height: 13px; color: var(--color-primary-dark); flex-shrink: 0; }
 .pbmBar > span:first-of-type { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Legacy compat */
-.pbmHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 7px 10px; border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent); }
+.pbmHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; padding: 7px 10px; border-bottom: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); }
 .pbmHeadMain { display: flex; gap: 8px; min-width: 0; flex: 1; }
 .pbmGlyph { display: none; }
-.pbmTitle { font-size: 12.5px; font-weight: 850; color: var(--color-text-heading); }
+.pbmTitle { font-size: 12.5px; font-weight: 800; color: var(--color-text-heading); }
 .pbmSub { display: none; }
 
-.pbmTag { flex-shrink: 0; padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.02em; border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent); background: color-mix(in srgb, var(--color-surface-2) 50%, var(--color-card)); color: var(--color-text-3); }
-.pbmTag_info { border-color: color-mix(in srgb, var(--color-primary) 22%, var(--color-border)); background: color-mix(in srgb, var(--color-primary-light) 40%, var(--color-card)); color: var(--color-primary-darker); }
+.pbmTag { flex-shrink: 0; padding: 2px 7px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: 0.02em; border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); background: color-mix(in srgb, var(--color-surface-2) 50%, var(--color-card)); color: var(--color-text-3); }
+.pbmTag_info { border-color: color-mix(in srgb, var(--color-primary) 20%, var(--color-border)); background: color-mix(in srgb, var(--color-primary-light) 35%, var(--color-card)); color: var(--color-primary-darker); }
 
 .pbmGridTri { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
-.pbmHero { border-radius: 9px; padding: 9px 10px; border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent); background: color-mix(in srgb, var(--color-surface) 40%, var(--color-card)); }
-.pbmHeroName { font-size: 13.5px; font-weight: 850; color: var(--color-text-heading); }
-.pbmHeroMeta { margin-top: 2px; font-size: 11px; color: var(--color-text-3); font-weight: 600; line-height: 1.35; }
+.pbmHero { border-radius: 8px; padding: 9px 10px; border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); background: color-mix(in srgb, var(--color-surface) 40%, var(--color-card)); }
+.pbmHeroName { font-size: 13.5px; font-weight: 800; color: var(--color-text-heading); }
+.pbmHeroMeta { margin-top: 2px; font-size: 11px; color: var(--color-text-3); font-weight: 500; line-height: 1.35; }
 .pbmPillRow { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
-.pbmPill { padding: 2px 7px; border-radius: 999px; font-size: 10.5px; font-weight: 700; border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent); background: color-mix(in srgb, var(--color-card) 92%, var(--color-surface)); color: var(--color-text-2); }
+.pbmPill { padding: 2px 7px; border-radius: 999px; font-size: 10.5px; font-weight: 700; border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); background: color-mix(in srgb, var(--color-card) 92%, var(--color-surface)); color: var(--color-text-2); }
 
-.pbmInset { border-radius: 9px; padding: 9px; border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent); background: color-mix(in srgb, var(--color-surface) 35%, var(--color-card)); }
+.pbmInset { border-radius: 8px; padding: 9px; border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent); background: color-mix(in srgb, var(--color-surface) 35%, var(--color-card)); }
 .pbmInset .mfzGrid { gap: 7px; }
 .pbmInset .mfzField { gap: 3px; }
 .pbmInsetTitle { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-4); margin-bottom: 5px; }
@@ -2252,7 +2264,7 @@
 .pbmFlagsSubhead { margin-top: 3px; }
 .pbmFlagsSubhead .pbmInsetTitle { margin-bottom: 0; }
 .mfzCheck_muted { opacity: 0.82; cursor: default; }
-.mfzCheckMeta { font-weight: 500; font-size: 0.84em; color: var(--color-text-3); }
+.mfzCheckMeta { font-weight: 400; font-size: 0.84em; color: var(--color-text-3); }
 .pbmPanel > .mfzGrid { padding: 9px 10px 11px; }
 .pbmBar + .mfzGrid { padding-top: 9px; }
 .pbm .mfzGrid > .mfzCheck { grid-column: 1 / -1; }
@@ -2268,20 +2280,20 @@
 @media (max-width: 900px) { .pbmDash { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 720px) {
   .pbmDash { gap: 4px; }
-  .pbmTile { padding: 6px 8px; border-radius: 9px; }
+  .pbmTile { padding: 6px 8px; border-radius: 8px; }
   .pbmTileLab { font-size: 9.5px; }
   .pbmTileVal { font-size: 12.5px; }
   .pbmRail { gap: 4px; margin-bottom: 5px; }
   .pbmRailBtn { padding: 5px 9px; font-size: 11px; gap: 4px; }
   .pbmRailGlyph { width: 14px; height: 14px; }
   .pbmRailGlyph svg { width: 11px; height: 11px; }
-  .pbmPanel { border-radius: 9px; }
+  .pbmPanel { border-radius: 8px; }
   .pbmBar { padding: 6px 9px; font-size: 11px; }
   .pbmBar > svg { width: 11px; height: 11px; }
-  .pbmHero { padding: 8px 9px; border-radius: 8px; }
+  .pbmHero { padding: 8px 9px; border-radius: 7px; }
   .pbmHeroName { font-size: 12.5px; }
   .pbmHeroMeta { font-size: 10.5px; }
-  .pbmInset { border-radius: 8px; padding: 7px; }
+  .pbmInset { border-radius: 7px; padding: 7px; }
   .pbmPanel > .mfzGrid { padding: 7px 9px 9px; }
   .pbmBanner { padding: 6px 8px; margin-bottom: 5px; font-size: 11px; }
   .pbmFootErr { font-size: 11px; }

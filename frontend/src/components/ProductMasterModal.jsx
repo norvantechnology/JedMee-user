@@ -49,7 +49,7 @@ export default function ProductMasterModal({
     return {
       code:"", name:"", drugName:"", divisionId:"", mfgCompanyId:"", supplierId:"",
       hsnCode:"", rackLocation:"", packing:"", bulkPack:"", casePack:"",
-      conversionUnit:"", salesGST:"", purchaseGST:"", salesScheme:"",
+      unitsPerStrip:"1", conversionUnit:"", salesGST:"", purchaseGST:"", salesScheme:"",
       schemeQtyPaid:"", schemeQtyFree:"",
       stockable:true, isDiscountEnabled:true, isControl:false,
       isHalfScheme:false, isOtc:true, lowStockAlertEnabled:false, lowStockThreshold:"0"
@@ -72,6 +72,7 @@ export default function ProductMasterModal({
         packing: clean(initialValue.packing),
         bulkPack: clean(initialValue.bulk_pack ?? initialValue.bulkPack),
         casePack: clean(initialValue.case_pack ?? initialValue.casePack),
+        unitsPerStrip: initialValue.units_per_strip != null ? String(initialValue.units_per_strip) : initialValue.unitsPerStrip != null ? String(initialValue.unitsPerStrip) : "1",
         conversionUnit: clean(initialValue.conversion_unit ?? initialValue.conversionUnit),
         salesGST: initialValue.sales_gst != null ? String(initialValue.sales_gst) : initialValue.salesGST != null ? String(initialValue.salesGST) : "",
         purchaseGST: initialValue.purchase_gst != null ? String(initialValue.purchase_gst) : initialValue.purchaseGST != null ? String(initialValue.purchaseGST) : "",
@@ -178,6 +179,7 @@ export default function ProductMasterModal({
       packing: clean(form.packing) || undefined,
       bulkPack: clean(form.bulkPack) || undefined,
       casePack: clean(form.casePack) || undefined,
+      unitsPerStrip: clean(form.unitsPerStrip) !== "" ? Math.max(1, Number(form.unitsPerStrip) || 1) : 1,
       conversionUnit: clean(form.conversionUnit) || undefined,
       salesGST: clean(form.salesGST) !== "" ? Number(form.salesGST) : null,
       purchaseGST: clean(form.purchaseGST) !== "" ? Number(form.purchaseGST) : null,
@@ -446,8 +448,15 @@ export default function ProductMasterModal({
                     {TAX_OPTIONS.map((g) => <option key={g} value={g}>{g}%</option>)}
                   </select>
                 </ModalFormField>
-                <ModalFormField span={4} label="Conversion" hint="How selling units relate (optional).">
-                  <input className="mfzInput" value={form.conversionUnit} readOnly={readOnly} onChange={(e) => setField("conversionUnit", e.target.value)} placeholder="e.g. 1 box = 10 strips" />
+                <ModalFormField span={4} label="Units per strip" hint="Tablets / capsules / ml in 1 strip.">
+                  <input
+                    className="mfzInput"
+                    value={form.unitsPerStrip}
+                    readOnly={readOnly}
+                    inputMode="numeric"
+                    onChange={(e) => setField("unitsPerStrip", e.target.value)}
+                    placeholder="e.g. 10"
+                  />
                 </ModalFormField>
 
               </ModalFormGrid>

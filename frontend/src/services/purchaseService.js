@@ -45,6 +45,10 @@ export async function sendPurchaseInvoicesByEmail(body) {
   return await apiPost("/purchase-invoices/send-email", body || {}, { toast: "none" });
 }
 
+export async function getPurchaseReturn(id) {
+  return await apiGet(`/purchase-returns/${encodeURIComponent(String(id))}`, { toast: "none" });
+}
+
 export async function createPurchaseReturn(payload) {
   return await apiPost("/purchase-returns", payload || {}, { toast: "none" });
 }

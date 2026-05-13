@@ -190,11 +190,12 @@ const ROUTES = {
   'POST /vendor-manufacturers/{id}/delete': '../vendorManufacturers/delete',
 
   // ── Reports ─────────────────────────────────────────────────────────────────
-  'GET /reports/product-supplier': '../reports/productSupplier',
-  'GET /reports/mfg-stockist':     '../reports/mfgStockist',
-  'GET /reports/non-moving':       '../reports/nonMoving',
-  'GET /reports/day-book':         '../reports/dayBook',
-  'GET /reports/gst-r1':           '../reports/gstR1',
+  'GET /reports/product-supplier':      '../reports/productSupplier',
+  'GET /reports/mfg-stockist':          '../reports/mfgStockist',
+  'GET /reports/non-moving':            '../reports/nonMoving',
+  'GET /reports/day-book':              '../reports/dayBook',
+  'GET /reports/gst-r1':               '../reports/gstR1',
+  'GET /reports/sales-stock-analysis':  '../reports/salesStockAnalysis',
 
   // ── Dashboard ───────────────────────────────────────────────────────────────
   'GET /dashboard/alerts':  '../dashboard/alerts',

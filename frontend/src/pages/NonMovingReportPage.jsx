@@ -83,7 +83,7 @@ export function NonMovingReportContent({ embedded = false } = {}) {
                 onChange={(e) => setSearch(e.target.value)}
                 autoFocus
               />
-              <ReportCountChip busy={busy}>{`${filtered.length} item(s)`}</ReportCountChip>
+              {!busy && <ReportCountChip>{`${filtered.length} item(s)`}</ReportCountChip>}
             </ReportToolbarPrim>
             <ReportToolbarFilters>
               <label className="rptToolbarHint" htmlFor="nonmoving-days">
@@ -105,9 +105,9 @@ export function NonMovingReportContent({ embedded = false } = {}) {
           </ReportToolbar>
 
           <ReportPaneBody>
-            {filtered.length === 0 ? (
-              <ReportListEmpty busy={busy}>
-                {busy ? null : "No non-moving stock for the selected window."}
+            {!busy && filtered.length === 0 ? (
+              <ReportListEmpty>
+                {"No non-moving stock for the selected window."}
               </ReportListEmpty>
             ) : (
               <ReportTableScroll>

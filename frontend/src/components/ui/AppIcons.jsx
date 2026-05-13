@@ -1879,6 +1879,26 @@ export function IconMfgStockist(p) {
     </svg>
   );
 }
+/**
+ * IconSalesStock  sales & stock analysis report icon.
+ * Bar chart with an upward trend arrow and a stock box below — sold vs. in-hand.
+ * Used in: InventoryReportsPage.jsx "Sales & Stock" tab.
+ */
+export function IconSalesStock(p) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...p}>
+      {/* Bar chart columns */}
+      <rect x="2" y="12" width="4" height="9" rx="0.8" />
+      <rect x="8" y="7" width="4" height="14" rx="0.8" />
+      <rect x="14" y="9" width="4" height="12" rx="0.8" />
+      {/* Trend arrow */}
+      <path d="M19 4l2 2-2 2" strokeWidth="1.8" />
+      <path d="M3 6h12l6 0" strokeWidth="1.5" strokeOpacity="0.5" />
+    </svg>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ORDERS PAGE ICONS
 // pages/OrdersPage.jsx

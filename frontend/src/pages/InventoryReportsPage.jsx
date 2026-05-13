@@ -6,13 +6,15 @@ import { can } from "../utils/access.js";
 import { ProductSupplierReportContent } from "./ProductSupplierReportPage.jsx";
 import { MfgStockistReportContent } from "./MfgStockistReportPage.jsx";
 import { NonMovingReportContent } from "./NonMovingReportPage.jsx";
-import { IconNonMoving, IconMfgStockist, IconPsrPackage } from "../components/ui/AppIcons.jsx";
+import { SalesStockAnalysisContent } from "./SalesStockAnalysisPage.jsx";
+import { Package2, Building2, AlertTriangle, TrendingUp } from "../components/ui/AppIcons.jsx";
 import "./MergedReportsPage.css";
 
 const TABS = [
-  { id: "product-supplier", label: "Product Supplier", icon: <IconPsrPackage /> },
-  { id: "mfg-stockist",     label: "Mfg Stockist",     icon: <IconMfgStockist /> },
-  { id: "non-moving",       label: "Non Moving",        icon: <IconNonMoving /> }
+  { id: "product-supplier", label: "Product Supplier", icon: <Package2 size={15} strokeWidth={2} /> },
+  { id: "mfg-stockist",     label: "Mfg Stockist",     icon: <Building2 size={15} strokeWidth={2} /> },
+  { id: "non-moving",       label: "Non Moving",        icon: <AlertTriangle size={15} strokeWidth={2} /> },
+  { id: "sales-stock",      label: "Sales & Stock",     icon: <TrendingUp size={15} strokeWidth={2} /> },
 ];
 
 function clampTabId(id) {
@@ -95,6 +97,7 @@ export default function InventoryReportsPage() {
           {tab === "product-supplier" && <ProductSupplierReportContent embedded />}
           {tab === "mfg-stockist"     && <MfgStockistReportContent     embedded />}
           {tab === "non-moving"       && <NonMovingReportContent        embedded />}
+          {tab === "sales-stock"      && <SalesStockAnalysisContent     embedded />}
         </div>
 
       </div>

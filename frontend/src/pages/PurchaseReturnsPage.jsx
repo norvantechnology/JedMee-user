@@ -6,15 +6,17 @@ import CommonTable from "../components/CommonTable.jsx";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import { readAuth } from "../services/authStorage.js";
 import { can } from "../utils/access.js";
-import { listPurchaseReturns, confirmPurchaseReturn } from "../services/purchaseService.js";
+import { listPurchaseReturns, confirmPurchaseReturn, getPurchaseReturn } from "../services/purchaseService.js";
 import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
 import { fmtMoney } from "../utils/format.js";
-import { IconBtn, IconConfirm } from "../components/TableActionKit.jsx";
+import { IconBtn, IconConfirm, IconView, IconPrint } from "../components/TableActionKit.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
+import ReturnViewModal from "../components/ReturnViewModal.jsx";
+import { printReturnDoc } from "../print/returnPrint.js";
 
 export default function PurchaseReturnsPage() {
   useSeoMeta({ title: "Purchase Returns" });
@@ -34,6 +36,7 @@ export default function PurchaseReturnsPage() {
   const [confirm, setConfirm] = useState({ open: false, id: "" });
   const [confirmBusy, setConfirmBusy] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [viewModal, setViewModal] = useState({ open: false, id: null });
 
   async function refresh() {
     setBusy(true);
@@ -213,6 +216,23 @@ export default function PurchaseReturnsPage() {
                 sortable: false,
                 render: (r) => (
                   <div className="ibGroup" onClick={(e) => e.stopPropagation()}>
+                    <IconBtn tooltip="View return details" onClick={() => setViewModal({ open: true, id: r.id })}>
+                      <IconView />
+                    </IconBtn>
+                    <IconBtn
+                      tooltip="Print return"
+                      onClick={async () => {
+                        const res = await getPurchaseReturn(r.id);
+                        if (res.status >= 200 && res.status < 300 && res.json?.ok) {
+                          const d = res.json?.data ?? {};
+                          printReturnDoc({ ret: d?.return ?? d, items: d?.items ?? [], type: "purchase" });
+                        } else {
+                          emitToast({ type: "error", message: "Could not load return for printing." });
+                        }
+                      }}
+                    >
+                      <IconPrint />
+                    </IconBtn>
                     {r.status === "DRAFT" && canUpdate ? (
                       <IconBtn
                         tooltip="Confirm return and adjust stock"
@@ -246,6 +266,14 @@ export default function PurchaseReturnsPage() {
         entityType="PURCHASE_RETURNS"
         title="Import Purchase Returns"
         onCompleted={() => { setImportOpen(false); refresh(); }}
+      />
+
+      <ReturnViewModal
+        open={viewModal.open}
+        onClose={() => setViewModal({ open: false, id: null })}
+        returnId={viewModal.id}
+        type="purchase"
+        fetchFn={getPurchaseReturn}
       />
     </AppShell>
   );

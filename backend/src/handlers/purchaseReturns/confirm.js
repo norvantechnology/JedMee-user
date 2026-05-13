@@ -72,21 +72,39 @@ async function handler(event) {
         }
         // Only post inventory transaction when a batch is linked
         if (it.batch_id) {
-          await q(
-            `
-            INSERT INTO inventory_txns (account_id, batch_id, txn_type, qty, free_qty, ref_type, ref_id, note, created_by_user_id)
-            VALUES ($1,$2,'PURCHASE_RETURN',$3,$4,'PURCHASE_RETURN_ITEM',$5,$6,$7)
-            `,
-            [
-              ctx.accountId,
-              it.batch_id,
-              -Number(it.return_qty || 0),
-              -Number(it.return_free_qty || 0),
-              it.id,
-              `Purchase return ${ret.return_number}`,
-              actorId
-            ]
-          );
+          // Strip + free qty inventory deduction
+          if (Number(it.return_qty || 0) > 0 || Number(it.return_free_qty || 0) > 0) {
+            await q(
+              `INSERT INTO inventory_txns (account_id, batch_id, txn_type, qty, free_qty, ref_type, ref_id, note, created_by_user_id)
+               VALUES ($1,$2,'PURCHASE_RETURN',$3,$4,'PURCHASE_RETURN_ITEM',$5,$6,$7)`,
+              [
+                ctx.accountId, it.batch_id,
+                -Number(it.return_qty || 0), -Number(it.return_free_qty || 0),
+                it.id, `Purchase return ${ret.return_number}`, actorId
+              ]
+            );
+          }
+
+          // Restore loose stock on the batch
+          const returnLooseQty = Number(it.return_loose_qty || 0);
+          if (returnLooseQty > 0) {
+            await q(
+              `UPDATE product_batches
+               SET loose_stock = loose_stock + $3, updated_at = now()
+               WHERE id = $1 AND account_id = $2`,
+              [it.batch_id, ctx.accountId, returnLooseQty]
+            );
+            // Traceability event for loose return
+            await q(
+              `INSERT INTO inventory_txns (account_id, batch_id, txn_type, qty, free_qty, ref_type, ref_id, note, created_by_user_id)
+               VALUES ($1,$2,'PURCHASE_RETURN',0,0,'PURCHASE_RETURN_ITEM',$3,$4,$5)`,
+              [
+                ctx.accountId, it.batch_id, it.id,
+                `Loose return: ${returnLooseQty} unit(s) — Purchase return ${ret.return_number}`, actorId
+              ]
+            );
+          }
+
           lowStockBatches.add(String(it.batch_id));
         }
       }

@@ -46,33 +46,54 @@
 }
 
 .psrStatsRow {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 28px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .psrStatCard {
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 12px 16px;
+  border-radius: 12px;
+  padding: 10px 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex: 1;
-  min-width: 130px;
+  gap: 10px;
+  min-width: 0;
+  min-height: 68px;
   box-shadow: var(--shadow-sm);
 }
 
 .psrStatIcon {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+/* Icon background colors */
+.psrStatIcon_primary {
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+  color: var(--color-primary);
+}
+
+.psrStatIcon_success {
+  background: var(--color-success-light, color-mix(in srgb, #22c55e 14%, transparent));
+  color: var(--color-success-dark, #16a34a);
+}
+
+.psrStatIcon_warn {
+  background: var(--color-warning-light, color-mix(in srgb, #f59e0b 14%, transparent));
+  color: var(--color-warning-dark, #b45309);
+}
+
+.psrStatIcon_danger {
+  background: var(--color-danger-light, color-mix(in srgb, #ef4444 14%, transparent));
+  color: var(--color-danger-dark, #b91c1c);
 }
 
 .psrStatVal {
@@ -1219,26 +1240,27 @@
 .psrReport .stats-row {
   display: flex;
   gap: 12px;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   flex-wrap: wrap;
 }
 
 .psrReport .stat-card {
   background: var(--color-card);
-  border: 1px solid color-mix(in srgb, var(--color-border) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border) 60%, transparent);
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
   flex: 1;
   min-width: 130px;
-  box-shadow: 0 1px 6px color-mix(in srgb, var(--color-primary) 6%, transparent);
+  min-height: 72px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .psrReport .stat-card:hover {
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-primary) 12%, transparent);
+  box-shadow: 0 3px 10px rgba(0,0,0,.09);
   transform: translateY(-1px);
 }
 
@@ -1273,11 +1295,12 @@
 }
 
 .psrReport .stat-val {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--color-text-heading);
   line-height: 1;
   min-height: 18px;
+  letter-spacing: -0.02em;
 }
 
 .psrReport .stat-val_warn {
@@ -1292,35 +1315,38 @@
   font-size: 11px;
   color: var(--color-text-3);
   margin-top: 3px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .psrReport .search-hero {
   background: var(--color-card);
-  border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
-  border-radius: var(--radius);
-  padding: 24px 28px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 10px color-mix(in srgb, var(--color-primary) 6%, transparent);
-  text-align: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  text-align: left;
 }
 
 .psrReport .search-hero h2 {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--color-text-heading);
-  margin: 0 0 5px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--color-text-3);
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
 
 .psrReport .search-hero > p {
-  font-size: 13px;
-  color: var(--color-text-3);
-  margin: 0 0 20px;
+  display: none;
 }
 
 .psrReport .search-wrap {
   position: relative;
-  max-width: 620px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
 }
 
 .psrReport .s-icon {
@@ -1335,15 +1361,15 @@
 
 .psrReport .search-input {
   width: 100%;
-  padding: 14px 48px 14px 46px;
-  border: 2px solid var(--color-border-strong);
+  padding: 10px 40px 10px 40px;
+  border: 1.5px solid var(--color-border-strong);
   border-radius: 10px;
   background: var(--color-card);
   font-family: var(--font);
-  font-size: 15px;
+  font-size: 14px;
   color: var(--color-text);
   outline: none;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
   transition: border 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -1671,10 +1697,10 @@
 .psrReport .p-item {
   display: flex;
   align-items: center;
-  padding: 13px 18px;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 28%, transparent);
+  padding: 10px 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
   cursor: pointer;
-  gap: 13px;
+  gap: 12px;
   transition: background 0.12s ease;
   width: 100%;
   border-left: none;
@@ -2548,5 +2574,138 @@
 
   .psrBFval {
     font-size: 12px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PSR TABLE — new common-component table layout (matches Sales & Stock style)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Clickable table rows */
+.psrTableRow {
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.psrTableRow:hover td {
+  background: color-mix(in srgb, var(--color-primary) 5%, transparent) !important;
+}
+
+/* Out-of-stock row tint */
+.psrRow_out td {
+  background: color-mix(in srgb, var(--color-danger) 7%, transparent) !important;
+}
+
+/* Index column */
+.psrColIdx {
+  width: 44px;
+  text-align: center !important;
+}
+
+.psrIdxVal {
+  color: var(--color-text-3) !important;
+  font-size: 12px !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Manufacturer cell */
+.psrMfgCell {
+  font-size: 13px !important;
+  color: var(--color-text-2) !important;
+}
+
+/* Muted placeholder */
+.psrMuted {
+  color: var(--color-text-3) !important;
+}
+
+/* Product code pill */
+.psrCodePill {
+  display: inline-block !important;
+  width: fit-content !important;
+  max-width: 140px;
+  padding: 1px 8px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-border-strong) 50%, transparent);
+  color: var(--color-text-3);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Supplier count badge */
+.psrSupCount {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  font-size: 12.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Column widths */
+.psrColSuppliers { width: 90px; }
+.psrColStock     { width: 100px; }
+.psrColExpiring  { width: 100px; }
+
+/* Responsive: 2-column stat grid on tablet */
+@media (max-width: 1100px) {
+  .psrStatsRow {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .psrStatsRow {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .psrStatCard {
+    padding: 8px 12px;
+    gap: 8px;
+    min-height: 60px;
+  }
+
+  .psrStatIcon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .psrStatVal {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .psrStatsRow {
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
+
+  .psrStatCard {
+    padding: 7px 10px;
+    min-height: 56px;
+  }
+
+  .psrStatIcon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .psrStatVal {
+    font-size: 15px;
+  }
+
+  .psrStatLbl {
+    font-size: 9px;
   }
 }
