@@ -1,5 +1,16 @@
 const { clean, n, i, round4, isFutureDate, calculateLineItem, calculateInvoiceTotals } = require("../../shared/sales");
 
+/**
+ * Validate GSTIN format: 15-char alphanumeric per GST rules.
+ * Pattern: 2-digit state + 5 letters + 4 digits + 1 letter + 1 alphanumeric + Z + 1 alphanumeric
+ */
+function isValidGstin(g) {
+  if (!g) return false;
+  return /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(
+    String(g).toUpperCase().trim()
+  );
+}
+
 async function validateCustomer(q, accountId, customerId) {
   const rs = await q(`SELECT * FROM customers WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`, [customerId, accountId]);
   const c = rs.rows?.[0] || null;
@@ -542,6 +553,7 @@ module.exports = {
   enforceFinancialLimits,
   validateInvoiceHeader,
   resolveBatchRate,
+  isValidGstin,
   VALID_RATE_TYPES,
   VALID_BILL_TYPES
 };

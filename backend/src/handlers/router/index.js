@@ -190,12 +190,17 @@ const ROUTES = {
   'POST /vendor-manufacturers/{id}/delete': '../vendorManufacturers/delete',
 
   // ── Reports ─────────────────────────────────────────────────────────────────
-  'GET /reports/product-supplier':      '../reports/productSupplier',
-  'GET /reports/mfg-stockist':          '../reports/mfgStockist',
-  'GET /reports/non-moving':            '../reports/nonMoving',
-  'GET /reports/day-book':              '../reports/dayBook',
-  'GET /reports/gst-r1':               '../reports/gstR1',
-  'GET /reports/sales-stock-analysis':  '../reports/salesStockAnalysis',
+  'GET /reports/product-supplier':              '../reports/productSupplier',
+  'GET /reports/mfg-stockist':                  '../reports/mfgStockist',
+  'GET /reports/non-moving':                    '../reports/nonMoving',
+  'GET /reports/day-book':                      '../reports/dayBook',
+  'GET /reports/gst-r1':                        '../reports/gstR1',
+  'GET /reports/gst-r2':                        '../reports/gstr2',
+  'GET /reports/gst-r3b':                       '../reports/gstr3b',
+  'POST /reports/gst-r3b/{year}/{month}/file':  '../reports/gstr3bFile',
+  'GET /reports/gst-b2b-b2c':                   '../reports/gstrB2bB2c',
+  'POST /reports/gst-b2b-b2c/retag':            '../reports/gstrB2bB2cRetag',
+  'GET /reports/sales-stock-analysis':          '../reports/salesStockAnalysis',
 
   // ── Dashboard ───────────────────────────────────────────────────────────────
   'GET /dashboard/alerts':  '../dashboard/alerts',

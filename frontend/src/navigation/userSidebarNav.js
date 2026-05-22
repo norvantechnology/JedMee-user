@@ -105,6 +105,8 @@ export function buildUserSidebarSections(ctx) {
     ...(canQuality || canMfg ? [withFn({ to: "/reports/inventory", label: "Inventory Reports" })] : []),
     ...(canSales ? [withFn({ to: "/reports/day-book", label: "Day Book"                    })] : []),
     ...(canSales ? [withFn({ to: "/reports/gst-r1",   label: `${taxLabel} Report (R1)`     })] : []),
+    ...(canPurchase ? [withFn({ to: "/reports/gst-r2", label: `${taxLabel} ITC Report (R2)` })] : []),
+    ...(canSales ? [withFn({ to: "/reports/gst-r3b",  label: `${taxLabel} Return (3B)`     })] : []),
     ...(canCustomers || canDivisions || canVendors
       ? [withFn({ to: "/reports/ledger", label: "Ledger" })]
       : [])

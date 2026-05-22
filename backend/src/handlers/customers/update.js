@@ -44,14 +44,20 @@ async function handler(event) {
         is_cash_customer = $21,
         notes = $22,
         updated_by_user_id = $23,
-        updated_at = now()
+        updated_at = now(),
+        b2b_flag = $24,
+        state_code = $25,
+        gstin_validated_at = $26
       WHERE id = $1 AND account_id = $2
       RETURNING *`,
       [
         customerId, ctx.accountId, v.out.code || null, v.out.name || null, v.out.shortName || null, v.out.phoneCountryCode || null, v.out.phoneNumber || null,
         v.out.email || null, v.out.address || null, v.out.city || null, v.out.state || null, v.out.pincode || null, v.out.customerType,
         v.out.gstNumber || null, v.out.drugLicenseNumber || null, v.out.dlExpiryDate || null, v.out.creditDays, v.out.creditLimit, v.out.discountPercent,
-        v.out.isActive, v.out.isCashCustomer, v.out.notes || null, actorId
+        v.out.isActive, v.out.isCashCustomer, v.out.notes || null, actorId,
+        v.out.b2bFlag,
+        v.out.stateCode || null,
+        v.out.gstinValidatedAt || null
       ]
     );
     return ok({ customer: mapCustomerRow(rs.rows?.[0] || null) }, { message: "Customer updated." });

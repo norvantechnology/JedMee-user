@@ -8,6 +8,7 @@ import { readAuth } from "../services/authStorage.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
 import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
+import OrderPlaceWizardModal from "../components/orders/OrderPlaceWizardModal.jsx";
 import {
   acceptOrder,
   cancelOrderRetailer,
@@ -42,27 +43,24 @@ import {
   Check,
   BadgeCheck,
   Printer,
+  Calendar,
 } from "../components/ui/AppIcons.jsx";
 import "./OrdersPage.css";
 
 /* ── Status config ─────────────────────────────────────────── */
 const STATUS_CFG = {
-  PENDING:    { label: "Pending",    cls: "opSt_pending",    bar: "opBar_pending" },
-  ACCEPTED:   { label: "Accepted",   cls: "opSt_accepted",   bar: "opBar_accepted" },
-  DISPATCHED: { label: "Dispatched", cls: "opSt_dispatched", bar: "opBar_dispatched" },
-  DELIVERED:  { label: "Delivered",  cls: "opSt_delivered",  bar: "opBar_delivered" },
-  REJECTED:   { label: "Rejected",   cls: "opSt_rejected",   bar: "opBar_rejected" },
-  CANCELLED:  { label: "Cancelled",  cls: "opSt_cancelled",  bar: "opBar_cancelled" },
+  PENDING:    { label: "Pending",    cls: "opSt_pending" },
+  ACCEPTED:   { label: "Accepted",   cls: "opSt_accepted" },
+  DISPATCHED: { label: "Dispatched", cls: "opSt_dispatched" },
+  DELIVERED:  { label: "Delivered",  cls: "opSt_delivered" },
+  REJECTED:   { label: "Rejected",   cls: "opSt_rejected" },
+  CANCELLED:  { label: "Cancelled",  cls: "opSt_cancelled" },
 };
 
+/* ── Status badge — full pill with background ─────────────── */
 function StatusBadge({ status }) {
-  const cfg = STATUS_CFG[status] || { label: status, cls: "", bar: "" };
-  return (
-    <span className={`opBadge ${cfg.cls}`}>
-      <span className="opBadgeDot" />
-      {cfg.label}
-    </span>
-  );
+  const cfg = STATUS_CFG[status] || { label: status, cls: "" };
+  return <span className={`opBadge ${cfg.cls}`}>{cfg.label}</span>;
 }
 
 /* ── Stat pill definitions ─────────────────────────────────── */
@@ -82,6 +80,15 @@ const FULFILLMENT_STEPS = [
   { key: "delivered",  label: "Delivered",  getAt: (o) => o?.delivered_at },
 ];
 
+/* ── Format date without seconds ─────────────────────────── */
+function fmtDateTime(ts) {
+  if (!ts) return "—";
+  const d = new Date(ts);
+  const date = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  const time = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+  return `${date}, ${time}`;
+}
+
 /* ══════════════════════════════════════════════════════════════
    PAGE COMPONENT
 ══════════════════════════════════════════════════════════════ */
@@ -90,27 +97,31 @@ export default function OrdersPage() {
   const auth = readAuth();
   const isRetailer = useMemo(() => isRetailerAuth(auth), [auth]);
 
-  const [loading, setLoading]             = useState(false);
-  const [rows, setRows]                   = useState([]);
-  const [search, setSearch]               = useState("");
-  const [statusFilter, setStatusFilter]   = useState("");
+  const [loading, setLoading]               = useState(false);
+  const [rows, setRows]                     = useState([]);
+  const [search, setSearch]                 = useState("");
+  const [statusFilter, setStatusFilter]     = useState("");
   const [retailerFilter, setRetailerFilter] = useState("");
-  const [selected, setSelected]           = useState(null);
-  const [detail, setDetail]               = useState(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const printRef = useRef(null);
-  const [cancelTarget, setCancelTarget]   = useState(null);
-  const [cancelBusy, setCancelBusy]       = useState(false);
-  const [rejectReason, setRejectReason]   = useState("");
-  const [acceptNotes, setAcceptNotes]     = useState("");
-  const [overrides, setOverrides]         = useState({});
+  const [dateFrom, setDateFrom]             = useState("");
+  const [dateTo, setDateTo]                 = useState("");
+  const [sortOrder, setSortOrder]           = useState("newest");
+  const [selected, setSelected]             = useState(null);
+  const [detail, setDetail]                 = useState(null);
+  const [detailLoading, setDetailLoading]   = useState(false);
+  const printRef                            = useRef(null);
+  const [cancelTarget, setCancelTarget]     = useState(null);
+  const [cancelBusy, setCancelBusy]         = useState(false);
+  const [rejectReason, setRejectReason]     = useState("");
+  const [acceptNotes, setAcceptNotes]       = useState("");
+  const [overrides, setOverrides]           = useState({});
   const [openPurchaseModal, setOpenPurchaseModal] = useState(false);
-  const [purchaseItems, setPurchaseItems] = useState([]);
-  const [actionBusyKey, setActionBusyKey] = useState(null);
-  const [acceptBusy, setAcceptBusy]       = useState(false);
-  const [purchaseBusy, setPurchaseBusy]   = useState(false);
+  const [purchaseItems, setPurchaseItems]   = useState([]);
+  const [actionBusyKey, setActionBusyKey]   = useState(null);
+  const [acceptBusy, setAcceptBusy]         = useState(false);
+  const [purchaseBusy, setPurchaseBusy]     = useState(false);
+  const [showPlaceOrder, setShowPlaceOrder] = useState(false);
 
-  /* ── Fetch all orders (client-side filter for stat counts) ── */
+  /* ── Fetch all orders ── */
   async function refresh() {
     setLoading(true);
     const r = isRetailer
@@ -128,17 +139,26 @@ export default function OrdersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isRetailer]);
 
-  /* ── Client-side filter ─────────────────────────────────── */
+  /* ── Client-side filter + sort ─────────────────────────── */
   const filteredRows = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return rows.filter((r) => {
+    let result = rows.filter((r) => {
       const party = (r.wholesaler_firm_name || r.retailer_firm_name || "").toLowerCase();
       const matchQ = !q || (r.order_number || "").toLowerCase().includes(q) || party.includes(q);
       const matchS = !statusFilter || r.status === statusFilter;
       const matchR = isRetailer || !retailerFilter || r.retailer_firm_name === retailerFilter;
-      return matchQ && matchS && matchR;
+      const orderDate = r.placed_at || r.created_at;
+      const matchFrom = !dateFrom || (orderDate && new Date(orderDate) >= new Date(dateFrom));
+      const matchTo   = !dateTo   || (orderDate && new Date(orderDate) <= new Date(dateTo + "T23:59:59"));
+      return matchQ && matchS && matchR && matchFrom && matchTo;
     });
-  }, [rows, search, statusFilter, retailerFilter, isRetailer]);
+    result = [...result].sort((a, b) => {
+      const aDate = new Date(a.placed_at || a.created_at || 0);
+      const bDate = new Date(b.placed_at || b.created_at || 0);
+      return sortOrder === "newest" ? bDate - aDate : aDate - bDate;
+    });
+    return result;
+  }, [rows, search, statusFilter, retailerFilter, isRetailer, dateFrom, dateTo, sortOrder]);
 
   /* ── Stat counts ────────────────────────────────────────── */
   const statCounts = useMemo(() => {
@@ -154,6 +174,16 @@ export default function OrdersPage() {
     if (isRetailer) return [];
     return [...new Set(rows.map((r) => r.retailer_firm_name).filter(Boolean))].sort();
   }, [rows, isRetailer]);
+
+  const hasActiveFilters = !!(search || statusFilter || dateFrom || dateTo || retailerFilter);
+
+  function clearFilters() {
+    setSearch("");
+    setStatusFilter("");
+    setDateFrom("");
+    setDateTo("");
+    setRetailerFilter("");
+  }
 
   /* ── Open detail modal ──────────────────────────────────── */
   async function openView(row) {
@@ -181,7 +211,7 @@ export default function OrdersPage() {
     setDetailLoading(false);
   }
 
-  /* ── Patch a single row in-place (avoids full list reload) ── */
+  /* ── Patch a single row in-place ── */
   function patchRow(id, updates) {
     setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...updates } : r)));
   }
@@ -302,12 +332,11 @@ export default function OrdersPage() {
     }
   }
 
-  /* ── Print invoice (wholesaler only) ───────────────────────── */
+  /* ── Print invoice ───────────────────────────────────────── */
   function printOrder() {
     if (!printRef.current) return;
     const el = printRef.current;
     el.style.display = "block";
-    // Reset after the print dialog closes (afterprint fires on both Print and Cancel)
     const cleanup = () => { el.style.display = "none"; };
     window.addEventListener("afterprint", cleanup, { once: true });
     window.print();
@@ -331,32 +360,61 @@ export default function OrdersPage() {
 
         {/* ── Page header ── */}
         <div className="opHeader">
-          <div className="opTitle">{isRetailer ? "My Orders" : "Orders"}</div>
-          <div className="opSub">
-            {isRetailer ? "Track placed orders and confirm delivery." : "Manage incoming retailer orders."}
+          <div className="opHeaderLeft">
+            <div className="opTitle">{isRetailer ? "My Orders" : "Orders"}</div>
+            <div className="opSub">
+              {isRetailer ? "Track placed orders and confirm delivery." : "Manage incoming retailer orders."}
+            </div>
           </div>
+          {isRetailer && (
+            <button
+              type="button"
+              className="opNewOrderBtn"
+              onClick={() => setShowPlaceOrder(true)}
+            >
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              New Order
+            </button>
+          )}
         </div>
 
         {/* ── Stat pills ── */}
-        <div className="opStatsScroll" aria-label="Order status summary">
-          {STAT_DEFS.map((def) => {
-            const cnt = def.key === "ALL" ? statCounts.ALL : (statCounts[def.key] || 0);
-            const isActive = def.key === "ALL" ? !statusFilter : statusFilter === def.key;
-            return (
-              <button
-                key={def.key}
-                type="button"
-                className={`opStat${isActive ? " opStat_active" : ""}`}
-                onClick={() => setStatusFilter(def.key === "ALL" ? "" : def.key)}
-              >
-                <div className={`opStatIc ${def.iconCls}`}>{def.svg}</div>
-                <div>
-                  <div className="opStatN">{loading ? "—" : cnt}</div>
-                  <div className="opStatL">{def.label}</div>
-                </div>
-              </button>
-            );
-          })}
+        <div className="opStatsRow" aria-label="Order status summary">
+          {/* Total — dominant card */}
+          <button
+            type="button"
+            className={`opStatTotal${!statusFilter ? " opStatTotal_active" : ""}`}
+            onClick={() => setStatusFilter("")}
+          >
+            <div className="opStatTotalIc"><IconOpCart /></div>
+            <div className="opStatTotalBody">
+              <div className="opStatTotalN">{loading ? "—" : statCounts.ALL}</div>
+              <div className="opStatTotalL">Total Orders</div>
+            </div>
+          </button>
+
+          {/* Status pills — scrollable row */}
+          <div className="opStatPills">
+            {STAT_DEFS.slice(1).map((def) => {
+              const cnt = statCounts[def.key] || 0;
+              const isActive = statusFilter === def.key;
+              const isZero = cnt === 0;
+              return (
+                <button
+                  key={def.key}
+                  type="button"
+                  className={`opStatPill${isActive ? " opStatPill_active" : ""}${isZero ? " opStatPill_zero" : ""}`}
+                  onClick={() => setStatusFilter(isActive ? "" : def.key)}
+                >
+                  <div className={`opStatPillIc ${def.iconCls}`}>{def.svg}</div>
+                  <span className="opStatPillL">{def.label}</span>
+                  <span className="opStatPillN">{loading ? "—" : cnt}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* ── Toolbar ── */}
@@ -370,16 +428,24 @@ export default function OrdersPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <select
-            className="opStatusSel"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Status</option>
-            {["PENDING", "ACCEPTED", "DISPATCHED", "DELIVERED", "REJECTED", "CANCELLED"].map((s) => (
-              <option key={s} value={s}>{s.charAt(0) + s.slice(1).toLowerCase()}</option>
-            ))}
-          </select>
+          <div className="opDateRange">
+            <Calendar size={14} className="opDateRangeIc" />
+            <input
+              type="date"
+              className="opDateInput"
+              value={dateFrom}
+              onChange={(e) => setDateFrom(e.target.value)}
+              title="From date"
+            />
+            <span className="opDateSep">–</span>
+            <input
+              type="date"
+              className="opDateInput"
+              value={dateTo}
+              onChange={(e) => setDateTo(e.target.value)}
+              title="To date"
+            />
+          </div>
           {!isRetailer && retailerOptions.length > 0 && (
             <select
               className="opStatusSel"
@@ -399,7 +465,21 @@ export default function OrdersPage() {
           <span className="opMetaCnt">
             {loading ? "Loading…" : `${filteredRows.length} order${filteredRows.length !== 1 ? "s" : ""}`}
           </span>
-          {!loading && <span>sorted newest first</span>}
+          {!loading && (
+            <select
+              className="opSortSel"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          )}
+          {hasActiveFilters && !loading && (
+            <button type="button" className="opClearBtn" onClick={clearFilters}>
+              ✕ Clear filters
+            </button>
+          )}
         </div>
 
         {/* ── Order cards / empty / loading ── */}
@@ -412,27 +492,47 @@ export default function OrdersPage() {
               <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 001.95-1.57L23 6H6"/>
             </svg>
             <div className="opEmptyT">No orders found</div>
-            <div className="opEmptyS">Try changing your search or filter.</div>
+            <div className="opEmptyS">
+              {hasActiveFilters ? "Try changing your search or filters." : "No orders yet."}
+            </div>
+            {isRetailer && !hasActiveFilters && (
+              <button
+                type="button"
+                className="opNewOrderBtn opNewOrderBtn_empty"
+                onClick={() => setShowPlaceOrder(true)}
+              >
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Place Your First Order
+              </button>
+            )}
           </div>
         ) : (
           <div className="opList">
             {filteredRows.map((row) => {
               const party = row[partyKey] || "—";
               const itemCount = row.item_count ?? row.total_items ?? row.items?.length ?? null;
-              const placedAt = row.placed_at
-                ? new Date(row.placed_at).toLocaleString()
-                : row.created_at
-                  ? new Date(row.created_at).toLocaleString()
-                  : "—";
+              const placedAt = row.placed_at || row.created_at;
+              const dateStr = fmtDateTime(placedAt);
+
+              /* Mini fulfillment progress dots */
+              const fulSteps = [
+                { key: "accepted",   done: Boolean(row.accepted_at) },
+                { key: "dispatched", done: Boolean(row.dispatched_at) },
+                { key: "delivered",  done: Boolean(row.delivered_at) },
+              ];
+              const showProgress = ["ACCEPTED", "DISPATCHED", "DELIVERED"].includes(row.status);
+
               return (
                 <div key={row.id} className={`opCard opCard_${(row.status || "").toLowerCase()}`}>
                   <div className="opCardBody">
 
                     {/* Row 1: order number + date + badge */}
                     <div className="opCardRow1">
-                      <div>
+                      <div className="opCardIdGroup">
                         <div className="opCardId">{row.order_number || row.id}</div>
-                        <div className="opCardDate">{placedAt}</div>
+                        <div className="opCardDate">{dateStr}</div>
                       </div>
                       <StatusBadge status={row.status} />
                     </div>
@@ -457,6 +557,24 @@ export default function OrdersPage() {
                         <div className="opCardInfoL">Total</div>
                         <div className="opCardInfoV opCardInfoV_amt">{fmtCurrency(row.total_amount || 0)}</div>
                       </div>
+                      {showProgress && (
+                        <>
+                          <div className="opCardDiv" aria-hidden="true" />
+                          <div className="opCardInfo">
+                            <div className="opCardInfoL">Progress</div>
+                            <div className="opMiniProgress">
+                              {fulSteps.map((s, i) => (
+                                <div key={s.key} className="opMiniProgressStep">
+                                  <div className={`opMiniDot${s.done ? " opMiniDot_done" : ""}`} title={s.key.charAt(0).toUpperCase() + s.key.slice(1)} />
+                                  {i < fulSteps.length - 1 && (
+                                    <div className={`opMiniLine${s.done ? " opMiniLine_done" : ""}`} />
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     {/* Row 3: actions */}
@@ -465,6 +583,17 @@ export default function OrdersPage() {
                         <IconView />
                         View Details
                       </button>
+                      {isRetailer && row.status === "DISPATCHED" && (
+                        <button
+                          type="button"
+                          className="opBtn opBtn_confirm"
+                          disabled={actionBusyKey === `confirm:${row.id}`}
+                          onClick={() => quickAction("confirm", row)}
+                        >
+                          <Check size={14} />
+                          {actionBusyKey === `confirm:${row.id}` ? "Confirming…" : "Confirm Delivery"}
+                        </button>
+                      )}
                       {isRetailer && row.status === "PENDING" && (
                         <button type="button" className="opBtn opBtn_cancel" onClick={() => setCancelTarget(row)}>
                           <IconCancelCircle />
@@ -560,7 +689,7 @@ export default function OrdersPage() {
                     disabled={actionBusyKey === `confirm:${selected?.id}`}
                     onClick={() => quickAction("confirm", selected)}
                   >
-                    Confirm Delivery
+                    {actionBusyKey === `confirm:${selected?.id}` ? <InlineButtonProgress label="Confirming…" /> : "Confirm Delivery"}
                   </AppButton>
                 )}
                 {isRetailer && detail?.order?.status === "DELIVERED" && !detail?.order?.retailer_purchase_invoice_id && (
@@ -569,7 +698,7 @@ export default function OrdersPage() {
                     disabled={actionBusyKey === `purchase:${selected?.id}`}
                     onClick={() => quickAction("purchase", selected)}
                   >
-                    Create Purchase Invoice
+                    {actionBusyKey === `purchase:${selected?.id}` ? <InlineButtonProgress label="Creating…" /> : "Create Purchase Invoice"}
                   </AppButton>
                 )}
               </div>
@@ -580,7 +709,7 @@ export default function OrdersPage() {
         {detail && (
           <div className="opDetail opDetail_sectioned">
 
-            {/* ── Section 1: Order Summary + Delivery Progress (inline) ── */}
+            {/* ── Section 1: Order Summary + Delivery Progress ── */}
             <div className="opDSection">
               <div className="opDSummaryRow">
                 <div className="opDSummaryBlock">
@@ -873,13 +1002,22 @@ export default function OrdersPage() {
         </div>
       </CommonModal>
 
+      {/* Place New Order modal (retailer only) */}
+      {isRetailer && (
+        <OrderPlaceWizardModal
+          open={showPlaceOrder}
+          onClose={() => setShowPlaceOrder(false)}
+          onSuccess={() => { setShowPlaceOrder(false); refresh(); }}
+        />
+      )}
+
       {/* ══════════════════════════════════════════════════════
           PRINT INVOICE (hidden; shown only via @media print)
       ══════════════════════════════════════════════════════ */}
       <div ref={printRef} className="opPrintInvoice" style={{ display: "none" }} aria-hidden="true">
         {detail && !isRetailer && (
           <>
-            {/* ── Header: firm info left · INVOICE label right ── */}
+            {/* ── Header ── */}
             <div className="opPrintHeader">
               <div className="opPrintHeaderLeft">
                 <div className="opPrintBizName">{auth?.user?.firm_name || "Wholesaler"}</div>
@@ -894,7 +1032,7 @@ export default function OrdersPage() {
 
             <div className="opPrintDivider" />
 
-            {/* ── Bill To (left) + Invoice Details (right) ── */}
+            {/* ── Bill To + Invoice Details ── */}
             <div className="opPrintBillRow">
               <div className="opPrintBillTo">
                 <div className="opPrintBillLabel">BILL TO</div>
@@ -1006,19 +1144,11 @@ export default function OrdersPage() {
               </div>
             </div>
 
-            {/* ── Notes ── */}
             {(detail.order?.retailer_notes || detail.order?.wholesaler_notes) && (
               <div className="opPrintNotes">
-                {detail.order?.retailer_notes && (
-                  <div>
-                    <span className="opPrintNotesLabel">Retailer Note:</span> {detail.order.retailer_notes}
-                  </div>
-                )}
-                {detail.order?.wholesaler_notes && (
-                  <div>
-                    <span className="opPrintNotesLabel">Note:</span> {detail.order.wholesaler_notes}
-                  </div>
-                )}
+                <div className="opPrintNotesLabel">Notes</div>
+                {detail.order?.retailer_notes && <div>{detail.order.retailer_notes}</div>}
+                {detail.order?.wholesaler_notes && <div>{detail.order.wholesaler_notes}</div>}
               </div>
             )}
 
@@ -1026,7 +1156,6 @@ export default function OrdersPage() {
           </>
         )}
       </div>
-
     </AppShell>
   );
 }

@@ -1,7 +1,18 @@
-/* ── OrdersPage ─────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   OrdersPage — complete redesign
+   All tokens use var(--color-*) from theme.css
+══════════════════════════════════════════════════════════════ */
 
-/* Page header */
-.opHeader { margin-bottom: 16px; }
+/* ── Page header ─────────────────────────────────────────────── */
+.opHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.opHeaderLeft { flex: 1; min-width: 0; }
 .opTitle {
   font-size: 22px;
   font-weight: 900;
@@ -15,48 +26,150 @@
   margin: 0;
 }
 
-/* ── Stat pills ─────────────────────────────────────────────── */
-.opStatsScroll {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 8px;
+/* ── New Order button ────────────────────────────────────────── */
+.opNewOrderBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.opNewOrderBtn:hover {
+  background: var(--color-primary-dark);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+.opNewOrderBtn svg { flex-shrink: 0; }
+.opNewOrderBtn_empty { margin-top: 16px; }
+
+/* ══════════════════════════════════════════════════════════════
+   STAT PILLS — Total dominant + smaller pill-style filters
+══════════════════════════════════════════════════════════════ */
+.opStatsRow {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
   margin-bottom: 18px;
+  min-width: 0;
 }
 
-.opStat {
+/* ── Total card — dominant ── */
+.opStatTotal {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: var(--color-card);
-  border: 1.5px solid var(--color-border);
-  border-radius: 12px;
-  padding: 10px 14px;
-  transition: box-shadow 0.15s, border-color 0.15s;
+  gap: 12px;
+  background: var(--color-primary);
+  border: none;
+  border-radius: 14px;
+  padding: 14px 20px;
   cursor: pointer;
-  width: 100%;
-  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: box-shadow 0.15s, opacity 0.15s;
+  min-width: 130px;
 }
-.opStat:hover {
-  border-color: var(--color-primary);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+.opStatTotal:hover { opacity: 0.92; box-shadow: 0 6px 20px color-mix(in srgb, var(--color-primary) 35%, transparent); }
+.opStatTotal_active {
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--color-primary) 40%, transparent);
 }
-.opStat_active {
-  border-color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-card));
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
+/* When not active, show muted version */
+.opStatTotal:not(.opStatTotal_active) {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
 }
+.opStatTotal:not(.opStatTotal_active) .opStatTotalN,
+.opStatTotal:not(.opStatTotal_active) .opStatTotalL { color: var(--color-text-3); }
+.opStatTotal:not(.opStatTotal_active) .opStatTotalIc { background: color-mix(in srgb, var(--color-primary) 15%, var(--color-card)); }
+.opStatTotal:not(.opStatTotal_active) .opStatTotalIc svg { stroke: var(--color-primary); }
 
-/* Square icon box (34×34, radius 8) */
-.opStatIc {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
+.opStatTotalIc {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.2);
   display: grid;
   place-items: center;
   flex-shrink: 0;
 }
-.opStatIc svg { width: 16px; height: 16px; stroke-width: 2; }
+.opStatTotalIc svg { width: 18px; height: 18px; stroke: #fff; stroke-width: 2; fill: none; }
+.opStatTotalBody { display: flex; flex-direction: column; gap: 2px; }
+.opStatTotalN {
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+.opStatTotalL {
+  font-size: 11px;
+  color: rgba(255,255,255,0.85);
+  font-weight: 600;
+  white-space: nowrap;
+}
 
+/* ── Status pills — scrollable row ── */
+.opStatPills {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  align-items: stretch;
+}
+.opStatPills::-webkit-scrollbar { display: none; }
+
+.opStatPill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+.opStatPill:hover {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-card));
+}
+.opStatPill_active {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+/* Zero-count pills — muted */
+.opStatPill_zero {
+  opacity: 0.45;
+  pointer-events: auto;
+}
+.opStatPill_zero:hover { opacity: 0.7; }
+
+/* Icon inside pill — consistent 24×24 */
+.opStatPillIc {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.opStatPillIc svg { width: 13px; height: 13px; stroke-width: 2; fill: none; }
+
+/* Reuse existing icon color tokens */
 .opStatIc_all        { background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card)); }
 .opStatIc_all svg    { stroke: var(--color-primary); }
 .opStatIc_pending    { background: var(--color-warning-light); }
@@ -72,30 +185,40 @@
 .opStatIc_cancelled  { background: var(--color-surface); }
 .opStatIc_cancelled svg { stroke: var(--color-text-4); }
 
-.opStatN {
-  font-size: 20px;
-  font-weight: 900;
-  color: var(--color-text);
-  line-height: 1;
-}
-.opStatL {
-  font-size: 10.5px;
-  color: var(--color-text-2);
-  margin-top: 2px;
+.opStatPillL {
+  font-size: 12.5px;
   font-weight: 600;
-  line-height: 1;
+  color: var(--color-text-2);
+}
+.opStatPill_active .opStatPillL { color: var(--color-primary); font-weight: 700; }
+
+.opStatPillN {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--color-text-3);
+  background: var(--color-surface);
+  border-radius: 20px;
+  padding: 1px 7px;
+  min-width: 22px;
+  text-align: center;
+}
+.opStatPill_active .opStatPillN {
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
+  color: var(--color-primary);
 }
 
-/* ── Toolbar ────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   TOOLBAR — unified search + date range + filters
+══════════════════════════════════════════════════════════════ */
 .opToolbar {
   display: flex;
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   align-items: stretch;
   flex-wrap: wrap;
 }
 
-/* Search box — flex container with icon inside */
+/* Search box */
 .opSearchBox {
   flex: 1;
   min-width: 200px;
@@ -132,6 +255,46 @@
 }
 .opSearchBox input::placeholder { color: var(--color-text-3); }
 
+/* Date range filter */
+.opDateRange {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  transition: border-color 0.15s;
+  flex-shrink: 0;
+}
+.opDateRange:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 9%, transparent);
+}
+.opDateRangeIc {
+  color: var(--color-text-3);
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+}
+.opDateInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 12.5px;
+  color: var(--color-text);
+  font-family: inherit;
+  cursor: pointer;
+  width: 110px;
+}
+.opDateInput::-webkit-calendar-picker-indicator { opacity: 0.5; cursor: pointer; }
+.opDateSep {
+  font-size: 12px;
+  color: var(--color-text-3);
+  flex-shrink: 0;
+}
+
+/* Status / retailer select */
 .opStatusSel {
   padding: 10px 12px;
   background: var(--color-card);
@@ -147,32 +310,64 @@
 }
 .opStatusSel:focus { border-color: var(--color-primary); }
 
-/* ── Result meta ────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   RESULT META — count badge + sort control + clear
+══════════════════════════════════════════════════════════════ */
 .opMeta {
-  font-size: 12.5px;
-  color: var(--color-text-3);
-  margin-bottom: 10px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 .opMetaCnt {
   background: color-mix(in srgb, var(--color-primary) 12%, var(--color-card));
   color: var(--color-primary);
-  padding: 2px 9px;
+  padding: 3px 10px;
   border-radius: 20px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 800;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--color-border));
 }
+.opSortSel {
+  padding: 4px 10px;
+  background: var(--color-card);
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--color-text-3);
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.opSortSel:focus { border-color: var(--color-primary); color: var(--color-text); }
+.opClearBtn {
+  padding: 4px 10px;
+  background: var(--color-danger-light);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 25%, var(--color-border));
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-danger);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.opClearBtn:hover { background: var(--color-danger); color: #fff; }
 
-/* ── Order list ─────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   ORDER LIST
+══════════════════════════════════════════════════════════════ */
 .opList {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-/* ── Order card ─────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   ORDER CARD
+══════════════════════════════════════════════════════════════ */
 .opCard {
   background: var(--color-card);
   border: 1.5px solid var(--color-border);
@@ -186,13 +381,11 @@
   border-color: var(--color-primary);
 }
 
-/* Left accent bar via ::before */
+/* Left accent bar */
 .opCard::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
+  left: 0; top: 0; bottom: 0;
   width: 4px;
   border-radius: 4px 0 0 4px;
 }
@@ -203,7 +396,7 @@
 .opCard_rejected::before   { background: var(--color-danger); }
 .opCard_cancelled::before  { background: var(--color-text-4); }
 
-/* Card body — wraps all rows */
+/* Card body */
 .opCardBody {
   padding: 14px 16px 14px 20px;
   display: flex;
@@ -211,13 +404,14 @@
   gap: 10px;
 }
 
-/* Row 1: id + date + badge */
+/* ── Row 1: id + date + badge ── */
 .opCardRow1 {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
 }
+.opCardIdGroup { display: flex; flex-direction: column; gap: 2px; }
 .opCardId {
   font-size: 14px;
   font-weight: 800;
@@ -227,45 +421,32 @@
 .opCardDate {
   font-size: 11.5px;
   color: var(--color-text-3);
-  margin-top: 2px;
 }
 
-/* Status badge */
+/* ── Status badge — full pill with background ── */
 .opBadge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
+  padding: 4px 12px;
   border-radius: 20px;
   font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
   flex-shrink: 0;
+  letter-spacing: 0.01em;
 }
-.opBadgeDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.opSt_pending    { background: var(--color-warning-light);  color: var(--color-warning-strong); }
-.opSt_pending .opBadgeDot    { background: var(--color-warning-strong); }
-.opSt_accepted   { background: #eff6ff; color: #1d4ed8; }
-.opSt_accepted .opBadgeDot   { background: #1d4ed8; }
-.opSt_dispatched { background: #e0f2fe; color: #0891b2; }
-.opSt_dispatched .opBadgeDot { background: #0891b2; }
-.opSt_delivered  { background: var(--color-success-light);  color: var(--color-success); }
-.opSt_delivered .opBadgeDot  { background: var(--color-success); }
-.opSt_rejected   { background: var(--color-danger-light);   color: var(--color-danger); }
-.opSt_rejected .opBadgeDot   { background: var(--color-danger); }
-.opSt_cancelled  { background: var(--color-surface); color: var(--color-text-4); }
-.opSt_cancelled .opBadgeDot  { background: var(--color-text-4); }
+.opSt_pending    { background: var(--color-warning-light);  color: var(--color-warning-strong); border: 1px solid color-mix(in srgb, var(--color-warning-strong) 25%, transparent); }
+.opSt_accepted   { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+.opSt_dispatched { background: #e0f2fe; color: #0891b2; border: 1px solid #bae6fd; }
+.opSt_delivered  { background: var(--color-success-light);  color: var(--color-success); border: 1px solid color-mix(in srgb, var(--color-success) 25%, transparent); }
+.opSt_rejected   { background: var(--color-danger-light);   color: var(--color-danger); border: 1px solid color-mix(in srgb, var(--color-danger) 25%, transparent); }
+.opSt_cancelled  { background: var(--color-surface); color: var(--color-text-4); border: 1px solid var(--color-border); }
 
-/* Row 2: info grid with dividers */
+/* ── Row 2: info chips ── */
 .opCardRow2 {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   padding: 10px 12px;
   background: var(--color-surface);
   border-radius: 10px;
@@ -274,14 +455,13 @@
 .opCardInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 .opCardInfoL {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--color-text-3);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 .opCardInfoV {
   font-size: 13.5px;
@@ -290,7 +470,7 @@
 }
 .opCardInfoV_amt {
   color: var(--color-primary);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 900;
 }
 .opCardDiv {
@@ -300,17 +480,51 @@
   flex-shrink: 0;
 }
 
-/* Row 3: action buttons */
+/* ── Mini fulfillment progress ── */
+.opCardInfo_progress { justify-content: center; }
+.opMiniProgress {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-top: 2px;
+}
+.opMiniProgressStep {
+  display: flex;
+  align-items: center;
+}
+.opMiniDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-border);
+  border: 2px solid var(--color-border);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.opMiniDot_done {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+.opMiniLine {
+  width: 16px;
+  height: 2px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+.opMiniLine_done { background: var(--color-success); }
+
+/* ── Row 3: action buttons ── */
 .opCardRow3 {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 .opBtn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 14px;
+  padding: 8px 16px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
@@ -320,35 +534,75 @@
   font-family: inherit;
   white-space: nowrap;
 }
-/* Override AppIcons fixed 22px size to fit button */
 .opBtn svg { width: 14px !important; height: 14px !important; stroke-width: 2; flex-shrink: 0; }
+
+/* View Details — primary style, prominent */
 .opBtn_view {
-  background: var(--color-surface);
-  border-color: var(--color-border);
-  color: var(--color-primary);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 25%, transparent);
 }
 .opBtn_view:hover {
-  border-color: var(--color-primary);
-  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-card));
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--color-primary) 35%, transparent);
 }
+
+/* Confirm Delivery — success style */
+.opBtn_confirm {
+  background: var(--color-success-light);
+  border-color: color-mix(in srgb, var(--color-success) 35%, var(--color-border));
+  color: var(--color-success);
+}
+.opBtn_confirm:hover {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: #fff;
+}
+.opBtn_confirm:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* Cancel — danger style */
 .opBtn_cancel {
   background: var(--color-danger-light);
-  border-color: var(--color-danger);
+  border-color: color-mix(in srgb, var(--color-danger) 30%, var(--color-border));
   color: var(--color-danger);
 }
 .opBtn_cancel:hover {
   background: var(--color-danger);
+  border-color: var(--color-danger);
   color: #fff;
 }
+
+/* Dispatch — action style */
 .opBtn_action {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: #fff;
 }
 .opBtn_action:hover { opacity: 0.88; }
+.opBtn_action:disabled { opacity: 0.55; cursor: not-allowed; }
+
 .opBtn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* ── Empty / Loading ────────────────────────────────────────── */
+/* ── Urgent tag ── */
+.opCardUrgent {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--color-warning-strong);
+  background: var(--color-warning-light);
+  border: 1px solid color-mix(in srgb, var(--color-warning-strong) 30%, transparent);
+  border-radius: 20px;
+  padding: 4px 10px;
+}
+.opCardUrgent svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
+
+/* ══════════════════════════════════════════════════════════════
+   EMPTY / LOADING
+══════════════════════════════════════════════════════════════ */
 .opEmpty {
   display: flex;
   flex-direction: column;
@@ -383,57 +637,13 @@
   font-size: 14px;
 }
 
-/* ── Detail modal content ───────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   DETAIL MODAL CONTENT
+══════════════════════════════════════════════════════════════ */
 .opDetail {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-/* ── Summary bar ── */
-.opSummaryBar {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  overflow: hidden;
-}
-.opSummaryItem {
-  flex: 1;
-  padding: 9px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.opSummaryDiv {
-  width: 1px;
-  align-self: stretch;
-  background: var(--color-border);
-  flex-shrink: 0;
-}
-.opSummaryLbl {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-text-3);
-}
-.opSummaryVal {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--color-text);
-}
-.opSummaryVal_big {
-  font-size: 18px;
-  font-weight: 900;
-  color: var(--color-primary);
-}
-.opSummaryVal_date {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-2);
 }
 
 /* ── Party info card ── */
@@ -464,13 +674,6 @@
   flex-direction: column;
   gap: 4px;
 }
-.opPartyLabel {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-primary);
-}
 .opPartyName {
   font-size: 15px;
   font-weight: 800;
@@ -495,28 +698,38 @@
   border-radius: 20px;
   padding: 3px 10px;
 }
+.opPartyChip svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
 
-/* ── Info grid: party card + notes side by side ── */
-.opInfoGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  align-items: start;
-}
-
-/* Notes column inside info grid */
-.opNotesCol {
+/* ── Delivery address ── */
+.opPartyAddress {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 5px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+.opPartyAddressIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-text-3);
+  width: 11px;
+  height: 11px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+.opPartyAddressLines { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.opPartyAddressLine {
+  font-size: 11.5px;
+  color: var(--color-text-2);
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 /* ── Notes ── */
-.opNotesRow {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
 .opNoteBox {
   border-radius: 8px;
   padding: 8px 12px;
@@ -542,223 +755,25 @@
   line-height: 1.5;
 }
 
-/* ── Card urgent tag ── */
-.opCardUrgent {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--color-warning-strong);
-  background: var(--color-warning-light);
-  border: 1px solid color-mix(in srgb, var(--color-warning-strong) 30%, transparent);
+/* ── Item pills ── */
+.opPill {
+  display: inline-block;
+  padding: 2px 8px;
   border-radius: 20px;
-  padding: 4px 10px;
+  font-size: 10.5px;
+  font-weight: 600;
 }
-.opCardUrgent svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.2; flex-shrink: 0; }
-
-/* ── Extra item pills ── */
-.opPill_free    { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.opPill_pack    { background: color-mix(in srgb, var(--color-primary) 10%, transparent); color: var(--color-primary); }
+.opPill_ord     { background: var(--color-surface); color: var(--color-text-2); border: 1px solid var(--color-border); }
+.opPill_acc     { background: var(--color-success-light); color: var(--color-success); }
 .opPill_partial { background: var(--color-warning-light); color: var(--color-warning-strong); }
+.opPill_free    { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+.opPill_batch   { background: #e0f2fe; color: #0891b2; }
+.opPill_stock   { background: #dcfce7; color: #15803d; }
 .opPill_price   { background: var(--color-surface); color: var(--color-text-3); border: 1px solid var(--color-border); }
 
-/* ── Party chip SVG icons ── */
-.opPartyChip svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
-
-/* ── Structured delivery address block (wholesaler party card) ── */
-.opPartyAddress {
-  display: flex;
-  align-items: flex-start;
-  gap: 5px;
-  margin-top: 6px;
-  padding: 6px 10px;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-}
-.opPartyAddressIcon {
-  flex-shrink: 0;
-  margin-top: 2px;
-  color: var(--color-text-3);
-  width: 11px;
-  height: 11px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-}
-.opPartyAddressLines {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-.opPartyAddressLine {
-  font-size: 11.5px;
-  color: var(--color-text-2);
-  line-height: 1.4;
-  word-break: break-word;
-}
-
-/* Legacy meta grid — kept for backward compat */
-.opMetaGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.opMetaBox {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 12px 14px;
-}
-.opMetaLbl {
-  font-size: 10px;
-  color: var(--color-text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  font-weight: 800;
-  margin-bottom: 4px;
-}
-.opMetaVal {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text);
-}
-.opMetaVal_big {
-  font-size: 20px;
-  color: var(--color-primary);
-  font-weight: 900;
-}
-
-.opSecTitle {
-  font-size: 11px;
-  font-weight: 800;
-  color: var(--color-text-3);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  margin: 0 0 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.opSecTitle::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--color-border);
-}
-.opSecCnt {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 7px;
-  border-radius: 20px;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 800;
-}
-
-/* Fulfillment steps — old bordered box (kept for compat) */
-.opFulfil {
-  display: flex;
-  align-items: stretch;
-  gap: 0;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  overflow: hidden;
-}
-.opFulStep {
-  flex: 1;
-  padding: 10px 12px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  border-right: 1px solid var(--color-border);
-}
-.opFulStep:last-child { border-right: none; }
-.opFulStep_done { background: var(--color-success-light); }
-.opFulLabel {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-text-3);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 2px;
-}
-.opFulDot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: var(--color-border);
-}
-.opFulDot_done { background: var(--color-success); }
-.opFulVal {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-.opFulVal_pend {
-  color: var(--color-text-3);
-  font-weight: 400;
-  font-style: italic;
-}
-
-/* ── Compact delivery progress strip (new) ── */
-.opFulStrip {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 8px 12px;
-}
-.opFulStripTitle {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-text-3);
-  margin-bottom: 8px;
-}
-.opFulStripSteps {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-}
-.opFulChip {
-  display: flex;
-  align-items: flex-start;
-  gap: 7px;
-  padding: 0 10px 0 0;
-  border-right: 1px solid var(--color-border);
-}
-.opFulChip:last-child { border-right: none; padding-right: 0; }
-.opFulChip_done .opFulDot { background: var(--color-success); }
-.opFulChipLabel {
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--color-text-2);
-  line-height: 1.2;
-}
-.opFulChip_done .opFulChipLabel { color: var(--color-success); }
-.opFulChipVal {
-  font-size: 10.5px;
-  color: var(--color-text);
-  font-weight: 600;
-  margin-top: 1px;
-}
-
 /* Items list */
-.opItemsList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+.opItemsList { display: flex; flex-direction: column; gap: 8px; }
 .opItemRow {
   display: flex;
   align-items: flex-start;
@@ -769,10 +784,7 @@
   border: 1px solid var(--color-border);
   border-radius: 10px;
 }
-.opItemLeft {
-  flex: 1;
-  min-width: 0;
-}
+.opItemLeft { flex: 1; min-width: 0; }
 .opItemName {
   font-size: 13.5px;
   font-weight: 700;
@@ -782,24 +794,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.opItemMeta {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-.opPill {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 10.5px;
-  font-weight: 600;
-}
-.opPill_pack  { background: color-mix(in srgb, var(--color-primary) 10%, transparent); color: var(--color-primary); }
-.opPill_ord   { background: var(--color-surface); color: var(--color-text-2); border: 1px solid var(--color-border); }
-.opPill_acc   { background: var(--color-success-light); color: var(--color-success); }
-.opPill_batch { background: #e0f2fe; color: #0891b2; }
-.opPill_stock { background: #dcfce7; color: #15803d; }
-
+.opItemMeta { display: flex; gap: 5px; flex-wrap: wrap; }
 .opItemTotal {
   font-size: 14px;
   font-weight: 800;
@@ -808,250 +803,13 @@
   flex-shrink: 0;
 }
 
-/* Accept / override box */
-.opAcceptBox {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* ── Compact accept items table ── */
-.opAcceptItems {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-.opAcceptItemsHead {
-  display: grid;
-  grid-template-columns: 1fr 72px 64px 100px;
-  gap: 6px;
-  padding: 6px 10px;
-  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
-  border-bottom: 1px solid var(--color-border);
-}
-.opAIH_prod, .opAIH_num, .opAIH_batch {
-  font-size: 9.5px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-text-3);
-}
-.opAIH_num { text-align: center; }
-.opAcceptItemRow {
-  display: grid;
-  grid-template-columns: 1fr 72px 64px 100px;
-  gap: 6px;
-  padding: 7px 10px;
-  align-items: center;
-  border-bottom: 1px solid var(--color-border);
-}
-.opAcceptItemRow:last-child { border-bottom: none; }
-.opAIProd {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.opAIProdName {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.opAIStock {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-warning-strong);
-  background: var(--color-warning-light);
-  padding: 1px 5px;
-  border-radius: 8px;
-  display: inline-block;
-  width: fit-content;
-}
-.opAIInput {
-  padding: 5px 7px;
-  border: 1.5px solid var(--color-border);
-  border-radius: 6px;
-  background: var(--color-card);
-  color: var(--color-text);
-  font-size: 12.5px;
-  outline: none;
-  transition: border-color 0.15s;
-  width: 100%;
-  box-sizing: border-box;
-  font-family: inherit;
-  text-align: center;
-}
-.opAIInput:focus { border-color: var(--color-primary); }
-.opAIInput_batch { text-align: left; font-size: 11.5px; }
-
-/* Accept actions: note + accept btn + reject row */
-.opAcceptActions {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-.opAcceptNote {
-  padding: 7px 10px;
-  border: 1.5px solid var(--color-border);
-  border-radius: 7px;
-  background: var(--color-card);
-  color: var(--color-text);
-  font-size: 12.5px;
-  outline: none;
-  resize: none;
-  transition: border-color 0.15s;
-  width: 100%;
-  box-sizing: border-box;
-  font-family: inherit;
-}
-.opAcceptNote:focus { border-color: var(--color-primary); }
-
-/* Reject row — inline input + button */
-.opRejectRow {
-  display: flex;
-  gap: 7px;
-  align-items: center;
-  border-top: 1px dashed var(--color-border);
-  padding-top: 7px;
-}
-.opRejectInput {
-  flex: 1;
-  padding: 6px 10px;
-  border: 1.5px solid var(--color-danger);
-  border-radius: 7px;
-  background: var(--color-card);
-  color: var(--color-text);
-  font-size: 12.5px;
-  outline: none;
-  transition: border-color 0.15s;
-  font-family: inherit;
-}
-.opRejectInput:focus { border-color: var(--color-danger); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-danger) 12%, transparent); }
-.opRejectInput::placeholder { color: var(--color-text-3); }
-
-/* Legacy override row (purchase modal) */
-.opOverrideRow {
-  display: grid;
-  grid-template-columns: 1fr 90px 80px 120px;
-  gap: 8px;
-  align-items: center;
-}
-.opOverrideName {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-text);
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.opOverrideStock {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--color-warning-strong);
-  background: var(--color-warning-light);
-  padding: 1px 6px;
-  border-radius: 10px;
-  display: inline-block;
-  width: fit-content;
-}
-.opOverrideSub {
-  font-size: 11px;
-  color: var(--color-text-3);
-  margin-top: 2px;
-}
-
-/* Legacy reject box */
-.opRejectBox {
-  border-top: 1px dashed var(--color-border);
-  padding-top: 12px;
-  margin-top: 2px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.opRejectLabel {
-  font-size: 11px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--color-danger);
-}
-
-/* Modal footer */
-.opModalFoot {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-}
-
-/* Cancel modal body */
-.opCancelBody {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 12px;
-  padding: 8px 0;
-}
-.opCancelIc {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--color-danger-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.opCancelIc svg {
-  width: 26px;
-  height: 26px;
-  stroke: var(--color-danger);
-  stroke-width: 2;
-  fill: none;
-}
-.opCancelText {
-  font-size: 14px;
-  color: var(--color-text-2);
-  margin: 0;
-  line-height: 1.6;
-}
-.opCancelId {
-  font-weight: 800;
-  color: var(--color-text);
-}
-
-/* Purchase modal body */
-.opPurchaseBody {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* Inputs in CommonModal: CommonModal.css only (bare .mfzInput here would override all modals by cascade). */
-
 /* ══════════════════════════════════════════════════════════════
    REDESIGNED DETAIL MODAL — section-based layout
 ══════════════════════════════════════════════════════════════ */
-
-/* Remove gap from sectioned detail — sections handle spacing */
 .opDetail_sectioned {
   gap: 0;
   margin: 0 calc(-1 * clamp(16px, 2.8vw, 24px));
 }
-
-/* ── Section wrapper ── */
 .opDSection {
   padding: 14px clamp(16px, 2.8vw, 24px);
   border-bottom: 1px solid var(--color-border);
@@ -1070,7 +828,6 @@
   align-items: center;
   gap: 6px;
 }
-
 .opDSecCnt {
   background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
   color: var(--color-primary);
@@ -1118,7 +875,7 @@
   flex-shrink: 0;
 }
 
-/* ── Delivery progress — inline flex-1 column beside amount/items ── */
+/* ── Delivery progress ── */
 .opDProgressWrap {
   flex: 1;
   min-width: 0;
@@ -1147,7 +904,6 @@
   flex: 1;
   min-width: 0;
 }
-/* Top row: circle centered, line absolutely positioned between circles */
 .opDProgressStepTop {
   display: flex;
   align-items: center;
@@ -1173,7 +929,6 @@
   border-color: var(--color-success);
   background: var(--color-success);
 }
-/* Line extends from right edge of this circle to left edge of next circle */
 .opDStepLine {
   position: absolute;
   left: calc(50% + 11px);
@@ -1193,19 +948,11 @@
   line-height: 1.2;
   white-space: nowrap;
 }
-
-/* First step: circle flush-left (aligned with "Delivery Progress" label) */
 .opDProgressStep:first-child { align-items: flex-start; }
 .opDProgressStep:first-child .opDProgressStepTop { justify-content: flex-start; }
 .opDProgressStep:first-child .opDStepLine { left: 22px; right: calc(-50% + 11px); }
 .opDProgressStep:first-child .opDStepLabel { text-align: left; }
-
-/* Middle step(s): line must reach the right-edge circle of the last step */
-.opDProgressStep:not(:first-child):not(:last-child) .opDStepLine {
-  right: calc(-100% + 22px);
-}
-
-/* Last step: circle flush-right */
+.opDProgressStep:not(:first-child):not(:last-child) .opDStepLine { right: calc(-100% + 22px); }
 .opDProgressStep:last-child { align-items: flex-end; }
 .opDProgressStep:last-child .opDProgressStepTop { justify-content: flex-end; }
 .opDProgressStep:last-child .opDStepLabel { text-align: right; }
@@ -1236,20 +983,9 @@
   border-top: 1px solid var(--color-border);
   vertical-align: middle;
 }
-.opDProdCellName {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text);
-}
-.opDProdCellStock {
-  font-size: 10px;
-  color: var(--color-text-3);
-  margin-top: 2px;
-}
-.opDProdCellStock span {
-  font-weight: 600;
-  color: var(--color-warning-strong);
-}
+.opDProdCellName { font-size: 12px; font-weight: 600; color: var(--color-text); }
+.opDProdCellStock { font-size: 10px; color: var(--color-text-3); margin-top: 2px; }
+.opDProdCellStock span { font-weight: 600; color: var(--color-warning-strong); }
 .opDNumInput {
   width: 68px;
   height: 32px;
@@ -1281,19 +1017,14 @@
   color: var(--color-text-2);
   background: var(--color-card);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s;
   display: block;
   margin: 0 auto;
   font-family: inherit;
   box-sizing: border-box;
 }
 .opDBatchInput::placeholder { color: var(--color-text-4); }
-.opDBatchInput:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
-}
-
-/* Note textarea inside accept section */
+.opDBatchInput:focus { border-color: var(--color-primary); }
 .opDNoteInput {
   width: 100%;
   height: 60px;
@@ -1306,29 +1037,16 @@
   background: var(--color-surface);
   outline: none;
   resize: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s;
   margin-top: 10px;
   box-sizing: border-box;
 }
 .opDNoteInput::placeholder { color: var(--color-text-4); }
-.opDNoteInput:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent);
-  background: var(--color-card);
-}
+.opDNoteInput:focus { border-color: var(--color-primary); background: var(--color-card); }
 
-/* ── Footer: Accept / Reject (PENDING wholesaler) ── */
-.opDFooter {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  width: 100%;
-}
-/* Full-width Accept Order button inside the PENDING footer */
-.opDAcceptBtn {
-  width: 100%;
-  justify-content: center;
-}
+/* ── Footer: Accept / Reject ── */
+.opDFooter { display: flex; flex-direction: column; gap: 0; width: 100%; }
+.opDAcceptBtn { width: 100%; justify-content: center; }
 .opDOrDivider {
   display: flex;
   align-items: center;
@@ -1336,12 +1054,7 @@
   margin: 10px 0;
 }
 .opDOrDivider::before,
-.opDOrDivider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--color-border);
-}
+.opDOrDivider::after { content: ''; flex: 1; height: 1px; background: var(--color-border); }
 .opDOrText {
   font-size: 10px;
   font-weight: 600;
@@ -1349,11 +1062,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
-.opDRejectRow {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
+.opDRejectRow { display: flex; gap: 8px; align-items: center; }
 .opDRejectInput {
   flex: 1;
   height: 38px;
@@ -1365,7 +1074,7 @@
   color: var(--color-text);
   background: var(--color-card);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s;
   box-sizing: border-box;
 }
 .opDRejectInput::placeholder { color: var(--color-text-4); }
@@ -1374,138 +1083,131 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 8%, transparent);
 }
 
-/* ── Responsive: new section classes ── */
+/* Modal footer */
+.opModalFoot {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Cancel modal body */
+.opCancelBody {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+.opCancelIc {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-danger-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.opCancelIc svg { width: 26px; height: 26px; stroke: var(--color-danger); stroke-width: 2; fill: none; }
+.opCancelText { font-size: 14px; color: var(--color-text-2); margin: 0; line-height: 1.6; }
+.opCancelId { font-weight: 800; color: var(--color-text); }
+
+/* Purchase modal body */
+.opPurchaseBody { display: flex; flex-direction: column; gap: 12px; }
+.opOverrideRow {
+  display: grid;
+  grid-template-columns: 1fr 90px 80px 120px;
+  gap: 8px;
+  align-items: center;
+}
+.opOverrideName {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.opOverrideSub { font-size: 11px; color: var(--color-text-3); margin-top: 2px; }
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Stats: Total card full-width on very small, pills scroll */
+  .opStatsRow { flex-direction: column; gap: 8px; }
+  .opStatTotal { width: 100%; }
+  .opStatPills { width: 100%; }
+}
+
 @media (max-width: 640px) {
+  .opTitle { font-size: 18px; }
+  .opHeader { flex-direction: column; align-items: stretch; }
+  .opNewOrderBtn { width: 100%; justify-content: center; }
+
+  /* Toolbar: stack vertically */
+  .opToolbar { flex-direction: column; }
+  .opSearchBox { min-width: unset; }
+  .opDateRange { width: 100%; }
+  .opDateInput { flex: 1; width: auto; }
+  .opStatusSel { width: 100%; }
+
+  /* Card info: wrap tighter */
+  .opCardRow2 { gap: 8px; }
+  .opCardDiv { height: 20px; }
+
+  /* Detail modal responsive */
   .opDSummaryRow { flex-wrap: wrap; gap: 10px; }
   .opDSummaryDiv { display: none; }
   .opDProgressWrap { width: 100%; flex: unset; }
+  .opDSection { padding: 12px 14px; }
+  .opDRejectRow { flex-direction: column; align-items: stretch; gap: 8px; }
+  .opDRejectInput { width: 100%; flex: unset; box-sizing: border-box; height: 44px; font-size: 14px; }
+  .opDRejectRow .appBtn { width: 100%; justify-content: center; }
   .opDAcceptTable th:last-child,
   .opDAcceptTable td:last-child { display: none; }
   .opDBatchInput { display: none; }
-  /* Section padding tighter on mobile */
-  .opDSection { padding: 12px 14px; }
-  /* Reject row: stack vertically, both children full-width */
-  .opDRejectRow {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-  .opDRejectInput {
-    width: 100%;
-    flex: unset;
-    box-sizing: border-box;
-    height: 44px;
-    font-size: 14px;
-  }
-  .opDRejectRow .appBtn {
-    width: 100%;
-    justify-content: center;
-  }
-  /* Accept table: tighter number inputs */
   .opDNumInput { width: 60px; }
-  /* Note textarea: comfortable tap height */
   .opDNoteInput { font-size: 14px; }
-}
 
-/* ── Responsive: new section classes (480px) ── */
-@media (max-width: 480px) {
-  .opDNumInput { width: 50px; }
-  .opDSection { padding: 10px 12px; }
-  .opDRejectInput { height: 46px; }
-}
-
-/* ── Responsive ─────────────────────────────────────────────── */
-@media (max-width: 640px) {
-  .opTitle { font-size: 18px; }
-
-  /* 3 cards per row on small screens */
-  .opStatsScroll { grid-template-columns: repeat(3, 1fr); gap: 6px; }
-  .opStat { padding: 8px 10px; gap: 8px; }
-  .opStatIc { width: 28px; height: 28px; }
-  .opStatIc svg { width: 13px; height: 13px; }
-  .opStatN { font-size: 16px; }
-
-  .opToolbar { flex-direction: column; }
-  .opSearchBox, .opStatusSel { width: 100%; min-width: unset; }
-
-  .opCardRow2 { gap: 10px; }
-  .opCardDiv { height: 20px; }
-
-  .opSummaryBar { flex-direction: column; }
-  .opSummaryDiv { width: auto; height: 1px; align-self: stretch; }
-  .opSummaryItem { padding: 10px 14px; }
-
-  .opPartyCard { gap: 10px; }
-  .opPartyName { font-size: 14px; }
-
-  .opMetaGrid { grid-template-columns: 1fr 1fr; }
-
-  /* 2 cards per row on very small phones */
-  @media (max-width: 380px) {
-    .opStatsScroll { grid-template-columns: repeat(2, 1fr); }
-  }
-
-  /* Info grid: stack party card + notes vertically */
-  .opInfoGrid { grid-template-columns: 1fr; }
-
-  /* Fulfillment strip: stack chips vertically */
-  .opFulStripSteps { grid-template-columns: 1fr; gap: 6px; }
-  .opFulChip { border-right: none; border-bottom: 1px solid var(--color-border); padding: 0 0 6px; }
-  .opFulChip:last-child { border-bottom: none; padding-bottom: 0; }
-
-  /* Accept items table: hide batch column, keep product + qty cols */
-  .opAcceptItemsHead { grid-template-columns: 1fr 64px 64px; }
-  .opAcceptItemRow   { grid-template-columns: 1fr 64px 64px; }
-  .opAIH_batch, .opAIInput_batch { display: none; }
-
-  /* Reject row: stack input + button vertically */
-  .opRejectRow { flex-direction: column; }
-  .opRejectInput { width: 100%; }
-
-  /* Legacy override row */
+  /* Purchase override row */
   .opOverrideRow { grid-template-columns: 1fr 1fr; }
   .opOverrideName { grid-column: 1 / -1; }
+
+  /* Modal footer */
+  .opModalFoot { flex-direction: column-reverse; }
+  .opModalFoot > * { width: 100%; }
 }
 
 @media (max-width: 480px) {
   .opCardBody { padding: 12px 14px 12px 18px; }
   .opCardRow3 { gap: 6px; }
-  .opBtn { padding: 6px 10px; font-size: 12px; }
-
-  .opMetaGrid { grid-template-columns: 1fr 1fr; }
-
+  .opBtn { padding: 7px 12px; font-size: 12px; }
   .opItemRow { flex-direction: column; gap: 6px; }
   .opItemTotal { align-self: flex-end; }
-
-  .opModalFoot { flex-direction: column-reverse; }
-  .opModalFoot > * { width: 100%; }
+  .opDSection { padding: 10px 12px; }
+  .opDNumInput { width: 50px; }
 }
 
-@media (max-width: 400px) {
-  .opMetaGrid { grid-template-columns: 1fr; }
-  .mh-title { font-size: 14px; }
+@media (max-width: 380px) {
+  .opStatsRow { gap: 6px; }
+  .opStatTotal { padding: 12px 14px; }
+  .opStatTotalN { font-size: 22px; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PRINT INVOICE  — hidden on screen, shown only when printing
+   PRINT INVOICE — hidden on screen, shown only when printing
 ═══════════════════════════════════════════════════════════════ */
-
-/* Screen: keep hidden */
 .opPrintInvoice { display: none; }
 
-/* Page setup */
-@page {
-  size: A4;
-  margin: 16mm 14mm 16mm 14mm;
-}
+@page { size: A4; margin: 16mm 14mm 16mm 14mm; }
 
 @media print {
-  /* Blank out everything except the invoice */
   * { visibility: hidden !important; }
-
   .opPrintInvoice,
   .opPrintInvoice * { visibility: visible !important; }
-
   .opPrintInvoice {
     display: block !important;
     position: fixed !important;
@@ -1523,10 +1225,7 @@
   }
 }
 
-/* ── Invoice inner layout ────────────────────────────────────── */
-/* All classes below apply inside .opPrintInvoice */
-
-/* ── Header: two-column grid ─────────────────────────────────── */
+/* ── Invoice inner layout ── */
 .opPrintHeader {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -1534,274 +1233,47 @@
   align-items: flex-start;
   margin-bottom: 0;
 }
-
-.opPrintHeaderLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.opPrintBizName {
-  font-size: 18pt;
-  font-weight: 700;
-  color: #000;
-  letter-spacing: -0.2px;
-  line-height: 1.1;
-  margin-bottom: 5px;
-}
-
-.opPrintBizMeta {
-  font-size: 8.5pt;
-  color: #444;
-  line-height: 1.55;
-}
-
-.opPrintHeaderRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: flex-start;
-}
-
-.opPrintInvoiceLabel {
-  font-size: 26pt;
-  font-weight: 900;
-  color: #000;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-/* ── Divider ─────────────────────────────────────────────────── */
-.opPrintDivider {
-  border: none;
-  border-top: 1.5px solid #111;
-  margin: 11px 0;
-}
-
-/* ── Bill To row: two-column ─────────────────────────────────── */
-.opPrintBillRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-/* Bill To box */
-.opPrintBillTo {
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  padding: 9px 11px;
-  background: #fafafa;
-}
-
-.opPrintBillLabel {
-  font-size: 7pt;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #888;
-  margin-bottom: 5px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #e4e4e4;
-}
-
-.opPrintBillName {
-  font-size: 12pt;
-  font-weight: 700;
-  color: #000;
-  margin-bottom: 4px;
-  line-height: 1.2;
-}
-
-.opPrintBillLine {
-  font-size: 8.5pt;
-  color: #333;
-  line-height: 1.65;
-}
-
-.opPrintBillKey {
-  font-weight: 700;
-  color: #555;
-}
-
-/* Invoice Details box (right side) */
-.opPrintInvoiceBox {
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  padding: 9px 11px;
-  background: #fafafa;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.opPrintInvoiceRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 4px 0;
-  border-bottom: 0.5px solid #efefef;
-  font-size: 8.5pt;
-}
-
+.opPrintHeaderLeft { display: flex; flex-direction: column; gap: 1px; }
+.opPrintBizName { font-size: 18pt; font-weight: 700; color: #000; letter-spacing: -0.2px; line-height: 1.1; margin-bottom: 5px; }
+.opPrintBizMeta { font-size: 8.5pt; color: #444; line-height: 1.55; }
+.opPrintHeaderRight { display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start; }
+.opPrintInvoiceLabel { font-size: 26pt; font-weight: 900; color: #000; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1; }
+.opPrintDivider { border: none; border-top: 1.5px solid #111; margin: 11px 0; }
+.opPrintBillRow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+.opPrintBillTo { border: 1px solid #ccc; border-radius: 3px; padding: 9px 11px; background: #fafafa; }
+.opPrintBillLabel { font-size: 7pt; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #888; margin-bottom: 5px; padding-bottom: 4px; border-bottom: 1px solid #e4e4e4; }
+.opPrintBillName { font-size: 12pt; font-weight: 700; color: #000; margin-bottom: 4px; line-height: 1.2; }
+.opPrintBillLine { font-size: 8.5pt; color: #333; line-height: 1.65; }
+.opPrintBillKey { font-weight: 700; color: #555; }
+.opPrintInvoiceBox { border: 1px solid #ccc; border-radius: 3px; padding: 9px 11px; background: #fafafa; display: flex; flex-direction: column; gap: 0; }
+.opPrintInvoiceRow { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; border-bottom: 0.5px solid #efefef; font-size: 8.5pt; }
 .opPrintInvoiceRow:last-child { border-bottom: none; }
-
-.opPrintInvoiceKey {
-  color: #666;
-  font-weight: 600;
-}
-
-.opPrintInvoiceVal {
-  color: #111;
-  font-weight: 700;
-  text-align: right;
-}
-
-.opPrintInvoiceVal_status {
-  text-transform: uppercase;
-  font-size: 7.5pt;
-  letter-spacing: 0.06em;
-}
-
-/* ── Items table ─────────────────────────────────────────────── */
-.opPrintTable {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 0 0 4px;
-  border: 1px solid #bbb;
-}
-
-.opPrintTh {
-  font-size: 7.5pt;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #fff;
-  background: #222;
-  padding: 7px 8px;
-  text-align: left;
-  border-right: 1px solid #444;
-}
-
+.opPrintInvoiceKey { color: #666; font-weight: 600; }
+.opPrintInvoiceVal { color: #111; font-weight: 700; text-align: right; }
+.opPrintInvoiceVal_status { text-transform: uppercase; font-size: 7.5pt; letter-spacing: 0.06em; }
+.opPrintTable { width: 100%; border-collapse: collapse; margin: 0 0 4px; border: 1px solid #bbb; }
+.opPrintTh { font-size: 7.5pt; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #fff; background: #222; padding: 7px 8px; text-align: left; border-right: 1px solid #444; }
 .opPrintTh:last-child { border-right: none; }
-
 .opPrintThProduct { width: 36%; }
-.opPrintThNum     { text-align: right; }
-.opPrintThRight   { text-align: right; }
-
+.opPrintThNum { text-align: right; }
+.opPrintThRight { text-align: right; }
 .opPrintTr:nth-child(even) { background: #f6f6f6; }
 .opPrintTr:nth-child(odd)  { background: #fff; }
-
-.opPrintTd {
-  font-size: 9pt;
-  color: #111;
-  padding: 6px 8px;
-  border-bottom: 0.5px solid #ddd;
-  border-right: 0.5px solid #e4e4e4;
-  vertical-align: top;
-}
-
+.opPrintTd { font-size: 9pt; color: #111; padding: 6px 8px; border-bottom: 0.5px solid #ddd; border-right: 0.5px solid #e4e4e4; vertical-align: top; }
 .opPrintTd:last-child { border-right: none; }
-
-.opPrintTdNum {
-  text-align: right;
-  white-space: nowrap;
-}
-
-.opPrintTdRight {
-  text-align: right;
-  font-weight: 700;
-  color: #000;
-}
-
-.opPrintProdName {
-  font-weight: 700;
-  color: #000;
-  font-size: 9pt;
-}
-
-.opPrintProdMeta {
-  font-size: 7.5pt;
-  color: #666;
-  margin-top: 2px;
-  line-height: 1.4;
-}
-
-/* ── Totals block ────────────────────────────────────────────── */
-.opPrintTotals {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  margin: 8px 0 4px;
-}
-
-.opPrintTotalsBox {
-  width: 260px;
-  border: 1px solid #bbb;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.opPrintTotalRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 5px 11px;
-  font-size: 9pt;
-  color: #333;
-  border-bottom: 0.5px solid #e8e8e8;
-}
-
+.opPrintTdNum { text-align: right; white-space: nowrap; }
+.opPrintTdRight { text-align: right; font-weight: 700; color: #000; }
+.opPrintProdName { font-weight: 700; color: #000; font-size: 9pt; }
+.opPrintProdMeta { font-size: 7.5pt; color: #666; margin-top: 2px; line-height: 1.4; }
+.opPrintTotals { display: flex; flex-direction: column; align-items: flex-end; margin: 8px 0 4px; }
+.opPrintTotalsBox { width: 260px; border: 1px solid #bbb; border-radius: 3px; overflow: hidden; }
+.opPrintTotalRow { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 11px; font-size: 9pt; color: #333; border-bottom: 0.5px solid #e8e8e8; }
 .opPrintTotalRow:last-child { border-bottom: none; }
-
 .opPrintTotalLabel { color: #555; }
 .opPrintTotalValue { font-weight: 600; color: #111; }
-
-/* Grand Total row — dark highlight */
-.opPrintGrand {
-  background: #1a1a1a;
-  border-bottom: none !important;
-}
-
-.opPrintGrand .opPrintTotalLabel {
-  color: #fff;
-  font-weight: 700;
-  font-size: 10pt;
-}
-
-.opPrintGrand .opPrintTotalValue {
-  color: #fff;
-  font-weight: 900;
-  font-size: 11pt;
-}
-
-/* ── Notes ───────────────────────────────────────────────────── */
-.opPrintNotes {
-  margin-top: 14px;
-  padding: 8px 11px;
-  background: #f8f8f8;
-  border-left: 3px solid #bbb;
-  font-size: 8.5pt;
-  color: #444;
-  line-height: 1.65;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.opPrintNotesLabel {
-  font-weight: 700;
-  color: #333;
-}
-
-/* ── Footer ──────────────────────────────────────────────────── */
-.opPrintFooter {
-  margin-top: 28px;
-  font-size: 8.5pt;
-  color: #888;
-  text-align: center;
-  border-top: 0.5px solid #ccc;
-  padding-top: 9px;
-  letter-spacing: 0.03em;
-}
+.opPrintGrand { background: #1a1a1a; border-bottom: none !important; }
+.opPrintGrand .opPrintTotalLabel { color: #fff; font-weight: 700; font-size: 10pt; }
+.opPrintGrand .opPrintTotalValue { color: #fff; font-weight: 900; font-size: 11pt; }
+.opPrintNotes { margin-top: 14px; padding: 8px 11px; background: #f8f8f8; border-left: 3px solid #bbb; font-size: 8.5pt; color: #444; line-height: 1.65; display: flex; flex-direction: column; gap: 3px; }
+.opPrintNotesLabel { font-weight: 700; color: #333; }
+.opPrintFooter { margin-top: 28px; font-size: 8.5pt; color: #888; text-align: center; border-top: 0.5px solid #ccc; padding-top: 9px; letter-spacing: 0.03em; }

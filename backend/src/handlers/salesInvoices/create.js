@@ -4,7 +4,7 @@ const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { withTransaction } = require("../../shared/db");
 const { nextSalesNumber } = require("../../shared/sales");
-const { validateCustomer, validateAndEnrichSalesItems, validateInvoiceHeader, insertSalesLineItemsMany } = require("./_common");
+const { validateCustomer, validateAndEnrichSalesItems, validateInvoiceHeader, insertSalesLineItemsMany, isValidGstin } = require("./_common");
 const { getRoleCodeForAccount } = require("../../shared/accountRoleProfile");
 
 async function handler(event) {
@@ -42,14 +42,57 @@ async function handler(event) {
       const dueDate = isRetailer && isWalkInSale
         ? h.header.invoiceDate
         : h.header.dueDate || (Number(c.customer.credit_days || 0) > 0 ? new Date(Date.now() + Number(c.customer.credit_days || 0) * 86400000).toISOString().slice(0, 10) : null);
+
+      // ── B2B / B2C auto-tagging ────────────────────────────────────────────────
+      // Walk-in sales are always B2C regardless of any other field.
+      // B2B requires a valid 15-char GSTIN on the customer profile.
+      const customerGstinRaw = String(c.customer.gst_number || "").trim().toUpperCase();
+      const gstinValid = !isWalkInSale && isValidGstin(customerGstinRaw);
+      const b2bB2cTag = gstinValid ? "B2B" : "B2C";
+      const customerGstinSnapshot = gstinValid ? customerGstinRaw : null;
+
+      // Place of supply: 2-digit state code from GSTIN prefix (most reliable),
+      // fallback to customer.state_code, then null.
+      const placeOfSupply = customerGstinSnapshot
+        ? customerGstinSnapshot.substring(0, 2)
+        : (String(c.customer.state_code || "").trim() || null);
+
+      // Supply type: compare business GSTIN state with customer state.
+      // Default INTRA_STATE (most common for local pharmacy).
+      let supplyType = "INTRA_STATE";
+      if (placeOfSupply) {
+        try {
+          const bizRs = await q(
+            `SELECT state_code, gst_number FROM app_users WHERE id = $1 LIMIT 1`,
+            [ctx.accountId]
+          );
+          const biz = bizRs.rows?.[0] || null;
+          const bizStateCode = biz?.state_code
+            ? String(biz.state_code).trim()
+            : (biz?.gst_number && String(biz.gst_number).length >= 2
+                ? String(biz.gst_number).substring(0, 2)
+                : null);
+          if (bizStateCode && bizStateCode !== placeOfSupply) {
+            supplyType = "INTER_STATE";
+          }
+        } catch {
+          // Default to INTRA_STATE on error
+        }
+      }
+
+      // Large B2C flag: B2C invoice with total > ₹2.5 lakh must be reported individually.
+      // Rechecked at confirm time with the final total.
+      const largB2cFlag = b2bB2cTag === "B2C" && Number(i.totals.totalAmount) > 250000;
+
       const inv = await q(
         `INSERT INTO sales_invoices (
            account_id, invoice_number, customer_id, customer_name, customer_gst, customer_drug_license,
            invoice_date, due_date, status, payment_status, subtotal, total_discount, total_gst, total_amount,
            amount_paid, balance_due, round_off, notes, created_by_user_id,
            is_walk_in_sale, walk_in_patient_name, walk_in_patient_phone, walk_in_doctor_name, walk_in_prescription_no,
-           rate_type, bill_type, global_discount_percent
-         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'DRAFT'::sales_invoice_status,'UNPAID'::sales_payment_status,$9,$10,$11,$12,0,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)
+           rate_type, bill_type, global_discount_percent,
+           b2b_b2c_tag, large_b2c_flag, place_of_supply, supply_type, customer_gstin_snapshot
+         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'DRAFT'::sales_invoice_status,'UNPAID'::sales_payment_status,$9,$10,$11,$12,0,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)
          RETURNING *`,
         [
           ctx.accountId, ivNo, c.customer.id, c.customer.name, c.customer.gst_number || null, c.customer.drug_license_number || null,
@@ -61,7 +104,12 @@ async function handler(event) {
           h.header.walkInPrescriptionNo || null,
           h.header.rateType || "RETAIL_RATE",
           h.header.billType || "CASH_MEMO",
-          h.header.globalDiscountPercent || 0
+          h.header.globalDiscountPercent || 0,
+          b2bB2cTag,
+          largB2cFlag,
+          placeOfSupply,
+          supplyType,
+          customerGstinSnapshot
         ]
       );
       const invoice = inv.rows?.[0];

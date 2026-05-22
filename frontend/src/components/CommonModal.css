@@ -864,6 +864,13 @@
   box-sizing: border-box;
 }
 .mcmBody .csf.mfzInput { min-height: 0; }
+/* Button-group: override full radius for any select/button inside .msw in modal */
+.mcmBody .msw > .csf {
+  border-radius: var(--mcm-ctrl-radius) 0 0 var(--mcm-ctrl-radius);
+}
+.mcmBody .msw > .mswAdd {
+  border-radius: 0 var(--mcm-ctrl-radius) var(--mcm-ctrl-radius) 0 !important;
+}
 
 /* MasterSelect in modal */
 .mcmBody .mfzField > .msw > .csf,
@@ -871,6 +878,7 @@
   border: 1.5px solid var(--mcm-field-border);
   background: var(--mcm-field-bg);
   box-shadow: var(--field-rest-shadow);
+  border-radius: var(--mcm-ctrl-radius) 0 0 var(--mcm-ctrl-radius);
 }
 .mcmBody .mfzField > .msw > .csf:hover:not(:focus-within):not(.csf_disabled),
 .mcmBody .cliItemsTable td .msw > .csf:hover:not(:focus-within):not(.csf_disabled) {
@@ -901,6 +909,7 @@
   min-height: var(--mcm-ctrl-h);
   padding: 0;
   box-sizing: border-box;
+  border-radius: 0 var(--mcm-ctrl-radius) var(--mcm-ctrl-radius) 0 !important;
 }
 
 .mcmBody .csf .csfSelect {
@@ -1160,7 +1169,7 @@
   .mcmBody .sfmSection > *:not(.sfmSectionHead) { padding: 10px 12px; }
   .mcmBody .piSectionBody { padding: 10px 12px; }
   .mcmBody .piSectionHead { padding: 8px 12px; }
-  .mcm .mcmBody .msw { gap: 6px; }
+  .mcm .mcmBody .msw { gap: 0; }
   .mcm .mcmBody .mswAdd { width: 42px; min-height: 42px; }
   .mcm .mcmBody .mfzField > .msw.msw_mfz > .mswAdd.ciab_icon {
     width: var(--mcm-ctrl-h);

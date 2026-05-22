@@ -1,27 +1,47 @@
+/* ── MasterSelectWithCreate — select + attached + button ── */
 .msw {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 0;                   /* button-group: no gap between select and + */
   width: 100%;
   min-width: 0;
-  align-items: center;
+  /* stretch so the + button always matches the select field height */
+  align-items: stretch;
 }
 
-/* First column is the select control (no extra wrapper div) */
+/* Select fills its column; square right edge for button-group look */
 .msw > .csf {
   min-width: 0;
+  border-radius: 12px 0 0 12px;
 }
 
+/* Suppress lift-transform so the + button stays visually aligned */
+.msw > .csf:hover,
+.msw > .csf:focus-within {
+  transform: none;
+}
+
+/* + button: square left edge, rounded right edge */
 .mswAdd {
-  width: var(--mcm-ctrl-h, 42px);
-  min-height: var(--mcm-ctrl-h, 42px);
+  width: 38px;
+  min-width: 38px;
+  height: auto;
+  min-height: 36px;
   flex: 0 0 auto;
+  align-self: stretch;
+  /* override ciab_icon fixed width/height so it stretches */
+  border-radius: 0 10px 10px 0 !important;
+  border-left: none !important;  /* share border with select */
+  padding: 0 !important;
 }
 
-/* `.msw_mfz` (select has `mfzInput` inside CommonModal): border/hover/focus/error chrome lives in
-   CommonModal.css under `.mcmBody .mfzField > .msw > .csf` — avoid duplicating tokens here. */
+/* Modal context (mfzInput layout) — slightly taller fields */
 .msw_mfz {
-  align-items: center;
+  align-items: stretch;
+  gap: 0;
+}
+.msw_mfz .mswAdd {
+  min-height: 38px;
 }
 
 /* Kind-specific emphasis */
@@ -30,16 +50,20 @@
   letter-spacing: 0.01em;
 }
 
+/* ── Mobile responsive ── */
 @media (max-width: 720px) {
-  .msw {
-    gap: 7px;
-  }
+  .msw { gap: 0; }
+  .mswAdd { width: 36px; min-width: 36px; }
 }
 
 @media (max-width: 480px) {
-  .msw {
-    gap: 6px;
-  }
+  .msw { gap: 0; }
+  .mswAdd { width: 34px; min-width: 34px; }
+}
+
+@media (max-width: 380px) {
+  .msw { gap: 0; }
+  .mswAdd { width: 32px; min-width: 32px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

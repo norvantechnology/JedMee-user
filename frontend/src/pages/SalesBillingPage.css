@@ -387,6 +387,48 @@
   border: 1px solid var(--color-border);
 }
 
+/* ─── Loose stock chip (shown in STOCK cell when packaging exists) ─── */
+.sbmLooseStockChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #0891b2;
+  background: #e0f2fe;
+  border: 1px solid #bae6fd;
+  white-space: nowrap;
+}
+
+/* Zero loose stock — muted appearance */
+.sbmLooseStockChip_zero {
+  color: var(--color-text-4);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+}
+
+/* ─── Unit label (static, no packaging) ─── */
+.sbmUnitLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--color-text-3);
+  padding: 4px 6px;
+  border-radius: 6px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  white-space: nowrap;
+  cursor: default;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* ─── Batch select ───────────────────────────────────────────────────────── */
 .sbmLineSelect,
 .sbmItemsTable td select.sbmLineSelect {
@@ -858,8 +900,8 @@
 
   .piModalForm .msw {
     grid-template-columns: 1fr auto !important;
-    gap: 8px !important;
-    align-items: center !important;
+    gap: 0 !important;
+    align-items: stretch !important;
   }
 
   .piModalForm .mswAdd {

@@ -45,6 +45,15 @@
   border-radius: 10px;
 }
 
+/* When .ciab_icon is inside .msw (MasterSelectWithCreate), let CSS grid stretch it */
+.msw .ciab_icon {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border-radius: 0 10px 10px 0;  /* button-group: square left edge */
+  border-left: none;             /* share border with select */
+}
+
 .ciab:hover {
   border-color: var(--color-primary);
   background: linear-gradient(
@@ -131,6 +140,19 @@
     padding: 0;
     border-radius: 9px;
   }
+
+  /* Inside .msw: let grid control the size */
+  .msw .ciab_icon {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .msw .ciab_icon {
+    border-radius: 8px;
+  }
 }
 
 @media (max-width: 380px) {
@@ -144,6 +166,12 @@
     width: 34px;
     min-width: 34px;
     height: 34px;
+  }
+
+  .msw .ciab_icon {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
   }
 }
 

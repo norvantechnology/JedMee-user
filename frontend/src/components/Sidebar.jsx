@@ -88,6 +88,7 @@ function pickSidebarIcon(to) {
       return <Layers />;
     case "/reports/day-book":
     case "/reports/gst-r1":
+    case "/reports/gst-r2":
       return <IconDayBook />;
     case "/reports/ledger":
       return <IconLedger />;

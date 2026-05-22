@@ -262,3 +262,45 @@
   max-width: 380px;
   line-height: 1.5;
 }
+
+/* ── GSTIN code chip ── */
+.gstCode {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12.5px;
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: var(--color-text-2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+.gstCodeInvalid {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ── GSTIN issue badge ── */
+.gstIssueBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #b91c1c;
+  background: #fee2e2;
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+
+/* ── Total cell highlight ── */
+.gstTotalCell {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* ── tTotal row (shared with g3bTable) ── */
+.g3bTable .tTotal {
+  font-weight: 700;
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+.g3bTable .tTotal td { border-top: 2px solid var(--color-border); }
+.g3bTable .tHighlight { color: var(--color-primary); font-weight: 700; }

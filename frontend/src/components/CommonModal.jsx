@@ -830,33 +830,22 @@ function cmMakeEmptyCustomer(isRetailer) {
 export function useCustomerModalForm({ open, mode, initialValue, isRetailer, busy, onClose }) {
   const { taxIdLabel } = useLocale();
   const [form, setForm] = useState(() => cmMakeEmptyCustomer(isRetailer));
-  const [showCompliance, setShowCompliance] = useState(!isRetailer);
   const [submitted, setSubmitted] = useState(false);
-  const overlayClosedRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
-    if (overlayClosedRef.current) {
-      overlayClosedRef.current = false;
-      return;
-    }
     const base = cmMakeEmptyCustomer(isRetailer);
     if (initialValue && mode === "edit") {
       const merged = { ...base, ...initialValue };
       setForm(merged);
-      setShowCompliance(
-        !isRetailer || Boolean(initialValue.gstNumber || initialValue.drugLicenseNumber || initialValue.dlExpiryDate)
-      );
     } else {
       setForm(base);
-      setShowCompliance(!isRetailer);
     }
     setSubmitted(false);
   }, [open, mode, initialValue, isRetailer]);
 
   function handleOverlayClose() {
     if (busy) return;
-    overlayClosedRef.current = true;
     onClose?.();
   }
 
@@ -890,8 +879,6 @@ export function useCustomerModalForm({ open, mode, initialValue, isRetailer, bus
     typeOptions,
     form,
     setForm,
-    showCompliance,
-    setShowCompliance,
     submitted,
     setSubmitted,
     handleOverlayClose,
@@ -909,8 +896,6 @@ export function CustomerModalFormBody({
   setForm,
   busy,
   submitted,
-  showCompliance,
-  setShowCompliance,
   isRetailer,
   taxIdLabel,
   typeOptions,
@@ -1046,61 +1031,38 @@ export function CustomerModalFormBody({
         <ModalFormPanel aria-label="Compliance">
           <ModalFormPanelHead>
             <ModalFormSectionTitle kicker="Compliance" />
-            {isRetailer ? (
-              <div className="mfzHeadRight">
-                <button
-                  type="button"
-                  className="mfzToggle mcmComplianceToggle"
-                  onClick={() => setShowCompliance((v) => !v)}
-                  aria-expanded={showCompliance}
-                  aria-controls="customer-compliance-section"
-                >
-                  <span className="mfzToggleIcon" aria-hidden="true">
-                    <span className={showCompliance ? "mfzRot90" : ""}>
-                      <IconChevronMini />
-                    </span>
-                  </span>
-                  {showCompliance ? "Hide compliance" : "Show compliance"}
-                </button>
-              </div>
-            ) : null}
           </ModalFormPanelHead>
-
-          {showCompliance ? (
-            <ModalFormPanelBody id="customer-compliance-section">
-              {isRetailer && form.customerType === "PATIENT" ? null : (
-                <ModalFormGrid>
-                  <ModalFormField span={6} label={taxIdLabel} error={gstError || null}>
-                    <input
-                      className={`mfzInput${gstError ? " mfzInput_err" : ""}`}
-                      value={form.gstNumber}
-                      placeholder="Tax registration number"
-                      disabled={busy}
-                      maxLength={15}
-                      onChange={(e) => setForm((p) => ({ ...p, gstNumber: e.target.value }))}
-                    />
-                  </ModalFormField>
-                  <ModalFormField span={6} label="Drug license number">
-                    <input
-                      className="mfzInput"
-                      value={form.drugLicenseNumber}
-                      placeholder=""
-                      disabled={busy}
-                      onChange={(e) => setForm((p) => ({ ...p, drugLicenseNumber: e.target.value }))}
-                    />
-                  </ModalFormField>
-                  <ModalFormField span={6} label="DL expiry date">
-                    <CommonDatePicker
-                      value={form.dlExpiryDate}
-                      disabled={busy}
-                      onChange={(v) => setForm((p) => ({ ...p, dlExpiryDate: v }))}
-                      ariaLabel="DL expiry date"
-                    />
-                  </ModalFormField>
-                </ModalFormGrid>
-              )}
-            </ModalFormPanelBody>
-          ) : null}
+          <ModalFormPanelBody>
+            <ModalFormGrid>
+              <ModalFormField span={6} label={taxIdLabel} error={gstError || null}>
+                <input
+                  className={`mfzInput${gstError ? " mfzInput_err" : ""}`}
+                  value={form.gstNumber}
+                  placeholder="Tax registration number"
+                  disabled={busy}
+                  maxLength={15}
+                  onChange={(e) => setForm((p) => ({ ...p, gstNumber: e.target.value }))}
+                />
+              </ModalFormField>
+              <ModalFormField span={6} label="Drug license number">
+                <input
+                  className="mfzInput"
+                  value={form.drugLicenseNumber}
+                  placeholder=""
+                  disabled={busy}
+                  onChange={(e) => setForm((p) => ({ ...p, drugLicenseNumber: e.target.value }))}
+                />
+              </ModalFormField>
+              <ModalFormField span={6} label="DL expiry date">
+                <CommonDatePicker
+                  value={form.dlExpiryDate}
+                  disabled={busy}
+                  onChange={(v) => setForm((p) => ({ ...p, dlExpiryDate: v }))}
+                  ariaLabel="DL expiry date"
+                />
+              </ModalFormField>
+            </ModalFormGrid>
+          </ModalFormPanelBody>
         </ModalFormPanel>
 
         <ModalFormPanel aria-label="Billing defaults">

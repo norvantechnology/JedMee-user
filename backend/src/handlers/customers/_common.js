@@ -1,5 +1,25 @@
 const { clean, n } = require("../../shared/sales");
 
+/**
+ * Validate GSTIN format: 15-char alphanumeric per GST rules.
+ * Pattern: 2-digit state + 5 letters + 4 digits + 1 letter + 1 alphanumeric + Z + 1 alphanumeric
+ * Same regex used in salesInvoices/_common.js and gstrB2bB2c.js
+ */
+function isValidGstin(g) {
+  if (!g) return false;
+  return /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/.test(
+    String(g).toUpperCase().trim()
+  );
+}
+
+/**
+ * Derive 2-digit state code from a valid GSTIN (first 2 chars).
+ */
+function stateCodeFromGstin(gstin) {
+  if (!gstin || !isValidGstin(gstin)) return null;
+  return String(gstin).toUpperCase().trim().substring(0, 2);
+}
+
 function mapCustomerRow(r) {
   if (!r) return null;
   return {
@@ -7,6 +27,7 @@ function mapCustomerRow(r) {
     is_active: Boolean(r.is_active),
     is_cash_customer: Boolean(r.is_cash_customer),
     is_walk_in: Boolean(r.is_walk_in),
+    b2b_flag: Boolean(r.b2b_flag),
     credit_days: Number(r.credit_days || 0),
     credit_limit: Number(r.credit_limit || 0),
     discount_percent: Number(r.discount_percent || 0)
@@ -37,6 +58,12 @@ function validateCustomerPayload(body, isUpdate = false) {
     notes: clean(body.notes)
   };
 
+  // Derive b2b_flag and state_code from GSTIN
+  const gstinValid = isValidGstin(out.gstNumber);
+  out.b2bFlag = gstinValid;
+  out.stateCode = gstinValid ? stateCodeFromGstin(out.gstNumber) : null;
+  out.gstinValidatedAt = out.gstNumber ? new Date().toISOString() : null;
+
   const errs = [];
   if (!isUpdate || out.name) {
     if (out.name.length < 2) errs.push("Customer name must be at least 2 characters.");
@@ -49,7 +76,10 @@ function validateCustomerPayload(body, isUpdate = false) {
       errs.push("Phone number must be 7 to 15 digits.");
     }
   }
-  if (out.gstNumber && !/^[0-9A-Z]{15}$/.test(out.gstNumber)) errs.push("GST number must be 15 alphanumeric characters.");
+  // Strict GSTIN format validation — reject invalid format at save time
+  if (out.gstNumber && !isValidGstin(out.gstNumber)) {
+    errs.push("GST number must be a valid 15-character GSTIN (e.g. 29ABCDE1234F1Z5). Invalid format is not allowed.");
+  }
   if (out.dlExpiryDate) {
     const d = String(out.dlExpiryDate).slice(0, 10);
     if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) errs.push("DL expiry must be a valid date (YYYY-MM-DD).");
@@ -63,4 +93,4 @@ function validateCustomerPayload(body, isUpdate = false) {
   return { ok: errs.length === 0, errs, out };
 }
 
-module.exports = { mapCustomerRow, validateCustomerPayload };
+module.exports = { mapCustomerRow, validateCustomerPayload, isValidGstin, stateCodeFromGstin };

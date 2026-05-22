@@ -26,6 +26,8 @@ import InventoryReportsPage from "../pages/InventoryReportsPage.jsx";
 import DayBookReportPage from "../pages/DayBookReportPage.jsx";
 import LedgerReportsPage from "../pages/LedgerReportsPage.jsx";
 import GstReportPage from "../pages/GstReportPage.jsx";
+import Gstr3bPage from "../pages/Gstr3bPage.jsx";
+import Gstr2Page from "../pages/Gstr2Page.jsx";
 import CustomerLedgerPage from "../pages/CustomerLedgerPage.jsx";
 import VendorLedgerPage from "../pages/VendorLedgerPage.jsx";
 import ProfileSettingsPage from "../pages/ProfileSettingsPage.jsx";
@@ -45,6 +47,7 @@ export function AppRoutes() {
   const [mustChange, setMustChange] = useState(Boolean(readAuth()?.user?.must_change_password));
   const [authTick, setAuthTick] = useState(0);
   const bootstrappedForTokenRef = useRef(null);
+  const isBootstrappingRef = useRef(false);
   const [approvalGate, setApprovalGate] = useState(false);
 
   useEffect(() => {
@@ -71,26 +74,35 @@ export function AppRoutes() {
     const hasUserAndAccess = Boolean(auth?.user) && Boolean(auth?.access);
     // In dev (React StrictMode), effects may run twice. Also avoid re-bootstrapping for the same token.
     if (bootstrappedForTokenRef.current === auth.refreshToken && hasUserAndAccess) return;
+    // Prevent duplicate in-flight bootstrap requests (e.g. when saveAuthUser triggers authTick
+    // before saveAuthAccess completes, which would otherwise fire a second /me + /access/me pair).
+    if (isBootstrappingRef.current) return;
+
     bootstrappedForTokenRef.current = auth.refreshToken;
+    isBootstrappingRef.current = true;
 
     (async () => {
-      const resp = await getMe();
-      if (resp.status === 401) {
-        clearAuth();
-        return;
-      }
-      const u = resp.json?.data?.user;
-      if (u) saveAuthUser(u);
+      try {
+        const resp = await getMe();
+        if (resp.status === 401) {
+          clearAuth();
+          return;
+        }
+        const u = resp.json?.data?.user;
+        if (u) saveAuthUser(u);
 
-      const a = await getMyAccess();
-      if (a.status === 401) {
-        clearAuth();
-        return;
-      }
-      const access = a.json?.data?.access;
-      if (access) {
-        const { saveAuthAccess } = await import("../services/authStorage.js");
-        saveAuthAccess(access);
+        const a = await getMyAccess();
+        if (a.status === 401) {
+          clearAuth();
+          return;
+        }
+        const access = a.json?.data?.access;
+        if (access) {
+          const { saveAuthAccess } = await import("../services/authStorage.js");
+          saveAuthAccess(access);
+        }
+      } finally {
+        isBootstrappingRef.current = false;
       }
     })();
   }, [authed, authTick]);
@@ -226,6 +238,18 @@ export function AppRoutes() {
         path="/reports/gst-r1"
         element={
           !authed ? <Navigate to="/login" replace /> : mustChange ? <Navigate to="/first-login-change-password" replace /> : approvalGate ? <Navigate to="/approval" replace /> : <GstReportPage />
+        }
+      />
+      <Route
+        path="/reports/gst-r2"
+        element={
+          !authed ? <Navigate to="/login" replace /> : mustChange ? <Navigate to="/first-login-change-password" replace /> : approvalGate ? <Navigate to="/approval" replace /> : <Gstr2Page />
+        }
+      />
+      <Route
+        path="/reports/gst-r3b"
+        element={
+          !authed ? <Navigate to="/login" replace /> : mustChange ? <Navigate to="/first-login-change-password" replace /> : approvalGate ? <Navigate to="/approval" replace /> : <Gstr3bPage />
         }
       />
       <Route

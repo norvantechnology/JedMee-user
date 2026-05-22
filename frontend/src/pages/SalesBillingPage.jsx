@@ -1241,7 +1241,7 @@ export default function SalesBillingPage() {
     { key: "stock", label: "Stock", className: "c" },
     { key: "qty", label: "Qty", className: "r" },
     { key: "free", label: "Free", className: "r" },
-    { key: "loose", label: "Loose", className: "r" },
+    { key: "loose", label: "Loose Qty", className: "r" },
     { key: "unit", label: "Unit", className: "c" },
     { key: "mrp", label: "MRP", className: "r" },
     { key: "rate", label: "Rate", className: "r" },
@@ -2156,29 +2156,37 @@ export default function SalesBillingPage() {
                           </div>
                         </td>
 
-                        {/* Stock */}
+                        {/* Stock — shows strip stock + loose stock chip when packaging exists */}
                         <td>
-                          {it.batchId ? (
-                            <div
-                              className="sbmStockCell"
-                              title={(() => {
-                                const wh = batchWarehouseStock(form.items, it.batchId);
-                                const looseQty = Number(it.looseQty || 0);
-                                const looseStock = Number(it.looseStock || 0);
-                                const packingUnits = Math.max(1, Number(it.packingUnits || 1));
-                                const looseShortfall = Math.max(0, looseQty - looseStock);
-                                const stripsBreaking = looseShortfall > 0 ? Math.ceil(looseShortfall / packingUnits) : 0;
-                                let tip = `After sale: ${afterStock ?? 0} strip(s) left · WH: ${wh} strip(s)`;
-                                if (looseQty > 0) tip += ` · Loose: ${looseQty} ${String(it.looseUnitName || "unit")}(s) sold`;
-                                if (stripsBreaking > 0) tip += ` · ${stripsBreaking} strip(s) will be opened`;
-                                if (looseStock > 0) tip += ` · ${looseStock} loose unit(s) in stock`;
-                                return tip;
-                              })()}
-                            >
-                              <span className={stockChipClass(afterStock ?? 0)}>{afterStock ?? 0}</span>
-                              {isRetailer ? <span className="sbmStockWh">/ {batchWarehouseStock(form.items, it.batchId)}</span> : null}
-                            </div>
-                          ) : ""}
+                          {it.batchId ? (() => {
+                            const whStock = batchWarehouseStock(form.items, it.batchId);
+                            const looseStock = Number(it.looseStock || 0);
+                            const packingUnits = Math.max(1, Number(it.packingUnits || 1));
+                            const hasPackaging = packingUnits > 1;
+                            const looseQty = Number(it.looseQty || 0);
+                            const looseShortfall = Math.max(0, looseQty - looseStock);
+                            const stripsBreaking = looseShortfall > 0 ? Math.ceil(looseShortfall / packingUnits) : 0;
+                            const tipParts = [
+                              `Strip stock: ${whStock}`,
+                              `After sale: ${afterStock ?? 0} strip(s) left`,
+                            ];
+                            if (hasPackaging) tipParts.push(`Loose in stock: ${looseStock} ${String(it.looseUnitName || "TAB").toUpperCase()}`);
+                            if (looseQty > 0) tipParts.push(`Loose selling: ${looseQty} ${String(it.looseUnitName || "TAB").toUpperCase()}`);
+                            if (stripsBreaking > 0) tipParts.push(`${stripsBreaking} strip(s) will be opened`);
+                            return (
+                              <div className="sbmStockCell" title={tipParts.join(" · ")}>
+                                {/* Strip stock chip — colored by after-sale level */}
+                                <span className={stockChipClass(afterStock ?? 0)}>{whStock}</span>
+                                {/* Loose stock chip — only when packaging exists */}
+                                {hasPackaging && (
+                                  <span className={`sbmLooseStockChip${looseStock > 0 ? "" : " sbmLooseStockChip_zero"}`}
+                                    title={`Loose in stock: ${looseStock} ${String(it.looseUnitName || "TAB").toUpperCase()}`}>
+                                    {looseStock}{String(it.looseUnitName || "TAB").charAt(0).toUpperCase()}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })() : ""}
                         </td>
 
                         {/* Qty */}
@@ -2223,16 +2231,16 @@ export default function SalesBillingPage() {
                           />
                         </td>
 
-                        {/* Loose — hidden in UNIT mode (qty field handles individual units) */}
+                        {/* Loose Qty — only shown when packaging exists (packingUnits > 1) and not in UNIT mode */}
                         <td>
-                          {it.salesUnitMode !== "UNIT" ? (
+                          {it.salesUnitMode !== "UNIT" && Number(it.packingUnits || 1) > 1 ? (
                             <input
                               className="raInput sbmNum"
                               type="text"
                               inputMode="numeric"
                               pattern="[0-9]*"
                               value={it.looseQty || 0}
-                              title={`Loose units (${String(it.looseUnitName || "TAB").toUpperCase()}) available: ${Number(it.looseStock || 0)}`}
+                              title={`Loose ${String(it.looseUnitName || "TAB").toUpperCase()} to sell · In stock: ${Number(it.looseStock || 0)}`}
                               onChange={(e) =>
                                 setForm((p) => ({
                                   ...p,
@@ -2243,21 +2251,24 @@ export default function SalesBillingPage() {
                           ) : null}
                         </td>
 
-                        {/* Unit toggle button — STRIP/UNIT mode switcher */}
+                        {/* Unit toggle — STRIP/UNIT mode switcher; static label when no packaging */}
                         <td>
-                          <button
-                            type="button"
-                            className={`sbmUnitBtn${it.salesUnitMode === "UNIT" ? " sbmUnitBtn--active" : ""}`}
-                            title={Number(it.packingUnits || 1) > 1
-                              ? `Click to switch: currently selling by ${it.salesUnitMode}`
-                              : `1 strip = 1 ${String(it.looseUnitName || "TAB").toUpperCase()}`}
-                            style={{ cursor: Number(it.packingUnits || 1) > 1 ? "pointer" : "default" }}
-                            onClick={() => Number(it.packingUnits || 1) > 1 && handleToggleUnitMode(idx)}
-                          >
-                            {it.salesUnitMode === "UNIT"
-                              ? String(it.looseUnitName || "TAB").toUpperCase()
-                              : "STRIP"}
-                          </button>
+                          {Number(it.packingUnits || 1) > 1 ? (
+                            <button
+                              type="button"
+                              className={`sbmUnitBtn${it.salesUnitMode === "UNIT" ? " sbmUnitBtn--active" : ""}`}
+                              title={`Click to switch: currently selling by ${it.salesUnitMode} · ${it.packingUnits} ${String(it.looseUnitName || "TAB").toUpperCase()} per strip`}
+                              onClick={() => handleToggleUnitMode(idx)}
+                            >
+                              {it.salesUnitMode === "UNIT"
+                                ? String(it.looseUnitName || "TAB").toUpperCase()
+                                : "STRIP"}
+                            </button>
+                          ) : (
+                            <span className="sbmUnitLabel" title="No packaging — selling individual units">
+                              {String(it.looseUnitName || "UNIT").toUpperCase()}
+                            </span>
+                          )}
                         </td>
 
                         {/* MRP */}

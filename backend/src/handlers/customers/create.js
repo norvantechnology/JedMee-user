@@ -36,15 +36,19 @@ async function handler(event) {
       `INSERT INTO customers (
         account_id, code, name, short_name, phone_country_code, phone_number, email, address, city, state, pincode,
         customer_type, gst_number, drug_license_number, dl_expiry_date, credit_days, credit_limit, discount_percent,
-        is_active, is_cash_customer, notes, created_by_user_id, updated_by_user_id
+        is_active, is_cash_customer, notes, created_by_user_id, updated_by_user_id,
+        b2b_flag, state_code, gstin_validated_at
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::customer_type_enum,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$22)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12::customer_type_enum,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$22,$23,$24,$25)
       RETURNING *`,
       [
         ctx.accountId, code, v.out.name, v.out.shortName || null, v.out.phoneCountryCode || null, v.out.phoneNumber || null, v.out.email || null,
         v.out.address || null, v.out.city || null, v.out.state || null, v.out.pincode || null, v.out.customerType, v.out.gstNumber || null,
         v.out.drugLicenseNumber || null, v.out.dlExpiryDate || null, v.out.creditDays, v.out.creditLimit, v.out.discountPercent,
-        v.out.isActive, v.out.isCashCustomer, v.out.notes || null, actorId
+        v.out.isActive, v.out.isCashCustomer, v.out.notes || null, actorId,
+        v.out.b2bFlag,
+        v.out.stateCode || null,
+        v.out.gstinValidatedAt || null
       ]
     );
     return created({ customer: mapCustomerRow(rs.rows?.[0] || null) }, { message: "Customer created." });

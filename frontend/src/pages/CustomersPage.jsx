@@ -501,8 +501,6 @@ export default function CustomersPage() {
           setForm={customerForm.setForm}
           busy={busy}
           submitted={customerForm.submitted}
-          showCompliance={customerForm.showCompliance}
-          setShowCompliance={customerForm.setShowCompliance}
           isRetailer={isRetailer}
           taxIdLabel={customerForm.taxIdLabel}
           typeOptions={customerForm.typeOptions}

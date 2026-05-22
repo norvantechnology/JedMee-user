@@ -912,8 +912,8 @@
   /* Keep + add button compact (override MasterSelectWithCreate mobile rule) */
   .piModalForm .msw {
     grid-template-columns: 1fr auto !important;
-    gap: 8px !important;
-    align-items: center !important;
+    gap: 0 !important;
+    align-items: stretch !important;
   }
   .piModalForm .mswAdd {
     width: 42px !important;
@@ -1522,4 +1522,18 @@
 .piModalForm .cliSummaryStrip .cliSummaryCell_total .cliSummaryValue {
   font-size: 16px;
   font-weight: 900;
+}
+
+/* ─── Supplier + button tight grouping ───────────────────────────────────── */
+.piHeaderTop .msw {
+  gap: 0 !important;
+}
+
+.piHeaderTop .msw .csf {
+  border-radius: 8px 0 0 8px !important;
+}
+
+.piHeaderTop .msw .mswAdd {
+  border-left: none !important;
+  border-radius: 0 8px 8px 0 !important;
 }

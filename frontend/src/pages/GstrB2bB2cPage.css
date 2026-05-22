@@ -1,0 +1,391 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   GstrB2bB2cPage.css  —  GSTR-1 B2B vs B2C Segregation Report
+   All classes prefixed "b2b" to avoid collisions.
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── Filter bar ──────────────────────────────────────────────────────────── */
+.b2bFilterBar { padding: 16px 20px; border-bottom: 1px solid var(--color-border); }
+
+.b2bFilterRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.b2bFilterField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+.b2bFieldLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-3);
+}
+
+.b2bSelect, .b2bDateInput {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-primary-light);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  min-width: 120px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.b2bSelect:focus, .b2bDateInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.b2bSearchInput {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-primary-light);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: var(--font);
+  outline: none;
+  min-width: 200px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.b2bSearchInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
+}
+
+.b2bFilterActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+/* ── Toggle filter pills ─────────────────────────────────────────────────── */
+.b2bFilterPills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface, #fbf8ff);
+}
+
+.b2bPill {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-card);
+  color: var(--color-text-3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.b2bPill:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.b2bPill.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary, #fff);
+}
+.b2bPill.warn.active {
+  background: var(--color-danger, #ef4444);
+  border-color: var(--color-danger, #ef4444);
+}
+
+/* ── Summary cards ───────────────────────────────────────────────────────── */
+.b2bSummaryRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 16px 20px;
+}
+@media (max-width: 900px) { .b2bSummaryRow { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .b2bSummaryRow { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px 14px; } }
+
+.b2bStatCard {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--layout-card-radius, 12px);
+  padding: 16px 18px;
+  box-shadow: var(--shadow-sm);
+}
+.b2bStatCard.b2bCardB2b { border-color: color-mix(in srgb, #3b82f6 40%, transparent); }
+.b2bStatCard.b2bCardB2c { border-color: color-mix(in srgb, #8b5cf6 40%, transparent); }
+.b2bStatCard.b2bCardGst { border-color: color-mix(in srgb, var(--color-primary) 40%, transparent); }
+
+.b2bStatIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  margin-bottom: 10px;
+  color: var(--ic, var(--color-primary));
+  background: color-mix(in srgb, var(--ic, var(--color-primary)) 12%, transparent);
+}
+
+.b2bStatLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-4);
+  margin-bottom: 4px;
+}
+
+.b2bStatValue {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text);
+}
+
+.b2bStatSub {
+  font-size: 11px;
+  color: var(--color-text-4);
+  margin-top: 3px;
+}
+
+.b2bStatWarn {
+  font-size: 11px;
+  color: var(--color-danger, #ef4444);
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+/* ── Section panels ──────────────────────────────────────────────────────── */
+.b2bSection {
+  margin: 0 20px 16px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--layout-card-radius, 12px);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.b2bSectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--color-surface, #fbf8ff);
+  border-bottom: 1px solid var(--color-border);
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.b2bSectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-2);
+}
+
+.b2bSectionBadge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-4);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.b2bSectionBadgeWarn {
+  background: color-mix(in srgb, var(--color-danger, #ef4444) 12%, transparent);
+  color: var(--color-danger-dark, #b91c1c);
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+.b2bTableScroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.b2bTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  color: var(--color-text);
+}
+.b2bTable th {
+  padding: 9px 12px;
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-3);
+  background: var(--color-primary-light);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+.b2bTable td {
+  padding: 9px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 55%, transparent);
+  vertical-align: middle;
+}
+.b2bTable tbody tr:last-child td { border-bottom: none; }
+.b2bTable tbody tr:hover { background: color-mix(in srgb, var(--color-primary-light) 70%, transparent); }
+.b2bTable .tR { text-align: right; }
+.b2bTable .tBold { font-weight: 700; }
+.b2bTable .tTotal { background: color-mix(in srgb, var(--color-primary) 6%, transparent); font-weight: 700; }
+.b2bTable .tTotal td { border-top: 2px solid var(--color-border); }
+.b2bTable .tHighlight { color: var(--color-primary); font-weight: 700; }
+
+/* Issue row highlight */
+.b2bIssueRow td { background: color-mix(in srgb, var(--color-danger, #ef4444) 6%, transparent); }
+
+/* GSTIN code chip */
+.b2bGstinCode {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 12px;
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: var(--color-text-2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+.b2bGstinCode.invalid {
+  background: color-mix(in srgb, var(--color-danger, #ef4444) 10%, transparent);
+  color: var(--color-danger-dark, #b91c1c);
+}
+
+/* Issue badge */
+.b2bIssueBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--color-danger, #ef4444) 12%, transparent);
+  color: var(--color-danger-dark, #b91c1c);
+}
+
+/* ── Warning / info banners ───────────────────────────────────────────────── */
+.b2bWarnBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 18px;
+  background: color-mix(in srgb, var(--color-danger, #ef4444) 8%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-danger, #ef4444) 25%, transparent);
+  color: var(--color-danger-dark, #b91c1c);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.b2bWarnBanner svg { flex-shrink: 0; margin-top: 2px; }
+
+.b2bInfoBanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 18px;
+  background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-3);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.b2bInfoBanner svg { flex-shrink: 0; margin-top: 2px; }
+
+.b2bSuccessBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: color-mix(in srgb, var(--color-success, #22c55e) 8%, transparent);
+  color: var(--color-success-dark, #15803d);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.b2bEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 24px;
+  gap: 10px;
+}
+.b2bEmptyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+.b2bEmptyTitle { font-size: 15px; font-weight: 600; color: var(--color-text-2); }
+.b2bEmptySub { font-size: 13px; color: var(--color-text-4); max-width: 380px; line-height: 1.5; }
+
+/* ── Notes section ───────────────────────────────────────────────────────── */
+.b2bNotesSection { border-color: color-mix(in srgb, var(--color-warning, #f59e0b) 35%, transparent); }
+
+.b2bNoteRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+.b2bNoteRow svg { flex-shrink: 0; margin-top: 2px; }
+.b2bNoteWarn { background: color-mix(in srgb, var(--color-warning, #f59e0b) 10%, transparent); color: var(--color-warning-dark, #b45309); }
+.b2bNoteInfo { background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-text-2); }
+
+/* ── Pagination ──────────────────────────────────────────────────────────── */
+.b2bPagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 18px;
+  border-top: 1px solid var(--color-border);
+  font-size: 13px;
+  color: var(--color-text-3);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.b2bPagBtns { display: flex; gap: 6px; }
+.b2bPagBtn {
+  padding: 5px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 7px;
+  background: var(--color-card);
+  color: var(--color-text-2);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.b2bPagBtn:hover:not(:disabled) { border-color: var(--color-primary); color: var(--color-primary); }
+.b2bPagBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .b2bSection { margin: 0 12px 12px; }
+  .b2bSectionHead { padding: 10px 14px; }
+  .b2bTable th, .b2bTable td { padding: 7px 9px; font-size: 12px; }
+  .b2bFilterActions { width: 100%; }
+  .b2bFilterActions .appBtn { flex: 1; justify-content: center; }
+}

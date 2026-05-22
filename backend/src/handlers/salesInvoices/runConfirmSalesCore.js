@@ -137,18 +137,23 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
     // Skip strip-based recalculation; use stored line values from save.
     if (lineQtyInt === 0 && looseQtySold > 0) {
       const storedGst = Number(item.gst_amount || 0);
-      const cgstAmt = String(invoice.bill_type || "").toUpperCase() === "TAX_INVOICE" ? Number((storedGst / 2).toFixed(4)) : 0;
-      const sgstAmt = String(invoice.bill_type || "").toUpperCase() === "TAX_INVOICE" ? Number((storedGst / 2).toFixed(4)) : 0;
+      // Always split GST into CGST/SGST/IGST for ALL bill types (CASH_MEMO and TAX_INVOICE).
+      // GSTR-3B requires the split regardless of bill type — the bill_type only affects
+      // whether the tax breakdown is printed on the invoice, not whether GST is owed.
+      const isInterState = String(invoice.supply_type || "INTRA_STATE").toUpperCase() === "INTER_STATE";
+      const cgstAmt  = !isInterState ? Number((storedGst / 2).toFixed(4)) : 0;
+      const sgstAmt  = !isInterState ? Number((storedGst / 2).toFixed(4)) : 0;
+      const igstAmt  = isInterState  ? Number(storedGst.toFixed(4))        : 0;
       await q(
         `UPDATE sales_invoice_items
          SET free_qty = 0, discount_percent = $3::numeric, discount_amount = $4::numeric, net_rate = $5::numeric,
              taxable_amount = $6::numeric, gst_amount = $7::numeric, line_total = $8::numeric,
-             cgst_amount = $9::numeric, sgst_amount = $10::numeric, igst_amount = 0
+             cgst_amount = $9::numeric, sgst_amount = $10::numeric, igst_amount = $11::numeric
          WHERE id = $1 AND account_id = $2`,
         [item.id, accountId,
          Number(item.discount_percent || 0), Number(item.discount_amount || 0), Number(item.net_rate || 0),
          Number(item.taxable_amount || 0), storedGst, Number(item.line_total || 0),
-         cgstAmt, sgstAmt]
+         cgstAmt, sgstAmt, igstAmt]
       );
       // No SALE inventory txn (qty=0, no full strips deducted)
       // Handle loose stock deduction (break packs if needed)
@@ -250,9 +255,13 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
     invoiceFreeQtyByBatch.set(batchIdKey, needFree);
 
     const splitGst = Number(final.gstAmount || 0);
-    const cgstAmount = String(invoice.bill_type || "").toUpperCase() === "TAX_INVOICE" ? Number((splitGst / 2).toFixed(4)) : 0;
-    const sgstAmount = String(invoice.bill_type || "").toUpperCase() === "TAX_INVOICE" ? Number((splitGst / 2).toFixed(4)) : 0;
-    const igstAmount = 0;
+    // Always split GST into CGST/SGST/IGST for ALL bill types (CASH_MEMO and TAX_INVOICE).
+    // GSTR-3B requires the split regardless of bill type — the bill_type only affects
+    // whether the tax breakdown is printed on the invoice, not whether GST is owed.
+    const isInterState = String(invoice.supply_type || "INTRA_STATE").toUpperCase() === "INTER_STATE";
+    const cgstAmount = !isInterState ? Number((splitGst / 2).toFixed(4)) : 0;
+    const sgstAmount = !isInterState ? Number((splitGst / 2).toFixed(4)) : 0;
+    const igstAmount = isInterState  ? Number(splitGst.toFixed(4))        : 0;
     await q(
       `UPDATE sales_invoice_items
        SET free_qty = $3::int, discount_percent = $4::numeric, discount_amount = $5::numeric, net_rate = $6::numeric,
@@ -345,7 +354,8 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
          payment_status = CASE WHEN $11::boolean THEN 'PAID'::sales_payment_status ELSE 'UNPAID'::sales_payment_status END,
          subtotal = $3::numeric, total_discount = $4::numeric, total_gst = $5::numeric, total_amount = $6::numeric, round_off = $7::numeric,
          balance_due = $9::numeric, amount_paid = $10::numeric,
-         confirmed_by_user_id = $8, confirmed_at = now(), updated_at = now()
+         confirmed_by_user_id = $8, confirmed_at = now(), updated_at = now(),
+         large_b2c_flag = CASE WHEN b2b_b2c_tag = 'B2C' AND $6::numeric > 250000 THEN TRUE ELSE FALSE END
      WHERE id = $1 AND account_id = $2`,
     [
       invoiceId,

@@ -4,6 +4,7 @@ const { withTransaction } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { clean, i, n, nextSalesNumber, isFutureDate, localCalendarYmd } = require("../../shared/sales");
+const { isValidGstin } = require("../salesInvoices/_common");
 
 async function handler(event) {
   const auth = await requirePermission(event, "SALES_RETURNS", "ADD");
@@ -36,12 +37,48 @@ async function handler(event) {
         const inv = await q(`SELECT id FROM sales_invoices WHERE id = $1 AND account_id = $2 AND customer_id = $3 LIMIT 1`, [salesInvoiceId, ctx.accountId, customer.id]);
         if (!inv.rows?.length) return { err: fail(400, "VALIDATION_ERROR", "Linked sales invoice not found for selected customer.") };
       }
+      // ── B2B / B2C auto-tagging for the return ────────────────────────────────
+      // Priority: copy from linked sales invoice (most accurate).
+      // Fallback: derive from customer GSTIN (same logic as invoice creation).
+      let b2bB2cTag = 'B2C';
+      let customerGstinSnapshot = null;
+      let placeOfSupply = null;
+      let supplyType = null;
+
+      if (salesInvoiceId) {
+        // Copy tag from the original invoice — returns must match the invoice group
+        const invTagRs = await q(
+          `SELECT b2b_b2c_tag, customer_gstin_snapshot, place_of_supply, supply_type
+           FROM sales_invoices WHERE id = $1 AND account_id = $2 LIMIT 1`,
+          [salesInvoiceId, ctx.accountId]
+        );
+        const invTag = invTagRs.rows?.[0] || null;
+        if (invTag) {
+          b2bB2cTag           = String(invTag.b2b_b2c_tag || 'B2C');
+          customerGstinSnapshot = invTag.customer_gstin_snapshot || null;
+          placeOfSupply       = invTag.place_of_supply || null;
+          supplyType          = invTag.supply_type || null;
+        }
+      } else {
+        // No linked invoice — derive from customer GSTIN (walk-in always B2C)
+        const customerGstinRaw = String(customer.gst_number || '').trim().toUpperCase();
+        const gstinValid = isValidGstin(customerGstinRaw);
+        b2bB2cTag             = gstinValid ? 'B2B' : 'B2C';
+        customerGstinSnapshot = gstinValid ? customerGstinRaw : null;
+        placeOfSupply         = customerGstinSnapshot
+          ? customerGstinSnapshot.substring(0, 2)
+          : (String(customer.state_code || '').trim() || null);
+        supplyType            = null; // cannot determine without business state at return time
+      }
+
       const rs = await q(
         `INSERT INTO sales_returns (
-           account_id, return_number, sales_invoice_id, customer_id, customer_name, return_date, return_reason, status, notes, created_by_user_id
-         ) VALUES ($1,$2,$3,$4,$5,$6,$7::sales_return_reason,'DRAFT'::sales_return_status,$8,$9)
+           account_id, return_number, sales_invoice_id, customer_id, customer_name, return_date, return_reason, status, notes, created_by_user_id,
+           b2b_b2c_tag, customer_gstin_snapshot, place_of_supply, supply_type
+         ) VALUES ($1,$2,$3,$4,$5,$6,$7::sales_return_reason,'DRAFT'::sales_return_status,$8,$9,$10,$11,$12,$13)
          RETURNING *`,
-        [ctx.accountId, number, salesInvoiceId, customer.id, customer.name, returnDate, returnReason, clean(body.notes) || null, actorId]
+        [ctx.accountId, number, salesInvoiceId, customer.id, customer.name, returnDate, returnReason, clean(body.notes) || null, actorId,
+         b2bB2cTag, customerGstinSnapshot, placeOfSupply, supplyType]
       );
       const ret = rs.rows?.[0];
 
