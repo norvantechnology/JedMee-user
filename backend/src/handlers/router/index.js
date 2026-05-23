@@ -80,6 +80,7 @@ const ROUTES = {
 
   // ── Product batches ─────────────────────────────────────────────────────────
   'GET /api/product-batches':               '../productBatches/list',
+  'GET /api/product-batches/by-barcode':    '../productBatches/byBarcode',
   'GET /api/product-batches/{id}':          '../productBatches/get',
   'POST /api/product-batches':              '../productBatches/create',
   'PUT /api/product-batches/{id}':          '../productBatches/update',

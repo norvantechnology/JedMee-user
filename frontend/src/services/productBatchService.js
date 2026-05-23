@@ -4,6 +4,13 @@ export async function listProductBatches(params) {
   return await apiGet("/api/product-batches", { toast: "none", params });
 }
 
+export async function findProductBatchByBarcode(barcode) {
+  return await apiGet("/api/product-batches/by-barcode", {
+    toast: "none",
+    params: { barcode: String(barcode || "").trim() },
+  });
+}
+
 export async function getProductBatch(id) {
   return await apiGet(`/api/product-batches/${encodeURIComponent(String(id))}`, { toast: "none" });
 }

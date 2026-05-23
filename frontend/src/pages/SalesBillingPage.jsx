@@ -38,6 +38,7 @@ import {
   updateSalesInvoice
 } from "../services/salesService.js";
 import { listProducts } from "../services/productService.js";
+import BarcodeScanInput from "../components/BarcodeScanInput.jsx";
 import { createProductBatch, listProductBatches } from "../services/productBatchService.js";
 import { parseApiError, parseApiErrorToast } from "../utils/api.js";
 import { toDivisionOption } from "../utils/divisionLabel.js";
@@ -2045,6 +2046,54 @@ export default function SalesBillingPage() {
           </div>
 
           {/* ── Line Items Section ────────────────────────────────────────── */}
+          <div className="barcodeScanBlock" style={{ marginBottom: 12 }}>
+            <BarcodeScanInput
+              disabled={busy}
+              onResolved={async (batch) => {
+                const idx =
+                  activeLineIdx >= 0 && activeLineIdx < (form.items || []).length
+                    ? activeLineIdx
+                    : Math.max(0, (form.items || []).length - 1);
+                const productId = String(batch.product_id || "");
+                const p =
+                  (productsForLines || []).find((x) => String(x.id) === productId) ||
+                  (products || []).find((x) => String(x.id) === productId) ||
+                  {
+                    id: productId,
+                    name: batch.product_name || "",
+                    code: batch.product_code || ""
+                  };
+                const availableBatches = await loadBatchesForProduct(productId);
+                const merged = availableBatches.some((x) => String(x.id) === String(batch.id))
+                  ? availableBatches
+                  : [{ ...batch, id: batch.id || batch.batch_id }, ...availableBatches];
+                const lineKey = form.items?.[idx]?.lineKey || newLineKey();
+                setActiveLineIdx(idx);
+                setForm((prev) => ({
+                  ...prev,
+                  items: prev.items.map((x, i) => {
+                    if (i !== idx) return x;
+                    const base = {
+                      ...emptyItem(),
+                      lineKey,
+                      productId: p.id,
+                      productName: p?.name || batch.product_name || "",
+                      productCode: p?.code || batch.product_code || "",
+                      productSearch: formatProductLabel(p),
+                      availableBatches: merged,
+                      productUnitsPerStrip: Math.max(1, Number(p?.units_per_strip || 1)),
+                      looseUnitName: p?.loose_unit_name || "TAB"
+                    };
+                    return { ...base, ...buildSalesLineUpdateFromBatch(base, batch, prev.rateType) };
+                  })
+                }));
+                emitToast({
+                  type: "success",
+                  message: `${batch.product_name || "Product"} selected — enter qty`
+                });
+              }}
+            />
+          </div>
           <CommonLineItemsSection
             title="Line Items"
             className="piSection"

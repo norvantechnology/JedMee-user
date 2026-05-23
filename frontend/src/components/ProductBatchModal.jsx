@@ -10,6 +10,7 @@ import ProductPicker from "./ProductPicker.jsx";
 import { formatBatchExpiryRelativePhrase } from "../utils/batchExpiryDisplay.js";
 import { readAuth } from "../services/authStorage.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
+import BarcodeDisplay from "./BarcodeDisplay.jsx";
 import {
   BadgeIndianRupee,
   Flag,
@@ -803,6 +804,11 @@ export default function ProductBatchModal({
                       onBlur={() => markTouched("barcode")}
                     />
                     {showErr("barcode") && errors.barcode ? <div className="mfzErr">{errors.barcode}</div> : null}
+                    {clean(form.barcode) ? (
+                      <div style={{ marginTop: 10 }}>
+                        <BarcodeDisplay value={form.barcode} height={48} />
+                      </div>
+                    ) : null}
                   </ModalFormField>
                   {vendorOptions.length > 0 ? (
                     <ModalFormField span={12} label="Supplier">

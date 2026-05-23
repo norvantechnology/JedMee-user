@@ -3,6 +3,11 @@ node_modules/
 .pnp
 .pnp.js
 
+# ─── Credentials (never commit) ───────────────────────────────────────────────
+*.pem
+*.key
+jedmee-db.pem
+
 # ─── Environment / Secrets ────────────────────────────────────────────────────
 # Keep .env.example committed; never commit real .env files
 .env
@@ -61,3 +66,4 @@ coverage/
 .cache/
 tmp/
 temp/
+mobile/

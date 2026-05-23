@@ -6,6 +6,7 @@ import AppShell from "../layouts/AppShell.jsx";
 import CommonTable from "../components/CommonTable.jsx";
 import CommonModal from "../components/CommonModal.jsx";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
+import BarcodeDisplay from "../components/BarcodeDisplay.jsx";
 import ProductBatchModal from "../components/ProductBatchModal.jsx";
 import ProductMasterModal from "../components/ProductMasterModal.jsx";
 import { onAuthChanged, readAuth } from "../services/authStorage.js";
@@ -1218,7 +1219,14 @@ export default function QualityMasterPage() {
                           {b.stockable === false ? <span className="qmBadge qmBadge_warn qmBDInlineBadge">Non-stock</span> : null}
                         </td>
                         <td className="qmBDTd qmBDMono" data-label="Barcode" title={clean(b.barcode) || undefined}>
-                          {truncateMiddle(b.barcode, 14)}
+                          {clean(b.barcode) ? (
+                            <div className="qmBarcodePreview">
+                              <div className="qmBarcodePreview-text">{truncateMiddle(b.barcode, 14)}</div>
+                              <BarcodeDisplay value={b.barcode} height={36} className="qmBarcodePreview-img" />
+                            </div>
+                          ) : (
+                            "—"
+                          )}
                         </td>
                         <td className="qmBDTd qmBDTd_expiry" data-label="Expiry">
                           <div className={`qmBDExpiry ${status === "EXPIRED" ? "qmBDExpiry_exp" : status === "NEAR_EXPIRY" ? "qmBDExpiry_near" : ""}`}>

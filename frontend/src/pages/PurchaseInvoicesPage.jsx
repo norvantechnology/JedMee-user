@@ -31,6 +31,7 @@ import { listDivisions } from "../services/divisionService.js";
 import { listMfgCompanies } from "../services/mfgCompanyService.js";
 import { listVendors, updateVendor } from "../services/vendorService.js";
 import { listProducts, searchProductsRich } from "../services/productService.js";
+import BarcodeScanInput from "../components/BarcodeScanInput.jsx";
 import { createProductBatch, listProductBatches } from "../services/productBatchService.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
 import {
@@ -1777,6 +1778,56 @@ export default function PurchaseInvoicesPage() {
             </div>
           </div>
 
+          <div className="barcodeScanBlock" style={{ marginBottom: 12 }}>
+            <BarcodeScanInput
+              disabled={busy}
+              onResolved={async (batch) => {
+                const idx =
+                  activeLineIdx >= 0 && activeLineIdx < (form.items || []).length
+                    ? activeLineIdx
+                    : Math.max(0, (form.items || []).length - 1);
+                const productId = String(batch.product_id || "");
+                const selected =
+                  (productsForLines || []).find((p) => String(p.id) === productId) ||
+                  (products || []).find((p) => String(p.id) === productId) ||
+                  {
+                    id: productId,
+                    name: batch.product_name || "",
+                    code: batch.product_code || ""
+                  };
+                setActiveLineIdx(idx);
+                const bRes = await listProductBatches({ productId, product_id: productId });
+                const batches =
+                  bRes.status >= 200 && bRes.status < 300 && bRes.json?.ok
+                    ? bRes.json?.data?.items || bRes.json?.data?.rows || []
+                    : [];
+                const merged = batches.some((x) => String(x.id) === String(batch.id))
+                  ? batches
+                  : [{ ...batch, id: batch.id || batch.batch_id }, ...batches];
+                const batchUpdate = buildPurchaseLineUpdateFromBatch(batch);
+                const factors = getPackagingFactors(selected);
+                const displayRate = stripRateToDisplayRate(
+                  batchUpdate.purchaseRate,
+                  form.items?.[idx]?.unitType || UNIT_TYPES.STRIP,
+                  factors
+                );
+                setItem(idx, {
+                  productId: selected?.id || productId,
+                  productName: selected?.name || batch.product_name || "",
+                  productCode: selected?.code || batch.product_code || "",
+                  productSearch: selected ? formatProductLabel(selected) : batch.product_name || "",
+                  availableBatches: merged,
+                  packingFactors: factors,
+                  ...batchUpdate,
+                  purchaseRate: Math.round(displayRate * 100) / 100
+                });
+                emitToast({
+                  type: "success",
+                  message: `${batch.product_name || "Product"} selected — enter qty`
+                });
+              }}
+            />
+          </div>
           <CommonLineItemsSection
             title="Line Items"
             wrapRef={itemsWrapRef}
