@@ -166,6 +166,7 @@ export default function PurchaseReturnsPage() {
             primaryAction={null}
             rows={rows}
             getRowId={(r) => r.id}
+            onRowClick={(r) => setViewModal({ open: true, id: r.id })}
             columns={[
               {
                 id: "return_number",

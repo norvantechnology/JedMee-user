@@ -172,10 +172,10 @@ async function handler(event) {
     await ensureAccountRoleBootstrap(row.id, row.role);
   }
 
-  const accessTtl = parseTtlSeconds(process.env.ACCESS_TOKEN_TTL_SECONDS, 900);
+  const accessTtl = parseTtlSeconds(process.env.ACCESS_TOKEN_TTL_SECONDS, 24 * 60 * 60);
   const refreshTtl = rememberMe
-    ? parseTtlSeconds(process.env.REFRESH_TOKEN_TTL_REMEMBER_SECONDS, 30 * 24 * 60 * 60)
-    : parseTtlSeconds(process.env.REFRESH_TOKEN_TTL_SECONDS, 24 * 60 * 60);
+    ? parseTtlSeconds(process.env.REFRESH_TOKEN_TTL_REMEMBER_SECONDS, 90 * 24 * 60 * 60)
+    : parseTtlSeconds(process.env.REFRESH_TOKEN_TTL_SECONDS, 30 * 24 * 60 * 60);
 
   const refreshToken = randomToken(32);
   const salt = makeSalt(16);

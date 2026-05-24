@@ -4,6 +4,7 @@ const { parseJsonBody } = require("../../shared/request");
 const { isEmailLike, normalizeEmail } = require("../../shared/validation");
 const {
   parseTtlSeconds,
+  secondsFromNow,
   randomToken,
   makeSalt,
   hashToken,
@@ -11,6 +12,17 @@ const {
   signAccessToken
 } = require("../../shared/tokens");
 const { mapDbConnectivityError } = require("../../shared/dbConnectivity");
+
+function refreshTtlForSession(expiresAt) {
+  const defaultTtl = parseTtlSeconds(process.env.REFRESH_TOKEN_TTL_SECONDS, 30 * 24 * 60 * 60);
+  const rememberTtl = parseTtlSeconds(
+    process.env.REFRESH_TOKEN_TTL_REMEMBER_SECONDS,
+    90 * 24 * 60 * 60
+  );
+  const remainingMs = new Date(expiresAt).getTime() - Date.now();
+  // Long initial session (remember-me) keeps the longer sliding window.
+  return remainingMs > 7 * 24 * 60 * 60 * 1000 ? rememberTtl : defaultTtl;
+}
 
 async function handler(event) {
   try {
@@ -44,7 +56,9 @@ async function handler(event) {
       return fail(401, "INVALID_REFRESH", "Invalid session. Please login again.");
     }
 
-    const accessTtl = parseTtlSeconds(process.env.ACCESS_TOKEN_TTL_SECONDS, 900);
+    const accessTtl = parseTtlSeconds(process.env.ACCESS_TOKEN_TTL_SECONDS, 24 * 60 * 60);
+    const refreshTtl = refreshTtlForSession(row.refresh_token_expires_at);
+    const newRefreshExpiresAt = secondsFromNow(refreshTtl);
 
     const newRefresh = randomToken(32);
     const salt = makeSalt(16);
@@ -56,11 +70,12 @@ async function handler(event) {
       SET
         refresh_token_hash = $2,
         refresh_token_salt = $3,
+        expires_at = $4,
         last_used_at = now()
       WHERE user_id = $1
         AND revoked_at IS NULL
       `,
-      [row.id, newHash, salt]
+      [row.id, newHash, salt, newRefreshExpiresAt]
     );
 
     const accessToken = signAccessToken({ sub: row.id, email }, accessTtl);
@@ -69,7 +84,7 @@ async function handler(event) {
       accessToken,
       accessExpiresInSec: accessTtl,
       refreshToken: newRefresh,
-      refreshExpiresAt: row.refresh_token_expires_at
+      refreshExpiresAt: newRefreshExpiresAt
     });
   } catch (e) {
     const net = mapDbConnectivityError(e);

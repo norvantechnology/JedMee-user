@@ -74,10 +74,10 @@ async function handler(event) {
 
   if (row.is_blocked) return fail(403, "USER_BLOCKED", "Your account is blocked. Please contact support.");
 
-  const accessTtl = parseTtlSeconds(process.env.ACCESS_TOKEN_TTL_SECONDS, 900);
+  const accessTtl = parseTtlSeconds(process.env.ACCESS_TOKEN_TTL_SECONDS, 24 * 60 * 60);
   const refreshTtl = rememberMe
-    ? parseTtlSeconds(process.env.REFRESH_TOKEN_TTL_REMEMBER_SECONDS, 30 * 24 * 60 * 60)
-    : parseTtlSeconds(process.env.REFRESH_TOKEN_TTL_SECONDS, 24 * 60 * 60);
+    ? parseTtlSeconds(process.env.REFRESH_TOKEN_TTL_REMEMBER_SECONDS, 90 * 24 * 60 * 60)
+    : parseTtlSeconds(process.env.REFRESH_TOKEN_TTL_SECONDS, 30 * 24 * 60 * 60);
 
   const refreshToken = randomToken(32);
   const salt = makeSalt(16);

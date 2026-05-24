@@ -265,6 +265,7 @@ export default function SalesReturnsPage() {
             primaryAction={canAdd ? { label: isRetailer ? "New return" : "Create sales return", onClick: () => { returnPrefillGenRef.current += 1; setModalLoading(false); setOpen(true); } } : null}
             rows={rows}
             getRowId={(r) => r.id}
+            onRowClick={(r) => setViewModal({ open: true, id: r.id })}
             columns={[
               { id: "return_number", header: "Return No", render: (r) => <span style={{ fontWeight: 700 }}>{r.return_number}</span> },
               { id: "customer_name", header: "Customer", render: (r) => r.customer_name || "" },

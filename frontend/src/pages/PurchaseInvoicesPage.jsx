@@ -68,6 +68,7 @@ import "./PurchaseInvoicesPage.css";
 import { IconReceipt, IconRotateBox, IconWallet } from "../components/ui/AppIcons.jsx";
 import CommonLoading from "../components/CommonLoading.jsx";
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
+import InvoiceViewModal from "../components/InvoiceViewModal.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
 import LineRemoveButton from "../components/ui/LineRemoveButton.jsx";
@@ -311,6 +312,7 @@ export default function PurchaseInvoicesPage() {
   const [confirm, setConfirm] = useState({ open: false, id: "", type: "confirm", invoiceNumber: "" });
   const [dupConfirm, setDupConfirm] = useState({ open: false, vendorInvoiceNumber: "", existingInvoiceNumber: "", action: "draft" });
   const [importOpen, setImportOpen] = useState(false);
+  const [viewModal, setViewModal] = useState({ open: false, id: null });
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [paymentForm, setPaymentForm] = useState({
     invoiceId: "",
@@ -1439,7 +1441,7 @@ export default function PurchaseInvoicesPage() {
                 align: "right",
                 render: (r) => (
                   <div className="ibGroup" onClick={(e) => e.stopPropagation()}>
-                   <IconBtn tooltip="View or open invoice" disabled={busy} onClick={() => openForEdit(r.id)}>
+                   <IconBtn tooltip="View invoice" disabled={busy} onClick={() => setViewModal({ open: true, id: r.id })}>
                      <IconView />
                    </IconBtn>
                    <IconBtn
@@ -2730,6 +2732,18 @@ export default function PurchaseInvoicesPage() {
           const action = dupConfirm.action;
           setDupConfirm({ open: false, vendorInvoiceNumber: "", existingInvoiceNumber: "", action: "draft" });
           await performSaveDraft({ confirmAfterSave: action === "confirm" });
+        }}
+      />
+      <InvoiceViewModal
+        open={viewModal.open}
+        onClose={() => setViewModal({ open: false, id: null })}
+        invoiceId={viewModal.id}
+        type="purchase"
+        fetchFn={getPurchaseInvoice}
+        canEdit={canUpdate}
+        onEdit={(id) => {
+          setViewModal({ open: false, id: null });
+          openForEdit(id);
         }}
       />
       <CsvImportWizard

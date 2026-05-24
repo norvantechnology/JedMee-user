@@ -56,6 +56,7 @@ import "../components/StructuredForm.css";
 import "./PurchaseInvoicesPage.css";
 import "./SalesBillingPage.css";
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
+import InvoiceViewModal from "../components/InvoiceViewModal.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
 import { todayYmdLocal } from "../utils/date.js";
@@ -693,6 +694,7 @@ export default function SalesBillingPage() {
   const [sendContact, setSendContact] = useState({ open: false, pendingIds: [], customerId: "", customerName: "" });
   const [sendContactForm, setSendContactForm] = useState({ email: "", phone: "", phoneCountryCode: "+91" });
   const [importOpen, setImportOpen] = useState(false);
+  const [viewModal, setViewModal] = useState({ open: false, id: null });
 
   // ref to the modal body for Enter-key navigation
   const modalBodyRef = useRef(null);
@@ -1520,7 +1522,7 @@ export default function SalesBillingPage() {
             }
             rows={rows}
             getRowId={(r) => r.id}
-            onRowClick={(r) => openForEdit(r.id)}
+            onRowClick={(r) => setViewModal({ open: true, id: r.id })}
             onSelectionChange={setSelectedSalesIds}
             bulkActions={[
               {
@@ -1633,7 +1635,7 @@ export default function SalesBillingPage() {
                 sortable: false,
                 render: (r) => (
                   <div className="ibGroup" onClick={(e) => e.stopPropagation()}>
-                    <IconBtn tooltip="View or open invoice" onClick={() => openForEdit(r.id)}><IconView /></IconBtn>
+                    <IconBtn tooltip="View invoice" onClick={() => setViewModal({ open: true, id: r.id })}><IconView /></IconBtn>
                     {r.status === "DRAFT" && canUpdate ? (
                       <IconBtn tooltip="Edit draft" onClick={() => openForEdit(r.id)}><IconEdit /></IconBtn>
                     ) : null}
@@ -2783,6 +2785,19 @@ export default function SalesBillingPage() {
           } finally {
             setBulkConfirmBusy(false);
           }
+        }}
+      />
+
+      <InvoiceViewModal
+        open={viewModal.open}
+        onClose={() => setViewModal({ open: false, id: null })}
+        invoiceId={viewModal.id}
+        type="sales"
+        fetchFn={getSalesInvoice}
+        canEdit={canUpdate}
+        onEdit={(id) => {
+          setViewModal({ open: false, id: null });
+          openForEdit(id);
         }}
       />
 
