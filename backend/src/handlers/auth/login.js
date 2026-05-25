@@ -84,18 +84,12 @@ async function handler(event) {
   const refreshHash = hashToken(refreshToken, salt);
   const refreshExpiresAt = secondsFromNow(refreshTtl);
 
+  // Insert a new session row — each device/login gets its own row so that
+  // logging in on a second device does NOT invalidate the first device's token.
   await query(
     `
     INSERT INTO user_sessions (user_id, refresh_token_hash, refresh_token_salt, expires_at, created_at, last_used_at, revoked_at)
     VALUES ($1, $2, $3, $4, now(), now(), NULL)
-    ON CONFLICT (user_id) DO UPDATE
-    SET
-      refresh_token_hash = EXCLUDED.refresh_token_hash,
-      refresh_token_salt = EXCLUDED.refresh_token_salt,
-      expires_at = EXCLUDED.expires_at,
-      created_at = now(),
-      last_used_at = now(),
-      revoked_at = NULL
     `,
     [row.id, refreshHash, salt, refreshExpiresAt]
   );
