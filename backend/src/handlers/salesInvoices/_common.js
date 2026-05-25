@@ -247,18 +247,11 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
     const stockFree = n(batch.current_free_stock);
     const needBillable = usedBillable + lineBillable;
     const needFree = usedFree + lineFree;
-    if (stockBillable < needBillable) {
-      return {
-        ok: false,
-        message: `Insufficient billable (paid) stock for "${batch.product_name}" batch "${batch.batch_no}". Billable: ${stockBillable}; free balance: ${stockFree}. Needed on this invoice: ${needBillable} paid (${usedBillable} on other lines + ${lineBillable} here). Free stock cannot cover paid line qty.`
-      };
-    }
-    if (stockFree < needFree) {
-      return {
-        ok: false,
-        message: `Insufficient free stock for "${batch.product_name}" batch "${batch.batch_no}". Available free: ${stockFree}, needed on this invoice: ${needFree} (${usedFree} on other lines + ${lineFree} here).`
-      };
-    }
+    // NOTE: Stock availability is NOT checked here at DRAFT time.
+    // A DRAFT invoice does not deduct stock; the authoritative stock check
+    // is enforced at CONFIRM time in runConfirmSalesInvoiceInTx().
+    // Removing this check allows wholesalers to create DRAFT invoices for
+    // back-orders (stock not yet received) without blocking the workflow.
     invoiceQtyByBatch.set(batchKey, needBillable);
     invoiceFreeQtyByBatch.set(batchKey, needFree);
 
