@@ -62,16 +62,16 @@ async function handler(event) {
       let supplyType = "INTRA_STATE";
       if (placeOfSupply) {
         try {
+          // NOTE: app_users does not have a state_code column — derive the
+          // 2-digit state code from the first two chars of gst_number instead.
           const bizRs = await q(
-            `SELECT state_code, gst_number FROM app_users WHERE id = $1 LIMIT 1`,
+            `SELECT gst_number FROM app_users WHERE id = $1 LIMIT 1`,
             [ctx.accountId]
           );
           const biz = bizRs.rows?.[0] || null;
-          const bizStateCode = biz?.state_code
-            ? String(biz.state_code).trim()
-            : (biz?.gst_number && String(biz.gst_number).length >= 2
-                ? String(biz.gst_number).substring(0, 2)
-                : null);
+          const bizStateCode = biz?.gst_number && String(biz.gst_number).length >= 2
+            ? String(biz.gst_number).substring(0, 2)
+            : null;
           if (bizStateCode && bizStateCode !== placeOfSupply) {
             supplyType = "INTER_STATE";
           }
