@@ -1,4 +1,5 @@
 const { fail } = require("../../shared/response");
+const { refreshSalesInvoicePaymentTotals } = require("../../shared/sales");
 
 async function runConfirmSalesReturnInTx(q, ctx, returnId) {
   const { accountId, actorId } = ctx;
@@ -96,6 +97,9 @@ async function runConfirmSalesReturnInTx(q, ctx, returnId) {
      WHERE id = $1 AND account_id = $2`,
     [returnId, accountId, total, actorId]
   );
+  if (ret.sales_invoice_id) {
+    await refreshSalesInvoicePaymentTotals(q, accountId, ret.sales_invoice_id);
+  }
   return { id: returnId, affectedBatchIds: [...lowStockBatches] };
 }
 

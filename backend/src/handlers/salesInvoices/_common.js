@@ -216,9 +216,10 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
       finalOut.discountPercent = 0;
       finalOut.discountAmount = 0;
       finalOut.netRate = finalOut.salesRate;
-      finalOut.taxableAmount = Number((finalOut.qty * finalOut.netRate).toFixed(4));
-      finalOut.gstAmount = Number((finalOut.taxableAmount * (finalOut.gstPercent / 100)).toFixed(4));
-      finalOut.lineTotal = Number((finalOut.taxableAmount + finalOut.gstAmount).toFixed(4));
+      const schemeAdd = Boolean(batch.is_half_scheme) ? round4(finalOut.freeQty * finalOut.salesRate * 0.5) : 0;
+      finalOut.taxableAmount = round4(finalOut.qty * finalOut.netRate + schemeAdd);
+      finalOut.gstAmount = round4(finalOut.taxableAmount * (finalOut.gstPercent / 100));
+      finalOut.lineTotal = round4(finalOut.taxableAmount + finalOut.gstAmount);
     }
     if (batch.prevent_free_qty && originalFreeQty > 0) {
       warnings.push(`Free quantity was set to 0 (restricted by ${batch.mfg_company_name || "manufacturer"} policy).`);
@@ -280,6 +281,20 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
           };
         }
       }
+    }
+
+    // Add loose qty component when strip and loose are on the same line
+    if (looseQty > 0) {
+      const looseRate = round4(resolvedRate / packingUnits);
+      const looseGross = round4(looseQty * looseRate);
+      const looseDiscAmt = round4(looseGross * (effectiveDiscount / 100));
+      const looseTaxable = round4(looseGross - looseDiscAmt);
+      const looseGst = round4(looseTaxable * (gstPct / 100));
+      const looseTotal = round4(looseTaxable + looseGst);
+      finalOut.taxableAmount = round4(finalOut.taxableAmount + looseTaxable);
+      finalOut.gstAmount = round4(finalOut.gstAmount + looseGst);
+      finalOut.lineTotal = round4(finalOut.lineTotal + looseTotal);
+      finalOut.discountAmount = round4(finalOut.discountAmount + looseDiscAmt);
     }
 
     out.push({

@@ -93,7 +93,7 @@ async function buildVendorLedgerDoc({ accountId, vendorId }) {
       type: "PURCHASE_RETURN",
       reference: x.return_number || "",
       debit: 0,
-      credit: Number(x.total_return_amount || 0),
+      credit: Number(x.total_amount || 0),
       sortTs: ledgerTs(x.return_date, x.created_at),
       sortId: x.id
     }))

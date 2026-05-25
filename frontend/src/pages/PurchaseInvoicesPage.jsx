@@ -72,6 +72,7 @@ import InvoiceViewModal from "../components/InvoiceViewModal.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
 import LineRemoveButton from "../components/ui/LineRemoveButton.jsx";
+import OngoingBillsBar from "../components/OngoingBillsBar.jsx";
 import CommonLineItemsSection from "../components/line-items/CommonLineItemsSection.jsx";
 import CommonLineItemsTable from "../components/line-items/CommonLineItemsTable.jsx";
 import {
@@ -294,6 +295,8 @@ export default function PurchaseInvoicesPage() {
   const [savingVendorContact, setSavingVendorContact] = useState(false);
 
   const [open, setOpen] = useState(false);
+  // Force the ongoing-bills rail to refresh after every save/confirm.
+  const [ongoingRefreshKey, setOngoingRefreshKey] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [loadingEditId, setLoadingEditId] = useState(null);
@@ -1111,12 +1114,14 @@ export default function PurchaseInvoicesPage() {
         if (!(confirmed.status >= 200 && confirmed.status < 300 && confirmed.json?.ok)) {
           emitToast({ type: "error", message: `Draft created, but confirm failed: ${parseApiError(confirmed)}` });
           resetEditor();
+          setOngoingRefreshKey((k) => k + 1);
           await refreshPurchaseTableOnly();
           setSaveBusy(false);
           return;
         }
       }
       resetEditor();
+      setOngoingRefreshKey((k) => k + 1);
       await refreshPurchaseTableOnly();
     } else if (r.status !== 401) {
       emitToast({ type: "error", message: parseApiError(r) });
@@ -1198,6 +1203,36 @@ export default function PurchaseInvoicesPage() {
             </div>
           </div>
         </div>
+        {canAdd ? (
+          <OngoingBillsBar
+            module="purchase"
+            activeId={editing?.id ? String(editing.id) : null}
+            refreshKey={ongoingRefreshKey}
+            onSelect={(bill) => {
+              if (!bill) {
+                purchaseInvoiceLoadGenRef.current += 1;
+                setEditing(null);
+                setModalLoading(false);
+                setLoadingEditId(null);
+                const defaultDivisionId = !isRetailer ? clean(divisionFilter) : "";
+                const defaultVendorId = isRetailer ? clean(vendorFilter) : "";
+                setForm({
+                  invoiceNumber: "",
+                  vendorInvoiceNumber: "",
+                  divisionId: defaultDivisionId,
+                  vendorId: defaultVendorId,
+                  invoiceDate: localCalendarYmd(),
+                  dueDate: "",
+                  notes: "",
+                  items: [emptyLine()]
+                });
+                setOpen(true);
+                return;
+              }
+              openForEdit(bill.id);
+            }}
+          />
+        ) : null}
         <div className="pageCard">
           <CommonTable
             title=""

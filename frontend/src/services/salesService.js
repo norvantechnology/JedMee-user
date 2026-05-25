@@ -4,6 +4,15 @@ export async function listSalesInvoices(params) {
   return await apiGet("/sales-invoices", { toast: "none", params });
 }
 
+/**
+ * Lightweight list of in-progress (DRAFT) sales invoices for the parallel
+ * billing UI — supports multiple customers being served simultaneously at
+ * the counter.
+ */
+export async function listOngoingSalesInvoices(params) {
+  return await apiGet("/sales-invoices/ongoing", { toast: "none", params });
+}
+
 export async function getSalesInvoice(id) {
   return await apiGet(`/sales-invoices/${encodeURIComponent(String(id))}`, { toast: "none" });
 }

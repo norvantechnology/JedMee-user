@@ -161,12 +161,19 @@ async function refreshInvoicePaymentSummary(q, accountId, invoiceId) {
     [accountId, invoiceId]
   );
   const paid = n(p.rows?.[0]?.paid);
+  const ret = await q(
+    `SELECT COALESCE(SUM(total_amount),0)::numeric(14,2) AS credits
+     FROM purchase_returns
+     WHERE account_id = $1 AND purchase_invoice_id = $2 AND status = 'CONFIRMED'`,
+    [accountId, invoiceId]
+  );
+  const returnCredits = n(ret.rows?.[0]?.credits);
   const inv = await q(
     `SELECT total_amount FROM purchase_invoices WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`,
     [invoiceId, accountId]
   );
   const total = n(inv.rows?.[0]?.total_amount);
-  const due = Math.max(0, round2(total - paid));
+  const due = Math.max(0, round2(total - paid - returnCredits));
   const paymentStatus = due <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "UNPAID";
   await q(
     `

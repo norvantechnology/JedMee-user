@@ -85,12 +85,12 @@ async function handler(event) {
             );
           }
 
-          // Restore loose stock on the batch
+          // Deduct loose stock returned to vendor
           const returnLooseQty = Number(it.return_loose_qty || 0);
           if (returnLooseQty > 0) {
             await q(
               `UPDATE product_batches
-               SET loose_stock = loose_stock + $3, updated_at = now()
+               SET loose_stock = GREATEST(0, loose_stock - $3), updated_at = now()
                WHERE id = $1 AND account_id = $2`,
               [it.batch_id, ctx.accountId, returnLooseQty]
             );

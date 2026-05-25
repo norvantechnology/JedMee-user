@@ -50,14 +50,14 @@ async function enrichAndValidateItems(q, accountId, party, itemsInput) {
 
   for (let i = 0; i < items.length; i++) {
     const raw = items[i] || {};
-    const productId = clean(raw.productId);
-    const batchId = clean(raw.batchId);
-    const batchNo = clean(raw.batchNo);
-    const expiryDate = clean(raw.expiryDate);
-    const mfgDate = clean(raw.mfgDate);
+    const productId = clean(raw.productId || raw.product_id);
+    const batchId = clean(raw.batchId || raw.batch_id);
+    const batchNo = clean(raw.batchNo || raw.batch_no);
+    const expiryDate = clean(raw.expiryDate || raw.expiry_date);
+    const mfgDate = clean(raw.mfgDate || raw.mfg_date);
     const pack = clean(raw.pack);
-    const hsnCode = clean(raw.hsnCode);
-    const isNewBatch = Boolean(raw.isNewBatch || !batchId);
+    const hsnCode = clean(raw.hsnCode || raw.hsn_code);
+    const isNewBatch = Boolean(raw.isNewBatch || raw.is_new_batch || !batchId);
 
     if (!productId) {
       errs.push(`Line ${i + 1}: product is required.`);

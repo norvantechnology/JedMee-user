@@ -8,6 +8,11 @@ export async function listPurchaseInvoices(params) {
   return await apiGet("/purchase-invoices", { toast: "none", params });
 }
 
+/** Lightweight list of in-progress (DRAFT) purchase invoices for the rail UI. */
+export async function listOngoingPurchaseInvoices(params) {
+  return await apiGet("/purchase-invoices/ongoing", { toast: "none", params });
+}
+
 export async function getPurchaseInvoice(id) {
   return await apiGet(`/purchase-invoices/${encodeURIComponent(String(id))}`, { toast: "none" });
 }

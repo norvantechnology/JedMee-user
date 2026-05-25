@@ -3,7 +3,7 @@ const { parseJsonBody } = require("../../shared/request");
 const { withTransaction } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
-const { clean, i, n, nextSalesNumber, isFutureDate, localCalendarYmd } = require("../../shared/sales");
+const { clean, i, n, round4, nextSalesNumber, isFutureDate, localCalendarYmd } = require("../../shared/sales");
 const { isValidGstin } = require("../salesInvoices/_common");
 
 async function handler(event) {
@@ -110,13 +110,29 @@ async function handler(event) {
         const packingUnits = Math.max(1, Number(row.packing_units || 1));
         const netRate = n(it.netRate || it.net_rate || it.salesRate || it.sales_rate);
         const looseRate = netRate / packingUnits;
-
-        // Strip amount + loose amount
-        const stripAmount = Number((returnQty * netRate).toFixed(4));
-        const looseAmount = Number((returnLooseQty * looseRate).toFixed(4));
-        const returnAmount = Number((stripAmount + looseAmount).toFixed(4));
-
         const salesInvoiceItemId = clean(it.salesInvoiceItemId || it.sales_invoice_item_id) || null;
+
+        // Resolve GST from linked invoice line, else batch/product master
+        let gstPct = n(it.gstPercent || it.gst_percent);
+        if (salesInvoiceItemId && !(gstPct > 0)) {
+          const invLine = await q(
+            `SELECT gst_percent FROM sales_invoice_items WHERE id = $1 AND account_id = $2 LIMIT 1`,
+            [salesInvoiceItemId, ctx.accountId]
+          );
+          gstPct = n(invLine.rows?.[0]?.gst_percent);
+        }
+        if (!(gstPct > 0)) gstPct = n(row.sales_gst);
+        if (!(gstPct >= 0)) gstPct = 0;
+
+        // Strip + loose amounts (taxable + GST, aligned with purchase returns)
+        const stripTaxable = round4(returnQty * netRate);
+        const stripGst = round4(stripTaxable * (gstPct / 100));
+        const stripAmount = round4(stripTaxable + stripGst);
+        const looseTaxable = round4(returnLooseQty * looseRate);
+        const looseGst = round4(looseTaxable * (gstPct / 100));
+        const looseAmount = round4(looseTaxable + looseGst);
+        const returnAmount = round4(stripAmount + looseAmount);
+
         if (salesInvoiceItemId) {
           // Validate strip qty against original invoice item
           const original = await q(

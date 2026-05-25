@@ -23,7 +23,7 @@
 export const CURRENCIES = {
   INR: { code: "INR", symbol: "₹",    locale: "en-IN", name: "Indian Rupee",       decimals: 2 },
   USD: { code: "USD", symbol: "$",    locale: "en-US", name: "US Dollar",           decimals: 2 },
-  EUR: { code: "EUR", symbol: "€",    locale: "en-150", name: "Euro",               decimals: 2 },
+  EUR: { code: "EUR", symbol: "€",    locale: "de-DE", name: "Euro",               decimals: 2 },
   GBP: { code: "GBP", symbol: "£",    locale: "en-GB",  name: "British Pound",      decimals: 2 },
   AED: { code: "AED", symbol: "د.إ",  locale: "ar-AE",  name: "UAE Dirham",         decimals: 2 },
   CAD: { code: "CAD", symbol: "CA$",  locale: "en-CA", name: "Canadian Dollar",     decimals: 2 },

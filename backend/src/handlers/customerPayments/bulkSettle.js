@@ -3,7 +3,7 @@ const { parseJsonBody } = require("../../shared/request");
 const { withTransaction } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
-const { clean, n, isFutureDate } = require("../../shared/sales");
+const { clean, n, isFutureDate, localCalendarYmd, refreshSalesInvoicePaymentTotals } = require("../../shared/sales");
 
 function uniqueIds(values) {
   const out = [];
@@ -73,28 +73,13 @@ async function handler(event) {
           [ctx.accountId, invoice.customer_id, invoice.id, paymentDate, due, paymentMode, referenceNumber, notes, actorId]
         );
 
-        const pay = await q(
-          `SELECT COALESCE(SUM(amount),0)::numeric(12,4) AS paid
-           FROM customer_payments
-           WHERE account_id = $1 AND sales_invoice_id = $2`,
-          [ctx.accountId, invoice.id]
-        );
-        const paid = n(pay.rows?.[0]?.paid);
-        const total = n(invoice.total_amount);
-        const balance = Math.max(0, Number((total - paid).toFixed(4)));
-        const status = balance <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "UNPAID";
-        await q(
-          `UPDATE sales_invoices
-           SET amount_paid = $3, balance_due = $4, payment_status = $5::sales_payment_status, updated_at = now()
-           WHERE id = $1 AND account_id = $2`,
-          [invoice.id, ctx.accountId, paid, balance, status]
-        );
+        const summary = await refreshSalesInvoicePaymentTotals(q, ctx.accountId, invoice.id);
 
         completed.push({
           invoiceId: invoice.id,
           invoiceNumber: invoice.invoice_number,
           amount: due,
-          paymentStatus: status
+          paymentStatus: summary?.paymentStatus || "PAID"
         });
       }
 

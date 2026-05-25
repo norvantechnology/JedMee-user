@@ -385,24 +385,21 @@ async function handler(event) {
                 p.id AS product_id,
                 p.name AS product_name,
                 COUNT(pb.id)::int AS batches,
-                COALESCE(SUM(pb.current_stock),0)::numeric(14,3) AS qty
+                COALESCE(SUM(pb.current_stock),0)::numeric(14,3) AS qty,
+                COALESCE(p.low_stock_threshold,0)::numeric(14,3) AS threshold
               FROM products p
               LEFT JOIN product_batches pb
                 ON pb.product_id = p.id
                AND pb.account_id = p.account_id
                AND pb.deleted_at IS NULL
               WHERE p.account_id = $1 AND p.deleted_at IS NULL
-              GROUP BY p.id
+              GROUP BY p.id, p.name, p.low_stock_threshold
             )
             SELECT *
             FROM prod_stock
             WHERE qty > 0
-              AND qty <= (
-                SELECT COALESCE(p2.low_stock_threshold,0)
-                FROM products p2
-                WHERE p2.id = prod_stock.product_id AND p2.account_id = $1
-                LIMIT 1
-              )
+              AND threshold > 0
+              AND qty <= threshold
             ORDER BY qty ASC, product_name ASC
             LIMIT 20
             `,
@@ -641,7 +638,7 @@ async function handler(event) {
                 kind: "LOW_STOCK",
                 severity: "amber",
                 title: `${x.product_name}  Low stock`,
-                subtitle: `Stock: ${toNum(x.total_stock)} · Threshold: ${toNum(x.threshold)}`,
+                subtitle: `Stock: ${toNum(x.qty)} · Threshold: ${toNum(x.threshold)}`,
                 badge: "Low Stock"
               }))
             : []),

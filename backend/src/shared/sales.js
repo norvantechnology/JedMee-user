@@ -164,6 +164,38 @@ async function nextSalesNumber(q, accountId, table, prefix) {
   return `${prefix}-${activeFy}-${String(serial).padStart(4, "0")}`;
 }
 
+/** Recompute sales invoice amount_paid / balance_due / payment_status from payments and confirmed returns. */
+async function refreshSalesInvoicePaymentTotals(q, accountId, invoiceId) {
+  const inv = await q(
+    `SELECT total_amount FROM sales_invoices WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`,
+    [invoiceId, accountId]
+  );
+  const invoice = inv.rows?.[0];
+  if (!invoice) return null;
+  const total = n(invoice.total_amount);
+  const pay = await q(
+    `SELECT COALESCE(SUM(amount),0)::numeric(12,4) AS paid FROM customer_payments WHERE account_id = $1 AND sales_invoice_id = $2`,
+    [accountId, invoiceId]
+  );
+  const paid = n(pay.rows?.[0]?.paid);
+  const ret = await q(
+    `SELECT COALESCE(SUM(total_return_amount),0)::numeric(12,4) AS credits
+     FROM sales_returns
+     WHERE account_id = $1 AND sales_invoice_id = $2 AND status = 'CONFIRMED'::sales_return_status`,
+    [accountId, invoiceId]
+  );
+  const returnCredits = n(ret.rows?.[0]?.credits);
+  const balance = Math.max(0, round4(total - paid - returnCredits));
+  const status = balance <= 0 ? "PAID" : paid > 0 || returnCredits > 0 ? "PARTIAL" : "UNPAID";
+  await q(
+    `UPDATE sales_invoices
+     SET amount_paid = $3::numeric, balance_due = $4::numeric, payment_status = $5::sales_payment_status, updated_at = now()
+     WHERE id = $1 AND account_id = $2`,
+    [invoiceId, accountId, paid, balance, status]
+  );
+  return { amountPaid: paid, balanceDue: balance, paymentStatus: status, returnCredits };
+}
+
 async function getCustomerOutstandingInfo(q, accountId, customerId) {
   const rs = await q(
     `SELECT id, invoice_date, total_amount, amount_paid, balance_due
@@ -203,6 +235,7 @@ module.exports = {
   calculateLineItem,
   calculateInvoiceTotals,
   nextSalesNumber,
+  refreshSalesInvoicePaymentTotals,
   getCustomerOutstandingInfo,
   badRequest
 };

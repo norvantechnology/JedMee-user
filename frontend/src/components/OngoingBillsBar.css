@@ -1,0 +1,95 @@
+/* Parallel-billing rail — drop-in component above sales / purchase pages. */
+.ongoingBills {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--cm-card, #fff);
+  border: 1px solid var(--cm-border, #e5e7eb);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+}
+
+.ongoingBills.empty {
+  justify-content: flex-start;
+}
+
+.ongoingBills__chip {
+  appearance: none;
+  border: 1px solid var(--cm-border, #e5e7eb);
+  background: var(--cm-bg-soft, #f9fafb);
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 140px;
+  max-width: 240px;
+  text-align: left;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.ongoingBills__chip:hover {
+  border-color: var(--cm-primary, #4f46e5);
+}
+
+.ongoingBills__chip.is-active {
+  background: var(--cm-primary, #4f46e5);
+  color: #fff;
+  border-color: var(--cm-primary, #4f46e5);
+}
+
+.ongoingBills__chip.is-active .ongoingBills__chipMeta {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ongoingBills__chipTitle {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.ongoingBills__chipMeta {
+  font-size: 11px;
+  color: var(--cm-muted, #6b7280);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.ongoingBills__newChip {
+  appearance: none;
+  border: 1px dashed var(--cm-primary, #4f46e5);
+  color: var(--cm-primary, #4f46e5);
+  background: transparent;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.ongoingBills__newChip:hover {
+  background: var(--cm-primary, #4f46e5);
+  color: #fff;
+}
+
+.ongoingBills__hint {
+  color: var(--cm-muted, #6b7280);
+  font-size: 12px;
+}
+
+.ongoingBills__error {
+  color: var(--cm-danger, #dc2626);
+  font-size: 12px;
+}

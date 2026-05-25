@@ -101,6 +101,7 @@ const ROUTES = {
 
   // ── Purchase invoices ───────────────────────────────────────────────────────
   'GET /purchase-invoices':                   '../purchaseInvoices/list',
+  'GET /purchase-invoices/ongoing':           '../purchaseInvoices/ongoing',
   'POST /purchase-invoices':                  '../purchaseInvoices/create',
   'GET /purchase-invoices/{id}':              '../purchaseInvoices/get',
   'PUT /purchase-invoices/{id}':              '../purchaseInvoices/update',
@@ -135,6 +136,7 @@ const ROUTES = {
 
   // ── Sales invoices ──────────────────────────────────────────────────────────
   'GET /sales-invoices':                              '../salesInvoices/list',
+  'GET /sales-invoices/ongoing':                      '../salesInvoices/ongoing',
   'POST /sales-invoices':                             '../salesInvoices/create',
   'GET /sales-invoices/{id}':                         '../salesInvoices/get',
   'PUT /sales-invoices/{id}':                         '../salesInvoices/update',

@@ -3,7 +3,7 @@ const { parseJsonBody } = require("../../shared/request");
 const { withTransaction } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
-const { clean, n, isFutureDate } = require("../../shared/sales");
+const { clean, n, isFutureDate, localCalendarYmd, refreshSalesInvoicePaymentTotals } = require("../../shared/sales");
 
 function appendNote(base, suffix) {
   const a = clean(base);
@@ -24,29 +24,6 @@ function mergeInvoiceAllocations(raw) {
   return [...map.entries()]
     .map(([salesInvoiceId, amount]) => ({ salesInvoiceId, amount: Number(amount.toFixed(4)) }))
     .sort((a, b) => String(a.salesInvoiceId).localeCompare(String(b.salesInvoiceId)));
-}
-
-async function refreshInvoicePaymentTotals(q, accountId, invoiceId) {
-  const inv = await q(
-    `SELECT total_amount FROM sales_invoices WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`,
-    [invoiceId, accountId]
-  );
-  const invoice = inv.rows?.[0];
-  if (!invoice) return;
-  const total = n(invoice.total_amount);
-  const pay = await q(
-    `SELECT COALESCE(SUM(amount),0)::numeric(12,4) AS paid FROM customer_payments WHERE account_id = $1 AND sales_invoice_id = $2`,
-    [accountId, invoiceId]
-  );
-  const paid = n(pay.rows?.[0]?.paid);
-  const balance = Math.max(0, Number((total - paid).toFixed(4)));
-  const status = balance <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "UNPAID";
-  await q(
-    `UPDATE sales_invoices
-     SET amount_paid = $3::numeric, balance_due = $4::numeric, payment_status = $5::sales_payment_status, updated_at = now()
-     WHERE id = $1 AND account_id = $2`,
-    [invoiceId, accountId, paid, balance, status]
-  );
 }
 
 async function applyAdvanceToInvoice(q, { accountId, customerId, invoiceId, maxApplyAmount, actorId }) {
@@ -353,7 +330,7 @@ async function handler(event) {
         createdPayment = ins.rows?.[0] || null;
       }
       if (invoiceId) {
-        await refreshInvoicePaymentTotals(q, ctx.accountId, invoiceId);
+        await refreshSalesInvoicePaymentTotals(q, ctx.accountId, invoiceId);
         const pay = await q(
           `SELECT COALESCE(SUM(amount),0)::numeric(12,4) AS paid FROM customer_payments WHERE account_id = $1 AND sales_invoice_id = $2`,
           [ctx.accountId, invoiceId]

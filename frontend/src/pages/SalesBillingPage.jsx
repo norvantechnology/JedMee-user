@@ -63,6 +63,7 @@ import { todayYmdLocal } from "../utils/date.js";
 import PartyContactEmailModal from "../components/PartyContactEmailModal.jsx";
 import { EMAIL_RE, customerToUpdatePayload } from "../utils/customerContactPayload.js";
 import LineRemoveButton from "../components/ui/LineRemoveButton.jsx";
+import OngoingBillsBar from "../components/OngoingBillsBar.jsx";
 import CommonLineItemsSection from "../components/line-items/CommonLineItemsSection.jsx";
 import CommonLineItemsTable from "../components/line-items/CommonLineItemsTable.jsx";
 import { IconReceipt } from "../components/ui/AppIcons.jsx";
@@ -618,6 +619,9 @@ export default function SalesBillingPage() {
   const [loadingEditId, setLoadingEditId] = useState(null);
   const salesInvoiceLoadGenRef = useRef(0);
   const [editing, setEditing] = useState(null);
+  // Counter ergonomics: bump this whenever a save/confirm happens so the
+  // ongoing-bills rail refetches and the rest of the staff sees the new draft.
+  const [ongoingRefreshKey, setOngoingRefreshKey] = useState(0);
   const [customerOutstanding, setCustomerOutstanding] = useState(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [paymentForm, setPaymentForm] = useState({ customerId: "", salesInvoiceId: "", paymentDate: todayYmdLocal(), amount: "", paymentMode: "CASH", referenceNumber: "", notes: "", useAdvanceFirst: true });
@@ -1371,11 +1375,13 @@ export default function SalesBillingPage() {
           if (pipe.aborted) return;
           if (pipe.toast) emitToast(pipe.toast);
           setOpen(false);
+          setOngoingRefreshKey((k) => k + 1);
           await refreshSalesTableOnly();
           return;
         }
       }
       setOpen(false);
+      setOngoingRefreshKey((k) => k + 1);
       await refreshSalesTableOnly();
     } finally {
       setBusy(false);
@@ -1445,6 +1451,43 @@ export default function SalesBillingPage() {
             </button>
           </div>
         </div>
+        {canAdd ? (
+          <OngoingBillsBar
+            module="sales"
+            activeId={editing?.id ? String(editing.id) : null}
+            refreshKey={ongoingRefreshKey}
+            onSelect={(bill) => {
+              if (!bill) {
+                // "+ New" — open a fresh draft via the existing primary action.
+                salesInvoiceLoadGenRef.current += 1;
+                setEditing(null);
+                setModalLoading(false);
+                setLoadingEditId(null);
+                const d = loadSalesFormDefaults();
+                const walk = isRetailer ? (customers || []).find((c) => Boolean(c.is_walk_in)) : null;
+                setForm({
+                  customerId: isRetailer ? (walk?.id || d.customerId || "") : d.customerId,
+                  divisionId: isRetailer ? "" : d.divisionId,
+                  invoiceDate: todayYmdLocal(),
+                  dueDate: "",
+                  notes: "",
+                  walkInPatientName: "",
+                  walkInPatientPhone: "",
+                  walkInDoctorName: "",
+                  walkInPrescriptionNo: "",
+                  cashReceived: "",
+                  rateType: isRetailer ? "MRP" : "SALES_RATE",
+                  billType: "CASH_MEMO",
+                  globalDiscountPercent: 0,
+                  items: [emptyItem()]
+                });
+                setOpen(true);
+                return;
+              }
+              openForEdit(bill.id);
+            }}
+          />
+        ) : null}
         <div className="pageCard">
           <CommonTable
             title=""

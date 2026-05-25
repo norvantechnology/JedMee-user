@@ -577,6 +577,22 @@ export default function OrdersPage() {
                       )}
                     </div>
 
+                    {/* Row 2b: product names preview */}
+                    {Array.isArray(row.items) && row.items.length > 0 && (
+                      <div className="opCardProducts">
+                        {row.items.slice(0, 3).map((it, i) => (
+                          <span key={i} className="opCardProductPill">
+                            {it.product_name || "—"}
+                          </span>
+                        ))}
+                        {row.items.length > 3 && (
+                          <span className="opCardProductMore">
+                            +{row.items.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+
                     {/* Row 3: actions */}
                     <div className="opCardRow3">
                       <button type="button" className="opBtn opBtn_view" onClick={() => openView(row)}>
