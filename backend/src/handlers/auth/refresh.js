@@ -40,11 +40,13 @@ async function handler(event) {
     const res = await query(
       `
       SELECT u.id AS user_id,
+             r.code AS role,
              s.id AS session_id,
              s.refresh_token_hash,
              s.refresh_token_salt,
              s.expires_at AS refresh_token_expires_at
       FROM app_users u
+      JOIN roles r ON r.id = u.role_id
       JOIN user_sessions s ON s.user_id = u.id
       WHERE u.email = $1
         AND s.revoked_at IS NULL
@@ -90,10 +92,10 @@ async function handler(event) {
       [matched.session_id, newHash, salt, newRefreshExpiresAt]
     );
 
-    // Alias so the rest of the handler can use `row` unchanged.
-    const row = matched;
-
-    const accessToken = signAccessToken({ sub: row.id, email }, accessTtl);
+    const accessToken = signAccessToken(
+      { sub: matched.user_id, email, role: matched.role },
+      accessTtl
+    );
 
     return ok({
       accessToken,

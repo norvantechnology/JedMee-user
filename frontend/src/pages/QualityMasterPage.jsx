@@ -35,12 +35,9 @@ import { Download, Layers, Upload } from "../components/ui/AppIcons.jsx";
 function formatYmdFriendly(dateStr) {
   const s = String(dateStr || "").slice(0, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return "";
-  const d = new Date(`${s}T00:00:00Z`);
+  const d = new Date(`${s}T00:00:00`);
   if (Number.isNaN(d.getTime())) return s;
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  const month = d.toLocaleDateString("en-IN", { month: "short", timeZone: "UTC" });
-  const year = d.getUTCFullYear();
-  return `${day}-${month}-${year}`;
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 function truncateMiddle(s, maxLen) {

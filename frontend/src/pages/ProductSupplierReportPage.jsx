@@ -79,7 +79,7 @@ function formatDateChip(d) {
   if (!d) return "";
   const t = new Date(`${String(d).slice(0, 10)}T12:00:00`);
   if (Number.isNaN(t.getTime())) return String(d).slice(0, 10);
-  return t.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return t.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 // ── Product Detail Modal ──────────────────────────────────────────────────────

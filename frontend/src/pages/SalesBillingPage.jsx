@@ -1673,7 +1673,7 @@ export default function SalesBillingPage() {
                           const phone = String(r.customer_phone || "").replace(/\D/g, "");
                           const invoiceNo = r.invoice_number || "";
                           const amount = Number(r.grand_total || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                          const date = r.invoice_date ? new Date(r.invoice_date).toLocaleDateString("en-IN") : "";
+                          const date = r.invoice_date ? new Date(r.invoice_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "";
                           const msg = `Hello! Your invoice *${invoiceNo}* dated ${date} for ${fmtCurrency(amount)} is ready. Thank you for your purchase!`;
                           const url = phone
                             ? `https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`

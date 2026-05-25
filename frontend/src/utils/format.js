@@ -73,16 +73,16 @@ export function fmtDateDMY(value) {
   return `${d}/${m}/${y}`;
 }
 
-/** ISO date -> locale short date (e.g., "27 Apr 2026"). */
+/** ISO date -> locale short date (e.g., "23 Jan 2023" or "9 May 2026"). */
 export function fmtDateIndian(value) {
   const s = ymd(value);
   if (!s) return "-";
   const d = new Date(`${s}T00:00:00`);
   if (!Number.isFinite(d.getTime())) return s;
-  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-/** Format a date-time string as a localized readable stamp. */
+/** Format a date-time string as a localized readable stamp (e.g., "23 Jan 2023, 02:30 PM"). */
 export function fmtDateTime(value) {
   if (!value) return "-";
   const s = String(value).trim();
@@ -90,7 +90,7 @@ export function fmtDateTime(value) {
   const ms = Date.parse(s);
   if (!Number.isFinite(ms)) return s;
   const d = new Date(ms);
-  return d.toLocaleString();
+  return d.toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 // ─── Misc ──────────────────────────────────────────────────────────────────

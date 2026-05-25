@@ -307,7 +307,7 @@ export default function Gstr3bPage() {
               {/* Generated-at timestamp with stale data prompt */}
               {generatedAt && (
                 <div className="g3bGeneratedBar">
-                  <span>Generated: {generatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} — {generatedAt.toLocaleDateString()}</span>
+                  <span>Generated: {generatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} — {generatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
                   <span className="g3bGeneratedNote">New invoices added after this time won't appear — click <strong>Refresh</strong> to recalculate.</span>
                 </div>
               )}

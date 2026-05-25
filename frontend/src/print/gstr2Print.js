@@ -15,7 +15,7 @@ function td(v, cls, bold, color) {
 }
 function fmtDate(d) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 function isValidGstin(g) { return g && GSTIN_REGEX.test(g.trim().toUpperCase()); }
 
@@ -36,7 +36,7 @@ export function printGstr2Report({ data, year, month: monthParam }) {
   const fy    = `${yr}-${String(fyEnd).slice(2)}`;
   const fyMo  = fyMonth(Number(mo));
   const gstinOk = isValidGstin(biz.gst_number);
-  const generatedOn = new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const generatedOn = new Date().toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   /* ── Extra CSS injected as <style> tag inside bodyHtml ── */
   const extraCssHtml = `<style>

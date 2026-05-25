@@ -23,7 +23,7 @@ function plural(count, word) { return `${count} ${word}${count !== 1 ? "s" : ""}
 function isValidGstin(g) { return g && GSTIN_REGEX.test(g.trim().toUpperCase()); }
 function fmtDate(d) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 function buildYearOptions() {
   const now = new Date();
@@ -264,7 +264,7 @@ export default function Gstr2Page() {
 
               {generatedAt && (
                 <div className="g3bGeneratedBar">
-                  <span>Generated: {generatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} — {generatedAt.toLocaleDateString()}</span>
+                  <span>Generated: {generatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} — {generatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
                   <span className="g3bGeneratedNote">New invoices added after this time won't appear — click <strong>Refresh</strong> to recalculate.</span>
                 </div>
               )}

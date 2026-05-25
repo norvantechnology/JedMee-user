@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import CommonModal from "./CommonModal.jsx";
 import { AppButton } from "./ui/buttons.jsx";
 import ModalFooterShell from "./ui/ModalFooterShell.jsx";
-import { fmtMoney } from "../utils/format.js";
+import { fmtMoney, fmtDateIndian } from "../utils/format.js";
 import { printSalesInvoice } from "../services/salesService.js";
 import { printSalesInvoiceDoc } from "../print/salesInvoicePrint.js";
 import { readAuth } from "../services/authStorage.js";
@@ -167,13 +167,13 @@ export default function InvoiceViewModal({
             <div className="rvmInfoCell">
               <span className="rvmInfoLabel">Date</span>
               <span className="rvmInfoVal">
-                {String(inv.invoice_date || "").slice(0, 10) || "—"}
+                {fmtDateIndian(inv.invoice_date) || "—"}
               </span>
             </div>
             {inv.due_date ? (
               <div className="rvmInfoCell">
                 <span className="rvmInfoLabel">Due date</span>
-                <span className="rvmInfoVal">{String(inv.due_date).slice(0, 10)}</span>
+                <span className="rvmInfoVal">{fmtDateIndian(inv.due_date)}</span>
               </div>
             ) : null}
             <div className="rvmInfoCell">

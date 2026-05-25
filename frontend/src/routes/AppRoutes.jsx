@@ -37,6 +37,7 @@ import ApprovalPendingPage from "../pages/ApprovalPendingPage.jsx";
 import CatalogMarketplacePage from "../pages/CatalogMarketplacePage.jsx";
 import OrdersPage from "../pages/OrdersPage.jsx";
 import { readAuth, clearAuth, saveAuthUser, onAuthChanged, hasValidAccessToken } from "../services/authStorage.js";
+import { tryRefreshSession } from "../services/authRefresh.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
 import { useEffect, useRef, useState } from "react";
 import { getMe } from "../services/userService.js";
@@ -83,7 +84,15 @@ export function AppRoutes() {
 
     (async () => {
       try {
-        const resp = await getMe();
+        let resp = await getMe();
+        if (resp.status === 401) {
+          const r = await tryRefreshSession();
+          if (!r.ok) {
+            if (r.reason === "invalid_refresh" || r.reason === "no_session") clearAuth();
+            return;
+          }
+          resp = await getMe();
+        }
         if (resp.status === 401) {
           clearAuth();
           return;
@@ -91,7 +100,15 @@ export function AppRoutes() {
         const u = resp.json?.data?.user;
         if (u) saveAuthUser(u);
 
-        const a = await getMyAccess();
+        let a = await getMyAccess();
+        if (a.status === 401) {
+          const r = await tryRefreshSession();
+          if (!r.ok) {
+            if (r.reason === "invalid_refresh" || r.reason === "no_session") clearAuth();
+            return;
+          }
+          a = await getMyAccess();
+        }
         if (a.status === 401) {
           clearAuth();
           return;

@@ -104,6 +104,16 @@ function ymd(v) {
   return String(v || "").slice(0, 10) || "-";
 }
 
+/** Format a date value as "23 Jan 2023" (no leading zero on day). */
+function fmtDate(v) {
+  const s = String(v || "").slice(0, 10);
+  if (!s || s === "-") return "-";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const dt = new Date(`${s}T00:00:00`);
+  if (!Number.isFinite(dt.getTime())) return s;
+  return dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
 function qty(v) {
   return Number(v || 0).toFixed(2).replace(/\.00$/, "");
 }
@@ -130,7 +140,7 @@ function buildSalesInvoiceBodyHtml(data) {
       <td class="prNum">${i + 1}</td>
       <td>
         <div class="prName">${esc(it.product_name || "-")}</div>
-        <div class="prDetails">${esc(it.batch_no || "-")}${it.expiry_date ? ` | Exp ${ymd(it.expiry_date)}${esc(batchExpiryDaysInlineSuffix(it.expiry_date))}` : ""}</div>
+        <div class="prDetails">${esc(it.batch_no || "-")}${it.expiry_date ? ` | Exp ${fmtDate(it.expiry_date)}${esc(batchExpiryDaysInlineSuffix(it.expiry_date))}` : ""}</div>
       </td>
       <td class="prNum">${qty(it.qty)}</td>
       <td class="prNum">${qty(it.free_qty)}</td>
@@ -148,7 +158,7 @@ function buildSalesInvoiceBodyHtml(data) {
         .map(
           (p, i) => `<tr>
         <td>${i + 1}</td>
-        <td>${ymd(p.payment_date)}</td>
+        <td>${fmtDate(p.payment_date)}</td>
         <td>${esc(p.payment_mode || "-")}</td>
         <td>${esc(p.reference_number || "-")}</td>
         <td class="prNum">${money(p.amount)}</td>
@@ -186,7 +196,7 @@ function buildSalesInvoiceBodyHtml(data) {
           <h3>Invoice</h3>
           <div class="prKvs">
             <div class="prKv"><span class="prLabel">Invoice No</span><span class="prValue">${esc(inv.invoice_number || "-")}</span></div>
-            <div class="prKv"><span class="prLabel">Invoice Date</span><span class="prValue">${ymd(inv.invoice_date)}</span></div>
+            <div class="prKv"><span class="prLabel">Invoice Date</span><span class="prValue">${fmtDate(inv.invoice_date)}</span></div>
             <div class="prKv"><span class="prLabel">Status</span><span class="prValue">${esc(inv.status || "-")}</span></div>
             <div class="prKv"><span class="prLabel">Payment</span><span class="prValue">${esc(inv.payment_status_resolved || inv.payment_status || "-")}</span></div>
           </div>
@@ -251,7 +261,7 @@ function buildSalesInvoiceBodyHtml(data) {
       </div>
 
       <div class="prFooter">
-        <span>Generated on ${new Date().toLocaleString()}</span>
+        <span>Generated on ${new Date().toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
         <span>Invoice ${esc(inv.invoice_number || "-")} | ${esc(inv.payment_status_resolved || inv.payment_status || "-")}</span>
       </div>
     </div>
@@ -305,7 +315,7 @@ function buildPurchaseInvoiceBodyHtml(data) {
       <td class="prNum">${i + 1}</td>
       <td>
         <div class="prName">${esc(it.product_name || it.product_code || "-")}</div>
-        <div class="prDetails">${esc(it.batch_no || "-")}${it.expiry_date ? ` | Exp ${ymd(it.expiry_date)}${esc(batchExpiryDaysInlineSuffix(it.expiry_date))}` : ""}${it.hsn_code ? ` | HSN ${esc(it.hsn_code)}` : ""}</div>
+        <div class="prDetails">${esc(it.batch_no || "-")}${it.expiry_date ? ` | Exp ${fmtDate(it.expiry_date)}${esc(batchExpiryDaysInlineSuffix(it.expiry_date))}` : ""}${it.hsn_code ? ` | HSN ${esc(it.hsn_code)}` : ""}</div>
       </td>
       <td class="prNum">${qty(it.qty)}</td>
       <td class="prNum">${qty(it.free_qty)}</td>
@@ -362,8 +372,8 @@ function buildPurchaseInvoiceBodyHtml(data) {
           <div class="prKvs">
             <div class="prKv"><span class="prLabel">Invoice No</span><span class="prValue">${esc(inv.invoice_number || "-")}</span></div>
             ${inv.vendor_invoice_number ? `<div class="prKv"><span class="prLabel">Supplier Ref</span><span class="prValue">${esc(inv.vendor_invoice_number)}</span></div>` : ""}
-            <div class="prKv"><span class="prLabel">Invoice Date</span><span class="prValue">${ymd(inv.invoice_date)}</span></div>
-            ${inv.due_date ? `<div class="prKv"><span class="prLabel">Due Date</span><span class="prValue">${ymd(inv.due_date)}</span></div>` : ""}
+            <div class="prKv"><span class="prLabel">Invoice Date</span><span class="prValue">${fmtDate(inv.invoice_date)}</span></div>
+            ${inv.due_date ? `<div class="prKv"><span class="prLabel">Due Date</span><span class="prValue">${fmtDate(inv.due_date)}</span></div>` : ""}
             <div class="prKv"><span class="prLabel">Status</span><span class="prValue">${esc(inv.status || "-")}</span></div>
             <div class="prKv"><span class="prLabel">Payment</span><span class="prValue">${esc(inv.payment_status || "-")}</span></div>
           </div>
@@ -414,7 +424,7 @@ function buildPurchaseInvoiceBodyHtml(data) {
       </div>
 
       <div class="prFooter">
-        <span>Generated on ${new Date().toLocaleString()}</span>
+        <span>Generated on ${new Date().toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
         <span>Invoice ${esc(inv.invoice_number || "-")} | ${esc(inv.status || "-")}</span>
       </div>
     </div>

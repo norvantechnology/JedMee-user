@@ -12,7 +12,7 @@ export function OrderDetailFacts({ detail, isRetailer }) {
         <div className="ordFactRow">
           <span className="ordFactLabel">Placed</span>
           <span className="ordFactValue ordFactValueMono">
-            {detail?.order?.placed_at ? new Date(detail.order.placed_at).toLocaleString() : "—"}
+            {detail?.order?.placed_at ? new Date(detail.order.placed_at).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
           </span>
         </div>
         <div className="ordFactRow">
@@ -44,7 +44,7 @@ export function OrderDetailFulfillment({ order }) {
           return (
             <li key={key} className={at ? "ordFulfillmentItem--done" : "ordFulfillmentItem--pending"}>
               <span className="ordFulfillmentStep">{title}</span>
-              <span className="ordFulfillmentStat">{at ? new Date(at).toLocaleString() : "Pending"}</span>
+              <span className="ordFulfillmentStat">{at ? new Date(at).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "Pending"}</span>
             </li>
           );
         })}

@@ -65,7 +65,7 @@ export function printGstr3bReport({ data, taxLabel }) {
       <strong>⚠ Action Required:</strong> ${notes.missing_hsn_count} sales line item(s) missing HSN codes — mandatory for GSTR-1 filing. Update before sharing with CA.
     </div>` : "";
 
-  const generatedOn = new Date().toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const generatedOn = new Date().toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   /* ── PDF Header ── */
   const headerHtml = `

@@ -27,7 +27,7 @@ function td(v, cls, bold, color) {
 function fmtDate(d) {
   if (!d) return "—";
   const dt = new Date(d);
-  return dt.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 /**
@@ -49,7 +49,7 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
   const b2cReturns = data.b2c_returns  || [];
 
   const generatedOn = new Date().toLocaleString("en-IN", {
-    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
   });
 
   // ── Header ──────────────────────────────────────────────────────────────────

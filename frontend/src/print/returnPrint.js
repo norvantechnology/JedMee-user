@@ -1,5 +1,14 @@
 import { openPrintDocument } from "./printDocument.js";
 
+function fmtDate(d) {
+  if (!d) return "—";
+  const s = String(d).slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return s || "—";
+  const dt = new Date(`${s}T00:00:00`);
+  if (!Number.isFinite(dt.getTime())) return s;
+  return dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
 function esc(str) {
   return String(str || "")
     .replace(/&/g, "&amp;")
@@ -69,7 +78,7 @@ export function buildReturnHtml({ ret = {}, items = [], type = "sales" }) {
       <div style="margin-top:4px;font-size:14px;font-weight:700;color:#374151;">${esc(ret.return_number || "")}</div>
     </div>
     <div style="text-align:right;font-size:12px;color:#374151;line-height:1.6;">
-      <div>Date: <strong>${esc(String(ret.return_date || "").slice(0, 10))}</strong></div>
+      <div>Date: <strong>${esc(fmtDate(ret.return_date))}</strong></div>
       <div>Status: <strong>${esc(ret.status || "")}</strong></div>
     </div>
   </div>

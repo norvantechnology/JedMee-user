@@ -14,7 +14,7 @@ function td(v, cls, bold, color) {
 }
 function fmtDate(d) {
   if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
 /**
@@ -40,7 +40,7 @@ export function printGstReport({ data, year, month, taxLabel = "GST", taxIdLabel
 
   // Generated on — human readable, no seconds
   const generatedOn = new Date().toLocaleString("en-IN", {
-    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
+    day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
   });
 
   // ── Header ──────────────────────────────────────────────────────────────────

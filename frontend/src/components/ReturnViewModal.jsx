@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import CommonModal from "./CommonModal.jsx";
 import { AppButton } from "./ui/buttons.jsx";
 import ModalFooterShell from "./ui/ModalFooterShell.jsx";
-import { fmtMoney } from "../utils/format.js";
+import { fmtMoney, fmtDateIndian } from "../utils/format.js";
 import { printReturnDoc } from "../print/returnPrint.js";
 import { Printer } from "lucide-react";
 import "./ReturnViewModal.css";
@@ -106,7 +106,7 @@ export default function ReturnViewModal({ open, onClose, returnId, type = "sales
             </div>
             <div className="rvmInfoCell">
               <span className="rvmInfoLabel">Date</span>
-              <span className="rvmInfoVal">{String(ret.return_date || "").slice(0, 10) || "—"}</span>
+              <span className="rvmInfoVal">{fmtDateIndian(ret.return_date) || "—"}</span>
             </div>
             <div className="rvmInfoCell">
               <span className="rvmInfoLabel">Status</span>

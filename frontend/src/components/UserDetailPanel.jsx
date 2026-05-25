@@ -49,10 +49,10 @@ function fmtDateTime(value) {
   if (Number.isNaN(ms)) return s;
   const d = new Date(ms);
   try {
-    return d.toLocaleString(undefined, {
+    return d.toLocaleString("en-IN", {
       year: "numeric",
       month: "short",
-      day: "2-digit",
+      day: "numeric",
       hour: "2-digit",
       minute: "2-digit"
     });

@@ -1,5 +1,5 @@
-import { refresh } from "./authService.js";
-import { clearAuth, hasValidAccessToken, readAuth, saveAuth } from "./authStorage.js";
+import { clearAuth, hasValidAccessToken, readAuth } from "./authStorage.js";
+import { tryRefreshSession } from "./authRefresh.js";
 
 // How many ms before expiry to proactively refresh (2 minutes).
 const PROACTIVE_REFRESH_BEFORE_MS = 2 * 60 * 1000;
@@ -18,18 +18,8 @@ async function doRefresh() {
   // Only refresh if within the proactive window or already expired.
   if (msUntilExpiry > PROACTIVE_REFRESH_BEFORE_MS) return;
 
-  const resp = await refresh({ email: auth.email, refreshToken: auth.refreshToken });
-  if (resp.status >= 200 && resp.status < 300 && resp.json?.ok) {
-    const data = resp.json?.data || {};
-    saveAuth({
-      rememberMe: Boolean(auth.rememberMe),
-      email: auth.email,
-      accessToken: data.accessToken,
-      accessExpiresInSec: data.accessExpiresInSec,
-      refreshToken: data.refreshToken
-    });
-  } else if (resp.status === 401) {
-    // Refresh token itself is expired — clear session.
+  const r = await tryRefreshSession();
+  if (!r.ok && r.reason === "invalid_refresh") {
     clearAuth();
     stopTokenRefreshTimer();
   }
@@ -37,6 +27,8 @@ async function doRefresh() {
 
 export function startTokenRefreshTimer() {
   if (_refreshTimer) return; // already running
+  // Check immediately on start, then every 60s.
+  doRefresh();
   _refreshTimer = setInterval(doRefresh, REFRESH_CHECK_INTERVAL_MS);
 }
 
@@ -53,20 +45,14 @@ export async function bootstrapAuth() {
 
   if (hasValidAccessToken(auth)) return { ok: true };
 
-  const resp = await refresh({ email: auth.email, refreshToken: auth.refreshToken });
-  if (resp.status >= 200 && resp.status < 300 && resp.json?.ok) {
-    const data = resp.json?.data || {};
-    saveAuth({
-      rememberMe: Boolean(auth.rememberMe),
-      email: auth.email,
-      accessToken: data.accessToken,
-      accessExpiresInSec: data.accessExpiresInSec,
-      refreshToken: data.refreshToken
-    });
-    return { ok: true };
+  const r = await tryRefreshSession();
+  if (r.ok) return { ok: true };
+
+  // Only clear session when refresh token is invalid — keep session on network/server errors.
+  if (r.reason === "invalid_refresh" || r.reason === "no_session") {
+    clearAuth();
+    return { ok: false };
   }
 
-  clearAuth();
-  return { ok: false };
+  return { ok: false, transient: true };
 }
-

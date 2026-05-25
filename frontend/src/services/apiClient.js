@@ -1,7 +1,7 @@
 const DEFAULT_BASE_URL = "http://localhost:4000";
 import { emitApiToastFromResponse } from "./toastBus.js";
-import { readAuth, clearAuth, saveAuth } from "./authStorage.js";
-import { refresh } from "./authService.js";
+import { readAuth, clearAuth } from "./authStorage.js";
+import { tryRefreshSession } from "./authRefresh.js";
 import { requestNotificationInboxRefresh, shouldRefreshNotificationInboxFromRequest } from "./notificationInboxBus.js";
 
 let lastAuthExpiredToastAt = 0;
@@ -27,24 +27,6 @@ function clearAuthOnce() {
 export function getApiBaseUrl() {
   const base = import.meta.env.VITE_API_BASE_URL || DEFAULT_BASE_URL;
   return String(base).replace(/\/+$/, "");
-}
-
-async function tryRefreshSession() {
-  const auth = readAuth();
-  if (!auth?.refreshToken || !auth?.email) return { ok: false };
-  const resp = await refresh({ email: auth.email, refreshToken: auth.refreshToken });
-  if (resp.status >= 200 && resp.status < 300 && resp.json?.ok) {
-    const data = resp.json?.data || {};
-    saveAuth({
-      rememberMe: Boolean(auth.rememberMe),
-      email: auth.email,
-      accessToken: data.accessToken,
-      accessExpiresInSec: data.accessExpiresInSec,
-      refreshToken: data.refreshToken
-    });
-    return { ok: true };
-  }
-  return { ok: false };
 }
 
 async function apiFetch(method, url, body, opts, attempt = 0) {
@@ -74,11 +56,22 @@ async function apiFetch(method, url, body, opts, attempt = 0) {
   if (canRetry) {
     const r = await tryRefreshSession();
     if (r.ok) return await apiFetch(method, url, body, opts, 1);
+
+    // Only wipe session when refresh token is definitively invalid — not on network blips.
+    if (r.reason === "invalid_refresh" || r.reason === "no_session") {
+      clearAuthOnce();
+      const toastMode = opts?.toast ?? "auto";
+      if (toastMode !== "none" && !shouldThrottleAuthExpiredToast()) {
+        markAuthExpiredToastShown();
+        emitApiToastFromResponse(resp);
+      }
+    }
+    return resp;
   }
 
   const toastMode = opts?.toast ?? "auto"; // auto | none
   if (resp.status === 401) {
-    // Session is invalid/expired (refresh failed or not available).
+    // No refresh attempted (missing refresh token or auth endpoint).
     clearAuthOnce();
 
     // Only show one auth-expired toast for a burst of 401s.
@@ -131,4 +124,3 @@ export async function apiPatch(path, body, opts) {
   const url = `${getApiBaseUrl()}${path.startsWith("/") ? "" : "/"}${path}`;
   return await apiFetch("PATCH", url, body, opts);
 }
-

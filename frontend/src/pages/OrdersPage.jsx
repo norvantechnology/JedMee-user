@@ -84,7 +84,7 @@ const FULFILLMENT_STEPS = [
 function fmtDateTime(ts) {
   if (!ts) return "—";
   const d = new Date(ts);
-  const date = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  const date = d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
   const time = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
   return `${date}, ${time}`;
 }
@@ -1070,7 +1070,7 @@ export default function OrdersPage() {
                 <div className="opPrintInvoiceRow">
                   <span className="opPrintInvoiceKey">Date</span>
                   <span className="opPrintInvoiceVal">
-                    {detail.order?.placed_at ? new Date(detail.order.placed_at).toLocaleDateString() : "—"}
+                    {detail.order?.placed_at ? new Date(detail.order.placed_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
                   </span>
                 </div>
                 <div className="opPrintInvoiceRow">
