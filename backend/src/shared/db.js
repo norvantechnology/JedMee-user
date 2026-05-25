@@ -1,4 +1,13 @@
-const { Pool } = require("pg");
+const pg = require("pg");
+const { Pool } = pg;
+
+// Parse PostgreSQL `numeric` type (OID 1700) as a JavaScript float instead of
+// a string.  The pg driver returns numeric(x,y) as strings by default to avoid
+// precision loss, but the mobile client expects JSON numbers and crashes when
+// it receives "500.0000" and tries to call .toDouble() on it.
+// For the monetary / quantity ranges used here (≤ 14 digits, 4 decimal places)
+// a 64-bit IEEE-754 float is more than sufficient.
+pg.types.setTypeParser(1700, (val) => (val === null ? null : parseFloat(val)));
 
 let pool;
 
