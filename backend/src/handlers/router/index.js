@@ -146,6 +146,7 @@ const ROUTES = {
   'POST /sales-invoices/{id}/loose-sale':             '../salesInvoices/recordLooseSale',
   'POST /sales-invoices/{id}/confirm':                '../salesInvoices/confirm',
   'POST /sales-invoices/{id}/cancel':                 '../salesInvoices/cancel',
+  'DELETE /sales-invoices/{id}':                      '../salesInvoices/delete',
   'POST /sales-invoices/bulk-cancel':                 '../salesInvoices/bulkCancel',
   'POST /sales-invoices/bulk-confirm':                '../salesInvoices/bulkConfirm',
   'GET /sales-invoices/{id}/print':                   '../salesInvoices/print',

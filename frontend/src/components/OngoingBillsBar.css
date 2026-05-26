@@ -16,6 +16,14 @@
   justify-content: flex-start;
 }
 
+/* When rendered inside a modal body — slightly inset styling */
+.ongoingBills.compact {
+  border-radius: 8px;
+  margin-bottom: 16px;
+  border-color: var(--cm-border-subtle, #f3f4f6);
+  background: var(--cm-bg-soft, #f9fafb);
+}
+
 .ongoingBills__chip {
   appearance: none;
   border: 1px solid var(--cm-border, #e5e7eb);

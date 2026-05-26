@@ -11,6 +11,11 @@ import {
   displayRateToStripRate,
   UNIT_TYPES
 } from "../utils/packagingConversion.js";
+import {
+  isDraftInvoiceEdit,
+  purchaseItemsReadyForAutoSave,
+  useDraftAutoSave,
+} from "../utils/draftAutoSave.js";
 import { useLocale } from "../context/LocaleContext.jsx";
 import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
@@ -262,6 +267,7 @@ export default function PurchaseInvoicesPage() {
   const [authTick, setAuthTick] = useState(0);
   const [busy, setBusy] = useState(false);
   const [saveBusy, setSaveBusy] = useState(false);
+  const [autoSaveBusy, setAutoSaveBusy] = useState(false);
   const [updateConfirmedBusy, setUpdateConfirmedBusy] = useState(false);
   const [paymentSaveBusy, setPaymentSaveBusy] = useState(false);
   const [returnBusy, setReturnBusy] = useState(false);
@@ -295,6 +301,10 @@ export default function PurchaseInvoicesPage() {
   const [savingVendorContact, setSavingVendorContact] = useState(false);
 
   const [open, setOpen] = useState(false);
+  // isAddMode: true when the user opened the modal as "New" — stays true even
+  // after the first background auto-save creates the invoice. Keeps the modal
+  // title and footer buttons in "Add" state throughout the session.
+  const [isAddMode, setIsAddMode] = useState(false);
   // Force the ongoing-bills rail to refresh after every save/confirm.
   const [ongoingRefreshKey, setOngoingRefreshKey] = useState(0);
   const [submitted, setSubmitted] = useState(false);
@@ -396,6 +406,7 @@ export default function PurchaseInvoicesPage() {
       notes: "",
       items: [emptyLine()]
     });
+    setIsAddMode(true);
     setOpen(true);
     setSearchParams(
       (prev) => {
@@ -874,7 +885,9 @@ export default function PurchaseInvoicesPage() {
     !hasMissingNewBatchNo &&
     !hasLineValidationErrors &&
     !busy;
-  const canCreateAndConfirm = canAdd && !editing?.id && canSaveDraft && !hasLockedMfg;
+  // canCreateAndConfirm: enabled in Add mode regardless of whether auto-save
+  // has already created the invoice (editing?.id may be set after first save).
+  const canCreateAndConfirm = isAddMode && canSaveDraft && !hasLockedMfg;
   const canConfirmFromModal = canUpdate && isEditingDraft && !hasLockedMfg && !busy && !saveBusy;
   const canUpdateConfirmedFromModal = canUpdate && Boolean(editing?.id) && editingStatus === "CONFIRMED" && !hasLockedMfg && !busy && !updateConfirmedBusy;
   const canAddPaymentFromModal =
@@ -941,6 +954,7 @@ export default function PurchaseInvoicesPage() {
     setSubmitted(false);
     setOpen(false);
     setEditing(null);
+    setIsAddMode(false);
     setModalLoading(false);
     setLoadingEditId(null);
     setActiveLineIdx(0);
@@ -1018,6 +1032,7 @@ export default function PurchaseInvoicesPage() {
   function openForEdit(id) {
     if (!canUpdate) return;
     const pid = String(id || "");
+    setIsAddMode(false);
     setOpen(true);
     setModalLoading(true);
     setLoadingEditId(pid);
@@ -1101,32 +1116,64 @@ export default function PurchaseInvoicesPage() {
     }
   }
 
-  async function performSaveDraft({ confirmAfterSave = false } = {}) {
-    setSaveBusy(true);
-    // Convert display qty/rate to strip-based values before sending to backend
-    const strippedItems = (form.items || []).map(lineToStripPayload);
+  async function performSaveDraft({
+    confirmAfterSave = false,
+    silent = false,
+    closeAfter,
+  } = {}) {
+    const shouldClose = closeAfter ?? !silent;
+    if (silent) {
+      if (autoSaveBusy || saveBusy || busy) return;
+      setAutoSaveBusy(true);
+    } else {
+      setSaveBusy(true);
+    }
+    const readyItems = silent
+      ? purchaseItemsReadyForAutoSave(form.items)
+      : form.items || [];
+    if (silent && readyItems.length === 0) {
+      if (silent) setAutoSaveBusy(false);
+      return;
+    }
+    const strippedItems = readyItems.map(lineToStripPayload);
     const payload = { ...form, items: strippedItems, clientToday: localCalendarYmd() };
     const r = editing?.id ? await updatePurchaseInvoice(editing.id, payload) : await createPurchaseInvoice(payload);
     if (r.status >= 200 && r.status < 300 && r.json?.ok) {
       const savedId = String(r.json?.data?.invoice?.id || editing?.id || "");
+      const savedInvoice = r.json?.data?.invoice;
       if (confirmAfterSave && savedId) {
         const confirmed = await confirmPurchaseInvoice(savedId, {});
         if (!(confirmed.status >= 200 && confirmed.status < 300 && confirmed.json?.ok)) {
           emitToast({ type: "error", message: `Draft created, but confirm failed: ${parseApiError(confirmed)}` });
-          resetEditor();
+          if (shouldClose) resetEditor();
           setOngoingRefreshKey((k) => k + 1);
-          await refreshPurchaseTableOnly();
-          setSaveBusy(false);
+          void refreshPurchaseTableOnly();
+          if (silent) setAutoSaveBusy(false);
+          else setSaveBusy(false);
           return;
         }
       }
-      resetEditor();
-      setOngoingRefreshKey((k) => k + 1);
-      await refreshPurchaseTableOnly();
-    } else if (r.status !== 401) {
+      if (shouldClose) {
+        resetEditor();
+        setOngoingRefreshKey((k) => k + 1);
+        await refreshPurchaseTableOnly();
+      } else {
+        if (savedId) {
+          setEditing((prev) => ({
+            ...(prev || {}),
+            ...(savedInvoice || {}),
+            id: savedId,
+            status: "DRAFT",
+          }));
+        }
+        setOngoingRefreshKey((k) => k + 1);
+        void refreshPurchaseTableOnly();
+      }
+    } else if (!silent && r.status !== 401) {
       emitToast({ type: "error", message: parseApiError(r) });
     }
-    setSaveBusy(false);
+    if (silent) setAutoSaveBusy(false);
+    else setSaveBusy(false);
   }
 
   async function saveDraft() {
@@ -1177,6 +1224,29 @@ export default function PurchaseInvoicesPage() {
 
   createAndConfirmRef.current = createAndConfirm;
 
+  const performSaveDraftRef = useRef(performSaveDraft);
+  performSaveDraftRef.current = performSaveDraft;
+
+  const purchaseAutoSaveReady =
+    open &&
+    isDraftInvoiceEdit(editing) &&
+    !modalLoading &&
+    Boolean(clean(form.divisionId) || clean(form.vendorId)) &&
+    purchaseItemsReadyForAutoSave(form.items).length > 0 &&
+    !busy &&
+    !saveBusy &&
+    (editing?.id ? canUpdate : canAdd);
+
+  const purchaseFormAutoSaveKey = useMemo(() => JSON.stringify(form), [form]);
+
+  useDraftAutoSave({
+    enabled: open && isDraftInvoiceEdit(editing) && !busy && !saveBusy,
+    ready: purchaseAutoSaveReady,
+    loading: modalLoading,
+    watchValue: purchaseFormAutoSaveKey,
+    onSave: () => performSaveDraftRef.current({ silent: true, closeAfter: false }),
+  });
+
   if (!canView) {
     return (
       <AppShell userName={user?.full_name || "User"} userEmail={user?.email || auth?.email || ""} userBusinessName={user?.firm_name || ""} userGstNumber={user?.gst_number || ""} variant="user">
@@ -1212,6 +1282,7 @@ export default function PurchaseInvoicesPage() {
               if (!bill) {
                 purchaseInvoiceLoadGenRef.current += 1;
                 setEditing(null);
+                setIsAddMode(true);
                 setModalLoading(false);
                 setLoadingEditId(null);
                 const defaultDivisionId = !isRetailer ? clean(divisionFilter) : "";
@@ -1324,6 +1395,7 @@ export default function PurchaseInvoicesPage() {
                     onClick: () => {
                       purchaseInvoiceLoadGenRef.current += 1;
                       setEditing(null);
+                      setIsAddMode(true);
                       setModalLoading(false);
                       setLoadingEditId(null);
                       const defaultDivisionId = !isRetailer ? clean(divisionFilter) : "";
@@ -1647,8 +1719,16 @@ export default function PurchaseInvoicesPage() {
       <CommonModal
         open={open}
         ariaLabel="purchase-invoice-editor"
-        title={modalLoading && loadingEditId ? "Opening invoice…" : editing?.id ? (isRetailer ? "Edit Purchase" : "Edit Purchase Invoice") : (isRetailer ? "Add Purchase" : "Add Purchase Invoice")}
-        subtitle={modalLoading && loadingEditId ? "Loading lines and stock options" : ""}
+        title={modalLoading && loadingEditId ? "Opening invoice…" : !isAddMode ? (isRetailer ? "Edit Purchase" : "Edit Purchase Invoice") : (isRetailer ? "Add Purchase" : "Add Purchase Invoice")}
+        subtitle={
+          modalLoading && loadingEditId
+            ? "Loading lines and stock options"
+            : autoSaveBusy
+              ? "Saving draft…"
+              : isDraftInvoiceEdit(editing)
+                ? "Changes auto-save while in draft"
+                : ""
+        }
         icon={<IconReceipt />}
         loading={modalLoading || saveBusy || busy}
         loadingText={
@@ -1669,11 +1749,11 @@ export default function PurchaseInvoicesPage() {
               Cancel
             </button>
             {/* Secondary: save draft */}
-            <button className="piGhostBtn sfmBtnGhost" type="button" disabled={busy || !(editingStatus === "DRAFT" || !editing?.id) || !(isEditingDraft ? canUpdate : canAdd)} onClick={() => { setSubmitted(true); saveDraft(); }}>
-              {saveBusy ? <InlineButtonProgress label="Saving..." /> : editing?.id ? "Save Draft" : "Save Draft"}
+            <button className="piGhostBtn sfmBtnGhost" type="button" disabled={busy || !(editingStatus === "DRAFT" || isAddMode) || !(isEditingDraft ? canUpdate : canAdd)} onClick={() => { setSubmitted(true); saveDraft(); }}>
+              {saveBusy ? <InlineButtonProgress label="Saving..." /> : "Save Draft"}
             </button>
             {/* Primary actions — dominant */}
-            {editing?.id && editingStatus === "CONFIRMED" ? (
+            {!isAddMode && editingStatus === "CONFIRMED" ? (
               <button
                 className="piPrimaryBtn piPrimaryBtn_confirm sfmBtnPrimary"
                 type="button"
@@ -1700,12 +1780,12 @@ export default function PurchaseInvoicesPage() {
                 Add Payment
               </button>
             ) : null}
-            {!editing?.id ? (
+            {isAddMode ? (
               <button className="piPrimaryBtn piPrimaryBtn_confirm sfmBtnPrimary" data-cm-primary="true" type="button" disabled={busy || !canAdd} onClick={() => { setSubmitted(true); createAndConfirm(); }}>
                 {saveBusy ? <InlineButtonProgress label="Working..." /> : "Create & Confirm"}
               </button>
             ) : null}
-            {editing?.id && editingStatus === "DRAFT" ? (
+            {!isAddMode && editingStatus === "DRAFT" ? (
               <button
                 className="piPrimaryBtn piPrimaryBtn_confirm sfmBtnPrimary"
                 data-cm-primary="true"
@@ -1720,6 +1800,37 @@ export default function PurchaseInvoicesPage() {
         }
       >
         <div ref={modalBodyRef} className="piModalForm">
+          {canAdd ? (
+            <OngoingBillsBar
+              module="purchase"
+              activeId={editing?.id ? String(editing.id) : null}
+              refreshKey={ongoingRefreshKey}
+              compact
+              onSelect={(bill) => {
+                if (!bill) {
+                  purchaseInvoiceLoadGenRef.current += 1;
+                  setEditing(null);
+                  setIsAddMode(true);
+                  setModalLoading(false);
+                  setLoadingEditId(null);
+                  const defaultDivisionId = !isRetailer ? clean(divisionFilter) : "";
+                  const defaultVendorId = isRetailer ? clean(vendorFilter) : "";
+                  setForm({
+                    invoiceNumber: "",
+                    vendorInvoiceNumber: "",
+                    divisionId: defaultDivisionId,
+                    vendorId: defaultVendorId,
+                    invoiceDate: localCalendarYmd(),
+                    dueDate: "",
+                    notes: "",
+                    items: [emptyLine()]
+                  });
+                  return;
+                }
+                openForEdit(bill.id);
+              }}
+            />
+          ) : null}
           <div className="piSection">
             <div className="piSectionBody">
               <div className="piHeaderTop">

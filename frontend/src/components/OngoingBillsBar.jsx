@@ -29,6 +29,7 @@ export default function OngoingBillsBar({
   activeId,
   onSelect,
   refreshKey,
+  compact = false,
 }) {
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -61,9 +62,11 @@ export default function OngoingBillsBar({
     fetchBills();
   }, [fetchBills, refreshKey]);
 
+  const wrapClass = `ongoingBills${!bills.length && !loading ? " empty" : ""}${compact ? " compact" : ""}`;
+
   if (!bills.length && !loading) {
     return (
-      <div className="ongoingBills empty">
+      <div className={wrapClass}>
         <button
           type="button"
           className="ongoingBills__newChip"
@@ -79,9 +82,9 @@ export default function OngoingBillsBar({
   }
 
   return (
-    <div className="ongoingBills" role="list" aria-label={isSales ? "Ongoing sales bills" : "Ongoing purchase invoices"}>
+    <div className={wrapClass} role="list" aria-label={isSales ? "Ongoing sales bills" : "Ongoing purchase invoices"}>
       {bills.map((bill) => {
-        const active = bill.id === activeId;
+        const active = String(bill.id) === String(activeId || "");
         return (
           <button
             key={bill.id}
@@ -89,15 +92,15 @@ export default function OngoingBillsBar({
             role="listitem"
             className={`ongoingBills__chip${active ? " is-active" : ""}`}
             onClick={() => onSelect?.(bill)}
-            title={`${bill.partyName || "Walk-in"} · ${bill.invoiceNumber}`}
+            title={`${bill.partyName || "Walk-in"} · ${bill.invoiceNumber || "Draft"}`}
           >
             <span className="ongoingBills__chipTitle">
               {bill.partyName || (isSales ? "Walk-in customer" : "New vendor")}
             </span>
             <span className="ongoingBills__chipMeta">
+              {bill.invoiceNumber ? `${bill.invoiceNumber} · ` : ""}
               {bill.itemCount} item{bill.itemCount === 1 ? "" : "s"}
               {bill.totalAmount > 0 ? ` · ${fmtCurrency(bill.totalAmount)}` : ""}
-              {bill.createdByName ? ` · ${bill.createdByName}` : ""}
             </span>
           </button>
         );

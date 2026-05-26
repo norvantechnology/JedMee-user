@@ -60,6 +60,11 @@ import InvoiceViewModal from "../components/InvoiceViewModal.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
 import { todayYmdLocal } from "../utils/date.js";
+import {
+  isDraftInvoiceEdit,
+  salesItemsReadyForAutoSave,
+  useDraftAutoSave,
+} from "../utils/draftAutoSave.js";
 import PartyContactEmailModal from "../components/PartyContactEmailModal.jsx";
 import { EMAIL_RE, customerToUpdatePayload } from "../utils/customerContactPayload.js";
 import LineRemoveButton from "../components/ui/LineRemoveButton.jsx";
@@ -603,6 +608,7 @@ export default function SalesBillingPage() {
   const canDelete = can("SALES_INVOICES", "DELETE");
   const canUpdateCustomer = can("CUSTOMERS", "UPDATE");
   const [busy, setBusy] = useState(false);
+  const [autoSaveBusy, setAutoSaveBusy] = useState(false);
   const [rows, setRows] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -613,6 +619,7 @@ export default function SalesBillingPage() {
   const [customerFilter, setCustomerFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [isAddMode, setIsAddMode] = useState(true);
   const [open, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
@@ -649,6 +656,7 @@ export default function SalesBillingPage() {
     if (String(searchParams.get("new") || "") !== "1") return;
     salesInvoiceLoadGenRef.current += 1;
     setEditing(null);
+    setIsAddMode(true);
     setModalLoading(false);
     setLoadingEditId(null);
     const d = loadSalesFormDefaults();
@@ -1063,6 +1071,7 @@ export default function SalesBillingPage() {
   function openForEdit(invoiceId) {
     if (!canUpdate) return;
     const id = String(invoiceId || "");
+    setIsAddMode(false);
     setOpen(true);
     setModalLoading(true);
     setLoadingEditId(id);
@@ -1074,6 +1083,7 @@ export default function SalesBillingPage() {
 
   function closeSalesEditor() {
     salesInvoiceLoadGenRef.current += 1;
+    setIsAddMode(true);
     setModalLoading(false);
     setLoadingEditId(null);
     setSubmitted(false);
@@ -1262,7 +1272,7 @@ export default function SalesBillingPage() {
 
   const canSaveDraft =
     Boolean(clean(form.customerId)) && (form.items || []).length > 0 && !formIsBlocked && !busy && (editing?.id ? canUpdate : canAdd);
-  const canCreateAndConfirm = !editing?.id && canAdd && canUpdate && canSaveDraft;
+  const canCreateAndConfirm = isAddMode && canAdd && canUpdate && canSaveDraft;
   const isDraftModalEdit = Boolean(editing?.id) && String(editing?.status || "").toUpperCase() === "DRAFT";
   const canSaveAndConfirm = isDraftModalEdit && canSaveDraft;
 
@@ -1344,12 +1354,29 @@ export default function SalesBillingPage() {
     return () => window.removeEventListener("keydown", onKeyDown, true);
   }, [open]);
 
-  async function performSaveDraft({ confirmAfterSave = false, markPaidAtConfirm } = {}) {
-    setBusy(true);
+  async function performSaveDraft({
+    confirmAfterSave = false,
+    markPaidAtConfirm,
+    silent = false,
+    closeAfter,
+  } = {}) {
+    const shouldClose = closeAfter ?? !silent;
+    if (silent) {
+      if (autoSaveBusy || busy) return;
+      setAutoSaveBusy(true);
+    } else {
+      setBusy(true);
+    }
     try {
+      const itemsForSave = silent
+        ? salesItemsReadyForAutoSave(form.items)
+        : form.items;
+      if (silent && itemsForSave.length === 0) return;
+
       const { divisionId: _divisionId, ...basePayload } = form;
       const payload = {
         ...basePayload,
+        items: itemsForSave,
         clientToday: todayYmdLocal(),
         isWalkInSale: Boolean(isRetailer && selectedCustomerIsWalkIn),
         walkInPatientName: clean(form.walkInPatientName) || null,
@@ -1362,11 +1389,12 @@ export default function SalesBillingPage() {
       };
       const r = editing?.id ? await updateSalesInvoice(editing.id, payload) : await createSalesInvoice(payload);
       if (!(r.status >= 200 && r.status < 300 && r.json?.ok)) {
-        if (r.status !== 401) emitToast({ type: "error", message: parseApiError(r) });
+        if (!silent && r.status !== 401) emitToast({ type: "error", message: parseApiError(r) });
         return;
       }
       persistSalesFormDefaults({ customerId: form.customerId, divisionId: form.divisionId });
       const savedId = String(r.json?.data?.invoice?.id || r.json?.data?.invoiceId || editing?.id || "");
+      const savedInvoice = r.json?.data?.invoice;
       if (confirmAfterSave && savedId) {
         const confirmOpts =
           markPaidAtConfirm === true || markPaidAtConfirm === false ? { markPaidAtConfirm } : {};
@@ -1374,17 +1402,33 @@ export default function SalesBillingPage() {
         if (!pipe.ok) {
           if (pipe.aborted) return;
           if (pipe.toast) emitToast(pipe.toast);
-          setOpen(false);
-          setOngoingRefreshKey((k) => k + 1);
-          await refreshSalesTableOnly();
+          if (shouldClose) {
+            setOpen(false);
+            setOngoingRefreshKey((k) => k + 1);
+            await refreshSalesTableOnly();
+          }
           return;
         }
       }
-      setOpen(false);
-      setOngoingRefreshKey((k) => k + 1);
-      await refreshSalesTableOnly();
+      if (shouldClose) {
+        setOpen(false);
+        setOngoingRefreshKey((k) => k + 1);
+        await refreshSalesTableOnly();
+      } else {
+        if (savedId) {
+          setEditing((prev) => ({
+            ...(prev || {}),
+            ...(savedInvoice || {}),
+            id: savedId,
+            status: "DRAFT",
+          }));
+        }
+        setOngoingRefreshKey((k) => k + 1);
+        void refreshSalesTableOnly();
+      }
     } finally {
-      setBusy(false);
+      if (silent) setAutoSaveBusy(false);
+      else setBusy(false);
     }
   }
 
@@ -1397,6 +1441,28 @@ export default function SalesBillingPage() {
     if (!canCreateAndConfirm) return;
     await performSaveDraft({ confirmAfterSave: true, markPaidAtConfirm: true });
   }
+
+  const performSaveDraftRef = useRef(performSaveDraft);
+  performSaveDraftRef.current = performSaveDraft;
+
+  const salesAutoSaveReady =
+    open &&
+    isDraftInvoiceEdit(editing) &&
+    !modalLoading &&
+    Boolean(clean(form.customerId)) &&
+    salesItemsReadyForAutoSave(form.items).length > 0 &&
+    !busy &&
+    (editing?.id ? canUpdate : canAdd);
+
+  const formAutoSaveKey = useMemo(() => JSON.stringify(form), [form]);
+
+  useDraftAutoSave({
+    enabled: open && isDraftInvoiceEdit(editing) && !busy,
+    ready: salesAutoSaveReady,
+    loading: modalLoading,
+    watchValue: formAutoSaveKey,
+    onSave: () => performSaveDraftRef.current({ silent: true, closeAfter: false }),
+  });
 
   async function saveAndConfirmDraft(opts = {}) {
     if (!canSaveAndConfirm) return;
@@ -1461,6 +1527,7 @@ export default function SalesBillingPage() {
                 // "+ New" — open a fresh draft via the existing primary action.
                 salesInvoiceLoadGenRef.current += 1;
                 setEditing(null);
+                setIsAddMode(true);
                 setModalLoading(false);
                 setLoadingEditId(null);
                 const d = loadSalesFormDefaults();
@@ -1538,6 +1605,7 @@ export default function SalesBillingPage() {
                     onClick: () => {
                       salesInvoiceLoadGenRef.current += 1;
                       setEditing(null);
+                      setIsAddMode(true);
                       setModalLoading(false);
                       setLoadingEditId(null);
                       const d = loadSalesFormDefaults();
@@ -1798,11 +1866,19 @@ export default function SalesBillingPage() {
         title={
           modalLoading && loadingEditId
             ? "Opening invoice…"
-            : editing?.id
+            : !isAddMode
               ? isRetailer ? "Edit Bill" : "Edit Sales Invoice"
               : isRetailer ? "Add Bill" : "Add Sales Invoice"
         }
-        subtitle={modalLoading && loadingEditId ? "Fetching lines and batch info" : ""}
+        subtitle={
+          modalLoading && loadingEditId
+            ? "Fetching lines and batch info"
+            : autoSaveBusy
+              ? "Saving draft…"
+              : isDraftInvoiceEdit(editing)
+                ? "Changes auto-save while in draft"
+                : ""
+        }
         icon={<IconReceipt />}
         loading={modalLoading || busy}
         loadingText={busy ? "Saving invoice…" : "Loading invoice and line items…"}
@@ -1812,7 +1888,7 @@ export default function SalesBillingPage() {
         footer={
           <div className="sfmModalFooter">
             {/* Low-priority: send email — far left, steps back */}
-            {editing?.id && canView && String(editing?.status || "").toUpperCase() !== "CANCELLED" && clean(form.customerId) ? (
+            {!isAddMode && canView && String(editing?.status || "").toUpperCase() !== "CANCELLED" && clean(form.customerId) ? (
               <button
                 className="sfmBtnGhost sbmFooterSendBtn"
                 type="button"
@@ -1833,13 +1909,13 @@ export default function SalesBillingPage() {
             <button
               className="sfmBtnGhost"
               type="button"
-              disabled={busy || (Boolean(editing?.id) && !isDraftModalEdit) || !(editing?.id ? canUpdate : canAdd)}
+              disabled={busy || (!isAddMode && !isDraftModalEdit) || !(isAddMode ? canAdd : canUpdate)}
               onClick={() => { setSubmitted(true); performSaveDraft(); }}
             >
-              {busy ? <InlineButtonProgress label="Working..." /> : editing?.id ? "Save Changes" : "Save Draft"}
+              {busy ? <InlineButtonProgress label="Working..." /> : isAddMode ? "Save Draft" : "Save Changes"}
             </button>
             {/* Primary actions — dominant */}
-            {!editing?.id && canUpdate ? (
+            {isAddMode && canUpdate ? (
               <>
                 <button
                   className="sfmBtnGhost sbmBtnCreateConfirm"
@@ -1862,7 +1938,7 @@ export default function SalesBillingPage() {
                 </button>
               </>
             ) : null}
-            {isDraftModalEdit && canUpdate ? (
+            {!isAddMode && isDraftModalEdit && canUpdate ? (
               <>
                 <button
                   className="sfmBtnGhost sbmBtnCreateConfirm"
@@ -1890,6 +1966,43 @@ export default function SalesBillingPage() {
       >
         {/* Modal body – ref used for Enter-key navigation */}
         <div ref={modalBodyRef} className="sfm piModalForm sbmModalForm">
+          {canAdd ? (
+            <OngoingBillsBar
+              module="sales"
+              activeId={editing?.id ? String(editing.id) : null}
+              refreshKey={ongoingRefreshKey}
+              compact
+              onSelect={(bill) => {
+                if (!bill) {
+                  salesInvoiceLoadGenRef.current += 1;
+                  setEditing(null);
+                  setIsAddMode(true);
+                  setModalLoading(false);
+                  setLoadingEditId(null);
+                  const d = loadSalesFormDefaults();
+                  const walk = isRetailer ? (customers || []).find((c) => Boolean(c.is_walk_in)) : null;
+                  setForm({
+                    customerId: isRetailer ? (walk?.id || d.customerId || "") : d.customerId,
+                    divisionId: isRetailer ? "" : d.divisionId,
+                    invoiceDate: todayYmdLocal(),
+                    dueDate: "",
+                    notes: "",
+                    walkInPatientName: "",
+                    walkInPatientPhone: "",
+                    walkInDoctorName: "",
+                    walkInPrescriptionNo: "",
+                    cashReceived: "",
+                    rateType: isRetailer ? "MRP" : "SALES_RATE",
+                    billType: "CASH_MEMO",
+                    globalDiscountPercent: 0,
+                    items: [emptyItem()]
+                  });
+                  return;
+                }
+                openForEdit(bill.id);
+              }}
+            />
+          ) : null}
           {/* ── Party + dates + notes (same section shell as purchase) ───── */}
           <div className="piSection">
             <div className="piSectionBody">
