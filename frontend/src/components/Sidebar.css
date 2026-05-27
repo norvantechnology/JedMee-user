@@ -172,29 +172,31 @@
 .nav-scroll::-webkit-scrollbar { display: none; }
 
 /* ── Section group ── */
-.nav-group { margin-bottom: 6px; }
+.nav-group { margin-bottom: 4px; }
 .nav-group-label {
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .1em;
+  font-weight: 600;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--text-label);
-  padding: 12px 18px 5px;
+  padding: 24px 18px 6px;
   white-space: nowrap;
   overflow: hidden;
-  opacity: 1;
+  opacity: 0.45;
   transition: opacity var(--tr), height var(--tr), padding var(--tr);
 }
+/* First group has no label — remove top padding so Dashboard sits flush */
+.nav-group:first-child .nav-group-label { display: none; }
 .sidebar.collapsed .nav-group-label { opacity: 0; height: 0; padding-top: 0; padding-bottom: 0; }
 .sidebar.collapsed .nav-group + .nav-group::before { content: ''; display: block; height: 1px; background: var(--nav-border); margin: 6px 14px; }
 
 /* ── Nav item ── */
-.nav-item { position: relative; margin: 2px 8px; }
+.nav-item { position: relative; margin: 1px 8px; }
 .nav-link {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
+  padding: 0 12px;
   border-radius: 10px;
   cursor: pointer;
   text-decoration: none;
@@ -205,7 +207,7 @@
   position: relative;
   border: 1px solid transparent;
   user-select: none;
-  min-height: 44px;
+  min-height: 40px;
 }
 .nav-link:hover {
   background: color-mix(in srgb, var(--nav-hover) 90%, var(--brand) 10%);
@@ -235,9 +237,9 @@
 }
 
 .nav-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,18 +249,22 @@
   background: transparent;
 }
 .nav-link:hover .nav-icon { color: var(--text-primary); }
-.nav-icon svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+/* All icons: 18px, uniform size — no variation across items */
+.nav-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
-.nav-label { font-size: 15px; font-weight: 650; flex: 1; overflow: hidden; text-overflow: ellipsis; opacity: 1; transition: opacity var(--tr); }
+/* 13px label — never truncated; weight 400 inactive, 500 hover, 600 active */
+.nav-label { font-size: 13px; font-weight: 400; flex: 1; overflow: hidden; text-overflow: ellipsis; opacity: 1; transition: opacity var(--tr); }
+.nav-link:hover .nav-label { font-weight: 500; }
+.nav-link.active .nav-label { font-weight: 600; }
 .sidebar.collapsed .nav-label { opacity: 0; width: 0; }
 
-/* Alt+letter hints (global shortcuts — see services/navShortcuts.js) */
+/* Shortcut badge: 11px, right-aligned, opacity 0.35 */
 .navShortcutHint {
   flex-shrink: 0;
   margin-left: auto;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 9px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 600;
   letter-spacing: 0.02em;
   padding: 2px 5px;
   border-radius: 5px;
@@ -267,6 +273,7 @@
   border: 1px solid var(--nav-border);
   line-height: 1.2;
   white-space: nowrap;
+  opacity: 0.35;
 }
 .sidebar.collapsed .navShortcutHint { display: none; }
 
@@ -446,6 +453,8 @@
   font-family: var(--font);
 }
 .userMenuItem:hover { background: var(--nav-hover); }
+.userMenuItem--danger { color: var(--color-danger, #d32f2f); }
+.userMenuItem--danger:hover { background: color-mix(in srgb, var(--color-danger, #d32f2f) 12%, transparent); }
 
 /* ── Mobile close button (hidden on desktop) ── */
 .sb-mobile-close {
@@ -566,12 +575,14 @@
     height: 16px;
   }
 
-  /* Nav label */
+  /* Nav label — keep 13px on mobile too, never truncate */
   .nav-label {
-    font-size: 13.5px;
-    font-weight: 600;
+    font-size: 13px;
+    font-weight: 500;
     opacity: 1 !important;
     width: auto !important;
+    overflow: visible;
+    text-overflow: clip;
   }
 
   /* Active bar thinner on mobile */
@@ -650,6 +661,8 @@
   }
   .nav-label {
     font-size: 13px;
+    overflow: visible;
+    text-overflow: clip;
   }
 }
 

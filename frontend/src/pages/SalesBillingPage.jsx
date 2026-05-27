@@ -1520,7 +1520,7 @@ export default function SalesBillingPage() {
         {canAdd ? (
           <OngoingBillsBar
             module="sales"
-            activeId={editing?.id ? String(editing.id) : null}
+            activeId={open && editing?.id ? String(editing.id) : null}
             refreshKey={ongoingRefreshKey}
             onSelect={(bill) => {
               if (!bill) {

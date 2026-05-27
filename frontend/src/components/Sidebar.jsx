@@ -9,32 +9,32 @@ import { isRetailerAuth } from "../utils/businessRole.js";
 import { useLocale } from "../context/LocaleContext.jsx";
 import { buildUserSidebarSections } from "../navigation/userSidebarNav.js";
 import {
-  BadgeIndianRupee,
+  ArrowLeftRight,
+  BookMarked,
+  BookOpen,
   Building2,
-  CreditCard,
-  IconCollapseChevron,
-  IconDots,
-  IconLedger,
-  IconCatalog,
-  IconOrder,
-  IconDayBook,
   ClipboardList,
-  LayoutGrid,
-  Package2,
-  RotateCcw,
+  CreditCard,
+  Factory,
+  FileClock,
+  FileText,
+  Landmark,
+  LayoutDashboard,
+  Layers,
+  PackageCheck,
+  Pill,
+  ReceiptText,
+  ScrollText,
   ShieldCheck,
-  Store,
+  ShoppingCart,
   Truck,
+  UserRound,
   Users,
-  UsersRound,
-  WalletCards,
-  Layers
-} from "./ui/AppIcons.jsx";
+} from "lucide-react";
+import { IconCollapseChevron, IconDots } from "./ui/AppIcons.jsx";
 import "./Sidebar.css";
 
 // Persist sidebar nav scroll position across route changes.
-// Each page renders its own AppShell, so <Sidebar /> unmounts/remounts on
-// every navigation and its internal scroll would reset to 0 otherwise.
 const SIDEBAR_SCROLL_STORAGE_KEY = sidebarNavScrollStorageKey();
 let sidebarNavScrollCache = (() => {
   try {
@@ -53,55 +53,58 @@ function initialsFrom(nameOrEmail) {
   return s.slice(0, 2).toUpperCase();
 }
 
-/** Icons for sidebar routes — keep in sync with navigation/userSidebarNav.js */
+/** Icons for sidebar routes — all 18 px via CSS, contextually correct LucideIcons. */
 function pickSidebarIcon(to) {
   const path = String(to || "");
   switch (path) {
     case "/dashboard":
-      return <LayoutGrid />;
+      return <LayoutDashboard />;
     case "/quality-master":
-      return <Package2 />;
+      return <Pill />;
     case "/mfg-companies":
-      return <Building2 />;
+      return <Factory />;
     case "/divisions":
-      return <Truck />;
+      return <Layers />;
     case "/vendors":
-      return <Store />;
+      return <Truck />;
     case "/customers":
-      return <UsersRound />;
+      return <Users />;
     case "/order-catalog":
     case "/my-catalog":
-      return <IconCatalog />;
+      return <BookOpen />;
     case "/sales-billing":
-      return <WalletCards />;
+      return <ReceiptText />;
+    case "/purchase-invoices":
+      return <ShoppingCart />;
     case "/sales-returns":
     case "/purchase-returns":
-      return <RotateCcw />;
-    case "/purchase-invoices":
-      return <ClipboardList />;
+      return <ArrowLeftRight />;
     case "/my-orders":
     case "/orders":
-      return <IconOrder />;
-    case "/prescriptions":
-      return <ShieldCheck />;
+      return <PackageCheck />;
     case "/reports/inventory":
-      return <Layers />;
+      return <ClipboardList />;
     case "/reports/day-book":
+      return <BookMarked />;
     case "/reports/gst-r1":
+      return <Landmark />;
     case "/reports/gst-r2":
-      return <IconDayBook />;
+      return <FileText />;
+    case "/reports/gst-r3b":
+      return <FileClock />;
     case "/reports/ledger":
-      return <IconLedger />;
+      return <ScrollText />;
     case "/division-payments":
-      return <BadgeIndianRupee />;
+    case "/vendor-payments":
+      return <Building2 />;
     case "/customer-payments":
       return <CreditCard />;
     case "/users":
-      return <Users />;
+      return <UserRound />;
     case "/roles-access":
       return <ShieldCheck />;
     default:
-      return <LayoutGrid />;
+      return <LayoutDashboard />;
   }
 }
 
@@ -128,8 +131,6 @@ export default function Sidebar({
   const isOwner = Boolean(access?.isAccountOwner);
   const canUsers    = isOwner || Boolean(perms?.USERS?.VIEW);
   const canRoles    = isOwner || Boolean(perms?.ROLES?.VIEW);
-  // Wholesalers: divisions and vendors are separate tabs.
-  // Retailers:   vendors shown as "Suppliers" — no divisions tab.
   const canDivisions = !isRetailer && (isOwner || Boolean(perms?.DIVISIONS?.VIEW));
   const canVendors   = isOwner || Boolean(perms?.VENDORS?.VIEW);
   const canQuality   = isOwner || Boolean(perms?.PRODUCT_BATCHES?.VIEW);
@@ -148,7 +149,6 @@ export default function Sidebar({
     return onAuthChanged(() => setAuthTick((t) => t + 1));
   }, []);
 
-  // Fetch pending order count for the sidebar badge (wholesaler only).
   const refreshOrderBadge = useCallback(async () => {
     if (!canOrders || isRetailer) return;
     const r = await getPendingOrderCount();
@@ -192,8 +192,6 @@ export default function Sidebar({
   const menuRef = useRef(null);
   const navRef = useRef(null);
 
-  // Restore previous sidebar scroll before browser paints, so users don't
-  // see a jump to the top when Sidebar remounts on route change.
   useLayoutEffect(() => {
     const el = navRef.current;
     if (!el) return;
@@ -202,7 +200,6 @@ export default function Sidebar({
     }
   }, []);
 
-  // Persist scroll position while the user scrolls inside the sidebar.
   useEffect(() => {
     const el = navRef.current;
     if (!el) return;
@@ -247,12 +244,10 @@ export default function Sidebar({
         <div className="sidebar-logo">
           <div className="sidebar-logo-inner">
             <div className="logo-mark" aria-hidden="true">
-              {/* Full logo — visible when expanded */}
               <picture className="sidebar-logo-full">
                 <source srcSet="/logo.webp" type="image/webp" />
                 <img src="/logo.png" alt="JedMee" className="sidebar-logo-img" />
               </picture>
-              {/* Favicon icon — visible when collapsed */}
               <picture className="sidebar-logo-favicon">
                 <source srcSet="/favicon-192.webp" type="image/webp" />
                 <img src="/favicon-192.png" alt="JedMee" className="sidebar-logo-favicon-img" />
@@ -266,75 +261,67 @@ export default function Sidebar({
         </div>
 
         <nav ref={navRef} className="nav-scroll" aria-label="Primary navigation">
-          {(() => {
-            const prettyTitle = (t) => {
-              const s = String(t || "").trim().toLowerCase();
-              if (!s) return "";
-              return s
-                .split(/\s+/)
-                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                .join(" ");
-            };
+          {sections.map((sec) => (
+            <div key={sec.title || "__main"} className="nav-group">
+              {/* Only render the label when the group has a title */}
+              {sec.title ? (
+                <div className="nav-group-label">{sec.title}</div>
+              ) : null}
+              {sec.items.map((it) => {
+                const itemKey = String(it.to || it.label || sec.title);
+                const shortcutHint = it.fnKey ? `F${it.fnKey}` : "";
 
-            return sections.map((sec) => (
-              <div key={sec.title} className="nav-group">
-                <div className="nav-group-label">{prettyTitle(sec.title)}</div>
-                {sec.items.map((it) => {
-                  const itemKey = String(it.to || it.label || sec.title);
-                  const shortcutHint = it.fnKey ? `F${it.fnKey}` : "";
+                const snapshotScroll = () => {
+                  const el = navRef.current;
+                  if (!el) return;
+                  const top = el.scrollTop;
+                  sidebarNavScrollCache = top;
+                  try {
+                    window.sessionStorage.setItem(SIDEBAR_SCROLL_STORAGE_KEY, String(top));
+                  } catch {
+                    // ignore
+                  }
+                };
 
-                  const snapshotScroll = () => {
-                    const el = navRef.current;
-                    if (!el) return;
-                    const top = el.scrollTop;
-                    sidebarNavScrollCache = top;
-                    try {
-                      window.sessionStorage.setItem(SIDEBAR_SCROLL_STORAGE_KEY, String(top));
-                    } catch {
-                      // ignore
-                    }
-                  };
-
-                  return (
-                    <div key={itemKey} className="nav-item">
-                      <NavLink
-                        to={it.to}
-                        title={shortcutHint ? `${it.label} (${shortcutHint})` : it.label}
-                        preventScrollReset
-                        data-label={it.label}
-                        className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
-                        onClick={() => {
-                          snapshotScroll();
-                          onNavigate?.();
-                        }}
-                      >
-                        <span className="nav-active-bar" />
-                        <span className="nav-icon" aria-hidden="true">
-                          {it.icon}
-                        </span>
-                        <span className="nav-label">{it.label}</span>
-                        {!collapsed && shortcutHint ? (
-                          <kbd className="navShortcutHint" aria-label={`Shortcut ${shortcutHint}`}>
-                            {shortcutHint}
-                          </kbd>
-                        ) : null}
-                        {it.badge ? (
-                          <span className="nav-badge" aria-label={`${it.badge} pending`}>{it.badge}</span>
-                        ) : null}
-                      </NavLink>
-
-                      {collapsed ? (
-                        <span className="nav-tooltip">
-                          {it.label}
-                          {shortcutHint ? ` (${shortcutHint})` : ""}
-                        </span>
+                return (
+                  <div key={itemKey} className="nav-item">
+                    <NavLink
+                      to={it.to}
+                      title={shortcutHint ? `${it.label} (${shortcutHint})` : it.label}
+                      preventScrollReset
+                      data-label={it.label}
+                      className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
+                      onClick={() => {
+                        snapshotScroll();
+                        onNavigate?.();
+                      }}
+                    >
+                      <span className="nav-active-bar" />
+                      <span className="nav-icon" aria-hidden="true">
+                        {it.icon}
+                      </span>
+                      <span className="nav-label">{it.label}</span>
+                      {!collapsed && shortcutHint ? (
+                        <kbd className="navShortcutHint" aria-label={`Shortcut ${shortcutHint}`}>
+                          {shortcutHint}
+                        </kbd>
                       ) : null}
-                    </div>
-                  );
-                })}
-              </div>
-            ));
-          })()}
+                      {it.badge ? (
+                        <span className="nav-badge" aria-label={`${it.badge} pending`}>{it.badge}</span>
+                      ) : null}
+                    </NavLink>
+
+                    {collapsed ? (
+                      <span className="nav-tooltip">
+                        {it.label}
+                        {shortcutHint ? ` (${shortcutHint})` : ""}
+                      </span>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         <div className="sidebar-footer">
@@ -365,6 +352,28 @@ export default function Sidebar({
                   role="menuitem"
                   onClick={() => {
                     setMenuOpen(false);
+                    navigate("/profile");
+                  }}
+                >
+                  Profile
+                </button>
+                <button
+                  className="userMenuItem"
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    navigate("/settings");
+                  }}
+                >
+                  Settings
+                </button>
+                <button
+                  className="userMenuItem userMenuItem--danger"
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
                     const auth = readAuth();
                     if (auth?.email && auth?.refreshToken) {
                       logout({ email: auth.email, refreshToken: auth.refreshToken }).catch(() => {});
@@ -384,4 +393,3 @@ export default function Sidebar({
     </>
   );
 }
-

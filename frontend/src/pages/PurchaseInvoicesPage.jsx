@@ -1276,7 +1276,7 @@ export default function PurchaseInvoicesPage() {
         {canAdd ? (
           <OngoingBillsBar
             module="purchase"
-            activeId={editing?.id ? String(editing.id) : null}
+            activeId={open && editing?.id ? String(editing.id) : null}
             refreshKey={ongoingRefreshKey}
             onSelect={(bill) => {
               if (!bill) {

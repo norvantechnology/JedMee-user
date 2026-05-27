@@ -151,6 +151,7 @@ function LandingNav({ navigate, authed }) {
   const links = [
     { label: "Features", href: "#features" },
     { label: "Pricing",  href: "#pricing" },
+    { label: "Download", href: "#download" },
     { label: "About",    to: "/about" },
     { label: "Contact",  to: "/contact" },
   ];
@@ -964,6 +965,566 @@ function FAQSection() {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   DOWNLOAD APP SECTION
+───────────────────────────────────────────────────────────── */
+function DownloadSection() {
+  const [appInfo, setAppInfo] = useState({
+    version: "1.0.0", buildDateHuman: "",
+    android: { available: false, apkUrl: "", sizeMB: "0" },
+    ios: { available: false }
+  });
+  const [dlState, setDlState] = useState("idle"); // idle | downloading | done
+
+  useEffect(() => {
+    fetch("/downloads/version.json")
+      .then(r => r.json())
+      .then(d => setAppInfo(d))
+      .catch(() => {});
+  }, []);
+
+  const handleAndroidDownload = (e) => {
+    if (!appInfo.android.available) { e.preventDefault(); return; }
+    setDlState("downloading");
+    setTimeout(() => setDlState("done"), 1800);
+  };
+
+  const barHeights = [45, 65, 50, 80, 60, 88, 72];
+
+  return (
+    <section className="ln-download" id="download">
+      {/* Background */}
+      <div className="ln-dl-bg">
+        <div className="ln-dl-orb ln-dl-orb--1" />
+        <div className="ln-dl-orb ln-dl-orb--2" />
+        <div className="ln-dl-grid" />
+      </div>
+
+      <div className="ln-container">
+        {/* Section header — centered */}
+        <div className="ln-dl-header">
+          <div className="ln-dl-badge">
+            <Icon name="zap" size={13} />
+            <span>Mobile App — Free Download</span>
+          </div>
+          <h2 className="ln-dl-title">
+            Your Pharmacy, Always<br />
+            <span className="ln-dl-title-accent">In Your Pocket</span>
+          </h2>
+          <p className="ln-dl-sub">
+            Manage billing, stock, and orders from your Android phone. Fast, lightweight, and free.
+          </p>
+        </div>
+
+        {/* Main card row */}
+        <div className="ln-dl-inner">
+
+          {/* ── Left: phone mockup ── */}
+          <div className="ln-dl-visual">
+            <div className="ln-dl-float ln-dl-float--1">
+              <Icon name="checkCircle" size={14} className="ln-dl-fi-green" />
+              <div>
+                <div className="ln-dl-float-label">Invoice Created</div>
+                <div className="ln-dl-float-val">₹24,850</div>
+              </div>
+            </div>
+            <div className="ln-dl-float ln-dl-float--2">
+              <Icon name="trending" size={14} className="ln-dl-fi-indigo" />
+              <div>
+                <div className="ln-dl-float-label">Today's Sales</div>
+                <div className="ln-dl-float-val">↑ 12%</div>
+              </div>
+            </div>
+
+            <div className="ln-dl-phone-wrap">
+              <div className="ln-dl-phone-glow" />
+              <div className="ln-dl-phone">
+                {/* Status bar */}
+                <div className="ln-dl-statusbar">
+                  <span className="ln-dl-sb-time">9:41</span>
+                  <div className="ln-dl-sb-icons">
+                    <div className="ln-dl-sb-signal"><div/><div/><div/><div/></div>
+                    <div className="ln-dl-sb-battery" />
+                  </div>
+                </div>
+                <div className="ln-dl-phone-screen">
+                  {/* App top bar */}
+                  <div className="ln-dl-app-header">
+                    <div className="ln-dl-app-logo">JedMee</div>
+                    <div className="ln-dl-app-header-right">
+                      <div className="ln-dl-app-notif">
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.9)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <div className="ln-dl-notif-dot" />
+                      </div>
+                      <div className="ln-dl-app-avatar">RK</div>
+                    </div>
+                  </div>
+
+                  {/* Greeting */}
+                  <div className="ln-dl-app-body">
+                    <div className="ln-dl-scroll-content">
+
+                      {/* Greeting */}
+                      <div className="ln-dl-greeting">
+                        <div className="ln-dl-greeting-text">Good morning, Raj 👋</div>
+                        <div className="ln-dl-greeting-sub">Today · May 27, 2026</div>
+                      </div>
+
+                      {/* Date filter tabs */}
+                      <div className="ln-dl-tabs">
+                        {["Today","This week","This month"].map((t, i) => (
+                          <div key={t} className={`ln-dl-tab${i === 2 ? " active" : ""}`}>{t}</div>
+                        ))}
+                      </div>
+
+                      {/* 5 KPI cards — 2 columns */}
+                      <div className="ln-dl-kpi-grid">
+                        <div className="ln-dl-kpi ln-dl-kpi--blue">
+                          <div className="ln-dl-kpi-dot ln-dl-kpi-dot--blue" />
+                          <div className="ln-dl-kpi-label">Period Sales</div>
+                          <div className="ln-dl-kpi-val">₹34,818</div>
+                        </div>
+                        <div className="ln-dl-kpi ln-dl-kpi--gray">
+                          <div className="ln-dl-kpi-dot ln-dl-kpi-dot--gray" />
+                          <div className="ln-dl-kpi-label">Purchases</div>
+                          <div className="ln-dl-kpi-val">₹8.2K</div>
+                        </div>
+                        <div className="ln-dl-kpi ln-dl-kpi--green">
+                          <div className="ln-dl-kpi-dot ln-dl-kpi-dot--green" />
+                          <div className="ln-dl-kpi-label">Receivables</div>
+                          <div className="ln-dl-kpi-val">₹705</div>
+                        </div>
+                        <div className="ln-dl-kpi ln-dl-kpi--red">
+                          <div className="ln-dl-kpi-dot ln-dl-kpi-dot--red" />
+                          <div className="ln-dl-kpi-label">Payables</div>
+                          <div className="ln-dl-kpi-val">₹50K</div>
+                        </div>
+                        <div className="ln-dl-kpi ln-dl-kpi--purple ln-dl-kpi--wide">
+                          <div className="ln-dl-kpi-dot ln-dl-kpi-dot--purple" />
+                          <div className="ln-dl-kpi-label">Gross Profit</div>
+                          <div className="ln-dl-kpi-val">₹16.6K <span className="ln-dl-kpi-trend up">↑ 8%</span></div>
+                        </div>
+                      </div>
+
+                      {/* Alerts section */}
+                      <div className="ln-dl-section-card">
+                        <div className="ln-dl-section-head">
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                          <span>Alerts</span>
+                        </div>
+                        {[
+                          { name: "Paracetamol Batch 99", sub: "Exp: May 29 · Stock: 899" },
+                          { name: "Amoxicillin Batch 77", sub: "Exp: Jun 01 · Stock: 814" },
+                        ].map((a, i) => (
+                          <div key={i} className="ln-dl-alert-item">
+                            <div className="ln-dl-alert-item-icon">
+                              <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            </div>
+                            <div className="ln-dl-alert-item-info">
+                              <div className="ln-dl-alert-item-name">{a.name}</div>
+                              <div className="ln-dl-alert-item-sub">{a.sub}</div>
+                            </div>
+                            <div className="ln-dl-exp-badge">Exp Soon</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Quick Actions */}
+                      <div className="ln-dl-section-card">
+                        <div className="ln-dl-section-head">
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#6b3fa0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                          <span>Quick Actions</span>
+                        </div>
+                        <div className="ln-dl-qa-grid">
+                          {[
+                            { label: "New Sale",  color: "blue",   svg: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 2 4 22 7 20 10 22 13 20 16 22 19 20 20 22 20 2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg> },
+                            { label: "Purchase", color: "purple", svg: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6b3fa0" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> },
+                            { label: "Customers",color: "green",  svg: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+                            { label: "Suppliers",color: "orange", svg: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> },
+                            { label: "Reports",  color: "indigo", svg: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
+                            { label: "Products", color: "teal",   svg: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0d9488" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> },
+                          ].map(({ label, color, svg }) => (
+                            <div key={label} className="ln-dl-qa-item">
+                              <div className={`ln-dl-qa-icon ln-dl-qa-icon--${color}`}>{svg}</div>
+                              <div className="ln-dl-qa-label">{label}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Weekly Sales Chart */}
+                      <div className="ln-dl-chart">
+                        <div className="ln-dl-chart-head">
+                          <div className="ln-dl-chart-title">Weekly Sales</div>
+                          <div className="ln-dl-chart-legend">
+                            <span className="ln-dl-leg ln-dl-leg--blue" />Sales
+                            <span className="ln-dl-leg ln-dl-leg--purple" />Buy
+                          </div>
+                        </div>
+                        <svg viewBox="0 0 140 48" className="ln-dl-chart-svg" preserveAspectRatio="none">
+                          {[12, 24, 36].map(y => (
+                            <line key={y} x1="0" y1={y} x2="140" y2={y} stroke="rgba(107,63,160,.1)" strokeWidth="0.5" />
+                          ))}
+                          {[45,65,50,80,60,88,72].map((h, i) => {
+                            const barH = (h / 100) * 38;
+                            const x = i * 20 + 2;
+                            return <rect key={`s${i}`} x={x} y={42 - barH} width="8" height={barH} rx="1.5" fill="url(#salesGrad2)" opacity="0.95" />;
+                          })}
+                          {[25,36,28,44,33,48,40].map((h, i) => {
+                            const barH = (h / 100) * 38;
+                            const x = i * 20 + 11;
+                            return <rect key={`b${i}`} x={x} y={42 - barH} width="8" height={barH} rx="1.5" fill="url(#buyGrad2)" opacity="0.9" />;
+                          })}
+                          <line x1="0" y1="42" x2="140" y2="42" stroke="rgba(107,63,160,.2)" strokeWidth="0.5" />
+                          {["M","T","W","T","F","S","S"].map((d, i) => (
+                            <text key={d+i} x={i * 20 + 9.5} y="48" textAnchor="middle" fill="rgba(26,12,48,.3)" fontSize="4.5">{d}</text>
+                          ))}
+                          <defs>
+                            <linearGradient id="salesGrad2" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#6366f1" />
+                              <stop offset="100%" stopColor="#4338ca" />
+                            </linearGradient>
+                            <linearGradient id="buyGrad2" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="0%" stopColor="#7c3aed" />
+                              <stop offset="100%" stopColor="#5b21b6" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                      </div>
+
+                      {/* Recent Invoices */}
+                      <div className="ln-dl-invoices">
+                        <div className="ln-dl-inv-head">Recent Invoices</div>
+                        {[
+                          { no: "SI-042", name: "Walk-in",     amt: "₹1,250", status: "paid" },
+                          { no: "SI-041", name: "Alex M.",     amt: "₹3,800", status: "unpaid" },
+                          { no: "SI-040", name: "City Pharma", amt: "₹920",   status: "paid" },
+                        ].map((inv, i) => (
+                          <div key={i} className="ln-dl-inv-row">
+                            <div className="ln-dl-inv-icon" />
+                            <div className="ln-dl-inv-info">
+                              <div className="ln-dl-inv-no">{inv.no}</div>
+                              <div className="ln-dl-inv-name">{inv.name}</div>
+                            </div>
+                            <div className="ln-dl-inv-right">
+                              <div className="ln-dl-inv-amt">{inv.amt}</div>
+                              <div className={`ln-dl-inv-status ln-dl-inv-status--${inv.status}`}>{inv.status}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Expiry alert bar */}
+                      <div className="ln-dl-alert">
+                        <div className="ln-dl-alert-dot" />
+                        <span>2 batches expiring in 7 days</span>
+                      </div>
+
+                      {/* Profit card */}
+                      <div className="ln-dl-section-card">
+                        <div className="ln-dl-section-head">
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                          <span>Profit</span>
+                          <span className="ln-dl-profit-pct">8.0%</span>
+                        </div>
+                        {[
+                          { label: "Revenue",      val: "₹34,818", color: "#6366f1" },
+                          { label: "Gross profit", val: "₹16,650", color: "#16a34a" },
+                        ].map((r, i) => (
+                          <div key={i} className="ln-dl-profit-row">
+                            <span className="ln-dl-profit-label">{r.label}</span>
+                            <span className="ln-dl-profit-val" style={{ color: r.color }}>{r.val}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Top Products & Top Customers side by side */}
+                      <div className="ln-dl-insights-row">
+                        <div className="ln-dl-section-card ln-dl-insights-half">
+                          <div className="ln-dl-section-head">
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#6b3fa0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                            <span>Top Products</span>
+                          </div>
+                          {[
+                            { r: 1, name: "Paracet…", val: "₹15.6K" },
+                            { r: 2, name: "Amoxici…", val: "₹9.4K" },
+                            { r: 3, name: "Ibupro…",  val: "₹7.7K" },
+                          ].map((p) => (
+                            <div key={p.r} className="ln-dl-rank-row">
+                              <span className="ln-dl-rank">{p.r}</span>
+                              <span className="ln-dl-rank-name">{p.name}</span>
+                              <span className="ln-dl-rank-val">{p.val}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="ln-dl-section-card ln-dl-insights-half">
+                          <div className="ln-dl-section-head">
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#6b3fa0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            <span>Top Customers</span>
+                          </div>
+                          {[
+                            { r: 1, name: "Hospital", val: "₹17.2K" },
+                            { r: 2, name: "Test Lab",  val: "₹13.8K" },
+                            { r: 3, name: "Norvan",    val: "₹3.6K" },
+                          ].map((c) => (
+                            <div key={c.r} className="ln-dl-rank-row">
+                              <span className="ln-dl-rank">{c.r}</span>
+                              <span className="ln-dl-rank-name">{c.name}</span>
+                              <span className="ln-dl-rank-val">{c.val}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Expiry Watch */}
+                      <div className="ln-dl-section-card">
+                        <div className="ln-dl-section-head">
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                          <span>Expiry Watch</span>
+                        </div>
+                        {[
+                          { name: "Paracetamol 500mg", batch: "B-099", days: "2 days", urgent: true },
+                          { name: "Amoxicillin 250mg", batch: "B-077", days: "5 days", urgent: false },
+                          { name: "Metformin 500mg",   batch: "B-044", days: "8 days", urgent: false },
+                        ].map((e, i) => (
+                          <div key={i} className="ln-dl-expiry-row">
+                            <div className="ln-dl-expiry-info">
+                              <div className="ln-dl-expiry-name">{e.name}</div>
+                              <div className="ln-dl-expiry-batch">{e.batch}</div>
+                            </div>
+                            <div className={`ln-dl-expiry-days${e.urgent ? " urgent" : ""}`}>{e.days}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Stock Summary */}
+                      <div className="ln-dl-section-card">
+                        <div className="ln-dl-section-head">
+                          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#6b3fa0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                          <span>Stock Summary</span>
+                        </div>
+                        {[
+                          { label: "Total Products", val: "248",  color: "#1a0c30" },
+                          { label: "Low Stock",      val: "12",   color: "#d97706" },
+                          { label: "Out of Stock",   val: "3",    color: "#dc2626" },
+                          { label: "Expiring Soon",  val: "5",    color: "#d97706" },
+                        ].map((s, i) => (
+                          <div key={i} className="ln-dl-stock-row">
+                            <span className="ln-dl-stock-label">{s.label}</span>
+                            <span className="ln-dl-stock-val" style={{ color: s.color }}>{s.val}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Sidebar overlay — slides in/out during animation */}
+                  <div className="ln-dl-sidebar">
+                    {/* Header row: jedmee logo + close btn + avatar */}
+                    <div className="ln-dl-sidebar-header">
+                      <span className="ln-dl-sidebar-logo">jedmee</span>
+                      <div className="ln-dl-sidebar-header-right">
+                        <div className="ln-dl-sidebar-close">×</div>
+                        <div className="ln-dl-sidebar-avatar ln-dl-sidebar-avatar--te">TE</div>
+                      </div>
+                    </div>
+
+                    {/* Dashboard — active */}
+                    <div className="ln-dl-sidebar-item active">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                      <span>Dashboard</span>
+                    </div>
+
+                    {/* MASTER DATA */}
+                    <div className="ln-dl-sidebar-section-label">MASTER DATA</div>
+                    {[
+                      { label: "Products",      svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg> },
+                      { label: "Manufacturers", svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
+                      { label: "Divisions",     svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg> },
+                      { label: "Suppliers",     svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> },
+                      { label: "Customers",     svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+                    ].map(({ label, svg }) => (
+                      <div key={label} className="ln-dl-sidebar-item">{svg}<span>{label}</span></div>
+                    ))}
+
+                    {/* CATALOG */}
+                    <div className="ln-dl-sidebar-section-label">CATALOG</div>
+                    <div className="ln-dl-sidebar-item">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                      <span>My Catalog</span>
+                    </div>
+
+                    {/* TRANSACTIONS */}
+                    <div className="ln-dl-sidebar-section-label">TRANSACTIONS</div>
+                    {[
+                      { label: "Sales & Billing",   svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 2 4 22 7 20 10 22 13 20 16 22 19 20 20 22 20 2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg> },
+                      { label: "Purchases",          svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> },
+                      { label: "Sales Returns",      svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> },
+                      { label: "Purchase Returns",   svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="7 1 3 5 7 9"/><path d="M21 11V9a4 4 0 0 0-4-4H3"/><polyline points="17 23 21 19 17 15"/><path d="M3 13v2a4 4 0 0 0 4 4h14"/></svg> },
+                      { label: "Orders",             svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> },
+                    ].map(({ label, svg }) => (
+                      <div key={label} className="ln-dl-sidebar-item">{svg}<span>{label}</span></div>
+                    ))}
+
+                    {/* REPORTS & ACCOUNTS */}
+                    <div className="ln-dl-sidebar-section-label">REPORTS &amp; ACCOUNTS</div>
+                    {[
+                      { label: "Inventory Report",  svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> },
+                      { label: "Day Book",           svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> },
+                      { label: "GST Report (R1)",    svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="2"/><line x1="14" y1="18" x2="14" y2="7"/><line x1="18" y1="18" x2="18" y2="14"/></svg> },
+                      { label: "GST ITC Report",     svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> },
+                      { label: "GST Return (3B)",    svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+                      { label: "Ledger",             svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg> },
+                      { label: "Division Payments",  svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> },
+                      { label: "Customer Payments",  svg: <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
+                    ].map(({ label, svg }) => (
+                      <div key={label} className="ln-dl-sidebar-item">{svg}<span>{label}</span></div>
+                    ))}
+
+                    {/* Footer */}
+                    <div className="ln-dl-sidebar-footer">
+                      <span className="ln-dl-sidebar-footer-logo">JedMee</span>
+                      <span className="ln-dl-sidebar-footer-sub">Pharmacy Platform</span>
+                    </div>
+                  </div>
+
+                  {/* Bottom nav */}
+                  <div className="ln-dl-bottom-nav">
+                    {[
+                      { icon: "chart", label: "Dashboard", active: true },
+                      { icon: "receipt", label: "Bills" },
+                      { icon: "package", label: "Stock" },
+                      { icon: "users", label: "Customers" },
+                    ].map(({ icon, label, active }) => (
+                      <div key={label} className={`ln-dl-nav-item${active ? " active" : ""}`}>
+                        <Icon name={icon} size={11} />
+                        <span>{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Right: download content ── */}
+          <div className="ln-dl-content">
+
+            {/* Version pill */}
+            <div className="ln-dl-version">
+              <div className="ln-dl-version-dot" />
+              <span className="ln-dl-version-text">
+                Version <span className="ln-dl-version-num">v{appInfo.version}</span>
+                {appInfo.buildDateHuman ? ` · ${appInfo.buildDateHuman}` : ""}
+              </span>
+            </div>
+
+            {/* Feature list */}
+            <ul className="ln-dl-features">
+              {[
+                ["receipt",     "Tax billing & invoicing in seconds"],
+                ["package",     "Real-time stock & expiry tracking"],
+                ["bell",        "Low-stock & expiry alerts"],
+                ["barChart",    "Daily sales & profit reports"],
+              ].map(([icon, text]) => (
+                <li key={text} className="ln-dl-feature-item">
+                  <span className="ln-dl-feature-icon"><Icon name={icon} size={14} /></span>
+                  <span>{text}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Download buttons */}
+            <div className="ln-dl-buttons">
+              {/* Android APK — direct .apk download */}
+              <a
+                href={appInfo.android.available ? appInfo.android.apkUrl : "#download"}
+                download={appInfo.android.available ? appInfo.android.fileName || `jedmee-v${appInfo.version}.apk` : undefined}
+                className={`ln-dl-btn ln-dl-btn--android${!appInfo.android.available ? " ln-dl-btn--disabled" : ""}`}
+                onClick={handleAndroidDownload}
+                aria-label="Download JedMee APK for Android"
+              >
+                <div className="ln-dl-btn-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zm-2.5-1C2.67 17 2 17.67 2 18.5v5c0 .83.67 1.5 1.5 1.5S5 24.33 5 23.5v-5C5 17.67 4.33 17 3.5 17zm17 0c-.83 0-1.5.67-1.5 1.5v5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-5c0-.83-.67-1.5-1.5-1.5zM15.53 2.16l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48C13.85 1.23 12.95 1 12 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31C6.97 3.26 6 5.01 6 7h12c0-1.99-.97-3.75-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z" fill="white"/>
+                  </svg>
+                </div>
+                <div className="ln-dl-btn-text">
+                  <span className="ln-dl-btn-label">
+                    {dlState === "downloading" ? "Starting download…" : dlState === "done" ? "Download started ✓" : "Download free for"}
+                  </span>
+                  <span className="ln-dl-btn-name">Android APK</span>
+                  {appInfo.android.sizeMB && appInfo.android.sizeMB !== "0"
+                    ? <span className="ln-dl-btn-size">{appInfo.android.sizeMB} MB · No sign-up needed</span>
+                    : !appInfo.android.available
+                      ? <span className="ln-dl-btn-size">Coming soon</span>
+                      : null
+                  }
+                </div>
+                <div className="ln-dl-btn-arrow">
+                  {dlState === "done"
+                    ? <Icon name="checkMark" size={18} />
+                    : <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  }
+                </div>
+              </a>
+
+              {/* iOS — dynamic: shows download when IPA is available, else "coming soon" */}
+              <a
+                href={appInfo.ios.available ? appInfo.ios.ipaUrl : "#download"}
+                download={appInfo.ios.available ? appInfo.ios.fileName || `jedmee-v${appInfo.version}.ipa` : undefined}
+                className={`ln-dl-btn ln-dl-btn--ios${!appInfo.ios.available ? " ln-dl-btn--disabled" : ""}`}
+                aria-label={appInfo.ios.available ? "Download JedMee IPA for iOS" : "iOS App Store — coming soon"}
+              >
+                <div className="ln-dl-btn-icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                </div>
+                <div className="ln-dl-btn-text">
+                  <span className="ln-dl-btn-label">
+                    {appInfo.ios.available ? "Download free for" : "Coming soon on"}
+                  </span>
+                  <span className="ln-dl-btn-name">iOS / App Store</span>
+                  {appInfo.ios.available && appInfo.ios.sizeMB && appInfo.ios.sizeMB !== "0"
+                    ? <span className="ln-dl-btn-size">{appInfo.ios.sizeMB} MB · No sign-up needed</span>
+                    : !appInfo.ios.available
+                      ? <span className="ln-dl-btn-size">Currently in development</span>
+                      : null
+                  }
+                </div>
+                <div className="ln-dl-btn-arrow">
+                  {appInfo.ios.available
+                    ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    : <Icon name="arrow" size={18} />
+                  }
+                </div>
+              </a>
+            </div>
+
+            {/* Trust row */}
+            <div className="ln-dl-trust">
+              {[
+                ["shield", "Safe & verified"],
+                ["zap",    "No sign-up to install"],
+                ["lock",   "Free forever"],
+              ].map(([icon, label]) => (
+                <div key={label} className="ln-dl-trust-item">
+                  <Icon name={icon} size={12} /><span>{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
    CTA SECTION
 ───────────────────────────────────────────────────────────── */
 function CTASection({ navigate }) {
@@ -1017,6 +1578,7 @@ function Footer() {
               <li><a href="#workflow">How It Works</a></li>
               <li><a href="#platform">Platform Preview</a></li>
               <li><a href="#pricing">Pricing</a></li>
+              <li><a href="#download">Download App</a></li>
             </ul>
           </div>
           <div className="ln-footer-col">
@@ -1236,6 +1798,17 @@ export default function LandingPage() {
       onScroll(el, { opacity: 0, x: -35 }, { opacity: 1, x: 0, duration: 0.45, delay: i * 0.05 });
     });
 
+    // Download section animations
+    onScrollSel(".ln-dl-badge",   { opacity: 0, y: 14, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.5)" });
+    onScrollSel(".ln-dl-title",   { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.6 });
+    onScrollSel(".ln-dl-sub",     { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.5 });
+    onScrollSel(".ln-dl-version", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4 });
+    onBatch(".ln-dl-btn",         { opacity: 0, x: -30, scale: 0.96 }, { opacity: 1, x: 0, scale: 1, duration: 0.5, ease: "back.out(1.2)" }, 0.12);
+    onScrollSel(".ln-dl-qr-wrap", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.45 });
+    onBatch(".ln-dl-trust-item",  { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35 }, 0.07);
+    onScrollSel(".ln-dl-phone-wrap", { opacity: 0, x: 60, scale: 0.92 }, { opacity: 1, x: 0, scale: 1, duration: 0.9, ease: "power4.out" });
+    onBatch(".ln-dl-float",       { opacity: 0, y: 20, scale: 0.88 }, { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, 0.15);
+
     onScrollSel(".ln-cta-badge",   { opacity: 0, y: 18, scale: 0.9 }, { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: "back.out(1.4)" });
     onScrollSel(".ln-cta-title",   { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.6 });
     onScrollSel(".ln-cta-sub",     { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.45 });
@@ -1280,6 +1853,7 @@ export default function LandingPage() {
       <TestimonialsSection />
       <PricingSection navigate={navigate} />
       <FAQSection />
+      <DownloadSection />
       <CTASection navigate={navigate} />
       <Footer />
     </div>
