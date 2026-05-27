@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "versionCode": "1",
-  "buildDate": "2026-05-27T09:38:20Z",
+  "buildDate": "2026-05-27T11:46:24Z",
   "buildDateHuman": "May 27, 2026",
   "android": {
     "available": true,
@@ -12,7 +12,7 @@
     "sizeMB": "11.9"
   },
   "ios": {
-    "available": true,
+    "available": false,
     "ipaUrl": "/downloads/jedmee-v1.0.0.ipa",
     "fileName": "jedmee-v1.0.0.ipa",
     "sizeMB": "0"

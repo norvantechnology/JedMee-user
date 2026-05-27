@@ -21,13 +21,13 @@
     "node": ">=22"
   },
   "//": "All Lambda runtime deps live in lib/nodejs-light/nodejs (the Layer). Only local dev-server deps go here so sam build's `npm install --production` ships a code-only function zip.",
-  "dependencies": {},
   "devDependencies": {
     "@aws-sdk/client-s3": "^3.1040.0",
     "@aws-sdk/s3-request-presigner": "^3.1040.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.6",
     "express": "^5.2.1",
+    "firebase-admin": "^13.10.0",
     "js-yaml": "^4.1.1",
     "jsonwebtoken": "^9.0.3",
     "nodemailer": "^6.9.16",

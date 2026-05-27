@@ -1,4 +1,5 @@
 const { query } = require("../db");
+const { sendPushNotification } = require("../fcm");
 
 /**
  * Count products (SKU-level) in low-stock state for an account.
@@ -90,8 +91,12 @@ async function insertLowStockDigestForAccount(accountId, ymd) {
   const lowBatches = await countLowStockBatches(accountId);
   if (lowProducts === 0 && lowBatches === 0) return 0;
 
-  const title = "Low stock summary";
-  const body = `${lowProducts} product(s) and ${lowBatches} batch(es) are at or below alert thresholds.`;
+  const title = "Stock alert summary";
+  const parts = [];
+  if (lowProducts > 0) parts.push(`${lowProducts} product${lowProducts === 1 ? "" : "s"} low`);
+  if (lowBatches > 0) parts.push(`${lowBatches} batch${lowBatches === 1 ? "" : "es"} low`);
+  const body = parts.join(", ") + ". Check your inventory.";
+
   const payload = JSON.stringify({
     lowProductCount: lowProducts,
     lowBatchCount: lowBatches,
@@ -132,7 +137,34 @@ async function insertLowStockDigestForAccount(accountId, ymd) {
     `,
     [accountId, title, body, payload, ymd]
   );
-  return (ins.rows || []).length;
+
+  const inserted = (ins.rows || []).length;
+
+  // Send push notification to eligible users if any DB rows were inserted.
+  if (inserted > 0) {
+    try {
+      const r = await query(
+        `SELECT id FROM (${notifyUsersSubquery()}) nu`,
+        [accountId]
+      );
+      const userIds = (r.rows || []).map((row) => String(row.id));
+      await sendPushNotification({
+        userIds,
+        title,
+        body,
+        type: "LOW_STOCK_DAILY",
+        actionPath: "/quality-master",
+        data: {
+          lowProductCount: String(lowProducts),
+          lowBatchCount: String(lowBatches)
+        }
+      });
+    } catch (pushErr) {
+      console.error("[lowStockDailyDigest] Push notification failed:", pushErr);
+    }
+  }
+
+  return inserted;
 }
 
 /**

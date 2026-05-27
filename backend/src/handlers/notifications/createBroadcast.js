@@ -3,6 +3,7 @@ const { withTransaction } = require("../../shared/db");
 const { parseJsonBody } = require("../../shared/request");
 const { requireApprovedUser } = require("../../shared/auth");
 const { getPermissionsForUser, hasPermission } = require("../../shared/permissions");
+const { sendPushNotification } = require("../../shared/fcm");
 
 function clean(v) {
   return String(v ?? "").trim();
@@ -37,6 +38,10 @@ async function handler(event) {
 
   try {
     const payloadJson = JSON.stringify({ source: "admin_broadcast" });
+
+    // Determine which user IDs will receive the notification (for push).
+    let targetUserIds = [];
+
     const sent = await withTransaction(async (q) => {
       const r =
         audience === "selected"
@@ -51,7 +56,7 @@ async function handler(event) {
                 AND u.status = 'APPROVED'
                 AND u.is_blocked = false
                 AND u.id = ANY($8::uuid[])
-              RETURNING id
+              RETURNING id, user_id
               `,
               [ctx.accountId, title, msg, payloadJson, actionLabel || null, actionPath || null, actorId, userIds]
             )
@@ -65,12 +70,25 @@ async function handler(event) {
               WHERE u.account_id = $1
                 AND u.status = 'APPROVED'
                 AND u.is_blocked = false
-              RETURNING id
+              RETURNING id, user_id
               `,
               [ctx.accountId, title, msg, payloadJson, actionLabel || null, actionPath || null, actorId]
             );
+      targetUserIds = (r.rows || []).map((row) => String(row.user_id));
       return (r.rows || []).length;
     });
+
+    // Send push notification to all users who received the DB notification.
+    if (targetUserIds.length > 0) {
+      sendPushNotification({
+        userIds: targetUserIds,
+        title,
+        body: msg,
+        type: "ADMIN_BROADCAST",
+        actionPath: actionPath || "",
+        data: { source: "admin_broadcast" }
+      }).catch((err) => console.error("[notifications:createBroadcast] Push failed:", err));
+    }
 
     return created({ sent }, { message: "Notifications sent." });
   } catch (e) {

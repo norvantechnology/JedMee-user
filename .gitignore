@@ -67,3 +67,4 @@ coverage/
 tmp/
 temp/
 mobile/
+*firebase-adminsdk*.json

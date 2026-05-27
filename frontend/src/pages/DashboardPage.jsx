@@ -147,8 +147,16 @@ export default function DashboardPage() {
   function applyPreset(p) {
     setPreset(p);
     const today = todayYmdLocal();
+    // Week start: Monday of current week (ISO week)
+    const todayDate = new Date(`${today}T00:00:00`);
+    const dayOfWeek = todayDate.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const weekStart = new Date(todayDate);
+    weekStart.setDate(todayDate.getDate() - daysToMonday);
+    const weekStartYmd = `${weekStart.getFullYear()}-${String(weekStart.getMonth() + 1).padStart(2, "0")}-${String(weekStart.getDate()).padStart(2, "0")}`;
     const ranges = {
       TODAY:   { from: today,                          to: today },
+      WEEK:    { from: weekStartYmd,                   to: today },
       MONTH:   { from: `${today.slice(0, 8)}01`,       to: monthEndYmd(today) },
       QUARTER: { from: quarterStartYmd(today),          to: quarterEndYmd(today) },
       YEAR:    { from: `${today.slice(0, 4)}-01-01`,   to: `${today.slice(0, 4)}-12-31` },
@@ -368,10 +376,11 @@ export default function DashboardPage() {
               <div className="dash-header-right">
                 <div className="preset-tabs" role="group" aria-label="Date presets">
                   {[
-                    { label: "Today",   key: "TODAY" },
-                    { label: "Month",   key: "MONTH" },
-                    { label: "Quarter", key: "QUARTER" },
-                    { label: "Year",    key: "YEAR" },
+                    { label: "Today",    key: "TODAY" },
+                    { label: "Week",     key: "WEEK" },
+                    { label: "Month",    key: "MONTH" },
+                    { label: "Quarter",  key: "QUARTER" },
+                    { label: "Year",     key: "YEAR" },
                   ].map(({ label, key }) => (
                     <button
                       key={key}
@@ -452,51 +461,42 @@ export default function DashboardPage() {
                     <div className="kpi-card kpi-primary" style={{ "--i": 0 }}>
                       <div className="kpi-card-glow" />
                       <div className="kpi-card-header">
-                        <span className="kpi-card-label">Today's Sales</span>
+                        <span className="kpi-card-label">{preset === "TODAY" ? "Today's Sales" : "Period Sales"}</span>
                         <div className="kpi-card-icon">
                           <FileSpreadsheet aria-hidden="true" size={16} strokeWidth={2.2} />
                         </div>
                       </div>
-                      <div className="kpi-card-value">{fmtCurrency(data.kpis?.today_sales?.value || 0) || fmtCurrency(0)}</div>
-                      <div className="kpi-card-footer">
-                        <span className="kpi-badge kpi-badge-up">
-                          <IconChevronsUp />
-                          {data.kpis?.today_sales?.delta_pct != null ? `${Number(data.kpis.today_sales.delta_pct).toFixed(1)}%` : ""}
-                        </span>
-                        <span className="kpi-card-sub">vs {fmtCurrency(data.kpis?.today_sales?.prev_value || 0) || fmtCurrency(0)} yesterday</span>
+                      <div className="kpi-card-value">
+                        {preset === "TODAY"
+                          ? (fmtCurrency(data.kpis?.today_sales?.value || 0) || fmtCurrency(0))
+                          : (fmtCurrency(data.kpis?.range_sales?.value || 0) || fmtCurrency(0))}
                       </div>
-                      {kpiSparklines.todaySales.length >= 2 && (
-                        <div className="kpi-sparkline">
-                          <SparklineChart values={kpiSparklines.todaySales} color="var(--color-primary)" height={36} width={110} area />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {canSales && (
-                    <div className="kpi-card kpi-success" style={{ "--i": 1 }}>
-                      <div className="kpi-card-glow" />
-                      <div className="kpi-card-header">
-                        <span className="kpi-card-label">Period Sales</span>
-                        <div className="kpi-card-icon">
-                          <BarChart3 aria-hidden="true" size={16} strokeWidth={2.2} />
-                        </div>
-                      </div>
-                      <div className="kpi-card-value kpi-val-success">{fmtCurrency(data.kpis?.range_sales?.value || 0) || fmtCurrency(0)}</div>
                       <div className="kpi-card-footer">
-                        <span className="kpi-badge kpi-badge-neutral">{ymd(data.meta?.range?.from)} → {ymd(data.meta?.range?.to)}</span>
-                        <span className="kpi-card-sub">selected range</span>
+                        {preset === "TODAY" ? (
+                          <>
+                            <span className="kpi-badge kpi-badge-up">
+                              <IconChevronsUp />
+                              {data.kpis?.today_sales?.delta_pct != null ? `${Number(data.kpis.today_sales.delta_pct).toFixed(1)}%` : ""}
+                            </span>
+                            <span className="kpi-card-sub">vs {fmtCurrency(data.kpis?.today_sales?.prev_value || 0) || fmtCurrency(0)} yesterday</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="kpi-badge kpi-badge-neutral">{ymd(data.meta?.range?.from)} → {ymd(data.meta?.range?.to)}</span>
+                            <span className="kpi-card-sub">selected range</span>
+                          </>
+                        )}
                       </div>
                       {kpiSparklines.periodSales.length >= 2 && (
                         <div className="kpi-sparkline">
-                          <SparklineChart values={kpiSparklines.periodSales} color="var(--color-success)" height={36} width={110} area />
+                          <SparklineChart values={kpiSparklines.periodSales} color="var(--color-primary)" height={36} width={110} area />
                         </div>
                       )}
                     </div>
                   )}
 
                   {canSales && (
-                    <div className="kpi-card kpi-warning" style={{ "--i": 2 }}>
+                    <div className="kpi-card kpi-warning" style={{ "--i": 1 }}>
                       <div className="kpi-card-glow" />
                       <div className="kpi-card-header">
                         <span className="kpi-card-label">Receivables</span>
@@ -510,30 +510,81 @@ export default function DashboardPage() {
                           <IconChevronsDown />
                           {Number(data.kpis?.receivables?.invoices || 0)} invoices
                         </span>
-                        <span className="kpi-card-sub">balance due</span>
+                        <span className="kpi-card-sub">total outstanding</span>
                       </div>
                     </div>
                   )}
 
                   {canPurchases && (
-                    <div className="kpi-card kpi-violet" style={{ "--i": 3 }}>
+                    <div className="kpi-card kpi-violet" style={{ "--i": 2 }}>
                       <div className="kpi-card-glow" />
                       <div className="kpi-card-header">
-                        <span className="kpi-card-label">Today's Purchases</span>
+                        <span className="kpi-card-label">{preset === "TODAY" ? "Today's Purchases" : "Period Purchases"}</span>
                         <div className="kpi-card-icon">
                           <Package2 aria-hidden="true" size={16} strokeWidth={2.2} />
                         </div>
                       </div>
-                      <div className="kpi-card-value">{fmtCurrency(data.kpis?.today_purchases?.value || 0) || fmtCurrency(0)}</div>
+                      <div className="kpi-card-value">
+                        {preset === "TODAY"
+                          ? (fmtCurrency(data.kpis?.today_purchases?.value || 0) || fmtCurrency(0))
+                          : (fmtCurrency(data.kpis?.range_purchases?.value || 0) || fmtCurrency(0))}
+                      </div>
                       <div className="kpi-card-footer">
-                        <span className="kpi-badge kpi-badge-neutral">{Number(data.kpis?.today_purchases?.invoices || 0)} invoices</span>
-                        <span className="kpi-card-sub">today</span>
+                        <span className="kpi-badge kpi-badge-neutral">
+                          {preset === "TODAY"
+                            ? `${Number(data.kpis?.today_purchases?.invoices || 0)} invoices`
+                            : `${Number(data.kpis?.range_purchases?.invoices || 0)} invoices`}
+                        </span>
+                        <span className="kpi-card-sub">{preset === "TODAY" ? "today" : "selected range"}</span>
                       </div>
                       {kpiSparklines.purchases.length >= 2 && (
                         <div className="kpi-sparkline">
                           <SparklineChart values={kpiSparklines.purchases} color="var(--color-secondary)" height={36} width={110} area />
                         </div>
                       )}
+                    </div>
+                  )}
+
+                  {canSales && canPurchases && data.kpis?.gross_profit != null && (
+                    <div className="kpi-card kpi-success" style={{ "--i": 3 }}>
+                      <div className="kpi-card-glow" />
+                      <div className="kpi-card-header">
+                        <span className="kpi-card-label">Gross Profit</span>
+                        <div className="kpi-card-icon">
+                          <BarChart3 aria-hidden="true" size={16} strokeWidth={2.2} />
+                        </div>
+                      </div>
+                      <div className="kpi-card-value kpi-val-success">{fmtCurrency(data.kpis.gross_profit.value) || fmtCurrency(0)}</div>
+                      <div className="kpi-card-footer">
+                        <span className="kpi-badge kpi-badge-neutral">
+                          {(() => {
+                            const sales = Number(data.kpis?.range_sales?.value || 0);
+                            const profit = Number(data.kpis.gross_profit.value || 0);
+                            return sales > 0 ? `${((profit / sales) * 100).toFixed(1)}% margin` : "0.0% margin";
+                          })()}
+                        </span>
+                        <span className="kpi-card-sub">sales − purchases</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {canPurchases && (
+                    <div className="kpi-card" style={{ "--i": 4, borderLeft: "3px solid var(--color-danger)" }}>
+                      <div className="kpi-card-glow" />
+                      <div className="kpi-card-header">
+                        <span className="kpi-card-label">Payables</span>
+                        <div className="kpi-card-icon">
+                          <CreditCard aria-hidden="true" size={16} strokeWidth={2.2} />
+                        </div>
+                      </div>
+                      <div className="kpi-card-value" style={{ color: "var(--color-danger)" }}>{fmtCurrency(data.kpis?.payables?.value || 0) || fmtCurrency(0)}</div>
+                      <div className="kpi-card-footer">
+                        <span className="kpi-badge kpi-badge-down">
+                          <IconChevronsDown />
+                          {Number(data.kpis?.payables?.invoices || 0)} invoices
+                        </span>
+                        <span className="kpi-card-sub">total outstanding</span>
+                      </div>
                     </div>
                   )}
                 </section>

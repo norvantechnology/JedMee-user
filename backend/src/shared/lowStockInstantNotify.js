@@ -1,5 +1,6 @@
 const { query } = require("./db");
 const { notifyUsersSubquery } = require("./jobs/lowStockDailyDigest");
+const { sendPushNotification } = require("./fcm");
 
 function uniqIds(ids) {
   const out = [];
@@ -159,6 +160,14 @@ async function loadProductContexts(accountId, productIds) {
   return r.rows || [];
 }
 
+async function getNotifyUserIds(accountId) {
+  const r = await query(
+    `SELECT id FROM (${notifyUsersSubquery()}) nu`,
+    [accountId]
+  );
+  return (r.rows || []).map((row) => String(row.id));
+}
+
 async function evaluateBatches(accountId, batchRows) {
   for (const row of batchRows) {
     const bid = String(row.id);
@@ -167,20 +176,35 @@ async function evaluateBatches(accountId, batchRows) {
     const fire = await consumeArmedLowTransition(accountId, "BATCH", bid, low);
     if (!fire) continue;
 
-    const title = "Low stock: batch";
-    const body = `Batch "${row.batch_no}" (${row.product_name || row.product_code || "product"}) is at or below threshold (total ${fmtQty(row.total)} ≤ ${fmtQty(row.low_stock_threshold)}).`;
+    const title = "Low stock alert";
+    const body = `Batch "${row.batch_no}" (${row.product_name || row.product_code || "product"}) is low. Stock: ${fmtQty(row.total)}, limit: ${fmtQty(row.low_stock_threshold)}.`;
+    const payload = {
+      batchId: bid,
+      productId: String(row.product_id),
+      batchNo: row.batch_no,
+      total: Number(row.total),
+      threshold: Number(row.low_stock_threshold || 0)
+    };
+
     // eslint-disable-next-line no-await-in-loop
     await insertInventoryAlertNotifications(accountId, {
       type: "LOW_STOCK_BATCH",
       title,
       body,
-      payload: {
-        batchId: bid,
-        productId: String(row.product_id),
-        batchNo: row.batch_no,
-        total: Number(row.total),
-        threshold: Number(row.low_stock_threshold || 0)
-      }
+      payload
+    });
+
+    // Send push notification to eligible users.
+    // eslint-disable-next-line no-await-in-loop
+    const userIds = await getNotifyUserIds(accountId);
+    // eslint-disable-next-line no-await-in-loop
+    await sendPushNotification({
+      userIds,
+      title,
+      body,
+      type: "LOW_STOCK_BATCH",
+      actionPath: "/quality-master",
+      data: { batchId: bid, productId: String(row.product_id) }
     });
   }
 }
@@ -193,19 +217,34 @@ async function evaluateProducts(accountId, productRows) {
     const fire = await consumeArmedLowTransition(accountId, "PRODUCT", pid, low);
     if (!fire) continue;
 
-    const title = "Low stock: product";
-    const body = `Product "${row.product_name || row.product_code}" total stock is at or below threshold (total ${fmtQty(row.total)} ≤ ${fmtQty(row.low_stock_threshold)}).`;
+    const title = "Low stock alert";
+    const body = `"${row.product_name || row.product_code}" is low. Stock: ${fmtQty(row.total)}, limit: ${fmtQty(row.low_stock_threshold)}.`;
+    const payload = {
+      productId: pid,
+      productCode: row.product_code,
+      total: Number(row.total),
+      threshold: Number(row.low_stock_threshold || 0)
+    };
+
     // eslint-disable-next-line no-await-in-loop
     await insertInventoryAlertNotifications(accountId, {
       type: "LOW_STOCK_PRODUCT",
       title,
       body,
-      payload: {
-        productId: pid,
-        productCode: row.product_code,
-        total: Number(row.total),
-        threshold: Number(row.low_stock_threshold || 0)
-      }
+      payload
+    });
+
+    // Send push notification to eligible users.
+    // eslint-disable-next-line no-await-in-loop
+    const userIds = await getNotifyUserIds(accountId);
+    // eslint-disable-next-line no-await-in-loop
+    await sendPushNotification({
+      userIds,
+      title,
+      body,
+      type: "LOW_STOCK_PRODUCT",
+      actionPath: "/quality-master",
+      data: { productId: pid }
     });
   }
 }

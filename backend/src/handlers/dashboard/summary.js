@@ -472,6 +472,42 @@ async function handler(event) {
         : Promise.resolve({ rows: [{ amount: 0, invoices: 0 }] })
     );
 
+    // Total outstanding receivables (all-time, not date-filtered) — balance sheet item
+    calls.push(
+      canSales
+        ? query(
+            `
+            SELECT
+              COALESCE(SUM(balance_due),0)::numeric(14,2) AS amount,
+              COUNT(*)::int AS invoices
+            FROM sales_invoices
+            WHERE account_id = $1 AND deleted_at IS NULL
+              AND status = 'CONFIRMED'::sales_invoice_status
+              AND balance_due > 0
+            `,
+            [ctx.accountId]
+          )
+        : Promise.resolve({ rows: [{ amount: 0, invoices: 0 }] })
+    );
+
+    // Total outstanding payables (all-time, not date-filtered) — balance sheet item
+    calls.push(
+      canPurchases
+        ? query(
+            `
+            SELECT
+              COALESCE(SUM(balance_due),0)::numeric(14,2) AS amount,
+              COUNT(*)::int AS invoices
+            FROM purchase_invoices
+            WHERE account_id = $1 AND deleted_at IS NULL
+              AND status = 'CONFIRMED'::purchase_invoice_status
+              AND balance_due > 0
+            `,
+            [ctx.accountId]
+          )
+        : Promise.resolve({ rows: [{ amount: 0, invoices: 0 }] })
+    );
+
     // Stock summary (bottom table)
     calls.push(
       canBatches
@@ -527,6 +563,8 @@ async function handler(event) {
       nonMovingCount,
       overdueRecv,
       overduePay,
+      totalRecv,
+      totalPay,
       stockSummary
     ] = await Promise.all(calls);
 
@@ -543,7 +581,15 @@ async function handler(event) {
     const yesterdaySales = toNum(salesPrev?.total);
     const todaySalesDeltaPct = yesterdaySales > 0 ? ((todaySales - yesterdaySales) / yesterdaySales) * 100 : null;
 
-    const grossProfit = canSales && canPurchases ? Math.max(0, toNum(salesRange?.total) - toNum(purRange?.total)) : null;
+    // Gross profit = period sales revenue − period purchase cost (can be negative; do NOT clamp to 0)
+    // Always calculate when canSales is true; use 0 for purchases when canPurchases is false
+    const grossProfit = canSales
+      ? toNum(salesRange?.total) - (canPurchases ? toNum(purRange?.total) : 0)
+      : null;
+
+    // Total outstanding receivables and payables (balance sheet items — not date-filtered)
+    const totalRecvRow = totalRecv.rows?.[0] || { amount: 0, invoices: 0 };
+    const totalPayRow  = totalPay.rows?.[0]  || { amount: 0, invoices: 0 };
 
     const days7 = last7DaysYmd(dateTo);
     const weekMap = new Map((salesRow.sales_week || []).map((r) => [String(r.day).slice(0, 10), toNum(r.sales_total)]));
@@ -594,7 +640,8 @@ async function handler(event) {
       kpis: {
         today_sales: canSales ? { value: todaySales, prev_value: yesterdaySales, delta_pct: todaySalesDeltaPct } : null,
         range_sales: canSales ? { value: toNum(salesRange?.total) } : null,
-        receivables: canSales ? { value: toNum(salesRange?.balance_due), invoices: toNum(salesRange?.bills) } : null,
+        // Receivables = total outstanding balance_due across ALL confirmed sales invoices (balance sheet item)
+        receivables: canSales ? { value: toNum(totalRecvRow.amount), invoices: toNum(totalRecvRow.invoices) } : null,
         today_cash_like: canSales
           ? {
               value: null,
@@ -602,8 +649,10 @@ async function handler(event) {
             }
           : null,
         today_purchases: canPurchases ? { value: toNum(purToday?.total), invoices: toNum(purToday?.invoices) } : null,
+        range_purchases: canPurchases ? { value: toNum(purRange?.total), invoices: toNum(purRange?.invoices) } : null,
         gross_profit: grossProfit != null ? { value: grossProfit } : null,
-        payables: canPurchases ? { value: toNum(purRange?.balance_due) } : null,
+        // Payables = total outstanding balance_due across ALL confirmed purchase invoices (balance sheet item)
+        payables: canPurchases ? { value: toNum(totalPayRow.amount), invoices: toNum(totalPayRow.invoices) } : null,
         bills_today: canSales ? { value: toNum(salesToday?.bills), confirmed: toNum(salesToday?.bills), drafts: 0, returns: null } : null
       },
       widgets: {

@@ -179,6 +179,7 @@ const ROUTES = {
   'GET /notifications/unread-count':  '../notifications/unreadCount',
   'POST /notifications/mark-read':    '../notifications/markRead',
   'POST /notifications/broadcast':    '../notifications/createBroadcast',
+  'POST /notifications/fcm-token':    '../notifications/saveFcmToken',
 
   // ── Announcement ────────────────────────────────────────────────────────────
   'GET /api/announcement': '../announcement/get',
