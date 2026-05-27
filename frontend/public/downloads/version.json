@@ -12,7 +12,7 @@
     "sizeMB": "11.9"
   },
   "ios": {
-    "available": false,
+    "available": true,
     "ipaUrl": "/downloads/jedmee-v1.0.0.ipa",
     "fileName": "jedmee-v1.0.0.ipa",
     "sizeMB": "0"
