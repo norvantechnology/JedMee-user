@@ -303,6 +303,36 @@ export default function DashboardPage() {
     };
   }, [data]);
 
+  // ── New analytics derived data ──────────────────────────────────────────────
+  const pendingOrders = useMemo(() => data?.widgets?.pending_orders || { incoming_count: 0, incoming_value: 0, my_count: 0, my_value: 0 }, [data]);
+  const momComparison = useMemo(() => data?.widgets?.mom_comparison || null, [data]);
+  const overdueAging  = useMemo(() => data?.widgets?.overdue_aging  || null, [data]);
+  const topMfg        = useMemo(() => {
+    const rows = Array.isArray(data?.widgets?.top_manufacturers) ? data.widgets.top_manufacturers : [];
+    return { rows, max: Math.max(1, ...rows.map((r) => Number(r.total || 0))) };
+  }, [data]);
+  const invoicePayStatus = useMemo(() => data?.widgets?.invoice_pay_status || null, [data]);
+  const expiryRisk    = useMemo(() => data?.widgets?.expiry_value_at_risk || null, [data]);
+  const nonMovingVal  = useMemo(() => data?.widgets?.non_moving_value || null, [data]);
+  const stockCoverage = useMemo(() => Array.isArray(data?.widgets?.stock_coverage) ? data.widgets.stock_coverage : [], [data]);
+
+  const hasPendingOrders = (pendingOrders.incoming_count > 0) || (pendingOrders.my_count > 0);
+  const hasMom           = momComparison != null && (momComparison.last_month > 0 || momComparison.same_month_last_year > 0);
+  const hasAging         = overdueAging != null && (overdueAging.bucket_0_30?.amount > 0 || overdueAging.bucket_31_60?.amount > 0 || overdueAging.bucket_61_90?.amount > 0 || overdueAging.bucket_90_plus?.amount > 0);
+  const hasTopMfg        = topMfg.rows.length > 0;
+  const hasPayStatus     = invoicePayStatus != null && invoicePayStatus.total_invoices > 0;
+  const hasExpiryRisk    = expiryRisk != null && expiryRisk.value_30d > 0;
+  const hasNonMovingVal  = nonMovingVal != null && nonMovingVal.count > 0;
+  const hasStockCoverage = stockCoverage.length > 0;
+
+  // Purchase-to-sales ratio (derived, no new query)
+  const purchaseToSalesRatio = useMemo(() => {
+    const sales = Number(data?.kpis?.range_sales?.value || 0);
+    const pur   = Number(data?.kpis?.range_purchases?.value || 0);
+    if (sales <= 0) return null;
+    return Math.round((pur / sales) * 100);
+  }, [data]);
+
   /* ─── render ─── */
   return (
     <AppShell
@@ -1031,6 +1061,312 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* ══ PENDING ORDERS WIDGET ══ */}
+                {hasPendingOrders && (
+                  <div className="dash-row">
+                    <div className="panel panel-full panel-orders-banner">
+                      <div className="panel-header">
+                        <div className="panel-title">
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                          Pending Orders
+                        </div>
+                        <button className="panel-action" onClick={() => navigate("/orders")}>View All <IconChevronRight /></button>
+                      </div>
+                      <div className="orders-banner-grid">
+                        {pendingOrders.incoming_count > 0 && (
+                          <div className="orders-banner-card orders-incoming" onClick={() => navigate("/orders?tab=incoming&status=PENDING")} role="button" tabIndex={0}>
+                            <div className="orders-banner-icon">
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                            </div>
+                            <div className="orders-banner-info">
+                              <span className="orders-banner-count">{pendingOrders.incoming_count}</span>
+                              <span className="orders-banner-label">Incoming Orders</span>
+                              <span className="orders-banner-val">{fmtCurrency(pendingOrders.incoming_value) || fmtCurrency(0)}</span>
+                            </div>
+                            <div className="orders-banner-cta">Accept <IconChevronRight /></div>
+                          </div>
+                        )}
+                        {pendingOrders.my_count > 0 && (
+                          <div className="orders-banner-card orders-my" onClick={() => navigate("/orders?tab=my&status=PENDING")} role="button" tabIndex={0}>
+                            <div className="orders-banner-icon">
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                            </div>
+                            <div className="orders-banner-info">
+                              <span className="orders-banner-count">{pendingOrders.my_count}</span>
+                              <span className="orders-banner-label">My Pending Orders</span>
+                              <span className="orders-banner-val">{fmtCurrency(pendingOrders.my_value) || fmtCurrency(0)}</span>
+                            </div>
+                            <div className="orders-banner-cta">Track <IconChevronRight /></div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* ══ MONTH-OVER-MONTH + COLLECTION EFFICIENCY ══ */}
+                {(hasMom || hasPayStatus || purchaseToSalesRatio != null) && (
+                  <div className="dash-row dash-row-3col">
+
+                    {/* Month-over-Month */}
+                    {hasMom && (
+                      <div className="panel">
+                        <div className="panel-header">
+                          <div className="panel-title">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Month-over-Month
+                          </div>
+                        </div>
+                        <div className="panel-body mom-grid">
+                          <div className="mom-row">
+                            <span className="mom-label">Current period</span>
+                            <span className="mom-val">{fmtCurrency(momComparison.current_period) || fmtCurrency(0)}</span>
+                          </div>
+                          <div className="mom-row">
+                            <span className="mom-label">Last month</span>
+                            <span className="mom-val">{fmtCurrency(momComparison.last_month) || fmtCurrency(0)}</span>
+                            {momComparison.mom_delta_pct != null && (
+                              <span className={`mom-delta ${momComparison.mom_delta_pct >= 0 ? "up" : "down"}`}>
+                                {momComparison.mom_delta_pct >= 0 ? "▲" : "▼"} {Math.abs(momComparison.mom_delta_pct).toFixed(1)}%
+                              </span>
+                            )}
+                          </div>
+                          <div className="mom-row">
+                            <span className="mom-label">Same month last year</span>
+                            <span className="mom-val">{fmtCurrency(momComparison.same_month_last_year) || fmtCurrency(0)}</span>
+                            {momComparison.yoy_delta_pct != null && (
+                              <span className={`mom-delta ${momComparison.yoy_delta_pct >= 0 ? "up" : "down"}`}>
+                                {momComparison.yoy_delta_pct >= 0 ? "▲" : "▼"} {Math.abs(momComparison.yoy_delta_pct).toFixed(1)}%
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Collection Efficiency */}
+                    {hasPayStatus && (
+                      <div className="panel">
+                        <div className="panel-header">
+                          <div className="panel-title">
+                            <CreditCard aria-hidden="true" size={15} strokeWidth={2.2} />
+                            Collection Efficiency
+                          </div>
+                        </div>
+                        <div className="panel-body">
+                          <div className="collection-pct-ring">
+                            <svg viewBox="0 0 80 80" width="80" height="80">
+                              <circle cx="40" cy="40" r="32" fill="none" stroke="var(--color-border)" strokeWidth="8"/>
+                              <circle cx="40" cy="40" r="32" fill="none"
+                                stroke={invoicePayStatus.collection_pct >= 80 ? "var(--color-success)" : invoicePayStatus.collection_pct >= 50 ? "var(--color-warning-strong)" : "var(--color-danger)"}
+                                strokeWidth="8"
+                                strokeDasharray={`${(invoicePayStatus.collection_pct / 100) * 201} 201`}
+                                strokeLinecap="round"
+                                transform="rotate(-90 40 40)"
+                              />
+                              <text x="40" y="44" textAnchor="middle" fontSize="14" fontWeight="700" fill="var(--color-text)">{invoicePayStatus.collection_pct}%</text>
+                            </svg>
+                            <div className="collection-stats">
+                              <div className="coll-stat"><span className="coll-dot green"/><span>Paid: {invoicePayStatus.paid}</span></div>
+                              <div className="coll-stat"><span className="coll-dot amber"/><span>Partial: {invoicePayStatus.partial}</span></div>
+                              <div className="coll-stat"><span className="coll-dot red"/><span>Unpaid: {invoicePayStatus.unpaid}</span></div>
+                            </div>
+                          </div>
+                          <div className="collection-amounts">
+                            <div className="coll-amount-row">
+                              <span>Billed</span><span>{fmtCurrency(invoicePayStatus.total_billed) || fmtCurrency(0)}</span>
+                            </div>
+                            <div className="coll-amount-row">
+                              <span>Collected</span><span className="green-text">{fmtCurrency(invoicePayStatus.total_collected) || fmtCurrency(0)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Purchase-to-Sales Ratio */}
+                    {purchaseToSalesRatio != null && (
+                      <div className="panel">
+                        <div className="panel-header">
+                          <div className="panel-title">
+                            <BarChart3 aria-hidden="true" size={15} strokeWidth={2.2} />
+                            Purchase / Sales Ratio
+                          </div>
+                        </div>
+                        <div className="panel-body ratio-body">
+                          <div className="ratio-gauge">
+                            <div className="ratio-track">
+                              <div className="ratio-fill" style={{ width: `${Math.min(100, purchaseToSalesRatio)}%`, background: purchaseToSalesRatio > 90 ? "var(--color-danger)" : purchaseToSalesRatio > 70 ? "var(--color-warning-strong)" : "var(--color-success)" }} />
+                            </div>
+                            <span className="ratio-pct">{purchaseToSalesRatio}%</span>
+                          </div>
+                          <p className="ratio-desc">
+                            For every ₹100 sold, <strong>₹{purchaseToSalesRatio}</strong> was spent on purchases.
+                            {purchaseToSalesRatio > 90 ? " ⚠️ High cost ratio." : purchaseToSalesRatio < 50 ? " ✅ Healthy margin." : " Moderate margin."}
+                          </p>
+                          <div className="ratio-kpis">
+                            <div><span>Sales</span><span>{fmtCurrency(data?.kpis?.range_sales?.value || 0) || fmtCurrency(0)}</span></div>
+                            <div><span>Purchases</span><span>{fmtCurrency(data?.kpis?.range_purchases?.value || 0) || fmtCurrency(0)}</span></div>
+                            <div><span>Gross Profit</span><span className="green-text">{fmtCurrency(data?.kpis?.gross_profit?.value || 0) || fmtCurrency(0)}</span></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ══ OVERDUE AGING + TOP MANUFACTURERS ══ */}
+                {(hasAging || hasTopMfg) && (
+                  <div className="dash-row dash-row-50-50">
+
+                    {/* Overdue Aging Buckets */}
+                    {hasAging && (
+                      <div className="panel">
+                        <div className="panel-header">
+                          <div className="panel-title">
+                            <span className="icon-danger"><IconAlert /></span>
+                            Overdue Receivables Aging
+                          </div>
+                          <button className="panel-action" onClick={() => navigate("/reports/ledger?tab=customer")}>Ledger <IconChevronRight /></button>
+                        </div>
+                        <div className="panel-body aging-body">
+                          {[
+                            { label: "0–30 days",  data: overdueAging.bucket_0_30,   color: "var(--color-warning-strong)" },
+                            { label: "31–60 days", data: overdueAging.bucket_31_60,  color: "var(--color-warning-strong)" },
+                            { label: "61–90 days", data: overdueAging.bucket_61_90,  color: "var(--color-danger)" },
+                            { label: "90+ days",   data: overdueAging.bucket_90_plus, color: "var(--color-danger)" },
+                          ].map(({ label, data: bd, color }) => {
+                            const totalAging = (overdueAging.bucket_0_30?.amount || 0) + (overdueAging.bucket_31_60?.amount || 0) + (overdueAging.bucket_61_90?.amount || 0) + (overdueAging.bucket_90_plus?.amount || 0);
+                            const w = totalAging > 0 ? pct(bd?.amount || 0, totalAging) : 0;
+                            return (
+                              <div key={label} className="aging-row">
+                                <div className="aging-meta">
+                                  <span className="aging-label">{label}</span>
+                                  <span className="aging-count">{bd?.count || 0} inv</span>
+                                  <span className="aging-amount">{fmtCurrency(bd?.amount || 0) || fmtCurrency(0)}</span>
+                                </div>
+                                <div className="aging-track">
+                                  <div className="aging-fill" style={{ width: `${w}%`, background: color }} />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Top Manufacturers */}
+                    {hasTopMfg && (
+                      <div className="panel">
+                        <div className="panel-header">
+                          <div className="panel-title">
+                            <Package2 aria-hidden="true" size={15} strokeWidth={2.2} />
+                            Top Manufacturers
+                          </div>
+                          <button className="panel-action" onClick={() => navigate("/mfg-companies")}>All <IconChevronRight /></button>
+                        </div>
+                        <div className="panel-body prod-bars">
+                          {topMfg.rows.slice(0, 6).map((m, idx) => (
+                            <div key={String(m.mfg_id || idx)} className="prod-bar-row" style={{ "--delay": `${idx * 60}ms` }}>
+                              <div className="prod-bar-meta">
+                                <span className="prod-bar-name">{m.mfg_name}</span>
+                                <span className="prod-bar-val">{fmtCurrency(m.total) || fmtCurrency(0)}</span>
+                              </div>
+                              <div className="prod-bar-track">
+                                <div className="prod-bar-fill" style={{ width: animateBars ? `${(Number(m.total || 0) / topMfg.max) * 100}%` : "0%", background: progColors[idx % progColors.length], transitionDelay: `${idx * 60}ms` }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ══ EXPIRY VALUE AT RISK + NON-MOVING VALUE + STOCK COVERAGE ══ */}
+                {(hasExpiryRisk || hasNonMovingVal || hasStockCoverage) && (
+                  <div className="dash-row dash-row-3col">
+
+                    {/* Expiry Value at Risk */}
+                    {hasExpiryRisk && (
+                      <div className="panel">
+                        <div className="panel-header">
+                          <div className="panel-title">
+                            <span className="icon-danger"><IconNearExpiry /></span>
+                            Expiry Value at Risk
+                          </div>
+                          <button className="panel-action" onClick={() => navigate("/quality-master")}>Batches <IconChevronRight /></button>
+                        </div>
+                        <div className="panel-body expiry-risk-body">
+                          {[
+                            { label: "Within 30 days", val: expiryRisk.value_30d, batches: expiryRisk.batches_30d, cls: "red" },
+                            { label: "Within 60 days", val: expiryRisk.value_60d, batches: expiryRisk.batches_60d, cls: "amber" },
+                            { label: "Within 90 days", val: expiryRisk.value_90d, batches: 0, cls: "gray" },
+                          ].map(({ label, val, batches, cls }) => (
+                            <div key={label} className="expiry-risk-row">
+                              <div className={`expiry-risk-pip ${cls}`} />
+                              <div className="expiry-risk-info">
+                                <span className="expiry-risk-label">{label}</span>
+                                {batches > 0 && <span className="expiry-risk-batches">{batches} batches</span>}
+                              </div>
+                              <span className="expiry-risk-val">{fmtCurrency(val) || fmtCurrency(0)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Non-Moving Stock Value */}
+                    {hasNonMovingVal && (
+                      <div className="panel">
+                        <div className="panel-header">
+                          <div className="panel-title">
+                            <span className="icon-amber"><IconNonMoving /></span>
+                            Non-Moving Stock Value
+                          </div>
+                          <button className="panel-action" onClick={() => navigate("/reports/inventory?tab=non-moving")}>Report <IconChevronRight /></button>
+                        </div>
+                        <div className="panel-body non-moving-body">
+                          <div className="nm-big-val">{fmtCurrency(nonMovingVal.value) || fmtCurrency(0)}</div>
+                          <div className="nm-sub">{nonMovingVal.count} batches not sold in {data?.meta?.thresholds?.non_moving_days || 90}+ days</div>
+                          <div className="nm-hint">Capital locked in slow-moving inventory. Consider clearance pricing.</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Stock Coverage Days */}
+                    {hasStockCoverage && (
+                      <div className="panel">
+                        <div className="panel-header">
+                          <div className="panel-title">
+                            <Package2 aria-hidden="true" size={15} strokeWidth={2.2} />
+                            Stock Coverage Days
+                          </div>
+                          <button className="panel-action" onClick={() => navigate("/quality-master")}>Products <IconChevronRight /></button>
+                        </div>
+                        <div className="table-wrap">
+                          <table className="data-table">
+                            <thead><tr><th>Product</th><th className="r">Stock</th><th className="r">Days Left</th></tr></thead>
+                            <tbody>
+                              {stockCoverage.slice(0, 6).map((r) => (
+                                <tr key={String(r.product_id)}>
+                                  <td className="td-bold">{r.product_name}</td>
+                                  <td className="r">{Number(r.total_stock || 0)}</td>
+                                  <td className="r">
+                                    <span className={`status-pill ${r.coverage_days <= 7 ? "red" : r.coverage_days <= 30 ? "amber" : "green"}`}>
+                                      {r.coverage_days}d
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
               </div>
             )}

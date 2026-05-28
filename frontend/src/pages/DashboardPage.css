@@ -1395,3 +1395,190 @@
     max-height: 140px;
   }
 }
+/* ═══════════════════════════════════════════════════════
+   NEW ANALYTICS WIDGETS  — added for dashboard v3
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Pending Orders Banner ── */
+.panel-orders-banner { border-left: 3px solid var(--color-primary); }
+
+.orders-banner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  padding: 12px 14px 14px;
+}
+
+.orders-banner-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border: 1px solid var(--color-border);
+}
+.orders-banner-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.orders-banner-card:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+.orders-incoming { background: linear-gradient(135deg, rgba(79,70,229,0.06) 0%, rgba(79,70,229,0.02) 100%); }
+.orders-my       { background: linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(16,185,129,0.02) 100%); }
+
+.orders-banner-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.orders-incoming .orders-banner-icon { background: rgba(79,70,229,0.1); color: var(--color-primary); }
+.orders-my       .orders-banner-icon { background: rgba(16,185,129,0.1); color: var(--color-success); }
+
+.orders-banner-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.orders-banner-count { font-size: 26px; font-weight: 800; line-height: 1; color: var(--color-text); }
+.orders-banner-label { font-size: 12px; color: var(--color-text-muted); font-weight: 500; }
+.orders-banner-val   { font-size: 13px; font-weight: 600; color: var(--color-text); }
+
+.orders-banner-cta {
+  display: flex; align-items: center; gap: 2px;
+  font-size: 12px; font-weight: 600;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+/* ── Month-over-Month ── */
+.mom-grid { display: flex; flex-direction: column; gap: 10px; padding: 4px 0; }
+
+.mom-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+.mom-label { flex: 1; font-size: 12px; color: var(--color-text-muted); font-weight: 500; }
+.mom-val   { font-size: 14px; font-weight: 700; color: var(--color-text); }
+.mom-delta {
+  font-size: 11px; font-weight: 700;
+  padding: 2px 6px; border-radius: 20px;
+}
+.mom-delta.up   { background: rgba(16,185,129,0.12); color: var(--color-success); }
+.mom-delta.down { background: rgba(239,68,68,0.12);  color: var(--color-danger); }
+
+/* ── Collection Efficiency ── */
+.collection-pct-ring {
+  display: flex; align-items: center; gap: 16px;
+  padding: 8px 0 12px;
+}
+.collection-stats { display: flex; flex-direction: column; gap: 6px; }
+.coll-stat { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--color-text-muted); }
+.coll-dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.coll-dot.green { background: var(--color-success); }
+.coll-dot.amber { background: var(--color-warning-strong); }
+.coll-dot.red   { background: var(--color-danger); }
+
+.collection-amounts {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--color-border);
+}
+.coll-amount-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px;
+}
+.coll-amount-row span:first-child { color: var(--color-text-muted); }
+.coll-amount-row span:last-child  { font-weight: 600; color: var(--color-text); }
+.green-text { color: var(--color-success) !important; }
+
+/* ── Purchase-to-Sales Ratio ── */
+.ratio-body { display: flex; flex-direction: column; gap: 12px; }
+
+.ratio-gauge { display: flex; align-items: center; gap: 10px; }
+.ratio-track {
+  flex: 1; height: 10px; border-radius: 5px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+.ratio-fill { height: 100%; border-radius: 5px; transition: width 0.6s ease; }
+.ratio-pct  { font-size: 16px; font-weight: 800; color: var(--color-text); min-width: 44px; text-align: right; }
+
+.ratio-desc { font-size: 12.5px; color: var(--color-text-muted); line-height: 1.5; margin: 0; }
+.ratio-desc strong { color: var(--color-text); }
+
+.ratio-kpis { display: flex; flex-direction: column; gap: 6px; }
+.ratio-kpis > div {
+  display: flex; justify-content: space-between;
+  font-size: 12px; padding: 5px 8px;
+  background: var(--color-bg); border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
+.ratio-kpis > div span:first-child { color: var(--color-text-muted); }
+.ratio-kpis > div span:last-child  { font-weight: 600; color: var(--color-text); }
+
+/* ── Overdue Aging ── */
+.aging-body { display: flex; flex-direction: column; gap: 10px; }
+
+.aging-row { display: flex; flex-direction: column; gap: 4px; }
+.aging-meta {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px;
+}
+.aging-label  { flex: 1; font-weight: 600; color: var(--color-text); }
+.aging-count  { color: var(--color-text-muted); }
+.aging-amount { font-weight: 700; color: var(--color-text); min-width: 80px; text-align: right; }
+
+.aging-track {
+  height: 6px; border-radius: 3px;
+  background: var(--color-border);
+  overflow: hidden;
+}
+.aging-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+
+/* ── Expiry Value at Risk ── */
+.expiry-risk-body { display: flex; flex-direction: column; gap: 10px; }
+
+.expiry-risk-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+}
+.expiry-risk-pip { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.expiry-risk-pip.red   { background: var(--color-danger); }
+.expiry-risk-pip.amber { background: var(--color-warning-strong); }
+.expiry-risk-pip.gray  { background: var(--color-text-faint); }
+
+.expiry-risk-info { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.expiry-risk-label   { font-size: 12px; font-weight: 600; color: var(--color-text); }
+.expiry-risk-batches { font-size: 11px; color: var(--color-text-muted); }
+.expiry-risk-val     { font-size: 13px; font-weight: 700; color: var(--color-text); }
+
+/* ── Non-Moving Stock Value ── */
+.non-moving-body { display: flex; flex-direction: column; gap: 8px; padding: 4px 0; }
+
+.nm-big-val {
+  font-size: 28px; font-weight: 800;
+  color: var(--color-warning-strong);
+  line-height: 1;
+}
+.nm-sub  { font-size: 13px; color: var(--color-text-muted); font-weight: 500; }
+.nm-hint {
+  font-size: 12px; color: var(--color-text-faint);
+  padding: 8px 10px;
+  background: rgba(245,158,11,0.06);
+  border-radius: 6px;
+  border-left: 3px solid var(--color-warning-strong);
+  line-height: 1.5;
+}
+
+/* ── Icon colour helpers ── */
+.icon-amber { color: var(--color-warning-strong); }
+
+/* ── Responsive adjustments ── */
+@media (max-width: 768px) {
+  .orders-banner-grid { grid-template-columns: 1fr; }
+  .collection-pct-ring { flex-direction: column; align-items: flex-start; }
+  .ratio-kpis > div { flex-direction: column; gap: 2px; }
+  .aging-amount { min-width: 60px; }
+}

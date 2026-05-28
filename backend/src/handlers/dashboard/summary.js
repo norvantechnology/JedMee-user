@@ -549,6 +549,232 @@ async function handler(event) {
         : Promise.resolve({ rows: [] })
     );
 
+    // ── NEW ANALYTICS QUERIES ────────────────────────────────────────────────
+
+    // Pending orders (incoming for wholesaler + my orders for retailer)
+    calls.push(
+      query(
+        `
+        SELECT
+          COUNT(CASE WHEN wholesaler_account_id = $1 AND status = 'PENDING' THEN 1 END)::int AS incoming_count,
+          COALESCE(SUM(CASE WHEN wholesaler_account_id = $1 AND status = 'PENDING' THEN total_amount ELSE 0 END),0)::numeric(14,2) AS incoming_value,
+          COUNT(CASE WHEN retailer_account_id = $1 AND status = 'PENDING' THEN 1 END)::int AS my_count,
+          COALESCE(SUM(CASE WHEN retailer_account_id = $1 AND status = 'PENDING' THEN total_amount ELSE 0 END),0)::numeric(14,2) AS my_value
+        FROM orders
+        WHERE (wholesaler_account_id = $1 OR retailer_account_id = $1)
+          AND status = 'PENDING'
+        `,
+        [ctx.accountId]
+      )
+    );
+
+    // Month-over-month: last month + same month last year sales
+    calls.push(
+      canSales
+        ? query(
+            `
+            SELECT
+              COALESCE(SUM(CASE
+                WHEN invoice_date BETWEEN
+                  date_trunc('month', $2::date - INTERVAL '1 month')::date
+                  AND (date_trunc('month', $2::date) - INTERVAL '1 day')::date
+                THEN total_amount ELSE 0 END),0)::numeric(14,2) AS last_month_sales,
+              COALESCE(SUM(CASE
+                WHEN invoice_date BETWEEN
+                  date_trunc('month', $2::date - INTERVAL '13 months')::date
+                  AND (date_trunc('month', $2::date - INTERVAL '12 months') - INTERVAL '1 day')::date
+                THEN total_amount ELSE 0 END),0)::numeric(14,2) AS same_month_last_year,
+              COALESCE(SUM(CASE
+                WHEN invoice_date BETWEEN
+                  date_trunc('month', $2::date)::date AND $2::date
+                THEN total_amount ELSE 0 END),0)::numeric(14,2) AS current_month_to_date
+            FROM sales_invoices
+            WHERE account_id = $1 AND deleted_at IS NULL
+              AND status = 'CONFIRMED'
+            `,
+            [ctx.accountId, dateTo]
+          )
+        : Promise.resolve({ rows: [{ last_month_sales: 0, same_month_last_year: 0, current_month_to_date: 0 }] })
+    );
+
+    // Overdue receivables aging buckets (0-30, 31-60, 61-90, 90+ days)
+    calls.push(
+      canSales
+        ? query(
+            `
+            SELECT
+              COALESCE(SUM(CASE WHEN (CURRENT_DATE - due_date) BETWEEN 1 AND 30 THEN balance_due ELSE 0 END),0)::numeric(14,2) AS bucket_0_30,
+              COALESCE(SUM(CASE WHEN (CURRENT_DATE - due_date) BETWEEN 31 AND 60 THEN balance_due ELSE 0 END),0)::numeric(14,2) AS bucket_31_60,
+              COALESCE(SUM(CASE WHEN (CURRENT_DATE - due_date) BETWEEN 61 AND 90 THEN balance_due ELSE 0 END),0)::numeric(14,2) AS bucket_61_90,
+              COALESCE(SUM(CASE WHEN (CURRENT_DATE - due_date) > 90 THEN balance_due ELSE 0 END),0)::numeric(14,2) AS bucket_90_plus,
+              COUNT(CASE WHEN (CURRENT_DATE - due_date) BETWEEN 1 AND 30 THEN 1 END)::int AS count_0_30,
+              COUNT(CASE WHEN (CURRENT_DATE - due_date) BETWEEN 31 AND 60 THEN 1 END)::int AS count_31_60,
+              COUNT(CASE WHEN (CURRENT_DATE - due_date) BETWEEN 61 AND 90 THEN 1 END)::int AS count_61_90,
+              COUNT(CASE WHEN (CURRENT_DATE - due_date) > 90 THEN 1 END)::int AS count_90_plus
+            FROM sales_invoices
+            WHERE account_id = $1 AND deleted_at IS NULL
+              AND status = 'CONFIRMED'
+              AND balance_due > 0
+              AND due_date IS NOT NULL
+              AND due_date < CURRENT_DATE
+            `,
+            [ctx.accountId]
+          )
+        : Promise.resolve({ rows: [{ bucket_0_30: 0, bucket_31_60: 0, bucket_61_90: 0, bucket_90_plus: 0, count_0_30: 0, count_31_60: 0, count_61_90: 0, count_90_plus: 0 }] })
+    );
+
+    // Top manufacturers by sales revenue in the period
+    calls.push(
+      canSales
+        ? query(
+            `
+            SELECT
+              mc.id AS mfg_id,
+              mc.name AS mfg_name,
+              COALESCE(SUM(sii.line_total),0)::numeric(14,2) AS total
+            FROM sales_invoice_items sii
+            INNER JOIN sales_invoices si
+              ON si.id = sii.sales_invoice_id AND si.account_id = sii.account_id
+            INNER JOIN products p
+              ON p.id = sii.product_id AND p.account_id = sii.account_id
+            INNER JOIN mfg_companies mc
+              ON mc.id = p.mfg_company_id AND mc.account_id = p.account_id
+            WHERE sii.account_id = $1
+              AND si.deleted_at IS NULL
+              AND si.status = 'CONFIRMED'::sales_invoice_status
+              AND si.invoice_date BETWEEN $2::date AND $3::date
+            GROUP BY mc.id, mc.name
+            ORDER BY total DESC
+            LIMIT 8
+            `,
+            [ctx.accountId, dateFrom, dateTo]
+          )
+        : Promise.resolve({ rows: [] })
+    );
+
+    // Invoice payment status for the selected period
+    calls.push(
+      canSales
+        ? query(
+            `
+            SELECT
+              COUNT(*)::int AS total_invoices,
+              SUM(CASE WHEN payment_status = 'PAID'::sales_payment_status THEN 1 ELSE 0 END)::int AS paid,
+              SUM(CASE WHEN payment_status = 'PARTIAL'::sales_payment_status THEN 1 ELSE 0 END)::int AS partial,
+              SUM(CASE WHEN payment_status = 'UNPAID'::sales_payment_status THEN 1 ELSE 0 END)::int AS unpaid,
+              COALESCE(SUM(total_amount),0)::numeric(14,2) AS total_billed,
+              COALESCE(SUM(amount_paid),0)::numeric(14,2) AS total_collected
+            FROM sales_invoices
+            WHERE account_id = $1 AND deleted_at IS NULL
+              AND status = 'CONFIRMED'::sales_invoice_status
+              AND invoice_date BETWEEN $2::date AND $3::date
+            `,
+            [ctx.accountId, dateFrom, dateTo]
+          )
+        : Promise.resolve({ rows: [{ total_invoices: 0, paid: 0, partial: 0, unpaid: 0, total_billed: 0, total_collected: 0 }] })
+    );
+
+    // Expiry value at risk (stock value of batches expiring within 30/60/90 days)
+    calls.push(
+      canBatches
+        ? query(
+            `
+            SELECT
+              COALESCE(SUM(CASE WHEN pb.expiry_date <= CURRENT_DATE + INTERVAL '30 days'
+                THEN pb.current_stock * COALESCE(pb.mrp,0) ELSE 0 END),0)::numeric(14,2) AS value_30d,
+              COALESCE(SUM(CASE WHEN pb.expiry_date <= CURRENT_DATE + INTERVAL '60 days'
+                THEN pb.current_stock * COALESCE(pb.mrp,0) ELSE 0 END),0)::numeric(14,2) AS value_60d,
+              COALESCE(SUM(CASE WHEN pb.expiry_date <= CURRENT_DATE + INTERVAL '90 days'
+                THEN pb.current_stock * COALESCE(pb.mrp,0) ELSE 0 END),0)::numeric(14,2) AS value_90d,
+              COUNT(CASE WHEN pb.expiry_date <= CURRENT_DATE + INTERVAL '30 days' THEN 1 END)::int AS batches_30d,
+              COUNT(CASE WHEN pb.expiry_date <= CURRENT_DATE + INTERVAL '60 days' THEN 1 END)::int AS batches_60d
+            FROM product_batches pb
+            WHERE pb.account_id = $1
+              AND pb.deleted_at IS NULL
+              AND pb.current_stock > 0
+              AND pb.expiry_date IS NOT NULL
+              AND pb.expiry_date > CURRENT_DATE
+            `,
+            [ctx.accountId]
+          )
+        : Promise.resolve({ rows: [{ value_30d: 0, value_60d: 0, value_90d: 0, batches_30d: 0, batches_60d: 0 }] })
+    );
+
+    // Non-moving stock value (count + rupee value of non-moving batches)
+    calls.push(
+      canBatches
+        ? query(
+            `
+            WITH last_sale AS (
+              SELECT batch_id, MAX(created_at) AS last_sale_at
+              FROM inventory_txns
+              WHERE account_id = $1 AND txn_type = 'SALE'
+              GROUP BY batch_id
+            )
+            SELECT
+              COUNT(*)::int AS count,
+              COALESCE(SUM(pb.current_stock * COALESCE(pb.mrp,0)),0)::numeric(14,2) AS value
+            FROM product_batches pb
+            LEFT JOIN last_sale ls ON ls.batch_id = pb.id
+            WHERE pb.account_id = $1
+              AND pb.deleted_at IS NULL
+              AND pb.current_stock > 0
+              AND (ls.last_sale_at IS NULL OR ls.last_sale_at < now() - ($2::int || ' days')::interval)
+            `,
+            [ctx.accountId, nonMovingDays]
+          )
+        : Promise.resolve({ rows: [{ count: 0, value: 0 }] })
+    );
+
+    // Stock coverage days (products with lowest days of stock remaining at current sales rate)
+    calls.push(
+      canBatches && canSales
+        ? query(
+            `
+            WITH period_days AS (
+              SELECT GREATEST(1, ($3::date - $2::date + 1)) AS days
+            ),
+            daily_sales AS (
+              SELECT
+                sii.product_id,
+                COALESCE(SUM(sii.qty),0)::numeric(14,3) / (SELECT days FROM period_days) AS avg_daily_qty
+              FROM sales_invoice_items sii
+              INNER JOIN sales_invoices si
+                ON si.id = sii.sales_invoice_id AND si.account_id = sii.account_id
+              WHERE sii.account_id = $1
+                AND si.deleted_at IS NULL
+                AND si.status = 'CONFIRMED'::sales_invoice_status
+                AND si.invoice_date BETWEEN $2::date AND $3::date
+              GROUP BY sii.product_id
+            ),
+            current_stock AS (
+              SELECT
+                p.id AS product_id,
+                p.name AS product_name,
+                COALESCE(SUM(pb.current_stock),0)::numeric(14,3) AS total_stock
+              FROM products p
+              LEFT JOIN product_batches pb
+                ON pb.product_id = p.id AND pb.account_id = p.account_id AND pb.deleted_at IS NULL
+              WHERE p.account_id = $1 AND p.deleted_at IS NULL
+              GROUP BY p.id, p.name
+            )
+            SELECT
+              cs.product_id,
+              cs.product_name,
+              cs.total_stock,
+              ROUND(ds.avg_daily_qty, 3) AS avg_daily_qty,
+              ROUND(cs.total_stock / NULLIF(ds.avg_daily_qty, 0))::int AS coverage_days
+            FROM current_stock cs
+            INNER JOIN daily_sales ds ON ds.product_id = cs.product_id
+            WHERE cs.total_stock > 0 AND ds.avg_daily_qty > 0
+            ORDER BY coverage_days ASC
+            LIMIT 10
+            `,
+            [ctx.accountId, dateFrom, dateTo]
+          )
+        : Promise.resolve({ rows: [] })
+    );
+
     const [
       salesPack,
       purchasePack,
@@ -565,7 +791,15 @@ async function handler(event) {
       overduePay,
       totalRecv,
       totalPay,
-      stockSummary
+      stockSummary,
+      pendingOrders,
+      momComparison,
+      overdueAging,
+      topMfg,
+      invoicePayStatus,
+      expiryValueAtRisk,
+      nonMovingValue,
+      stockCoverage
     ] = await Promise.all(calls);
 
     const salesRow = salesPack.rows?.[0] || {};
@@ -672,6 +906,85 @@ async function handler(event) {
         overdue_receivables: canSales ? overdueRecv.rows?.[0] || { amount: 0, invoices: 0 } : { amount: 0, invoices: 0 },
         overdue_payables: canPurchases ? overduePay.rows?.[0] || { amount: 0, invoices: 0 } : { amount: 0, invoices: 0 },
         non_moving_count: canBatches ? Number(nonMovingCount.rows?.[0]?.c || 0) : 0,
+        // ── NEW ANALYTICS WIDGETS ──────────────────────────────────────────
+        pending_orders: (() => {
+          const r = pendingOrders.rows?.[0] || {};
+          return {
+            incoming_count: Number(r.incoming_count || 0),
+            incoming_value: toNum(r.incoming_value),
+            my_count: Number(r.my_count || 0),
+            my_value: toNum(r.my_value)
+          };
+        })(),
+        mom_comparison: (() => {
+          const r = momComparison.rows?.[0] || {};
+          const currentPeriodSales = toNum(salesRange?.total);
+          const lastMonthSales = toNum(r.last_month_sales);
+          const sameMonthLastYear = toNum(r.same_month_last_year);
+          const momDeltaPct = lastMonthSales > 0 ? ((currentPeriodSales - lastMonthSales) / lastMonthSales) * 100 : null;
+          const yoyDeltaPct = sameMonthLastYear > 0 ? ((currentPeriodSales - sameMonthLastYear) / sameMonthLastYear) * 100 : null;
+          return canSales ? {
+            current_period: currentPeriodSales,
+            last_month: lastMonthSales,
+            same_month_last_year: sameMonthLastYear,
+            current_month_to_date: toNum(r.current_month_to_date),
+            mom_delta_pct: momDeltaPct,
+            yoy_delta_pct: yoyDeltaPct
+          } : null;
+        })(),
+        overdue_aging: (() => {
+          const r = overdueAging.rows?.[0] || {};
+          return canSales ? {
+            bucket_0_30:  { amount: toNum(r.bucket_0_30),  count: Number(r.count_0_30  || 0) },
+            bucket_31_60: { amount: toNum(r.bucket_31_60), count: Number(r.count_31_60 || 0) },
+            bucket_61_90: { amount: toNum(r.bucket_61_90), count: Number(r.count_61_90 || 0) },
+            bucket_90_plus: { amount: toNum(r.bucket_90_plus), count: Number(r.count_90_plus || 0) }
+          } : null;
+        })(),
+        top_manufacturers: canSales ? (topMfg.rows || []).map((r) => ({
+          mfg_id: r.mfg_id,
+          mfg_name: r.mfg_name,
+          total: toNum(r.total)
+        })) : [],
+        invoice_pay_status: (() => {
+          const r = invoicePayStatus.rows?.[0] || {};
+          const totalBilled = toNum(r.total_billed);
+          const totalCollected = toNum(r.total_collected);
+          const collectionPct = totalBilled > 0 ? (totalCollected / totalBilled) * 100 : 0;
+          return canSales ? {
+            total_invoices: Number(r.total_invoices || 0),
+            paid: Number(r.paid || 0),
+            partial: Number(r.partial || 0),
+            unpaid: Number(r.unpaid || 0),
+            total_billed: totalBilled,
+            total_collected: totalCollected,
+            collection_pct: Math.round(collectionPct * 10) / 10
+          } : null;
+        })(),
+        expiry_value_at_risk: (() => {
+          const r = expiryValueAtRisk.rows?.[0] || {};
+          return canBatches ? {
+            value_30d: toNum(r.value_30d),
+            value_60d: toNum(r.value_60d),
+            value_90d: toNum(r.value_90d),
+            batches_30d: Number(r.batches_30d || 0),
+            batches_60d: Number(r.batches_60d || 0)
+          } : null;
+        })(),
+        non_moving_value: (() => {
+          const r = nonMovingValue.rows?.[0] || {};
+          return canBatches ? {
+            count: Number(r.count || 0),
+            value: toNum(r.value)
+          } : null;
+        })(),
+        stock_coverage: canBatches && canSales ? (stockCoverage.rows || []).map((r) => ({
+          product_id: r.product_id,
+          product_name: r.product_name,
+          total_stock: toNum(r.total_stock),
+          avg_daily_qty: toNum(r.avg_daily_qty),
+          coverage_days: Number(r.coverage_days || 0)
+        })) : [],
         alerts: [
           ...(canBatches
             ? (expiryWatch.rows || []).slice(0, 2).map((x) => ({
