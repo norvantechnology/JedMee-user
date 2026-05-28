@@ -50,6 +50,9 @@ Mappings:
       MedicoEmailDryRun: ""
       AppLogoUrl: "https://jedmee.com/logo.png"
       EnvironmentTag: "Local"
+      FirebaseProjectId: "jedmee-43862"
+      FirebaseClientEmail: "firebase-adminsdk-fbsvc@jedmee-43862.iam.gserviceaccount.com"
+      FirebasePrivateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC0hzCURpBdvF5v\nF9eW4pG0wW8T12IiH4JA0KVuSd2XGFBh97Y2OTNRQ1SfxkhJlKN9KFNgy/yZBqwY\nWlROOutf734WtAcXwTOLzXwSF9FDjuV+Y9I/1fcyjFN3rcbXf2KVyElh0xtT4nDY\nLpxdBveDHThz+Ae9q8LuObAy6i9k7+NsN5Sc2fikcK+bJKJEdkB/rcJPIY8BnrQ0\nhzn27329yokPr34i0uv4Hh4wT1B5KD7hEwNDkgZEsq7WvMbOZDAZQMIkcOFTSFQg\nQxdFgLOe8o7ekCjEinVEfpb2A7sCzaFFz9Vu07fXW2uGDu2r5Msjnfby37SJf213\nxONv8i3PAgMBAAECgf8SkdVtayoZJPHnJjdcTfIEUIwcfmCZzKPusYeoJfD6mdsA\nONAwGQeDqb61W1q+4YtE/zY/FBHnq8gIDpfyyXIXbDXhdU3wI5opx06mjcyje7of\nm3paa/1W4G21jH/nqt15NXZW7wrglhUFfRtDIR7/XazGQRKKxXWdC6dplVf1XzYE\nJMtJGeFApjO3VzzfPoetkorUTEs/DxHZOThIt5ds7Tl2Sds/EDLAqk55ibuwd3qj\nDT6Jjm9zTI29DRq7rvbv1BTDVrNF5vjtewovYvqbLAhm2wx80C0CGeYxUdFw4j9x\nICMCZLAMCCT16mj3X0TdqhMXP0GJ2O7PAkUPP2ECgYEA5tKsdYXEqm9AjiEezk8I\nPERcKy87vz1fkNfxhcu6DgCp7FloZopknr89zL8uQrZO5CPVTLNTENSzCt/vWUc4\nNU2AC4grkNWj1k9bBp3T2ehRgpaXvEBjOHEL2VrGhTEb6+pvwRlOmrvBC4biSPjQ\nGIHP+xgvgIyVH0e3pP24qt8CgYEAyDgeyed+okN8uXf8jdbRzeYR4P3N7h7KpeHV\n2VxtvB/JR+ueuub7zWRUZsOnIjwLkNIBTGGTejt9+xfO9HxFmggYCFqeyOxxf3g/\n4A53aF2rCfGPlov55xGQzjFqePT/RAN+GYD5egrjC9E5PiadwIVJs7PqZq4jSwz5\nCe7QyxECgYEAvGAgyQSznNiQma3kA0EymmS7x66Tlx5SWNYzURsTq4vVIYNSFaVK\nOtgeanN4II/CUKQB1sfeubSsrepV3sml0LKAFmk6DMieHi/DPOIfXA4iP24BRWxS\nzWRM5EUWEOskO2OncrLhmJw0DuE02ZLd2bJPdz+kvMd+h/myoV9Dj4cCgYAsECW+\ne4LkBQQy8RQUxx0fOi3fHRwv9njUrvHYRz4jM7+hY1poeaMa3aSxhQeIQjytX3pH\nrAW/1c3w75ltNtg+gN+BHyhowZhs3DL6hVSEFHEq3A2krSOPVc9PgZKUEh8HgdlD\nlZ3R3QmAtUfqxKbdErhYoxTICjTcNHuuUu+CcQKBgQDc+TaNWudeFv/CLjGhYSk0\npMtBP7a36+dMvOLN+ww/W+qfQKnCoyer6UMRjne9JzxfdxJ0SpmXonMwP8geog50\nhXYz0CWICz5asPjXv/FrfDVah04owheGeSJGHZbv4v1iG92AjnMQmOANhahNuTqA\nUQy3aqPlKcU0Ho4lHeJ/0g==\n-----END PRIVATE KEY-----\n'
     dev:
       MemorySize: "256"
       BrandDisplayName: "JedMee"
@@ -80,6 +83,9 @@ Mappings:
       MedicoEmailDryRun: ""
       AppLogoUrl: "https://jedmee.com/logo.png"
       EnvironmentTag: "Development"
+      FirebaseProjectId: "jedmee-43862"
+      FirebaseClientEmail: "firebase-adminsdk-fbsvc@jedmee-43862.iam.gserviceaccount.com"
+      FirebasePrivateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC0hzCURpBdvF5v\nF9eW4pG0wW8T12IiH4JA0KVuSd2XGFBh97Y2OTNRQ1SfxkhJlKN9KFNgy/yZBqwY\nWlROOutf734WtAcXwTOLzXwSF9FDjuV+Y9I/1fcyjFN3rcbXf2KVyElh0xtT4nDY\nLpxdBveDHThz+Ae9q8LuObAy6i9k7+NsN5Sc2fikcK+bJKJEdkB/rcJPIY8BnrQ0\nhzn27329yokPr34i0uv4Hh4wT1B5KD7hEwNDkgZEsq7WvMbOZDAZQMIkcOFTSFQg\nQxdFgLOe8o7ekCjEinVEfpb2A7sCzaFFz9Vu07fXW2uGDu2r5Msjnfby37SJf213\nxONv8i3PAgMBAAECgf8SkdVtayoZJPHnJjdcTfIEUIwcfmCZzKPusYeoJfD6mdsA\nONAwGQeDqb61W1q+4YtE/zY/FBHnq8gIDpfyyXIXbDXhdU3wI5opx06mjcyje7of\nm3paa/1W4G21jH/nqt15NXZW7wrglhUFfRtDIR7/XazGQRKKxXWdC6dplVf1XzYE\nJMtJGeFApjO3VzzfPoetkorUTEs/DxHZOThIt5ds7Tl2Sds/EDLAqk55ibuwd3qj\nDT6Jjm9zTI29DRq7rvbv1BTDVrNF5vjtewovYvqbLAhm2wx80C0CGeYxUdFw4j9x\nICMCZLAMCCT16mj3X0TdqhMXP0GJ2O7PAkUPP2ECgYEA5tKsdYXEqm9AjiEezk8I\nPERcKy87vz1fkNfxhcu6DgCp7FloZopknr89zL8uQrZO5CPVTLNTENSzCt/vWUc4\nNU2AC4grkNWj1k9bBp3T2ehRgpaXvEBjOHEL2VrGhTEb6+pvwRlOmrvBC4biSPjQ\nGIHP+xgvgIyVH0e3pP24qt8CgYEAyDgeyed+okN8uXf8jdbRzeYR4P3N7h7KpeHV\n2VxtvB/JR+ueuub7zWRUZsOnIjwLkNIBTGGTejt9+xfO9HxFmggYCFqeyOxxf3g/\n4A53aF2rCfGPlov55xGQzjFqePT/RAN+GYD5egrjC9E5PiadwIVJs7PqZq4jSwz5\nCe7QyxECgYEAvGAgyQSznNiQma3kA0EymmS7x66Tlx5SWNYzURsTq4vVIYNSFaVK\nOtgeanN4II/CUKQB1sfeubSsrepV3sml0LKAFmk6DMieHi/DPOIfXA4iP24BRWxS\nzWRM5EUWEOskO2OncrLhmJw0DuE02ZLd2bJPdz+kvMd+h/myoV9Dj4cCgYAsECW+\ne4LkBQQy8RQUxx0fOi3fHRwv9njUrvHYRz4jM7+hY1poeaMa3aSxhQeIQjytX3pH\nrAW/1c3w75ltNtg+gN+BHyhowZhs3DL6hVSEFHEq3A2krSOPVc9PgZKUEh8HgdlD\nlZ3R3QmAtUfqxKbdErhYoxTICjTcNHuuUu+CcQKBgQDc+TaNWudeFv/CLjGhYSk0\npMtBP7a36+dMvOLN+ww/W+qfQKnCoyer6UMRjne9JzxfdxJ0SpmXonMwP8geog50\nhXYz0CWICz5asPjXv/FrfDVah04owheGeSJGHZbv4v1iG92AjnMQmOANhahNuTqA\nUQy3aqPlKcU0Ho4lHeJ/0g==\n-----END PRIVATE KEY-----\n'
     prod:
       MemorySize: "512"
       BrandDisplayName: "JedMee"
@@ -110,6 +116,9 @@ Mappings:
       MedicoEmailDryRun: ""
       AppLogoUrl: "https://jedmee.com/logo.png"
       EnvironmentTag: "Production"
+      FirebaseProjectId: "jedmee-43862"
+      FirebaseClientEmail: "firebase-adminsdk-fbsvc@jedmee-43862.iam.gserviceaccount.com"
+      FirebasePrivateKey: '-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQC0hzCURpBdvF5v\nF9eW4pG0wW8T12IiH4JA0KVuSd2XGFBh97Y2OTNRQ1SfxkhJlKN9KFNgy/yZBqwY\nWlROOutf734WtAcXwTOLzXwSF9FDjuV+Y9I/1fcyjFN3rcbXf2KVyElh0xtT4nDY\nLpxdBveDHThz+Ae9q8LuObAy6i9k7+NsN5Sc2fikcK+bJKJEdkB/rcJPIY8BnrQ0\nhzn27329yokPr34i0uv4Hh4wT1B5KD7hEwNDkgZEsq7WvMbOZDAZQMIkcOFTSFQg\nQxdFgLOe8o7ekCjEinVEfpb2A7sCzaFFz9Vu07fXW2uGDu2r5Msjnfby37SJf213\nxONv8i3PAgMBAAECgf8SkdVtayoZJPHnJjdcTfIEUIwcfmCZzKPusYeoJfD6mdsA\nONAwGQeDqb61W1q+4YtE/zY/FBHnq8gIDpfyyXIXbDXhdU3wI5opx06mjcyje7of\nm3paa/1W4G21jH/nqt15NXZW7wrglhUFfRtDIR7/XazGQRKKxXWdC6dplVf1XzYE\nJMtJGeFApjO3VzzfPoetkorUTEs/DxHZOThIt5ds7Tl2Sds/EDLAqk55ibuwd3qj\nDT6Jjm9zTI29DRq7rvbv1BTDVrNF5vjtewovYvqbLAhm2wx80C0CGeYxUdFw4j9x\nICMCZLAMCCT16mj3X0TdqhMXP0GJ2O7PAkUPP2ECgYEA5tKsdYXEqm9AjiEezk8I\nPERcKy87vz1fkNfxhcu6DgCp7FloZopknr89zL8uQrZO5CPVTLNTENSzCt/vWUc4\nNU2AC4grkNWj1k9bBp3T2ehRgpaXvEBjOHEL2VrGhTEb6+pvwRlOmrvBC4biSPjQ\nGIHP+xgvgIyVH0e3pP24qt8CgYEAyDgeyed+okN8uXf8jdbRzeYR4P3N7h7KpeHV\n2VxtvB/JR+ueuub7zWRUZsOnIjwLkNIBTGGTejt9+xfO9HxFmggYCFqeyOxxf3g/\n4A53aF2rCfGPlov55xGQzjFqePT/RAN+GYD5egrjC9E5PiadwIVJs7PqZq4jSwz5\nCe7QyxECgYEAvGAgyQSznNiQma3kA0EymmS7x66Tlx5SWNYzURsTq4vVIYNSFaVK\nOtgeanN4II/CUKQB1sfeubSsrepV3sml0LKAFmk6DMieHi/DPOIfXA4iP24BRWxS\nzWRM5EUWEOskO2OncrLhmJw0DuE02ZLd2bJPdz+kvMd+h/myoV9Dj4cCgYAsECW+\ne4LkBQQy8RQUxx0fOi3fHRwv9njUrvHYRz4jM7+hY1poeaMa3aSxhQeIQjytX3pH\nrAW/1c3w75ltNtg+gN+BHyhowZhs3DL6hVSEFHEq3A2krSOPVc9PgZKUEh8HgdlD\nlZ3R3QmAtUfqxKbdErhYoxTICjTcNHuuUu+CcQKBgQDc+TaNWudeFv/CLjGhYSk0\npMtBP7a36+dMvOLN+ww/W+qfQKnCoyer6UMRjne9JzxfdxJ0SpmXonMwP8geog50\nhXYz0CWICz5asPjXv/FrfDVah04owheGeSJGHZbv4v1iG92AjnMQmOANhahNuTqA\nUQy3aqPlKcU0Ho4lHeJ/0g==\n-----END PRIVATE KEY-----\n'
 
 Globals:
   Function:
@@ -146,6 +155,9 @@ Globals:
         PASSWORD_RESET_OTP_TTL_MINUTES: !FindInMap [StageConfig, !Ref Stage, PasswordResetOtpTtlMinutes]
         MEDICO_EMAIL_DRY_RUN: !FindInMap [StageConfig, !Ref Stage, MedicoEmailDryRun]
         APP_LOGO_URL: !FindInMap [StageConfig, !Ref Stage, AppLogoUrl]
+        FIREBASE_PROJECT_ID: !FindInMap [StageConfig, !Ref Stage, FirebaseProjectId]
+        FIREBASE_CLIENT_EMAIL: !FindInMap [StageConfig, !Ref Stage, FirebaseClientEmail]
+        FIREBASE_PRIVATE_KEY: !FindInMap [StageConfig, !Ref Stage, FirebasePrivateKey]
     Layers:
       - !Ref libsLight
     Tags:
