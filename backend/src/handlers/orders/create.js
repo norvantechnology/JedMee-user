@@ -196,11 +196,11 @@ async function handler(event) {
         wholesalerAccountId,
         wholesalerAccountId,
         "NEW_ORDER",
-        `New order ${order.order_number}`,
-        `${clean(actor?.firm_name) || clean(actor?.full_name) || "Retailer"} placed an order of ₹${totalAmount.toFixed(2)}.`,
+        `New order received – ${order.order_number}`,
+        `${clean(actor?.firm_name) || clean(actor?.full_name) || "A retailer"} just placed an order worth ₹${totalAmount.toFixed(2)}.`,
         { order_id: order.id },
-        "/orders",
-        "View orders"
+        `/orders/${order.id}`,
+        "View order"
       );
       return { order };
     });

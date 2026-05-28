@@ -177,7 +177,9 @@ async function evaluateBatches(accountId, batchRows) {
     if (!fire) continue;
 
     const title = "Low stock alert";
-    const body = `Batch "${row.batch_no}" (${row.product_name || row.product_code || "product"}) is low. Stock: ${fmtQty(row.total)}, limit: ${fmtQty(row.low_stock_threshold)}.`;
+    const productLabel = row.product_name || row.product_code || "a product";
+    const body = `Batch ${row.batch_no} of ${productLabel} is running low. Only ${fmtQty(row.total)} units left (limit: ${fmtQty(row.low_stock_threshold)}).`;
+    const actionPath = `/quality-master/${row.product_id}`;
     const payload = {
       batchId: bid,
       productId: String(row.product_id),
@@ -191,7 +193,9 @@ async function evaluateBatches(accountId, batchRows) {
       type: "LOW_STOCK_BATCH",
       title,
       body,
-      payload
+      payload,
+      actionPath,
+      actionLabel: "View product"
     });
 
     // Send push notification to eligible users.
@@ -203,7 +207,7 @@ async function evaluateBatches(accountId, batchRows) {
       title,
       body,
       type: "LOW_STOCK_BATCH",
-      actionPath: "/quality-master",
+      actionPath,
       data: { batchId: bid, productId: String(row.product_id) }
     });
   }
@@ -218,7 +222,9 @@ async function evaluateProducts(accountId, productRows) {
     if (!fire) continue;
 
     const title = "Low stock alert";
-    const body = `"${row.product_name || row.product_code}" is low. Stock: ${fmtQty(row.total)}, limit: ${fmtQty(row.low_stock_threshold)}.`;
+    const productLabel = row.product_name || row.product_code || "A product";
+    const body = `${productLabel} is running low. Only ${fmtQty(row.total)} units left (limit: ${fmtQty(row.low_stock_threshold)}).`;
+    const actionPath = `/quality-master/${pid}`;
     const payload = {
       productId: pid,
       productCode: row.product_code,
@@ -231,7 +237,9 @@ async function evaluateProducts(accountId, productRows) {
       type: "LOW_STOCK_PRODUCT",
       title,
       body,
-      payload
+      payload,
+      actionPath,
+      actionLabel: "View product"
     });
 
     // Send push notification to eligible users.
@@ -243,7 +251,7 @@ async function evaluateProducts(accountId, productRows) {
       title,
       body,
       type: "LOW_STOCK_PRODUCT",
-      actionPath: "/quality-master",
+      actionPath,
       data: { productId: pid }
     });
   }

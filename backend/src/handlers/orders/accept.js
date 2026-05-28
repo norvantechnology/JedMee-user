@@ -280,8 +280,10 @@ async function handler(event) {
         accepted.retailer_account_id,
         "ORDER_ACCEPTED",
         `Order ${accepted.order_number} accepted`,
-        "Your order was accepted and is being prepared.",
-        { order_id: accepted.id }
+        "Your order has been accepted and is now being prepared.",
+        { order_id: accepted.id },
+        `/orders/${accepted.id}`,
+        "View order"
       );
       return { order: accepted, sales_invoice_id: salesInvoice.id };
     });

@@ -1,4 +1,5 @@
 const { query } = require("../../shared/db");
+const { sendPushToAccount } = require("../../shared/fcm");
 
 function clean(v) {
   return String(v ?? "").trim();
@@ -111,6 +112,16 @@ async function createInAppNotification(q, accountId, userId, type, title, body, 
     VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$2)
     `,
     [accountId, userId, type, title, body, JSON.stringify(payload || {}), actionPath || null, actionLabel || null]
+  );
+  // Fire push notification to all active users of the account (fire-and-forget —
+  // push failure must never roll back the DB transaction).
+  sendPushToAccount(accountId, {
+    title,
+    body,
+    type,
+    actionPath: actionPath || "",
+  }).catch((err) =>
+    console.error(`[orders:createInAppNotification] Push failed (${type}):`, err)
   );
 }
 

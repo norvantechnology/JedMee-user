@@ -39,9 +39,11 @@ async function handler(event) {
         order.retailer_account_id,
         order.retailer_account_id,
         "ORDER_DISPATCHED",
-        `Order ${order.order_number} dispatched`,
-        "Order has been dispatched. Confirm delivery when received.",
-        { order_id: order.id }
+        `Order ${order.order_number} is on its way!`,
+        "Your order has been dispatched. Please confirm delivery once you receive it.",
+        { order_id: order.id },
+        `/orders/${order.id}`,
+        "View order"
       );
       return { order };
     });

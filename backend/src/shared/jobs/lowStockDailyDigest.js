@@ -91,11 +91,11 @@ async function insertLowStockDigestForAccount(accountId, ymd) {
   const lowBatches = await countLowStockBatches(accountId);
   if (lowProducts === 0 && lowBatches === 0) return 0;
 
-  const title = "Stock alert summary";
+  const title = "Daily stock alert";
   const parts = [];
-  if (lowProducts > 0) parts.push(`${lowProducts} product${lowProducts === 1 ? "" : "s"} low`);
-  if (lowBatches > 0) parts.push(`${lowBatches} batch${lowBatches === 1 ? "" : "es"} low`);
-  const body = parts.join(", ") + ". Check your inventory.";
+  if (lowProducts > 0) parts.push(`${lowProducts} product${lowProducts === 1 ? "" : "s"} running low`);
+  if (lowBatches > 0) parts.push(`${lowBatches} batch${lowBatches === 1 ? "" : "es"} running low`);
+  const body = `You have ${parts.join(" and ")}. Please check your inventory.`;
 
   const payload = JSON.stringify({
     lowProductCount: lowProducts,

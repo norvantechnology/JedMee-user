@@ -44,9 +44,11 @@ async function handler(event) {
         order.retailer_account_id,
         order.retailer_account_id,
         "ORDER_REJECTED",
-        `Order ${order.order_number} rejected`,
-        `Reason: ${reason}`,
-        { order_id: order.id }
+        `Order ${order.order_number} was not accepted`,
+        `Your order could not be accepted. ${reason ? `Reason: ${reason}` : "Please contact the supplier for more details."}`,
+        { order_id: order.id },
+        `/orders/${order.id}`,
+        "View order"
       );
       return { order };
     });

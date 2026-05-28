@@ -39,8 +39,10 @@ async function handler(event) {
         order.wholesaler_account_id,
         "ORDER_DELIVERED",
         `Order ${order.order_number} delivered`,
-        `${order.retailer_firm_name} confirmed delivery.`,
-        { order_id: order.id }
+        `${order.retailer_firm_name || "The retailer"} has confirmed delivery of this order.`,
+        { order_id: order.id },
+        `/orders/${order.id}`,
+        "View order"
       );
       return { order };
     });
