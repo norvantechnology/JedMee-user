@@ -200,7 +200,11 @@ async function handler(event) {
         `${clean(actor?.firm_name) || clean(actor?.full_name) || "A retailer"} just placed an order worth ₹${totalAmount.toFixed(2)}.`,
         { order_id: order.id },
         `/orders/${order.id}`,
-        "View order"
+        "View order",
+        // Extra FCM data — enables Accept/Cancel action buttons on mobile
+        { orderId: order.id, orderNumber: order.order_number },
+        // data-only so the mobile background handler can show action buttons
+        true
       );
       return { order };
     });

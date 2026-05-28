@@ -84,8 +84,11 @@ async function removeInvalidTokens(tokens) {
  * @param {object}    [opts.data]      - Optional key-value data payload (string values only).
  * @param {string}    [opts.type]      - Notification type constant (e.g. "LOW_STOCK_PRODUCT").
  * @param {string}    [opts.actionPath]- Deep-link path for tap navigation.
+ * @param {boolean}   [opts.dataOnly]  - When true, sends a data-only message (no FCM notification
+ *                                       field). Required for Android action buttons in background.
+ *                                       title/body are included in the data payload instead.
  */
-async function sendPushNotification({ userIds, title, body, data = {}, type = "", actionPath = "" }) {
+async function sendPushNotification({ userIds, title, body, data = {}, type = "", actionPath = "", dataOnly = false }) {
   const messaging = getMessaging();
   if (!messaging) return; // Firebase not configured — skip silently.
 
@@ -105,6 +108,8 @@ async function sendPushNotification({ userIds, title, body, data = {}, type = ""
   const dataPayload = {
     type: String(type || ""),
     actionPath: String(actionPath || ""),
+    // For data-only messages, include title/body so the mobile app can display them.
+    ...(dataOnly ? { title: String(title || ""), body: String(body || "") } : {}),
     ...Object.fromEntries(
       Object.entries(data).map(([k, v]) => [k, String(v ?? "")])
     ),
@@ -117,26 +122,42 @@ async function sendPushNotification({ userIds, title, body, data = {}, type = ""
   for (let i = 0; i < tokens.length; i += BATCH) {
     const batch = tokens.slice(i, i + BATCH);
     try {
-      const message = {
-        tokens: batch,
-        notification: { title, body },
-        data: dataPayload,
-        android: {
-          priority: "high",
-          notification: {
-            channelId: "jedmee_default",
-            sound: "default",
-          },
-        },
-        apns: {
-          payload: {
-            aps: {
-              sound: "default",
-              badge: 1,
+      // Data-only messages omit the `notification` field so FCM does NOT
+      // auto-display a notification. The mobile background handler shows a
+      // local notification with action buttons instead.
+      const message = dataOnly
+        ? {
+            tokens: batch,
+            data: dataPayload,
+            android: {
+              priority: "high",
+              // data-only: no notification block — prevents FCM auto-display
             },
-          },
-        },
-      };
+            apns: {
+              headers: { "apns-priority": "10" },
+              payload: { aps: { "content-available": 1 } },
+            },
+          }
+        : {
+            tokens: batch,
+            notification: { title, body },
+            data: dataPayload,
+            android: {
+              priority: "high",
+              notification: {
+                channelId: "jedmee_default",
+                sound: "default",
+              },
+            },
+            apns: {
+              payload: {
+                aps: {
+                  sound: "default",
+                  badge: 1,
+                },
+              },
+            },
+          };
 
       const response = await messaging.sendEachForMulticast(message);
 

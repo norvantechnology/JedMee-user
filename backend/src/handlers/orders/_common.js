@@ -103,7 +103,29 @@ async function nextOrderNumber(q, wholesalerAccountId) {
   return `ORD-${activeFy}-${String(next).padStart(4, "0")}`;
 }
 
-async function createInAppNotification(q, accountId, userId, type, title, body, payload = null, actionPath = null, actionLabel = null) {
+/**
+ * Insert an in-app notification row and fire a push notification.
+ *
+ * @param {object} q              - Transaction query function.
+ * @param {string} accountId      - Target account ID.
+ * @param {string} userId         - Target user ID.
+ * @param {string} type           - Notification type constant.
+ * @param {string} title          - Short title.
+ * @param {string} body           - Body text.
+ * @param {object} [payload]      - JSON payload stored in DB.
+ * @param {string} [actionPath]   - Deep-link path for tap navigation.
+ * @param {string} [actionLabel]  - CTA label.
+ * @param {object} [extraData]    - Extra key-value pairs added to the FCM data payload
+ *                                  (e.g. { orderId, orderNumber }). All values are stringified.
+ * @param {boolean} [dataOnly]    - When true, sends a data-only FCM message so the mobile
+ *                                  background handler can show a local notification with
+ *                                  action buttons (required for Android action buttons).
+ */
+async function createInAppNotification(
+  q, accountId, userId, type, title, body,
+  payload = null, actionPath = null, actionLabel = null,
+  extraData = {}, dataOnly = false
+) {
   await q(
     `
     INSERT INTO user_notifications (
@@ -120,6 +142,8 @@ async function createInAppNotification(q, accountId, userId, type, title, body, 
     body,
     type,
     actionPath: actionPath || "",
+    data: extraData,
+    dataOnly,
   }).catch((err) =>
     console.error(`[orders:createInAppNotification] Push failed (${type}):`, err)
   );
