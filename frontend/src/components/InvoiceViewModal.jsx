@@ -3,6 +3,7 @@ import CommonModal from "./CommonModal.jsx";
 import { AppButton } from "./ui/buttons.jsx";
 import ModalFooterShell from "./ui/ModalFooterShell.jsx";
 import { fmtMoney, fmtDateIndian } from "../utils/format.js";
+import { formatPaymentModeLabel } from "../constants/paymentModes.js";
 import { printSalesInvoice } from "../services/salesService.js";
 import { printSalesInvoiceDoc } from "../print/salesInvoicePrint.js";
 import { readAuth } from "../services/authStorage.js";
@@ -210,8 +211,14 @@ export default function InvoiceViewModal({
             ) : null}
             {status !== "CANCELLED" && inv.payment_status ? (
               <div className="rvmInfoCell">
-                <span className="rvmInfoLabel">Payment</span>
+                <span className="rvmInfoLabel">Payment status</span>
                 <span className="rvmInfoVal">{inv.payment_status}</span>
+              </div>
+            ) : null}
+            {status !== "CANCELLED" && inv.payment_mode ? (
+              <div className="rvmInfoCell">
+                <span className="rvmInfoLabel">Payment mode</span>
+                <span className="rvmInfoVal">{formatPaymentModeLabel(inv.payment_mode)}</span>
               </div>
             ) : null}
             <div className="rvmInfoCell">
@@ -237,6 +244,34 @@ export default function InvoiceViewModal({
               </div>
             ) : null}
           </div>
+
+          {payments.length > 0 ? (
+            <div className="rvmTableWrap" style={{ marginBottom: 12 }}>
+              <div className="rvmInfoLabel" style={{ marginBottom: 6 }}>
+                Payment history
+              </div>
+              <table className="rvmTable">
+                <thead>
+                  <tr>
+                    <th className="rvmTh">Date</th>
+                    <th className="rvmTh">Mode</th>
+                    <th className="rvmTh rvmNum">Amount</th>
+                    <th className="rvmTh">Reference</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {payments.map((p, i) => (
+                    <tr key={p.id || i} className="rvmRow">
+                      <td className="rvmTd">{fmtDateIndian(p.payment_date)}</td>
+                      <td className="rvmTd">{formatPaymentModeLabel(p.payment_mode)}</td>
+                      <td className="rvmTd rvmNum">{fmtMoney(p.amount)}</td>
+                      <td className="rvmTd">{p.reference_number || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : null}
 
           {items.length > 0 ? (
             <div className="rvmTableWrap">

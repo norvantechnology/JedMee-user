@@ -1,5 +1,6 @@
 const { fail } = require("../../shared/response");
-const { clean } = require("../../shared/purchase");
+const { clean, refreshInvoicePaymentSummary } = require("../../shared/purchase");
+const { normalizeVendorPaymentMode } = require("../../shared/paymentModes");
 const { getMfgCompany, assertPurchaseAllowed } = require("../../shared/mfgCompanyPolicy");
 const { computeDerived } = require("../../shared/productBatchCalc");
 const { upsertSupplierProductsForPurchase } = require("../../shared/supplierProducts");
@@ -383,9 +384,62 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
         remainingDue -= use;
       }
       await q("refresh-payment-summary-post-advance", `SELECT 1 FROM purchase_invoices WHERE id = $1`, [invoiceId]);
-      const { refreshInvoicePaymentSummary } = require("../../shared/purchase");
       await refreshInvoicePaymentSummary(rawQ, accountId, invoiceId);
     }
+  }
+
+  const markPaidFlag =
+    confirmOptions && Object.prototype.hasOwnProperty.call(confirmOptions, "markPaidAtConfirm")
+      ? confirmOptions.markPaidAtConfirm
+      : undefined;
+  let shouldMarkPaid = markPaidFlag === true;
+  if (markPaidFlag === false) shouldMarkPaid = false;
+
+  if (shouldMarkPaid) {
+    await refreshInvoicePaymentSummary(rawQ, accountId, invoiceId);
+    const dueRs = await q(
+      "reload-balance-for-paid-confirm",
+      `SELECT balance_due, division_id, vendor_id FROM purchase_invoices WHERE id = $1 AND account_id = $2 LIMIT 1`,
+      [invoiceId, accountId]
+    );
+    const row = dueRs.rows?.[0];
+    const balanceDue = Number(row?.balance_due || 0);
+    if (balanceDue > 0.0001) {
+      const payMode = normalizeVendorPaymentMode(confirmOptions.paymentMode, "CASH");
+      const payNote = `Payment (${payMode}) recorded on purchase confirm.`;
+      if (row?.division_id) {
+        const div = await q(
+          "division-mfg-for-payment",
+          `SELECT mfg_company_id FROM divisions WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`,
+          [row.division_id, accountId]
+        );
+        const mfgId = div.rows?.[0]?.mfg_company_id || null;
+        await q(
+          "insert-division-payment-on-confirm",
+          `INSERT INTO division_payments (
+             account_id, division_id, mfg_company_id, purchase_invoice_id, payment_date, amount, payment_mode, notes, created_by_user_id
+           )
+           VALUES ($1,$2,$3,$4,CURRENT_DATE,$5::numeric,$6::payment_mode_type,$7,$8)`,
+          [accountId, row.division_id, mfgId, invoiceId, balanceDue, payMode, payNote, actorId]
+        );
+      } else if (row?.vendor_id) {
+        await q(
+          "insert-vendor-payment-on-confirm",
+          `INSERT INTO vendor_payments (
+             account_id, vendor_id, purchase_invoice_id, allocation_type, payment_date, amount, payment_mode, notes, created_by_user_id
+           )
+           VALUES ($1,$2,$3,'INVOICE',CURRENT_DATE,$4::numeric,$5::payment_mode_type,$6,$7)`,
+          [accountId, row.vendor_id, invoiceId, balanceDue, payMode, payNote, actorId]
+        );
+      }
+      await refreshInvoicePaymentSummary(rawQ, accountId, invoiceId);
+    }
+  } else {
+    await q(
+      "mark-purchase-credit-mode",
+      `UPDATE purchase_invoices SET payment_mode = 'CREDIT', updated_at = now() WHERE id = $1 AND account_id = $2`,
+      [invoiceId, accountId]
+    );
   }
 
   await upsertSupplierProductsForPurchase({

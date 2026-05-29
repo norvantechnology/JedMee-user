@@ -5,6 +5,7 @@ const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { refreshLowStockNotifications } = require("../../shared/lowStockInstantNotify");
 const { runConfirmSalesInvoiceInTx } = require("./runConfirmSalesCore");
+const { parseConfirmPaymentOptions } = require("../../shared/paymentModes");
 
 async function handler(event) {
   const auth = await requirePermission(event, "SALES_INVOICES", "UPDATE");
@@ -16,9 +17,7 @@ async function handler(event) {
   if (!invoiceId) return fail(400, "VALIDATION_ERROR", "invoice id is required");
 
   const body = parseJsonBody(event);
-  const markPaidRaw = body?.markPaidAtConfirm;
-  const confirmOptions = {};
-  if (markPaidRaw === true || markPaidRaw === false) confirmOptions.markPaidAtConfirm = markPaidRaw;
+  const confirmOptions = parseConfirmPaymentOptions(body);
 
   let confirmStep = "start";
   try {

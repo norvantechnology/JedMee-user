@@ -175,15 +175,37 @@ async function refreshInvoicePaymentSummary(q, accountId, invoiceId) {
   const total = n(inv.rows?.[0]?.total_amount);
   const due = Math.max(0, round2(total - paid - returnCredits));
   const paymentStatus = due <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "UNPAID";
+  let paymentModeLabel = "CREDIT";
+  if (paymentStatus === "PAID" || paymentStatus === "PARTIAL") {
+    const modeRs = await q(
+      `
+      SELECT mode FROM (
+        SELECT vp.payment_mode::text AS mode, vp.payment_date, vp.created_at
+        FROM vendor_payments vp
+        WHERE vp.account_id = $1 AND vp.purchase_invoice_id = $2
+          AND COALESCE(vp.allocation_type, 'INVOICE') = 'INVOICE'
+        UNION ALL
+        SELECT dp.payment_mode::text AS mode, dp.payment_date, dp.created_at
+        FROM division_payments dp
+        WHERE dp.account_id = $1 AND dp.purchase_invoice_id = $2
+      ) x
+      ORDER BY payment_date DESC, created_at DESC
+      LIMIT 1
+      `,
+      [accountId, invoiceId]
+    );
+    paymentModeLabel = modeRs.rows?.[0]?.mode || "CASH";
+  }
   await q(
     `
     UPDATE purchase_invoices
-    SET amount_paid = $3, balance_due = $4, payment_status = $5, updated_at = now()
+    SET amount_paid = $3, balance_due = $4, payment_status = $5,
+        payment_mode = $6, updated_at = now()
     WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL
     `,
-    [invoiceId, accountId, paid, due, paymentStatus]
+    [invoiceId, accountId, paid, due, paymentStatus, paymentModeLabel]
   );
-  return { amountPaid: paid, balanceDue: due, paymentStatus };
+  return { amountPaid: paid, balanceDue: due, paymentStatus, paymentMode: paymentModeLabel };
 }
 
 function badRequest(message, details) {

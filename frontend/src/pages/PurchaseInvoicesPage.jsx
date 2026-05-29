@@ -68,6 +68,10 @@ import { emitToast } from "../services/toastBus.js";
 import { printViaHiddenIframe } from "../print/printDocument.js";
 import medico from "../shared/print/medicoPrintDocuments.cjs";
 import { NAV_LABELS } from "../constants/navLabels.js";
+import {
+  CUSTOMER_PAYMENT_MODE_OPTIONS,
+  formatPaymentModeLabel,
+} from "../constants/paymentModes.js";
 import "../components/StructuredForm.css";
 import "./PurchaseInvoicesPage.css";
 import { IconReceipt, IconRotateBox, IconWallet } from "../components/ui/AppIcons.jsx";
@@ -292,7 +296,12 @@ export default function PurchaseInvoicesPage() {
   const [selectedPurchaseIds, setSelectedPurchaseIds] = useState([]);
   const [bulkPaymentBusy, setBulkPaymentBusy] = useState(false);
   const [bulkConfirmBusy, setBulkConfirmBusy] = useState(false);
-  const [bulkConfirmPurchaseDialog, setBulkConfirmPurchaseDialog] = useState({ open: false, ids: [] });
+  const [bulkConfirmPurchaseDialog, setBulkConfirmPurchaseDialog] = useState({
+    open: false,
+    ids: [],
+    markPaid: false,
+    paymentMode: "CASH",
+  });
   const [bulkPaymentConfirm, setBulkPaymentConfirm] = useState({ open: false, ids: [], count: 0, total: 0, paymentDate: "", paymentMode: "" });
   const [printingPurchaseIds, setPrintingPurchaseIds] = useState(() => ({}));
   const [sendingPurchaseEmailById, setSendingPurchaseEmailById] = useState(() => ({}));
@@ -320,9 +329,18 @@ export default function PurchaseInvoicesPage() {
     invoiceDate: localCalendarYmd(),
     dueDate: "",
     notes: "",
+    collectPaymentNow: false,
+    paymentMode: "CASH",
     items: [emptyLine()]
   });
-  const [confirm, setConfirm] = useState({ open: false, id: "", type: "confirm", invoiceNumber: "" });
+  const [confirm, setConfirm] = useState({
+    open: false,
+    id: "",
+    type: "confirm",
+    invoiceNumber: "",
+    markPaid: false,
+    paymentMode: "CASH",
+  });
   const [dupConfirm, setDupConfirm] = useState({ open: false, vendorInvoiceNumber: "", existingInvoiceNumber: "", action: "draft" });
   const [importOpen, setImportOpen] = useState(false);
   const [viewModal, setViewModal] = useState({ open: false, id: null });
@@ -404,7 +422,9 @@ export default function PurchaseInvoicesPage() {
       invoiceDate: localCalendarYmd(),
       dueDate: "",
       notes: "",
-      items: [emptyLine()]
+      collectPaymentNow: false,
+      paymentMode: "CASH",
+      items: [emptyLine()],
     });
     setIsAddMode(true);
     setOpen(true);
@@ -918,7 +938,14 @@ export default function PurchaseInvoicesPage() {
         e.preventDefault();
         e.stopPropagation();
         if (state.isEditDraft && state.canConfirmFromModal && editing?.id) {
-          setConfirm({ open: true, id: editing.id, type: "confirm", invoiceNumber: editing.invoice_number || "" });
+          setConfirm({
+            open: true,
+            id: editing.id,
+            type: "confirm",
+            invoiceNumber: editing.invoice_number || "",
+            markPaid: Boolean(form.collectPaymentNow),
+            paymentMode: form.paymentMode || "CASH",
+          });
           return;
         }
         if (state.canCreateAndConfirm) void createAndConfirmRef.current();
@@ -958,7 +985,18 @@ export default function PurchaseInvoicesPage() {
     setModalLoading(false);
     setLoadingEditId(null);
     setActiveLineIdx(0);
-    setForm({ invoiceNumber: "", vendorInvoiceNumber: "", divisionId: "", vendorId: "", invoiceDate: localCalendarYmd(), dueDate: "", notes: "", items: [emptyLine()] });
+    setForm({
+      invoiceNumber: "",
+      vendorInvoiceNumber: "",
+      divisionId: "",
+      vendorId: "",
+      invoiceDate: localCalendarYmd(),
+      dueDate: "",
+      notes: "",
+      collectPaymentNow: false,
+      paymentMode: "CASH",
+      items: [emptyLine()],
+    });
   }
 
   async function openAddBatchForLine(lineIdx) {
@@ -1064,6 +1102,10 @@ export default function PurchaseInvoicesPage() {
         );
         if (gen !== purchaseInvoiceLoadGenRef.current) return;
         setEditing(invoice);
+        const loadedPayMode =
+          invoice.payment_mode && String(invoice.payment_mode).toUpperCase() !== "CREDIT"
+            ? String(invoice.payment_mode).toUpperCase()
+            : "CASH";
         setForm({
           invoiceNumber: invoice.invoice_number || "",
           vendorInvoiceNumber: invoice.vendor_invoice_number || "",
@@ -1072,6 +1114,8 @@ export default function PurchaseInvoicesPage() {
           invoiceDate: String(invoice.invoice_date || "").slice(0, 10),
           dueDate: String(invoice.due_date || "").slice(0, 10),
           notes: invoice.notes || "",
+          collectPaymentNow: false,
+          paymentMode: loadedPayMode,
           items: items.map((x) => {
             const prod = productIndex.get(String(x.product_id || ""));
             const factors = prod ? getPackagingFactors(prod) : { stripsPerBox: 1, boxesPerCase: 1, stripsPerCase: 1, unitsPerStrip: 1 };
@@ -1118,6 +1162,7 @@ export default function PurchaseInvoicesPage() {
 
   async function performSaveDraft({
     confirmAfterSave = false,
+    markPaidAtConfirm,
     silent = false,
     closeAfter,
   } = {}) {
@@ -1142,7 +1187,14 @@ export default function PurchaseInvoicesPage() {
       const savedId = String(r.json?.data?.invoice?.id || editing?.id || "");
       const savedInvoice = r.json?.data?.invoice;
       if (confirmAfterSave && savedId) {
-        const confirmed = await confirmPurchaseInvoice(savedId, {});
+        const paidFlag =
+          markPaidAtConfirm === true || markPaidAtConfirm === false
+            ? markPaidAtConfirm
+            : Boolean(form.collectPaymentNow);
+        const confirmed = await confirmPurchaseInvoice(savedId, {
+          markPaidAtConfirm: paidFlag,
+          paymentMode: form.paymentMode || "CASH",
+        });
         if (!(confirmed.status >= 200 && confirmed.status < 300 && confirmed.json?.ok)) {
           emitToast({ type: "error", message: `Draft created, but confirm failed: ${parseApiError(confirmed)}` });
           if (shouldClose) resetEditor();
@@ -1295,7 +1347,9 @@ export default function PurchaseInvoicesPage() {
                   invoiceDate: localCalendarYmd(),
                   dueDate: "",
                   notes: "",
-                  items: [emptyLine()]
+                  collectPaymentNow: false,
+                  paymentMode: "CASH",
+                  items: [emptyLine()],
                 });
                 setOpen(true);
                 return;
@@ -1408,7 +1462,9 @@ export default function PurchaseInvoicesPage() {
                         invoiceDate: localCalendarYmd(),
                         dueDate: "",
                         notes: "",
-                        items: [emptyLine()]
+                        collectPaymentNow: false,
+                        paymentMode: "CASH",
+                        items: [emptyLine()],
                       });
                       setOpen(true);
                     }
@@ -1455,7 +1511,7 @@ export default function PurchaseInvoicesPage() {
                   const ids = (rows || [])
                     .filter((r) => sel.has(String(r.id)) && String(r.status || "").toUpperCase() === "DRAFT")
                     .map((r) => r.id);
-                  setBulkConfirmPurchaseDialog({ open: true, ids });
+                  setBulkConfirmPurchaseDialog({ open: true, ids, markPaid: false, paymentMode: "CASH" });
                 }
               }
             ]}
@@ -1525,6 +1581,16 @@ export default function PurchaseInvoicesPage() {
               },
               { id: "status", header: "Status", render: (r) => <span style={{ fontWeight: 800 }}>{r.status}</span> },
               { id: "payment_status", header: "Payment", render: (r) => <span style={{ fontWeight: 700 }}>{r.status === "CANCELLED" ? "N/A" : r.payment_status}</span> },
+              {
+                id: "payment_mode",
+                header: "Pay mode",
+                sortable: false,
+                render: (r) => {
+                  if (r.status === "CANCELLED") return "—";
+                  const mode = r.payment_mode || (r.payment_status === "PAID" ? "CASH" : "CREDIT");
+                  return <span style={{ fontWeight: 600 }}>{formatPaymentModeLabel(mode)}</span>;
+                },
+              },
               { id: "total_amount", header: "Total", align: "right", render: (r) => <span>{money(r.total_amount)}</span> },
               { id: "balance_due", header: "Balance", align: "right", render: (r) => <span>{money(r.balance_due)}</span> },
               { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{ymd(r.created_at)}</span> },
@@ -1577,7 +1643,16 @@ export default function PurchaseInvoicesPage() {
                         tooltip="Confirm and post stock"
                         variant="success"
                         disabled={busy}
-                        onClick={() => setConfirm({ open: true, id: r.id, type: "confirm", invoiceNumber: r.invoice_number || "" })}
+                        onClick={() =>
+                          setConfirm({
+                            open: true,
+                            id: r.id,
+                            type: "confirm",
+                            invoiceNumber: r.invoice_number || "",
+                            markPaid: false,
+                            paymentMode: "CASH",
+                          })
+                        }
                       >
                         <IconConfirm />
                       </IconBtn>
@@ -1780,20 +1855,30 @@ export default function PurchaseInvoicesPage() {
                 Add Payment
               </button>
             ) : null}
-            {isAddMode ? (
-              <button className="piPrimaryBtn piPrimaryBtn_confirm sfmBtnPrimary" data-cm-primary="true" type="button" disabled={busy || !canAdd} onClick={() => { setSubmitted(true); createAndConfirm(); }}>
-                {saveBusy ? <InlineButtonProgress label="Working..." /> : "Create & Confirm"}
-              </button>
-            ) : null}
-            {!isAddMode && editingStatus === "DRAFT" ? (
+            {(isAddMode || (editingStatus === "DRAFT" && isEditingDraft)) ? (
               <button
                 className="piPrimaryBtn piPrimaryBtn_confirm sfmBtnPrimary"
                 data-cm-primary="true"
                 type="button"
-                disabled={busy || !canUpdate || !isEditingDraft}
-                onClick={() => { setSubmitted(true); setConfirm({ open: true, id: editing.id, type: "confirm", invoiceNumber: editing.invoice_number || "" }); }}
+                disabled={busy || (isAddMode ? !canAdd : !canUpdate)}
+                title={
+                  form.collectPaymentNow
+                    ? `Post stock and record ${formatPaymentModeLabel(form.paymentMode)} payment.`
+                    : "Post stock on credit; pay later from Vendor/Division Payments."
+                }
+                onClick={() => {
+                  setSubmitted(true);
+                  if (isAddMode) void createAndConfirm();
+                  else void performSaveDraft({ confirmAfterSave: true });
+                }}
               >
-                Confirm & Post Stock
+                {saveBusy ? (
+                  <InlineButtonProgress label="Working..." />
+                ) : form.collectPaymentNow ? (
+                  `Confirm & ${formatPaymentModeLabel(form.paymentMode)}`
+                ) : (
+                  "Confirm (on credit)"
+                )}
               </button>
             ) : null}
           </div>
@@ -1823,7 +1908,9 @@ export default function PurchaseInvoicesPage() {
                     invoiceDate: localCalendarYmd(),
                     dueDate: "",
                     notes: "",
-                    items: [emptyLine()]
+                    collectPaymentNow: false,
+                    paymentMode: "CASH",
+                    items: [emptyLine()],
                   });
                   return;
                 }
@@ -2388,6 +2475,50 @@ export default function PurchaseInvoicesPage() {
                 </div>
               </div>
             ) : null}
+            <div className="sbmPaymentRow piSection" style={{ marginTop: 8 }}>
+              <div className="piSectionBody">
+                <div className="sbmPaymentOpts">
+                  <label className="sbmPayOpt">
+                    <input
+                      type="radio"
+                      name="piCollectPayment"
+                      checked={form.collectPaymentNow === true}
+                      onChange={() => setForm((p) => ({ ...p, collectPaymentNow: true }))}
+                    />
+                    <span>Pay supplier now</span>
+                  </label>
+                  <label className="sbmPayOpt">
+                    <input
+                      type="radio"
+                      name="piCollectPayment"
+                      checked={form.collectPaymentNow === false}
+                      onChange={() => setForm((p) => ({ ...p, collectPaymentNow: false }))}
+                    />
+                    <span>On credit (pay later)</span>
+                  </label>
+                </div>
+                {form.collectPaymentNow ? (
+                  <div className="raField" style={{ maxWidth: 220, marginTop: 8 }}>
+                    <label>Payment method</label>
+                    <select
+                      className="raInput"
+                      value={form.paymentMode || "CASH"}
+                      onChange={(e) => setForm((p) => ({ ...p, paymentMode: e.target.value }))}
+                    >
+                      {CUSTOMER_PAYMENT_MODE_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <p className="sbmCashHint" style={{ marginTop: 8 }}>
+                    Invoice will be confirmed unpaid. Use Vendor or Division Payments to settle later.
+                  </p>
+                )}
+              </div>
+            </div>
             <div className="cliSummaryStrip" style={{gridTemplateColumns: "repeat(5, minmax(110px, 1fr))"}}>
               <div className="cliSummaryCell">
                 <div className="cliSummaryLabel">Subtotal</div>
@@ -2735,15 +2866,50 @@ export default function PurchaseInvoicesPage() {
         message={
           confirm.type === "delete"
             ? `Remove purchase ${confirm.invoiceNumber ? `“${confirm.invoiceNumber}”` : "invoice"} from your list? It will stay in the database for audit but will no longer appear here.`
-            : confirm.type === "confirm"
-              ? "This will post stock entries for all line items."
-              : "This will cancel invoice and reverse stock if it was confirmed."
+            : confirm.type === "confirm" ? (
+              <div>
+                <p style={{ margin: "0 0 10px" }}>This will post stock entries for all line items.</p>
+                <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(confirm.markPaid)}
+                    onChange={(e) => setConfirm((c) => ({ ...c, markPaid: e.target.checked }))}
+                  />
+                  Record payment on confirm
+                </label>
+                {confirm.markPaid ? (
+                  <select
+                    className="raInput"
+                    value={confirm.paymentMode || "CASH"}
+                    onChange={(e) => setConfirm((c) => ({ ...c, paymentMode: e.target.value }))}
+                  >
+                    {CUSTOMER_PAYMENT_MODE_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : null}
+              </div>
+            ) : (
+              "This will cancel invoice and reverse stock if it was confirmed."
+            )
         }
-        confirmLabel={confirm.type === "delete" ? "Remove" : confirm.type === "confirm" ? "Confirm" : "Cancel invoice"}
+        confirmLabel={
+          confirm.type === "delete"
+            ? "Remove"
+            : confirm.type === "confirm"
+              ? confirm.markPaid
+                ? `Confirm & ${formatPaymentModeLabel(confirm.paymentMode)}`
+                : "Confirm (credit)"
+              : "Cancel invoice"
+        }
         cancelLabel="Close"
         danger={confirm.type !== "confirm"}
         busy={busy}
-        onClose={() => setConfirm({ open: false, id: "", type: "confirm", invoiceNumber: "" })}
+        onClose={() =>
+          setConfirm({ open: false, id: "", type: "confirm", invoiceNumber: "", markPaid: false, paymentMode: "CASH" })
+        }
         onConfirm={async () => {
           if (!confirm.id) return;
           setBusy(true);
@@ -2758,7 +2924,10 @@ export default function PurchaseInvoicesPage() {
           } else {
             r =
               confirm.type === "confirm"
-                ? await confirmPurchaseInvoice(confirm.id, {})
+                ? await confirmPurchaseInvoice(confirm.id, {
+                    markPaidAtConfirm: Boolean(confirm.markPaid),
+                    paymentMode: confirm.paymentMode || "CASH",
+                  })
                 : await cancelPurchaseInvoice(confirm.id, { cancelReason: "Cancelled from UI" });
           }
           if (r.status >= 200 && r.status < 300 && r.json?.ok) {
@@ -2768,7 +2937,7 @@ export default function PurchaseInvoicesPage() {
                 resetEditor();
               }
             }
-            setConfirm({ open: false, id: "", type: "confirm", invoiceNumber: "" });
+            setConfirm({ open: false, id: "", type: "confirm", invoiceNumber: "", markPaid: false, paymentMode: "CASH" });
           } else if (r.status !== 401) {
             emitToast({ type: "error", message: parseApiError(r) });
           }
@@ -2830,19 +2999,58 @@ export default function PurchaseInvoicesPage() {
       <ConfirmDialog
         open={bulkConfirmPurchaseDialog.open}
         title="Confirm selected drafts?"
-        message={`Post stock and confirm ${bulkConfirmPurchaseDialog.ids?.length || 0} draft purchase(s)?`}
+        message={
+          <div>
+            <p style={{ margin: "0 0 10px" }}>
+              Post stock and confirm {bulkConfirmPurchaseDialog.ids?.length || 0} draft purchase(s)?
+            </p>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <input
+                type="checkbox"
+                checked={Boolean(bulkConfirmPurchaseDialog.markPaid)}
+                onChange={(e) =>
+                  setBulkConfirmPurchaseDialog((d) => ({ ...d, markPaid: e.target.checked }))
+                }
+              />
+              Record payment on confirm
+            </label>
+            {bulkConfirmPurchaseDialog.markPaid ? (
+              <select
+                className="raInput"
+                value={bulkConfirmPurchaseDialog.paymentMode || "CASH"}
+                onChange={(e) =>
+                  setBulkConfirmPurchaseDialog((d) => ({ ...d, paymentMode: e.target.value }))
+                }
+              >
+                {CUSTOMER_PAYMENT_MODE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            ) : null}
+          </div>
+        }
         confirmLabel="Confirm all"
         cancelLabel="Close"
         busy={bulkConfirmBusy}
         danger={false}
-        onClose={() => (bulkConfirmBusy ? null : setBulkConfirmPurchaseDialog({ open: false, ids: [] }))}
+        onClose={() =>
+          bulkConfirmBusy
+            ? null
+            : setBulkConfirmPurchaseDialog({ open: false, ids: [], markPaid: false, paymentMode: "CASH" })
+        }
         onConfirm={async () => {
           const ids = bulkConfirmPurchaseDialog.ids || [];
           if (!ids.length) return;
           setBulkConfirmBusy(true);
           try {
-            const r = await bulkConfirmPurchaseInvoices({ ids });
-            setBulkConfirmPurchaseDialog({ open: false, ids: [] });
+            const r = await bulkConfirmPurchaseInvoices({
+              ids,
+              markPaidAtConfirm: Boolean(bulkConfirmPurchaseDialog.markPaid),
+              paymentMode: bulkConfirmPurchaseDialog.paymentMode || "CASH",
+            });
+            setBulkConfirmPurchaseDialog({ open: false, ids: [], markPaid: false, paymentMode: "CASH" });
             if (r.status >= 200 && r.status < 300 && r.json?.ok) {
               const failed = r.json?.data?.failed || [];
               if (failed.length) {

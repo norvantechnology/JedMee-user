@@ -187,13 +187,28 @@ async function refreshSalesInvoicePaymentTotals(q, accountId, invoiceId) {
   const returnCredits = n(ret.rows?.[0]?.credits);
   const balance = Math.max(0, round4(total - paid - returnCredits));
   const status = balance <= 0 ? "PAID" : paid > 0 || returnCredits > 0 ? "PARTIAL" : "UNPAID";
+  const { salesInvoicePaymentModeLabel } = require("./paymentModes");
+  let paymentModeLabel = "CREDIT";
+  if (status === "PAID" || status === "PARTIAL") {
+    const modeRs = await q(
+      `SELECT payment_mode::text AS mode
+       FROM customer_payments
+       WHERE account_id = $1 AND sales_invoice_id = $2
+         AND COALESCE(allocation_type, 'INVOICE') = 'INVOICE'
+       ORDER BY payment_date DESC, created_at DESC
+       LIMIT 1`,
+      [accountId, invoiceId]
+    );
+    paymentModeLabel = salesInvoicePaymentModeLabel(true, modeRs.rows?.[0]?.mode || "CASH");
+  }
   await q(
     `UPDATE sales_invoices
-     SET amount_paid = $3::numeric, balance_due = $4::numeric, payment_status = $5::sales_payment_status, updated_at = now()
+     SET amount_paid = $3::numeric, balance_due = $4::numeric, payment_status = $5::sales_payment_status,
+         payment_mode = $6, updated_at = now()
      WHERE id = $1 AND account_id = $2`,
-    [invoiceId, accountId, paid, balance, status]
+    [invoiceId, accountId, paid, balance, status, paymentModeLabel]
   );
-  return { amountPaid: paid, balanceDue: balance, paymentStatus: status, returnCredits };
+  return { amountPaid: paid, balanceDue: balance, paymentStatus: status, returnCredits, paymentMode: paymentModeLabel };
 }
 
 async function getCustomerOutstandingInfo(q, accountId, customerId) {

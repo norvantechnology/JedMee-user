@@ -6,6 +6,7 @@ const { getPermissionsForUser } = require("../../shared/permissions");
 const { parseIdsFromBody } = require("../../shared/bulkIds");
 const { refreshLowStockNotifications } = require("../../shared/lowStockInstantNotify");
 const { runConfirmPurchaseInvoiceInTx } = require("./runConfirmPurchaseCore");
+const { parseConfirmPaymentOptions } = require("../../shared/paymentModes");
 
 function errMessage(errResp) {
   try {
@@ -27,6 +28,7 @@ async function handler(event) {
   const parsed = parseIdsFromBody(body, { max: 200 });
   if (!parsed.ok) return fail(400, "VALIDATION_ERROR", parsed.error);
   const ids = parsed.ids;
+  const confirmOptions = parseConfirmPaymentOptions(body);
 
   const confirmedIds = [];
   const failed = [];
@@ -35,7 +37,7 @@ async function handler(event) {
   for (const invoiceId of ids) {
     try {
       const result = await withTransaction(async (q) =>
-        runConfirmPurchaseInvoiceInTx(q, { accountId: ctx.accountId, actorId }, invoiceId, null)
+        runConfirmPurchaseInvoiceInTx(q, { accountId: ctx.accountId, actorId, confirmOptions }, invoiceId, null)
       );
       if (result?.err) {
         failed.push({ id: invoiceId, message: errMessage(result.err) });

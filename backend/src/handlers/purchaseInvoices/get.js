@@ -28,7 +28,8 @@ async function handler(event) {
     const invoice = inv.rows?.[0];
     if (!invoice) return fail(404, "NOT_FOUND", "Purchase invoice not found.");
 
-    const items = await query(
+    const [items, vendorPayments, divisionPayments] = await Promise.all([
+      query(
       `
       SELECT pii.*,
         COALESCE((
@@ -52,9 +53,25 @@ async function handler(event) {
       ORDER BY pii.created_at ASC
       `,
       [id, ctx.accountId]
-    );
+      ),
+      query(
+        `SELECT * FROM vendor_payments WHERE purchase_invoice_id = $1 AND account_id = $2 ORDER BY payment_date DESC, created_at DESC`,
+        [id, ctx.accountId]
+      ),
+      query(
+        `SELECT * FROM division_payments WHERE purchase_invoice_id = $1 AND account_id = $2 ORDER BY payment_date DESC, created_at DESC`,
+        [id, ctx.accountId]
+      ),
+    ]);
 
-    return ok({ invoice, items: items.rows || [] });
+    const payments = [...(vendorPayments.rows || []), ...(divisionPayments.rows || [])].sort((a, b) => {
+      const da = String(a.payment_date || "");
+      const db = String(b.payment_date || "");
+      if (da !== db) return db.localeCompare(da);
+      return String(b.created_at || "").localeCompare(String(a.created_at || ""));
+    });
+
+    return ok({ invoice, items: items.rows || [], payments });
   } catch {
     return fail(500, "INTERNAL_ERROR", "Something went wrong.", { subMessage: "Please try again." });
   }

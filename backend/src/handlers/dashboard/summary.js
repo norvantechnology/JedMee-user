@@ -203,18 +203,21 @@ async function handler(event) {
         : Promise.resolve({ rows: [{ pur_today: null, pur_range: null, pur_trend: [] }] })
     );
 
-    // Payment mode donut (sales invoices payment_mode)
+    // Payment mode donut (from customer_payments on confirmed sales in range)
     calls.push(
       canSales
         ? query(
             `
-            SELECT COALESCE(payment_mode, 'CASH') AS mode,
-                   COALESCE(SUM(total_amount),0)::numeric(14,2) AS total
-            FROM sales_invoices
-            WHERE account_id = $1 AND deleted_at IS NULL
-              AND status = 'CONFIRMED'::sales_invoice_status
-              AND invoice_date BETWEEN $2::date AND $3::date
-            GROUP BY COALESCE(payment_mode, 'CASH')
+            SELECT COALESCE(cp.payment_mode::text, 'CASH') AS mode,
+                   COALESCE(SUM(cp.amount),0)::numeric(14,2) AS total
+            FROM customer_payments cp
+            JOIN sales_invoices si ON si.id = cp.sales_invoice_id AND si.account_id = cp.account_id
+            WHERE cp.account_id = $1
+              AND si.deleted_at IS NULL
+              AND si.status = 'CONFIRMED'::sales_invoice_status
+              AND si.invoice_date BETWEEN $2::date AND $3::date
+              AND COALESCE(cp.allocation_type, 'INVOICE') = 'INVOICE'
+            GROUP BY COALESCE(cp.payment_mode::text, 'CASH')
             ORDER BY total DESC
             `,
             [ctx.accountId, dateFrom, dateTo]

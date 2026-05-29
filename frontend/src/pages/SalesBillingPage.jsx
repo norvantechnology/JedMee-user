@@ -61,6 +61,11 @@ import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
 import { todayYmdLocal } from "../utils/date.js";
 import {
+  CUSTOMER_PAYMENT_MODE_OPTIONS,
+  formatPaymentModeLabel,
+  defaultCollectPaymentNow,
+} from "../constants/paymentModes.js";
+import {
   isDraftInvoiceEdit,
   salesItemsReadyForAutoSave,
   useDraftAutoSave,
@@ -546,6 +551,7 @@ async function runSalesInvoiceConfirmPipeline(invoiceId, options = {}) {
   const payload = {};
   if (options.markPaidAtConfirm === true) payload.markPaidAtConfirm = true;
   if (options.markPaidAtConfirm === false) payload.markPaidAtConfirm = false;
+  if (options.paymentMode) payload.paymentMode = String(options.paymentMode).toUpperCase();
   const r = await confirmSalesInvoice(invoiceId, payload);
   if (r.status >= 200 && r.status < 300 && r.json?.ok) return { ok: true };
   return { ok: false, toast: { type: "error", ...parseApiErrorToast(r) } };
@@ -644,6 +650,8 @@ export default function SalesBillingPage() {
     walkInDoctorName: "",
     walkInPrescriptionNo: "",
     cashReceived: "",
+    collectPaymentNow: true,
+    paymentMode: "CASH",
     rateType: "MRP",
     billType: "CASH_MEMO",
     globalDiscountPercent: 0,
@@ -672,6 +680,8 @@ export default function SalesBillingPage() {
       walkInDoctorName: "",
       walkInPrescriptionNo: "",
       cashReceived: "",
+      collectPaymentNow: true,
+      paymentMode: "CASH",
       rateType: isRetailer ? "MRP" : "SALES_RATE",
       billType: "CASH_MEMO",
       globalDiscountPercent: 0,
@@ -685,13 +695,24 @@ export default function SalesBillingPage() {
     }, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canAdd, searchParams, isRetailer, customers]);
-  const [confirm, setConfirm] = useState({ open: false, id: "", type: "confirm" });
+  const [confirm, setConfirm] = useState({
+    open: false,
+    id: "",
+    type: "confirm",
+    markPaid: true,
+    paymentMode: "CASH",
+  });
   const [printingId, setPrintingId] = useState("");
   const [selectedSalesIds, setSelectedSalesIds] = useState([]);
   const [bulkPrintBusy, setBulkPrintBusy] = useState(false);
   const [bulkPaymentBusy, setBulkPaymentBusy] = useState(false);
   const [bulkConfirmBusy, setBulkConfirmBusy] = useState(false);
-  const [bulkConfirmSalesDialog, setBulkConfirmSalesDialog] = useState({ open: false, ids: [] });
+  const [bulkConfirmSalesDialog, setBulkConfirmSalesDialog] = useState({
+    open: false,
+    ids: [],
+    markPaid: false,
+    paymentMode: "CASH",
+  });
   const [bulkPaymentConfirm, setBulkPaymentConfirm] = useState({ open: false, ids: [], count: 0, total: 0, paymentDate: "", paymentMode: "" });
   const [batchModalOpen, setBatchModalOpen] = useState(false);
   const [batchModalBusy, setBatchModalBusy] = useState(false);
@@ -745,6 +766,19 @@ export default function SalesBillingPage() {
     [customers, form.customerId]
   );
   const selectedCustomerIsWalkIn = Boolean(selectedCustomer?.is_walk_in);
+
+  useEffect(() => {
+    if (!open || !form.customerId) return;
+    setForm((p) => ({
+      ...p,
+      collectPaymentNow: defaultCollectPaymentNow({
+        isRetailer,
+        isWalkIn: selectedCustomerIsWalkIn,
+        isCashCustomer: Boolean(selectedCustomer?.is_cash_customer),
+      }),
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, form.customerId, isRetailer, selectedCustomerIsWalkIn, selectedCustomer?.is_cash_customer]);
 
   useEffect(() => {
     if (!sendContact.open || !sendContact.customerId) return;
@@ -1154,6 +1188,7 @@ export default function SalesBillingPage() {
         );
         if (gen !== salesInvoiceLoadGenRef.current) return;
         setEditing(inv);
+        const editCustomer = (customers || []).find((c) => String(c.id) === String(inv.customer_id || ""));
         setForm({
           customerId: inv.customer_id || "",
           divisionId: inv.division_id ? String(inv.division_id) : "",
@@ -1165,6 +1200,15 @@ export default function SalesBillingPage() {
           walkInDoctorName: inv.walk_in_doctor_name || "",
           walkInPrescriptionNo: inv.walk_in_prescription_no || "",
           cashReceived: "",
+          collectPaymentNow: defaultCollectPaymentNow({
+            isRetailer,
+            isWalkIn: Boolean(editCustomer?.is_walk_in),
+            isCashCustomer: Boolean(editCustomer?.is_cash_customer),
+          }),
+          paymentMode:
+            inv.payment_mode && String(inv.payment_mode).toUpperCase() !== "CREDIT"
+              ? String(inv.payment_mode).toUpperCase()
+              : "CASH",
           rateType: String(inv.rate_type || (isRetailer ? "MRP" : "SALES_RATE")).toUpperCase(),
           billType: String(inv.bill_type || "CASH_MEMO").toUpperCase(),
           globalDiscountPercent: Number(inv.global_discount_percent || 0),
@@ -1310,8 +1354,7 @@ export default function SalesBillingPage() {
         const markPaid = e.shiftKey === true;
         if (draftEd && cEd) void saveAndConfirmDraftRef.current({ markPaidAtConfirm: markPaid });
         else if (cNew) {
-          if (markPaid) void createAndConfirmPaidRef.current();
-          else void createAndConfirmRef.current();
+          void performSaveDraftRef.current({ confirmAfterSave: true, markPaidAtConfirm: markPaid });
         }
         return;
       }
@@ -1396,8 +1439,11 @@ export default function SalesBillingPage() {
       const savedId = String(r.json?.data?.invoice?.id || r.json?.data?.invoiceId || editing?.id || "");
       const savedInvoice = r.json?.data?.invoice;
       if (confirmAfterSave && savedId) {
-        const confirmOpts =
-          markPaidAtConfirm === true || markPaidAtConfirm === false ? { markPaidAtConfirm } : {};
+        const paidFlag =
+          markPaidAtConfirm === true || markPaidAtConfirm === false
+            ? markPaidAtConfirm
+            : Boolean(form.collectPaymentNow);
+        const confirmOpts = { markPaidAtConfirm: paidFlag, paymentMode: form.paymentMode || "CASH" };
         const pipe = await runSalesInvoiceConfirmPipeline(savedId, confirmOpts);
         if (!pipe.ok) {
           if (pipe.aborted) return;
@@ -1543,6 +1589,8 @@ export default function SalesBillingPage() {
                   walkInDoctorName: "",
                   walkInPrescriptionNo: "",
                   cashReceived: "",
+                  collectPaymentNow: true,
+                  paymentMode: "CASH",
                   rateType: isRetailer ? "MRP" : "SALES_RATE",
                   billType: "CASH_MEMO",
                   globalDiscountPercent: 0,
@@ -1621,6 +1669,8 @@ export default function SalesBillingPage() {
                         walkInDoctorName: "",
                         walkInPrescriptionNo: "",
                         cashReceived: "",
+                        collectPaymentNow: true,
+                        paymentMode: "CASH",
                         rateType: isRetailer ? "MRP" : "SALES_RATE",
                         billType: "CASH_MEMO",
                         globalDiscountPercent: 0,
@@ -1656,7 +1706,7 @@ export default function SalesBillingPage() {
                   const ids = (rows || [])
                     .filter((r) => sel.has(String(r.id)) && String(r.status || "").toUpperCase() === "DRAFT")
                     .map((r) => r.id);
-                  setBulkConfirmSalesDialog({ open: true, ids });
+                  setBulkConfirmSalesDialog({ open: true, ids, markPaid: false, paymentMode: "CASH" });
                 }
               },
               {
@@ -1721,6 +1771,16 @@ export default function SalesBillingPage() {
                   return <span style={{ fontWeight: 700, color }}>{status}</span>;
                 }
               },
+              {
+                id: "payment_mode",
+                header: "Pay mode",
+                sortable: false,
+                render: (r) => {
+                  if (r.status === "CANCELLED") return "—";
+                  const mode = r.payment_mode || (r.payment_status === "PAID" ? "CASH" : "CREDIT");
+                  return <span style={{ fontWeight: 600 }}>{formatPaymentModeLabel(mode)}</span>;
+                },
+              },
               { id: "item_count", header: "Items", align: "right", render: (r) => Number(r.item_count || 0) },
               { id: "total_amount", header: "Total", align: "right", render: (r) => fmtMoney(r.total_amount || 0) },
               { id: "amount_paid", header: "Paid", align: "right", render: (r) => fmtMoney(r.amount_paid || 0) },
@@ -1751,7 +1811,23 @@ export default function SalesBillingPage() {
                       <IconBtn tooltip="Edit draft" onClick={() => openForEdit(r.id)}><IconEdit /></IconBtn>
                     ) : null}
                     {r.status === "DRAFT" && canUpdate ? (
-                      <IconBtn tooltip="Confirm and post stock" variant="success" onClick={() => setConfirm({ open: true, id: r.id, type: "confirm" })}>
+                      <IconBtn
+                        tooltip="Confirm and post stock"
+                        variant="success"
+                        onClick={() =>
+                          setConfirm({
+                            open: true,
+                            id: r.id,
+                            type: "confirm",
+                            markPaid: defaultCollectPaymentNow({
+                              isRetailer,
+                              isWalkIn: Boolean((customers || []).find((c) => String(c.id) === String(r.customer_id))?.is_walk_in),
+                              isCashCustomer: Boolean((customers || []).find((c) => String(c.id) === String(r.customer_id))?.is_cash_customer),
+                            }),
+                            paymentMode: "CASH",
+                          })
+                        }
+                      >
                         <IconConfirm />
                       </IconBtn>
                     ) : null}
@@ -1915,51 +1991,31 @@ export default function SalesBillingPage() {
               {busy ? <InlineButtonProgress label="Working..." /> : isAddMode ? "Save Draft" : "Save Changes"}
             </button>
             {/* Primary actions — dominant */}
-            {isAddMode && canUpdate ? (
-              <>
-                <button
-                  className="sfmBtnGhost sbmBtnCreateConfirm"
-                  type="button"
-                  disabled={busy || !canAdd || !canUpdate}
-                  title="Post stock and record full amount as cash received on this bill."
-                  onClick={() => { setSubmitted(true); createAndConfirmPaid(); }}
-                >
-                  {busy ? <InlineButtonProgress label="Working..." /> : "Confirm & Paid"}
-                </button>
-                <button
-                  className="sfmBtnPrimary sbmBtnCreateConfirm"
-                  data-cm-primary="true"
-                  type="button"
-                  disabled={busy || !canAdd || !canUpdate}
-                  title="Post stock and leave invoice unpaid (collect payment later in Customers or Customer Payments)."
-                  onClick={() => { setSubmitted(true); createAndConfirm(); }}
-                >
-                  {busy ? <InlineButtonProgress label="Working..." /> : "Create & Confirm"}
-                </button>
-              </>
-            ) : null}
-            {!isAddMode && isDraftModalEdit && canUpdate ? (
-              <>
-                <button
-                  className="sfmBtnGhost sbmBtnCreateConfirm"
-                  type="button"
-                  disabled={busy || !isDraftModalEdit || !canUpdate}
-                  title="Post stock and record full amount as cash on this bill."
-                  onClick={() => { setSubmitted(true); saveAndConfirmDraft({ markPaidAtConfirm: true }); }}
-                >
-                  {busy ? <InlineButtonProgress label="Working..." /> : "Confirm & Paid"}
-                </button>
-                <button
-                  className="sfmBtnPrimary sbmBtnCreateConfirm"
-                  data-cm-primary="true"
-                  type="button"
-                  disabled={busy || !isDraftModalEdit || !canUpdate}
-                  title={formIsBlocked ? "Fix line errors before confirming." : "Post stock; invoice stays unpaid until you record payment."}
-                  onClick={() => { setSubmitted(true); saveAndConfirmDraft({ markPaidAtConfirm: false }); }}
-                >
-                  {busy ? <InlineButtonProgress label="Working..." /> : "Save & Confirm"}
-                </button>
-              </>
+            {(isAddMode || isDraftModalEdit) && canUpdate ? (
+              <button
+                className="sfmBtnPrimary sbmBtnCreateConfirm"
+                data-cm-primary="true"
+                type="button"
+                disabled={busy || (isAddMode ? !canAdd : !isDraftModalEdit)}
+                title={
+                  form.collectPaymentNow
+                    ? `Post stock and record ${formatPaymentModeLabel(form.paymentMode)} payment.`
+                    : "Post stock on credit; collect payment later from Customer Payments."
+                }
+                onClick={() => {
+                  setSubmitted(true);
+                  if (isAddMode) void performSaveDraft({ confirmAfterSave: true });
+                  else void saveAndConfirmDraft();
+                }}
+              >
+                {busy ? (
+                  <InlineButtonProgress label="Working..." />
+                ) : form.collectPaymentNow ? (
+                  `Confirm & ${formatPaymentModeLabel(form.paymentMode)}`
+                ) : (
+                  "Confirm (on credit)"
+                )}
+              </button>
             ) : null}
           </div>
         }
@@ -1992,6 +2048,8 @@ export default function SalesBillingPage() {
                     walkInDoctorName: "",
                     walkInPrescriptionNo: "",
                     cashReceived: "",
+                    collectPaymentNow: true,
+                    paymentMode: "CASH",
                     rateType: isRetailer ? "MRP" : "SALES_RATE",
                     billType: "CASH_MEMO",
                     globalDiscountPercent: 0,
@@ -2604,6 +2662,52 @@ export default function SalesBillingPage() {
               </div>
             </div>
 
+            {/* Payment collection */}
+            <div className="sbmPaymentRow piSection" style={{ marginTop: 12 }}>
+              <div className="piSectionBody">
+                <div className="sbmPaymentOpts">
+                  <label className="sbmPayOpt">
+                    <input
+                      type="radio"
+                      name="sbmCollectPayment"
+                      checked={form.collectPaymentNow === true}
+                      onChange={() => setForm((p) => ({ ...p, collectPaymentNow: true }))}
+                    />
+                    <span>Receive payment now</span>
+                  </label>
+                  <label className="sbmPayOpt">
+                    <input
+                      type="radio"
+                      name="sbmCollectPayment"
+                      checked={form.collectPaymentNow === false}
+                      onChange={() => setForm((p) => ({ ...p, collectPaymentNow: false }))}
+                    />
+                    <span>On credit (pay later)</span>
+                  </label>
+                </div>
+                {form.collectPaymentNow ? (
+                  <div className="raField" style={{ maxWidth: 220, marginTop: 8 }}>
+                    <label>Payment method</label>
+                    <select
+                      className="raInput"
+                      value={form.paymentMode || "CASH"}
+                      onChange={(e) => setForm((p) => ({ ...p, paymentMode: e.target.value }))}
+                    >
+                      {CUSTOMER_PAYMENT_MODE_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <p className="sbmCashHint" style={{ marginTop: 8 }}>
+                    Invoice will be confirmed as unpaid. Record payment from Customer Payments or the invoice row.
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Cash row – retailer + walk-in */}
             {isRetailer && selectedCustomerIsWalkIn ? (
               <div className="sbmCashRow">
@@ -2629,7 +2733,7 @@ export default function SalesBillingPage() {
                   </div>
                 </div>
                 <div className="sbmCashHint sfmFull">
-                  For change only. Use Confirm &amp; Paid to record full cash, or Create &amp; Confirm to leave unpaid.
+                  For change only. Payment is recorded when you confirm with &quot;Receive payment now&quot; selected above.
                 </div>
               </div>
             ) : null}
@@ -2876,18 +2980,56 @@ export default function SalesBillingPage() {
       <ConfirmDialog
         open={confirm.open}
         title={confirm.type === "confirm" ? "Confirm invoice?" : "Cancel invoice?"}
-        message={confirm.type === "confirm" ? "This will post SALE stock transactions." : "This will cancel the invoice."}
-        confirmLabel={confirm.type === "confirm" ? "Confirm" : "Cancel invoice"}
+        message={
+          confirm.type === "confirm" ? (
+            <div>
+              <p style={{ margin: "0 0 10px" }}>This will post SALE stock transactions.</p>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(confirm.markPaid)}
+                  onChange={(e) => setConfirm((c) => ({ ...c, markPaid: e.target.checked }))}
+                />
+                Record payment on confirm
+              </label>
+              {confirm.markPaid ? (
+                <select
+                  className="raInput"
+                  value={confirm.paymentMode || "CASH"}
+                  onChange={(e) => setConfirm((c) => ({ ...c, paymentMode: e.target.value }))}
+                >
+                  {CUSTOMER_PAYMENT_MODE_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+            </div>
+          ) : (
+            "This will cancel the invoice."
+          )
+        }
+        confirmLabel={
+          confirm.type === "confirm"
+            ? confirm.markPaid
+              ? `Confirm & ${formatPaymentModeLabel(confirm.paymentMode)}`
+              : "Confirm (credit)"
+            : "Cancel invoice"
+        }
         cancelLabel="Close"
         busy={busy}
         danger={confirm.type !== "confirm"}
-        onClose={() => setConfirm({ open: false, id: "", type: "confirm" })}
+        onClose={() => setConfirm({ open: false, id: "", type: "confirm", markPaid: true, paymentMode: "CASH" })}
         onConfirm={async () => {
           if (!confirm.id) return;
           setBusy(true);
           try {
             if (confirm.type === "confirm") {
-              const pipe = await runSalesInvoiceConfirmPipeline(confirm.id);
+              const pipe = await runSalesInvoiceConfirmPipeline(confirm.id, {
+                markPaidAtConfirm: Boolean(confirm.markPaid),
+                paymentMode: confirm.paymentMode || "CASH",
+              });
               if (!pipe.ok) {
                 if (!pipe.aborted && pipe.toast) emitToast(pipe.toast);
                 return;
@@ -2900,7 +3042,7 @@ export default function SalesBillingPage() {
             else if (r.status !== 401) emitToast({ type: "error", ...parseApiErrorToast(r) });
           } finally {
             setBusy(false);
-            setConfirm({ open: false, id: "", type: "confirm" });
+            setConfirm({ open: false, id: "", type: "confirm", markPaid: true, paymentMode: "CASH" });
           }
         }}
       />
@@ -2908,7 +3050,38 @@ export default function SalesBillingPage() {
       <ConfirmDialog
         open={bulkConfirmSalesDialog.open}
         title="Confirm selected drafts?"
-        message={`Post stock and confirm ${bulkConfirmSalesDialog.ids?.length || 0} draft invoice(s)?`}
+        message={
+          <div>
+            <p style={{ margin: "0 0 10px" }}>
+              Post stock and confirm {bulkConfirmSalesDialog.ids?.length || 0} draft invoice(s)?
+            </p>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <input
+                type="checkbox"
+                checked={Boolean(bulkConfirmSalesDialog.markPaid)}
+                onChange={(e) =>
+                  setBulkConfirmSalesDialog((d) => ({ ...d, markPaid: e.target.checked }))
+                }
+              />
+              Record payment on confirm (cash counter)
+            </label>
+            {bulkConfirmSalesDialog.markPaid ? (
+              <select
+                className="raInput"
+                value={bulkConfirmSalesDialog.paymentMode || "CASH"}
+                onChange={(e) =>
+                  setBulkConfirmSalesDialog((d) => ({ ...d, paymentMode: e.target.value }))
+                }
+              >
+                {CUSTOMER_PAYMENT_MODE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            ) : null}
+          </div>
+        }
         confirmLabel="Confirm all"
         cancelLabel="Close"
         busy={bulkConfirmBusy}
@@ -2919,8 +3092,12 @@ export default function SalesBillingPage() {
           if (!ids.length) return;
           setBulkConfirmBusy(true);
           try {
-            const r = await bulkConfirmSalesInvoices({ ids });
-            setBulkConfirmSalesDialog({ open: false, ids: [] });
+            const r = await bulkConfirmSalesInvoices({
+              ids,
+              markPaidAtConfirm: Boolean(bulkConfirmSalesDialog.markPaid),
+              paymentMode: bulkConfirmSalesDialog.paymentMode || "CASH",
+            });
+            setBulkConfirmSalesDialog({ open: false, ids: [], markPaid: false, paymentMode: "CASH" });
             if (r.status >= 200 && r.status < 300 && r.json?.ok) {
               const failed = r.json?.data?.failed || [];
               if (failed.length) {

@@ -1,7 +1,11 @@
 const { fail } = require("../../shared/response");
-const { calculateInvoiceTotals, calculateLineItem } = require("../../shared/sales");
+const { calculateInvoiceTotals, calculateLineItem, refreshSalesInvoicePaymentTotals } = require("../../shared/sales");
 const { enforceFinancialLimits } = require("./_common");
 const { getRoleCodeForAccount } = require("../../shared/accountRoleProfile");
+const {
+  normalizeCustomerPaymentMode,
+  salesInvoicePaymentModeLabel,
+} = require("../../shared/paymentModes");
 
 /**
  * Post SALE inventory txns and mark invoice CONFIRMED. Shared by HTTP confirm and CSV import.
@@ -342,18 +346,20 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
   else if (markPaidFlag === false) shouldAutoCashSettle = false;
   else shouldAutoCashSettle = autoCashFromProfile;
   const totalAmt = Number(t.totalAmount);
-  const balanceDueAfter = shouldAutoCashSettle ? 0 : totalAmt;
-  const amountPaidAfter = shouldAutoCashSettle ? totalAmt : 0;
+  const settleMode = normalizeCustomerPaymentMode(confirmOptions?.paymentMode, "CASH");
+  const invoicePaymentMode = salesInvoicePaymentModeLabel(shouldAutoCashSettle, settleMode);
   const paymentNote =
     markPaidFlag === true
-      ? "Cash payment recorded on bill confirm."
+      ? `Payment (${settleMode}) recorded on bill confirm.`
       : "Auto-recorded on retailer walk-in/instant cash confirm";
   await q(
     `UPDATE sales_invoices
      SET status = 'CONFIRMED'::sales_invoice_status,
-         payment_status = CASE WHEN $11::boolean THEN 'PAID'::sales_payment_status ELSE 'UNPAID'::sales_payment_status END,
+         payment_status = CASE WHEN $9::boolean THEN 'PAID'::sales_payment_status ELSE 'UNPAID'::sales_payment_status END,
+         payment_mode = $10,
          subtotal = $3::numeric, total_discount = $4::numeric, total_gst = $5::numeric, total_amount = $6::numeric, round_off = $7::numeric,
-         balance_due = $9::numeric, amount_paid = $10::numeric,
+         balance_due = CASE WHEN $9::boolean THEN 0::numeric ELSE $6::numeric END,
+         amount_paid = CASE WHEN $9::boolean THEN $6::numeric ELSE 0::numeric END,
          confirmed_by_user_id = $8, confirmed_at = now(), updated_at = now(),
          large_b2c_flag = CASE WHEN b2b_b2c_tag = 'B2C' AND $6::numeric > 250000 THEN TRUE ELSE FALSE END
      WHERE id = $1 AND account_id = $2`,
@@ -366,9 +372,8 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
       totalAmt,
       t.roundOff,
       actorId,
-      balanceDueAfter,
-      amountPaidAfter,
-      shouldAutoCashSettle
+      shouldAutoCashSettle,
+      invoicePaymentMode,
     ]
   );
   if (shouldAutoCashSettle && totalAmt > 0.0001) {
@@ -376,9 +381,10 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
       `INSERT INTO customer_payments (
          account_id, customer_id, sales_invoice_id, allocation_type, payment_date, amount, payment_mode, notes, created_by_user_id
        )
-       VALUES ($1,$2,$3,'INVOICE',CURRENT_DATE,$4::numeric,'CASH'::customer_payment_mode_type,$5,$6)`,
-      [accountId, invoice.customer_id, invoiceId, totalAmt, paymentNote, actorId]
+       VALUES ($1,$2,$3,'INVOICE',CURRENT_DATE,$4::numeric,$5::customer_payment_mode_type,$6,$7)`,
+      [accountId, invoice.customer_id, invoiceId, totalAmt, settleMode, paymentNote, actorId]
     );
+    await refreshSalesInvoicePaymentTotals(q, accountId, invoiceId);
   }
   if (isRetailer) {
     for (const item of items) {

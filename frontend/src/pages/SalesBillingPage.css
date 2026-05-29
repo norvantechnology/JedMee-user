@@ -600,6 +600,27 @@
   color: var(--color-success, #16a34a);
 }
 
+.sbmPaymentOpts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.sbmPayOpt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  cursor: pointer;
+}
+
+.sbmPaymentRow .piSectionBody {
+  padding: 12px 14px;
+}
+
 .sbmCashHint {
   grid-column: 1 / -1;
   font-size: 11px;
@@ -1336,6 +1357,27 @@
 }
 
 /* ─── Cash hint — de-emphasised ──────────────────────────────────────────── */
+.sbmPaymentOpts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.sbmPayOpt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-2);
+  cursor: pointer;
+}
+
+.sbmPaymentRow .piSectionBody {
+  padding: 12px 14px;
+}
+
 .sbmCashHint {
   grid-column: 1 / -1;
   font-size: 11px;

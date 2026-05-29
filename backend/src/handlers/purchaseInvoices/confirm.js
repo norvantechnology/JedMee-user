@@ -6,6 +6,7 @@ const { withTransaction } = require("../../shared/db");
 const { clean } = require("../../shared/purchase");
 const { refreshLowStockNotifications } = require("../../shared/lowStockInstantNotify");
 const { runConfirmPurchaseInvoiceInTx } = require("./runConfirmPurchaseCore");
+const { parseConfirmPaymentOptions } = require("../../shared/paymentModes");
 
 async function handler(event) {
   const auth = await requirePermission(event, "PURCHASE_INVOICES", "UPDATE");
@@ -20,8 +21,14 @@ async function handler(event) {
   let lastQueryLabel = "init";
 
   try {
+    const confirmOptions = parseConfirmPaymentOptions(body);
     const data = await withTransaction(async (rawQ) => {
-      return runConfirmPurchaseInvoiceInTx(rawQ, { accountId: ctx.accountId, actorId }, id, clean(body.confirmNote) || null);
+      return runConfirmPurchaseInvoiceInTx(
+        rawQ,
+        { accountId: ctx.accountId, actorId, confirmOptions },
+        id,
+        clean(body.confirmNote) || null
+      );
     });
 
     if (data?.err) return data.err;
