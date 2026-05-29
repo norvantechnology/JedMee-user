@@ -1,6 +1,9 @@
 const { query } = require("./db");
 const { notifyUsersSubquery } = require("./jobs/lowStockDailyDigest");
 const { sendPushNotification } = require("./fcm");
+const { getNotificationMeta } = require("./notifications/notificationCatalog");
+const { insertNotificationsForNotifyUsers } = require("./notifications/notificationSchema");
+const { filterUserIdsForPush } = require("./notifications/notificationDispatcher");
 
 function uniqIds(ids) {
   const out = [];
@@ -25,19 +28,17 @@ function fmtQty(n) {
  * @param {{ type: string, title: string, body: string, payload?: object, actionLabel?: string, actionPath?: string }} n
  */
 async function insertInventoryAlertNotifications(accountId, n) {
-  const payloadJson = JSON.stringify(n.payload || {});
   const actionLabel = n.actionLabel != null ? String(n.actionLabel) : "View products";
   const actionPath = n.actionPath != null ? String(n.actionPath) : "/quality-master";
-  await query(
-    `
-    INSERT INTO user_notifications (
-      account_id, user_id, type, title, body, payload, action_label, action_path, dedupe_key, created_by_user_id
-    )
-    SELECT $1, nu.id, $2, $3, $4, $5::jsonb, $6, $7, NULL, NULL
-    FROM (${notifyUsersSubquery()}) nu
-    `,
-    [accountId, n.type, n.title, n.body, payloadJson, actionLabel, actionPath]
-  );
+  await insertNotificationsForNotifyUsers(accountId, notifyUsersSubquery(), {
+    type: n.type,
+    title: n.title,
+    body: n.body,
+    payload: n.payload || {},
+    actionLabel,
+    actionPath,
+    dedupeKeyExpr: "NULL",
+  });
 }
 
 async function ensureNotifyStateRow(accountId, scope, entityId) {
@@ -244,7 +245,8 @@ async function evaluateProducts(accountId, productRows) {
 
     // Send push notification to eligible users.
     // eslint-disable-next-line no-await-in-loop
-    const userIds = await getNotifyUserIds(accountId);
+    const userIds = await filterUserIdsForPush(await getNotifyUserIds(accountId), "LOW_STOCK_PRODUCT");
+    if (!userIds.length) continue;
     // eslint-disable-next-line no-await-in-loop
     await sendPushNotification({
       userIds,
@@ -252,7 +254,7 @@ async function evaluateProducts(accountId, productRows) {
       body,
       type: "LOW_STOCK_PRODUCT",
       actionPath,
-      data: { productId: pid }
+      data: { priority: "P2", category: "INVENTORY", productId: pid },
     });
   }
 }

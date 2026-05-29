@@ -177,6 +177,8 @@ const ROUTES = {
   // ── Notifications ───────────────────────────────────────────────────────────
   'GET /notifications':               '../notifications/list',
   'GET /notifications/unread-count':  '../notifications/unreadCount',
+  'GET /notifications/preferences':   '../notifications/preferencesRoute',
+  'PATCH /notifications/preferences': '../notifications/preferencesRoute',
   'POST /notifications/mark-read':    '../notifications/markRead',
   'POST /notifications/broadcast':    '../notifications/createBroadcast',
   'POST /notifications/fcm-token':    '../notifications/saveFcmToken',

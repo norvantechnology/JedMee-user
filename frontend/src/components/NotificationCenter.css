@@ -218,6 +218,10 @@
   }
   
   /* ── Notification item ── */
+  .nfyItem_clickable {
+    cursor: pointer;
+  }
+
   .nfyItem {
     position: relative;
     display: flex;

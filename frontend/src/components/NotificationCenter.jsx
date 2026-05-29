@@ -43,6 +43,37 @@ function fmtTimeOnly(iso) {
   catch { return ""; }
 }
 
+function parseNotificationPayload(payload) {
+  if (payload == null) return {};
+  if (typeof payload === "object" && !Array.isArray(payload)) return payload;
+  if (typeof payload === "string") {
+    try {
+      const parsed = JSON.parse(payload);
+      return typeof parsed === "object" && parsed && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
+function resolveNotificationPath(n) {
+  let path = String(n.action_path || n.actionPath || "").trim();
+  if (path === "/products") path = "/quality-master";
+  const payload = parseNotificationPayload(n.payload);
+  if (path === "/quality-master") {
+    const productId = payload.productId ?? payload.product_id;
+    if (productId) path = `/quality-master/${productId}`;
+  }
+  return path || null;
+}
+
+function normalizeNotification(n) {
+  const payload = parseNotificationPayload(n.payload);
+  const action_path = resolveNotificationPath({ ...n, payload }) || n.action_path || n.actionPath || null;
+  return { ...n, payload, action_path };
+}
+
 function buildNotificationRows(items) {
   const rows = [];
   let lastDay = null;
@@ -58,23 +89,32 @@ function buildNotificationRows(items) {
 }
 
 function severityForNotification(n) {
+  const p = String(n.priority || "").toUpperCase();
+  if (p === "P1") return "crit";
+  if (p === "P2") return "warn";
+  if (p === "P4") return "info";
   const t = String(n.type || "").toUpperCase();
+  if (t.includes("EXPIRED") || t === "STOCK_ZERO") return "crit";
+  if (t.includes("OVERDUE") || t.includes("EXPIRING")) return "warn";
   if (t.includes("LOW_STOCK")) {
     const thr = Number(n.payload?.threshold);
     const qty = Number(n.payload?.total ?? n.payload?.qty);
     if (Number.isFinite(thr) && Number.isFinite(qty) && thr > 0 && qty <= thr / 2) return "crit";
     return "warn";
   }
-  if (t.includes("ADMIN") || t.includes("BROADCAST")) return "info";
   return "info";
 }
 
-function severityLabel(n, tone) {
+function severityLabel(n) {
+  const p = String(n.priority || "").toUpperCase();
+  if (p) return p;
   const t = String(n.type || "").toUpperCase();
-  if (t === "LOW_STOCK_PRODUCT") return "Product low stock";
-  if (t === "LOW_STOCK_BATCH")   return "Batch low stock";
-  if (t === "LOW_STOCK_DAILY")   return "Daily summary";
-  return t.replace(/_/g, " ").toLowerCase() || "Update";
+  if (t === "LOW_STOCK_PRODUCT") return "P2";
+  if (t === "LOW_STOCK_BATCH") return "P2";
+  if (t === "EXPIRED_BATCH") return "P1";
+  if (t === "BATCH_EXPIRING_SOON") return "P2";
+  if (t === "PAYABLE_OVERDUE" || t === "RECEIVABLE_OVERDUE") return "P2";
+  return "P3";
 }
 
 function SeverityIcon({ tone }) {
@@ -116,7 +156,7 @@ export default function NotificationCenter() {
   const fetchPage = useCallback(async (offset, append) => {
     const r = await listNotifications({ limit: PAGE_SIZE, offset });
     if (r.status >= 200 && r.status < 300 && r.json?.ok) {
-      const newItems = r.json?.data?.items || [];
+      const newItems = (r.json?.data?.items || []).map(normalizeNotification);
       const hm = r.json?.data?.has_more;
       const more = hm !== undefined && hm !== null ? Boolean(hm) : newItems.length >= PAGE_SIZE;
       setHasMore(more);
@@ -214,7 +254,8 @@ export default function NotificationCenter() {
         await refreshUnread();
       }
     }
-    if (n.action_path) { setOpen(false); navigate(n.action_path); }
+    const path = resolveNotificationPath(n);
+    if (path) { setOpen(false); navigate(path); }
   }
 
   return (
@@ -295,8 +336,16 @@ export default function NotificationCenter() {
               return (
                 <div
                   key={row.key}
-                  className={`nfyItem nfyItem_${tone}${isUnread ? " nfyItem_unread" : ""}`}
+                  className={`nfyItem nfyItem_${tone}${isUnread ? " nfyItem_unread" : ""}${resolveNotificationPath(n) ? " nfyItem_clickable" : ""}`}
                   role="listitem"
+                  onClick={() => void onOpenItem(n)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      void onOpenItem(n);
+                    }
+                  }}
+                  tabIndex={resolveNotificationPath(n) ? 0 : undefined}
                 >
                   {/* Left accent + icon */}
                   <div className={`nfyIcon nfyIcon_${tone}`}>
@@ -314,7 +363,7 @@ export default function NotificationCenter() {
 
                     <div className="nfyRow2">
                       <span className={`nfyChip nfyChip_${tone}`}>
-                        {severityLabel(n, tone)}
+                        {severityLabel(n)}
                         {qty !== undefined && thr !== undefined && (
                           <span className="nfyChipSub"> · {qty}/{thr}</span>
                         )}
@@ -324,7 +373,7 @@ export default function NotificationCenter() {
                         <button
                           type="button"
                           className="nfyActLink"
-                          onClick={() => onOpenItem(n)}
+                          onClick={(e) => { e.stopPropagation(); onOpenItem(n); }}
                         >
                           {n.action_label || "Open"}
                           <IconArrowRight />

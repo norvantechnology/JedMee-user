@@ -1,5 +1,8 @@
 const { query } = require("../../shared/db");
-const { sendPushToAccount } = require("../../shared/fcm");
+const { sendPushNotification } = require("../../shared/fcm");
+const { filterUserIdsForPush } = require("../../shared/notifications/notificationDispatcher");
+const { getNotificationMeta, shouldSendPush } = require("../../shared/notifications/notificationCatalog");
+const { insertNotificationRow } = require("../../shared/notifications/notificationSchema");
 
 function clean(v) {
   return String(v ?? "").trim();
@@ -126,23 +129,28 @@ async function createInAppNotification(
   payload = null, actionPath = null, actionLabel = null,
   extraData = {}, dataOnly = false
 ) {
-  await q(
-    `
-    INSERT INTO user_notifications (
-      account_id, user_id, type, title, body, payload, action_path, action_label, created_by_user_id
-    )
-    VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$2)
-    `,
-    [accountId, userId, type, title, body, JSON.stringify(payload || {}), actionPath || null, actionLabel || null]
-  );
-  // Fire push notification to all active users of the account (fire-and-forget —
-  // push failure must never roll back the DB transaction).
-  sendPushToAccount(accountId, {
+  const meta = getNotificationMeta(type);
+  await insertNotificationRow(q, {
+    accountId,
+    userId,
+    type,
+    title,
+    body,
+    payload: payload || {},
+    actionPath: actionPath || meta.actionPath,
+    actionLabel,
+    createdByUserId: userId,
+  });
+  if (!shouldSendPush(type)) return;
+  const pushUserIds = await filterUserIdsForPush([userId], type);
+  if (!pushUserIds.length) return;
+  sendPushNotification({
+    userIds: pushUserIds,
     title,
     body,
     type,
-    actionPath: actionPath || "",
-    data: extraData,
+    actionPath: actionPath || meta.actionPath || "",
+    data: { priority: meta.priority, category: meta.category, ...extraData },
     dataOnly,
   }).catch((err) =>
     console.error(`[orders:createInAppNotification] Push failed (${type}):`, err)

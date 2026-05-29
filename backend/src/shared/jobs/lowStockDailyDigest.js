@@ -1,5 +1,7 @@
 const { query } = require("../db");
 const { sendPushNotification } = require("../fcm");
+const { filterUserIdsForPush } = require("../notifications/notificationDispatcher");
+const { getNotificationMeta } = require("../notifications/notificationCatalog");
 
 /**
  * Count products (SKU-level) in low-stock state for an account.
@@ -97,46 +99,56 @@ async function insertLowStockDigestForAccount(accountId, ymd) {
   if (lowBatches > 0) parts.push(`${lowBatches} batch${lowBatches === 1 ? "" : "es"} running low`);
   const body = `You have ${parts.join(" and ")}. Please check your inventory.`;
 
-  const payload = JSON.stringify({
+  const payloadJson = JSON.stringify({
     lowProductCount: lowProducts,
     lowBatchCount: lowBatches,
-    runDate: ymd
+    runDate: ymd,
   });
+  const dailyMeta = getNotificationMeta("LOW_STOCK_DAILY");
+  const { hasPriorityColumns } = require("../notifications/notificationSchema");
+  const extended = await hasPriorityColumns();
 
-  const ins = await query(
-    `
-    INSERT INTO user_notifications (
-      account_id,
-      user_id,
-      type,
-      title,
-      body,
-      payload,
-      action_label,
-      action_path,
-      dedupe_key
-    )
-    SELECT
-      $1,
-      nu.id,
-      'LOW_STOCK_DAILY',
-      $2,
-      $3,
-      $4::jsonb,
-      'View products',
-      '/quality-master',
-      'LOW_STOCK_DAILY:' || $5 || ':' || nu.id::text
-    FROM (${notifyUsersSubquery()}) nu
-    WHERE NOT EXISTS (
-      SELECT 1
-      FROM user_notifications un
-      WHERE un.user_id = nu.id
-        AND un.dedupe_key = ('LOW_STOCK_DAILY:' || $5 || ':' || nu.id::text)
-    )
-    RETURNING id
-    `,
-    [accountId, title, body, payload, ymd]
-  );
+  const ins = extended
+    ? await query(
+        `
+        INSERT INTO user_notifications (
+          account_id, user_id, type, title, body, payload,
+          action_label, action_path, dedupe_key, priority, category
+        )
+        SELECT
+          $1, nu.id, 'LOW_STOCK_DAILY', $2, $3, $4::jsonb,
+          'View products', '/quality-master',
+          'LOW_STOCK_DAILY:' || $5 || ':' || nu.id::text, $6, $7
+        FROM (${notifyUsersSubquery()}) nu
+        WHERE NOT EXISTS (
+          SELECT 1 FROM user_notifications un
+          WHERE un.user_id = nu.id
+            AND un.dedupe_key = ('LOW_STOCK_DAILY:' || $5 || ':' || nu.id::text)
+        )
+        RETURNING id
+        `,
+        [accountId, title, body, payloadJson, ymd, dailyMeta.priority, dailyMeta.category]
+      )
+    : await query(
+        `
+        INSERT INTO user_notifications (
+          account_id, user_id, type, title, body, payload,
+          action_label, action_path, dedupe_key
+        )
+        SELECT
+          $1, nu.id, 'LOW_STOCK_DAILY', $2, $3, $4::jsonb,
+          'View products', '/quality-master',
+          'LOW_STOCK_DAILY:' || $5 || ':' || nu.id::text
+        FROM (${notifyUsersSubquery()}) nu
+        WHERE NOT EXISTS (
+          SELECT 1 FROM user_notifications un
+          WHERE un.user_id = nu.id
+            AND un.dedupe_key = ('LOW_STOCK_DAILY:' || $5 || ':' || nu.id::text)
+        )
+        RETURNING id
+        `,
+        [accountId, title, body, payloadJson, ymd]
+      );
 
   const inserted = (ins.rows || []).length;
 
@@ -148,17 +160,22 @@ async function insertLowStockDigestForAccount(accountId, ymd) {
         [accountId]
       );
       const userIds = (r.rows || []).map((row) => String(row.id));
-      await sendPushNotification({
-        userIds,
-        title,
-        body,
-        type: "LOW_STOCK_DAILY",
-        actionPath: "/quality-master",
-        data: {
-          lowProductCount: String(lowProducts),
-          lowBatchCount: String(lowBatches)
-        }
-      });
+      const pushUserIds = await filterUserIdsForPush(userIds, "LOW_STOCK_DAILY");
+      if (pushUserIds.length) {
+        await sendPushNotification({
+          userIds: pushUserIds,
+          title,
+          body,
+          type: "LOW_STOCK_DAILY",
+          actionPath: "/quality-master",
+          data: {
+            priority: dailyMeta.priority,
+            category: dailyMeta.category,
+            lowProductCount: String(lowProducts),
+            lowBatchCount: String(lowBatches),
+          },
+        });
+      }
     } catch (pushErr) {
       console.error("[lowStockDailyDigest] Push notification failed:", pushErr);
     }

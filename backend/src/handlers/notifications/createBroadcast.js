@@ -4,6 +4,8 @@ const { parseJsonBody } = require("../../shared/request");
 const { requireApprovedUser } = require("../../shared/auth");
 const { getPermissionsForUser, hasPermission } = require("../../shared/permissions");
 const { sendPushNotification } = require("../../shared/fcm");
+const { filterUserIdsForPush } = require("../../shared/notifications/notificationDispatcher");
+const { getNotificationMeta } = require("../../shared/notifications/notificationCatalog");
 
 function clean(v) {
   return String(v ?? "").trim();
@@ -38,55 +40,78 @@ async function handler(event) {
 
   try {
     const payloadJson = JSON.stringify({ source: "admin_broadcast" });
+    const meta = getNotificationMeta("ADMIN_BROADCAST");
+    const { hasPriorityColumns } = require("../../shared/notifications/notificationSchema");
+    const extended = await hasPriorityColumns();
 
     // Determine which user IDs will receive the notification (for push).
     let targetUserIds = [];
 
     const sent = await withTransaction(async (q) => {
+      const insertCols = extended
+        ? `account_id, user_id, type, title, body, payload, action_label, action_path, dedupe_key, priority, category, created_by_user_id`
+        : `account_id, user_id, type, title, body, payload, action_label, action_path, dedupe_key, created_by_user_id`;
+      const selectVals = extended
+        ? `$1, u.id, 'ADMIN_BROADCAST', $2, $3, $4::jsonb, $5, $6, NULL, $8, $9, $7`
+        : `$1, u.id, 'ADMIN_BROADCAST', $2, $3, $4::jsonb, $5, $6, NULL, $7`;
+      const baseParams = [
+        ctx.accountId,
+        title,
+        msg,
+        payloadJson,
+        actionLabel || null,
+        actionPath || null,
+        actorId,
+      ];
+      const allParams = extended
+        ? [...baseParams, meta.priority, meta.category]
+        : baseParams;
+
       const r =
         audience === "selected"
           ? await q(
               `
-              INSERT INTO user_notifications (
-                account_id, user_id, type, title, body, payload, action_label, action_path, dedupe_key, created_by_user_id
-              )
-              SELECT $1, u.id, 'ADMIN_BROADCAST', $2, $3, $4::jsonb, $5, $6, NULL, $7
+              INSERT INTO user_notifications (${insertCols})
+              SELECT ${selectVals}
               FROM app_users u
               WHERE u.account_id = $1
                 AND u.status = 'APPROVED'
                 AND u.is_blocked = false
-                AND u.id = ANY($8::uuid[])
+                AND u.id = ANY($${extended ? 10 : 8}::uuid[])
               RETURNING id, user_id
               `,
-              [ctx.accountId, title, msg, payloadJson, actionLabel || null, actionPath || null, actorId, userIds]
+              [...allParams, userIds]
             )
           : await q(
               `
-              INSERT INTO user_notifications (
-                account_id, user_id, type, title, body, payload, action_label, action_path, dedupe_key, created_by_user_id
-              )
-              SELECT $1, u.id, 'ADMIN_BROADCAST', $2, $3, $4::jsonb, $5, $6, NULL, $7
+              INSERT INTO user_notifications (${insertCols})
+              SELECT ${selectVals}
               FROM app_users u
               WHERE u.account_id = $1
                 AND u.status = 'APPROVED'
                 AND u.is_blocked = false
               RETURNING id, user_id
               `,
-              [ctx.accountId, title, msg, payloadJson, actionLabel || null, actionPath || null, actorId]
+              allParams
             );
       targetUserIds = (r.rows || []).map((row) => String(row.user_id));
       return (r.rows || []).length;
     });
 
-    // Send push notification to all users who received the DB notification.
-    if (targetUserIds.length > 0) {
+    const pushUserIds = await filterUserIdsForPush(targetUserIds, "ADMIN_BROADCAST");
+
+    if (pushUserIds.length > 0) {
       sendPushNotification({
-        userIds: targetUserIds,
+        userIds: pushUserIds,
         title,
         body: msg,
         type: "ADMIN_BROADCAST",
         actionPath: actionPath || "",
-        data: { source: "admin_broadcast" }
+        data: {
+          source: "admin_broadcast",
+          priority: meta.priority,
+          category: meta.category,
+        },
       }).catch((err) => console.error("[notifications:createBroadcast] Push failed:", err));
     }
 

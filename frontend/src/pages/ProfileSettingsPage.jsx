@@ -5,6 +5,9 @@ import AppShell from "../layouts/AppShell.jsx";
 import { onAuthChanged, readAuth, saveAuthUser } from "../services/authStorage.js";
 import DocumentUploadField from "../components/DocumentUploadField.jsx";
 import { updateMe } from "../services/userService.js";
+import { getNotificationPreferences, updateNotificationPreferences } from "../services/notificationService.js";
+import { emitToast } from "../services/toastBus.js";
+import { parseApiError } from "../utils/api.js";
 import { clean } from "../utils/format.js";
 import { useCurrency } from "../context/CurrencyContext.jsx";
 import { CURRENCY_LIST } from "../utils/currency.js";
@@ -46,16 +49,59 @@ export default function ProfileSettingsPage() {
     business: false,
     docs: false,
     address: false,
+    notifications: false,
     preferences: false,
   });
   const { code: activeCurrencyCode, config: activeCurrencyConfig, setCurrency } = useCurrency();
   const { countryCode, countryConfig, setCountry, taxIdLabel } = useLocale();
   const [currencyPending, setCurrencyPending] = useState(null);
   const [countryPending, setCountryPending] = useState(null);
+  const [notifPrefs, setNotifPrefs] = useState({
+    push_enabled: true,
+    email_digest_enabled: true,
+    push_critical_only: false,
+  });
+  const [notifPrefsLoading, setNotifPrefsLoading] = useState(true);
+  const [notifPrefsBusy, setNotifPrefsBusy] = useState(false);
 
   useEffect(() => {
     return onAuthChanged(() => setAuthTick((t) => t + 1));
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setNotifPrefsLoading(true);
+      const r = await getNotificationPreferences();
+      if (!cancelled && r.status >= 200 && r.status < 300 && r.json?.ok) {
+        const d = r.json?.data || {};
+        setNotifPrefs({
+          push_enabled: d.push_enabled !== false,
+          email_digest_enabled: d.email_digest_enabled !== false,
+          push_critical_only: d.push_critical_only === true,
+        });
+      }
+      if (!cancelled) setNotifPrefsLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [authTick]);
+
+  async function saveNotifPref(patch) {
+    setNotifPrefsBusy(true);
+    const next = { ...notifPrefs, ...patch };
+    const r = await updateNotificationPreferences(patch);
+    if (r.status >= 200 && r.status < 300 && r.json?.ok) {
+      const d = r.json?.data || next;
+      setNotifPrefs({
+        push_enabled: d.push_enabled !== false,
+        email_digest_enabled: d.email_digest_enabled !== false,
+        push_critical_only: d.push_critical_only === true,
+      });
+    } else if (r.status !== 401) {
+      emitToast({ type: "error", message: parseApiError(r) });
+    }
+    setNotifPrefsBusy(false);
+  }
 
   const initial = useMemo(() => {
     // eslint-disable-next-line no-unused-vars
@@ -169,7 +215,14 @@ export default function ProfileSettingsPage() {
               </div>
             </div>
             <div className="hero-btns">
-              <button className="btn-ghost-sm" type="button" disabled>
+              <button
+                className="btn-ghost-sm"
+                type="button"
+                onClick={() => {
+                  setCollapsed((p) => ({ ...p, notifications: false }));
+                  document.getElementById("s-notifications")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+              >
                 <IconPsBell />
                 Notifications
               </button>
@@ -536,6 +589,76 @@ export default function ProfileSettingsPage() {
                   <input className="form-input status-ok" type="text" value={user?.email_verified ? "Yes" : "No"} readOnly />
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* ── Notifications ── */}
+          <div className={`section-card ${collapsed.notifications ? "collapsed" : ""}`} id="s-notifications">
+            <div
+              className="section-hdr"
+              role="button"
+              tabIndex={0}
+              onClick={() => setCollapsed((p) => ({ ...p, notifications: !p.notifications }))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") setCollapsed((p) => ({ ...p, notifications: !p.notifications }));
+              }}
+            >
+              <div className="section-hdr-left">
+                <div className="section-icon">
+                  <IconPsBell size={18} strokeWidth={1.75} />
+                </div>
+                <div>
+                  <div className="section-title">Notifications</div>
+                  <div className="section-desc">Push alerts and daily email digest</div>
+                </div>
+              </div>
+              <div className="section-chevron">
+                <IconPsChevronDown />
+              </div>
+            </div>
+            <div className="section-body">
+              {notifPrefsLoading ? (
+                <p className="psCurrencyHint">Loading notification settings…</p>
+              ) : (
+                <div className="psNotifPrefs">
+                  <label className="psNotifRow">
+                    <span>
+                      <strong>Mobile push notifications</strong>
+                      <span className="psNotifRowHint">Alerts on your phone when inventory or orders need attention</span>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={notifPrefs.push_enabled}
+                      disabled={notifPrefsBusy}
+                      onChange={(e) => void saveNotifPref({ push_enabled: e.target.checked })}
+                    />
+                  </label>
+                  <label className="psNotifRow">
+                    <span>
+                      <strong>Critical alerts only</strong>
+                      <span className="psNotifRowHint">Only P1/P2 pushes (expiry, stock-outs, overdue payments)</span>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={notifPrefs.push_critical_only}
+                      disabled={notifPrefsBusy || !notifPrefs.push_enabled}
+                      onChange={(e) => void saveNotifPref({ push_critical_only: e.target.checked })}
+                    />
+                  </label>
+                  <label className="psNotifRow">
+                    <span>
+                      <strong>Daily email digest</strong>
+                      <span className="psNotifRowHint">Summary of inventory and payment reminders</span>
+                    </span>
+                    <input
+                      type="checkbox"
+                      checked={notifPrefs.email_digest_enabled}
+                      disabled={notifPrefsBusy}
+                      onChange={(e) => void saveNotifPref({ email_digest_enabled: e.target.checked })}
+                    />
+                  </label>
+                </div>
+              )}
             </div>
           </div>
 

@@ -1,4 +1,4 @@
-import { apiGet, apiPost } from "./apiClient.js";
+import { apiGet, apiPatch, apiPost } from "./apiClient.js";
 
 export async function listNotifications(params) {
   return await apiGet("/notifications", { toast: "none", params: params || {} });
@@ -14,4 +14,12 @@ export async function markNotificationsRead(payload) {
 
 export async function broadcastNotifications(payload) {
   return await apiPost("/notifications/broadcast", payload || {}, { toast: "auto" });
+}
+
+export async function getNotificationPreferences() {
+  return await apiGet("/notifications/preferences", { toast: "none" });
+}
+
+export async function updateNotificationPreferences(payload) {
+  return await apiPatch("/notifications/preferences", payload || {}, { toast: "auto" });
 }

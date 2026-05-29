@@ -2,6 +2,7 @@ const { ok, fail } = require("../../shared/response");
 const { query } = require("../../shared/db");
 const { requireApprovedUser } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
+const { listNotificationRows } = require("../../shared/notifications/notificationSchema");
 
 function clean(v) {
   return String(v ?? "").trim();
@@ -21,49 +22,15 @@ async function handler(event) {
   const unreadOnly = ["1", "true", "yes"].includes(clean(qs.unread_only || qs.unreadOnly).toLowerCase());
 
   try {
-    const rows = await query(
-      `
-      SELECT
-        id,
-        account_id,
-        user_id,
-        type,
-        title,
-        body,
-        payload,
-        action_label,
-        action_path,
-        dedupe_key,
-        read_at,
-        created_at,
-        created_by_user_id
-      FROM user_notifications
-      WHERE user_id = $1 AND account_id = $2
-        ${unreadOnly ? "AND read_at IS NULL" : ""}
-      ORDER BY created_at DESC
-      LIMIT $3 OFFSET $4
-      `,
-      [userId, ctx.accountId, limit, offset]
-    );
+    const items = await listNotificationRows({
+      userId,
+      accountId: ctx.accountId,
+      limit,
+      offset,
+      unreadOnly,
+    });
 
-    const raw = rows.rows || [];
-    const items = raw.map((r) => ({
-      id: r.id,
-      account_id: r.account_id,
-      user_id: r.user_id,
-      type: r.type,
-      title: r.title,
-      body: r.body,
-      payload: r.payload,
-      action_label: r.action_label,
-      action_path: r.action_path,
-      dedupe_key: r.dedupe_key,
-      read_at: r.read_at,
-      created_at: r.created_at,
-      created_by_user_id: r.created_by_user_id
-    }));
-
-    const has_more = raw.length === limit;
+    const has_more = items.length === limit;
 
     return ok({ items, has_more, offset, limit });
   } catch (e) {

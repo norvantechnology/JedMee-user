@@ -88,9 +88,29 @@ async function removeInvalidTokens(tokens) {
  *                                       field). Required for Android action buttons in background.
  *                                       title/body are included in the data payload instead.
  */
+function channelForPriority(priority, type) {
+  const t = String(type || "").toUpperCase();
+  if (t === "NEW_ORDER") return "jedmee_orders";
+  const p = String(priority || dataPriorityFallback(type)).toUpperCase();
+  if (p === "P1") return "jedmee_critical";
+  return "jedmee_default";
+}
+
+function dataPriorityFallback(type) {
+  try {
+    const { getNotificationMeta } = require("./notifications/notificationCatalog");
+    return getNotificationMeta(type).priority;
+  } catch {
+    return "P3";
+  }
+}
+
 async function sendPushNotification({ userIds, title, body, data = {}, type = "", actionPath = "", dataOnly = false }) {
   const messaging = getMessaging();
   if (!messaging) return; // Firebase not configured — skip silently.
+
+  const priority = data.priority || dataPriorityFallback(type);
+  const channelId = channelForPriority(priority, type);
 
   let tokenRows;
   try {
@@ -108,6 +128,7 @@ async function sendPushNotification({ userIds, title, body, data = {}, type = ""
   const dataPayload = {
     type: String(type || ""),
     actionPath: String(actionPath || ""),
+    priority: String(priority || "P3"),
     // For data-only messages, include title/body so the mobile app can display them.
     ...(dataOnly ? { title: String(title || ""), body: String(body || "") } : {}),
     ...Object.fromEntries(
@@ -145,7 +166,7 @@ async function sendPushNotification({ userIds, title, body, data = {}, type = ""
             android: {
               priority: "high",
               notification: {
-                channelId: "jedmee_default",
+                channelId,
                 sound: "default",
               },
             },
