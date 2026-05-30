@@ -71,7 +71,8 @@ async function handler(event) {
         wc.catalog_notes,
         wc.hide_when_out_of_stock,
         p.sales_gst,
-        COALESCE(stock.current_stock, 0) AS current_stock
+        COALESCE(stock.current_stock, 0) AS current_stock,
+        COALESCE(stock.total_quantity, stock.current_stock, 0) AS total_quantity
       FROM wholesaler_catalog wc
       JOIN products p ON p.id = wc.product_id AND p.account_id = wc.account_id AND p.deleted_at IS NULL
       JOIN app_users au ON au.id = wc.account_id

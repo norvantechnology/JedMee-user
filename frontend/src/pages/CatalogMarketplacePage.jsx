@@ -2,6 +2,7 @@ import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { AsyncButton } from "../components/ui/buttons.jsx";
 import { fmtMoney, fmtCurrency, getCurrencySymbol } from "../utils/format.js";
+import { productTotalQuantity } from "../utils/productStock.js";
 import { useEffect, useMemo, useState } from "react";
 import { Check, Users } from "lucide-react";
 import AppShell from "../layouts/AppShell.jsx";
@@ -71,7 +72,12 @@ export default function CatalogMarketplacePage() {
   const [editForm, setEditForm] = useState({ catalog_price: "", mrp: "", packing: "", min_order_qty: 1, max_order_qty: "", is_visible: true, hide_when_out_of_stock: true, catalog_notes: "" });
 
   const activeWholesaler = useMemo(() => wholesalers.find((w) => String(w.wholesaler_account_id || "") === String(wholesalerId || "")) || null, [wholesalers, wholesalerId]);
-  const mcStats = useMemo(() => ({ total: rows.length, visible: rows.filter(r => r.is_visible).length, hidden: rows.filter(r => !r.is_visible).length, oos: rows.filter(r => Number(r.current_stock || 0) === 0).length }), [rows]);
+  const mcStats = useMemo(() => ({
+    total: rows.length,
+    visible: rows.filter(r => r.is_visible).length,
+    hidden: rows.filter(r => !r.is_visible).length,
+    oos: rows.filter(r => productTotalQuantity(r) === 0).length
+  }), [rows]);
   const filteredAddProducts = useMemo(() => {
     const q = addProductSearch.toLowerCase();
     const existingIds = new Set(rows.map(r => String(r.product_id || "")));
@@ -227,7 +233,7 @@ export default function CatalogMarketplacePage() {
                     const min = Math.max(1, Number(row.min_order_qty || 1) || 1);
                     const rawMax = row.max_order_qty == null || row.max_order_qty === "" ? null : Number(row.max_order_qty || 0);
                     const max = rawMax != null && rawMax > 0 ? rawMax : null;
-                    const cardQty = getCardQty(row), stock = Number(row.current_stock || 0);
+                    const cardQty = getCardQty(row), stock = productTotalQuantity(row);
                     const outOfStock = stock === 0, lowStock = stock > 0 && stock <= 5;
                     return (
                       <div key={id} className={["cmpCard", inCart ? "cmpCard_inCart" : "", outOfStock ? "cmpCard_oos" : ""].filter(Boolean).join(" ")}>
@@ -315,7 +321,7 @@ export default function CatalogMarketplacePage() {
               ) : (
                 <div className="mcGrid">
                   {filteredRows.map((row) => {
-                    const stock = Number(row.current_stock || 0), oos = stock === 0, lo = stock > 0 && stock <= 10;
+                    const stock = productTotalQuantity(row), oos = stock === 0, lo = stock > 0 && stock <= 10;
                     return (
                       <div key={row.id} className={`mcCard${!row.is_visible ? " mcCard_hid" : ""}`}>
                         <span className={`mcVisBadge${row.is_visible ? " mcVisBadge_yes" : " mcVisBadge_no"}`}>{row.is_visible ? "Visible" : "Hidden"}</span>

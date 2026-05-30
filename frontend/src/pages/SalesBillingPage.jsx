@@ -2,6 +2,7 @@ import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { InlineButtonProgress } from "../components/ui/buttons.jsx";
 import { clean, fmtMoney, fmtCurrency, getCurrencySymbol } from "../utils/format.js";
+import { batchBillableQtyFromRow, batchFreeQtyFromRow } from "../utils/productStock.js";
 import { useLocale } from "../context/LocaleContext.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -164,20 +165,6 @@ function addDaysYmd(ymd, days) {
   if (Number.isNaN(d.getTime())) return "";
   d.setDate(d.getDate() + Math.max(0, Number(days) || 0));
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function batchBillableQtyFromRow(b) {
-  if (!b) return 0;
-  if (b.stock_billable_qty != null && b.stock_billable_qty !== "") return Number(b.stock_billable_qty);
-  if (b.current_stock != null && b.current_stock !== "") return Number(b.current_stock);
-  return Number(b.total_stock ?? 0);
-}
-
-function batchFreeQtyFromRow(b) {
-  if (!b) return 0;
-  if (b.stock_free_qty != null && b.stock_free_qty !== "") return Number(b.stock_free_qty);
-  if (b.current_free_stock != null && b.current_free_stock !== "") return Number(b.current_free_stock);
-  return 0;
 }
 
 /** Label for batch `<select>` and `batchSearch` (no billable/paid or free stock counts). */

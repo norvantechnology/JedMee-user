@@ -1,4 +1,5 @@
 import { fmtMoney, fmtCurrency } from "../../utils/format.js";
+import { productTotalQuantity } from "../../utils/productStock.js";
 import { AppButton } from "../ui/buttons.jsx";
 import CommonModal from "../CommonModal.jsx";
 import ModalFooterShell from "../ui/ModalFooterShell.jsx";
@@ -128,7 +129,7 @@ export default function OrderCatalogProductDetailsModal({ open, onClose, row }) 
             </div>
             <div className="cpd_statChip cpd_chipStock">
               <div className="cpd_statLabel">Current Stock</div>
-              <div className="cpd_statValue">{Number(row?.current_stock || 0)}</div>
+              <div className="cpd_statValue">{productTotalQuantity(row)}</div>
             </div>
           </div>
 

@@ -2,6 +2,11 @@ const { ok, fail } = require("../../shared/response");
 const { query } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
+const {
+  batchInventoryStockJoin,
+  batchBillableStockSql,
+  batchTotalStockSql
+} = require("../../shared/productStockSql");
 
 /**
  * GET /reports/product-supplier?q=<text>
@@ -73,11 +78,13 @@ async function handler(event) {
         p.id, p.code, p.name, p.drug_name, p.packing, p.hsn_code, p.rack_location,
         p.sales_gst, p.is_control,
         p.mfg_company_id, mc.name AS mfg_name, mc.short_name AS mfg_short,
-        COALESCE(SUM(CASE WHEN pb.deleted_at IS NULL THEN pb.current_stock ELSE 0 END), 0)::numeric(12,2) AS total_stock,
+        COALESCE(SUM(CASE WHEN pb.deleted_at IS NULL THEN ${batchTotalStockSql} ELSE 0 END), 0)::numeric(12,2) AS total_stock,
+        COALESCE(SUM(CASE WHEN pb.deleted_at IS NULL THEN ${batchTotalStockSql} ELSE 0 END), 0)::numeric(12,2) AS total_quantity,
         COALESCE(SUM(CASE WHEN pb.deleted_at IS NULL THEN pb.loose_stock ELSE 0 END), 0)::numeric(12,3) AS total_loose
       FROM products p
       LEFT JOIN mfg_companies mc ON mc.id = p.mfg_company_id AND mc.account_id = p.account_id
       LEFT JOIN product_batches pb ON pb.product_id = p.id AND pb.account_id = p.account_id AND pb.deleted_at IS NULL
+      ${batchInventoryStockJoin("$1")}
       WHERE ${where}
       GROUP BY p.id, mc.name, mc.short_name
       ORDER BY p.name ASC
@@ -156,11 +163,15 @@ async function handler(event) {
         SELECT
           pb.id, pb.product_id, pb.batch_no, pb.expiry_date, pb.mfg_date,
           pb.mrp, pb.purchase_rate, pb.sales_rate, pb.retail_rate, pb.special_rate_1, pb.special_rate_2,
-          pb.current_stock, pb.loose_stock, pb.loose_unit_name,
+          ${batchBillableStockSql} AS stock_billable_qty,
+          ${batchTotalStockSql} AS total_stock,
+          ${batchBillableStockSql} AS current_stock,
+          pb.loose_stock, pb.loose_unit_name,
           pb.sales_gst, pb.scheme_qty_paid, pb.scheme_qty_free,
           pb.is_hold, pb.hold_reason, pb.vendor_id,
           COALESCE(v.name, purch.vendor_name) AS supplier_name
         FROM product_batches pb
+        ${batchInventoryStockJoin("$1")}
         LEFT JOIN vendors v ON v.id = pb.vendor_id AND v.account_id = pb.account_id AND v.deleted_at IS NULL
         LEFT JOIN LATERAL (
           SELECT vsub.name AS vendor_name

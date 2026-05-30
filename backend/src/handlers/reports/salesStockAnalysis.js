@@ -2,6 +2,10 @@ const { ok, fail } = require("../../shared/response");
 const { query } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
+const {
+  batchInventoryStockJoin,
+  batchTotalStockSql
+} = require("../../shared/productStockSql");
 
 /**
  * GET /reports/sales-stock-analysis?from_date=YYYY-MM-DD&to_date=YYYY-MM-DD&search=&limit=500
@@ -77,17 +81,17 @@ async function handler(event) {
     const stockRes = await query(
       `
       SELECT
-        p.id                                          AS product_id,
-        COALESCE(SUM(pb.current_stock), 0)::numeric  AS current_stock,
-        COALESCE(SUM(pb.loose_stock),   0)::numeric  AS loose_stock,
-        COUNT(pb.id)::int                             AS batch_count
+        p.id AS product_id,
+        COALESCE(SUM(${batchTotalStockSql}), 0)::numeric AS current_stock,
+        COALESCE(SUM(pb.loose_stock), 0)::numeric AS loose_stock,
+        COUNT(pb.id)::int AS batch_count
       FROM product_batches pb
       JOIN products p
         ON p.id = pb.product_id
        AND p.account_id = pb.account_id
+      ${batchInventoryStockJoin("$1")}
       WHERE pb.account_id = $1
         AND pb.deleted_at IS NULL
-        AND pb.current_stock >= 0
       GROUP BY p.id
       `,
       [ctx.accountId]
