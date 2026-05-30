@@ -58,7 +58,8 @@ async function buildCustomerLedgerDoc({ accountId, customerId }) {
     query(
       `SELECT id, invoice_number, invoice_date, total_amount, payment_status, status, created_at
        FROM sales_invoices
-       WHERE account_id = $1 AND customer_id = $2 AND deleted_at IS NULL AND status <> 'CANCELLED'
+       WHERE account_id = $1 AND customer_id = $2 AND deleted_at IS NULL
+         AND status = 'CONFIRMED'::sales_invoice_status
        ORDER BY invoice_date ASC, created_at ASC`,
       [accountId, customerId]
     ),

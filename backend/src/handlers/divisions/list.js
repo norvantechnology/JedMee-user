@@ -36,9 +36,20 @@ async function handler(event) {
   try {
     const rows = await query(
       `
-      SELECT d.*, m.name AS mfg_company_name
+      SELECT d.*, m.name AS mfg_company_name,
+             COALESCE(ob.outstanding_amount, 0)::numeric(14,2) AS outstanding_amount
       FROM divisions d
       INNER JOIN mfg_companies m ON m.id = d.mfg_company_id AND m.account_id = d.account_id AND m.deleted_at IS NULL
+      LEFT JOIN (
+        SELECT division_id, SUM(balance_due)::numeric(14,2) AS outstanding_amount
+        FROM purchase_invoices
+        WHERE account_id = $1
+          AND status = 'CONFIRMED'::purchase_invoice_status
+          AND payment_status IN ('UNPAID'::purchase_payment_status, 'PARTIAL'::purchase_payment_status)
+          AND deleted_at IS NULL
+          AND division_id IS NOT NULL
+        GROUP BY division_id
+      ) ob ON ob.division_id = d.id
       WHERE ${wh.join(" AND ")}
       ORDER BY ${orderCol} ${sortDir}, d.created_at DESC
       `,

@@ -1,0 +1,21 @@
+name: lucide_icons
+version: 0.257.0
+description: >
+  Local patch of lucide_icons 0.257.0 — fixes IconData final class
+  incompatibility introduced in Flutter 3.44.0 / Dart 3.7.
+  LucideIconData is replaced with direct IconData instances.
+homepage: https://github.com/JedMee/lucide_icons_patch
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  fonts:
+    - family: Lucide
+      fonts:
+        - asset: assets/lucide.ttf

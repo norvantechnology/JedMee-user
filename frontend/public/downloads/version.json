@@ -1,15 +1,15 @@
 {
   "version": "1.0.0",
   "versionCode": "1",
-  "buildDate": "2026-05-29T11:06:59Z",
-  "buildDateHuman": "May 29, 2026",
+  "buildDate": "2026-05-30T08:30:06Z",
+  "buildDateHuman": "May 30, 2026",
   "android": {
     "available": true,
     "apkUrl": "/downloads/jedmee-v1.0.0.apk",
     "zipUrl": "/downloads/jedmee-v1.0.0.zip",
     "fileName": "jedmee-v1.0.0.apk",
     "zipName": "jedmee-v1.0.0.zip",
-    "sizeMB": "11.3"
+    "sizeMB": "12.9"
   },
   "ios": {
     "available": false,

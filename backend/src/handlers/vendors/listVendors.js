@@ -3,7 +3,6 @@ const { query } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { getSortFromEvent, buildOrderBy } = require("../../shared/sort");
-const { VENDOR_ROW_COLUMNS } = require("../../shared/vendorInput");
 const { mapVendorPgError, logVendorPgError } = require("../../shared/vendorPgErrors");
 const { mapDbConnectivityError } = require("../../shared/dbConnectivity");
 
@@ -20,24 +19,35 @@ async function handler(event) {
     sortBy: sort.sortBy,
     sortDir: sort.sortDir,
     allowed: {
-      created_at: "created_at",
-      code: "code",
-      name: "name",
-      short_name: "short_name",
-      rack_number: "rack_number",
-      main_company: "main_company",
-      is_active: "is_active",
-      updated_at: "updated_at"
+      created_at: "v.created_at",
+      code: "v.code",
+      name: "v.name",
+      short_name: "v.short_name",
+      rack_number: "v.rack_number",
+      main_company: "v.main_company",
+      is_active: "v.is_active",
+      updated_at: "v.updated_at"
     },
-    fallback: "created_at DESC"
+    fallback: "v.created_at DESC"
   });
 
   try {
     const res = await query(
       `
-      SELECT ${VENDOR_ROW_COLUMNS}
-      FROM vendors
-      WHERE account_id = $1 AND deleted_at IS NULL
+      SELECT v.*,
+             COALESCE(ob.outstanding_amount, 0)::numeric(14,2) AS outstanding_amount
+      FROM vendors v
+      LEFT JOIN (
+        SELECT vendor_id, SUM(balance_due)::numeric(14,2) AS outstanding_amount
+        FROM purchase_invoices
+        WHERE account_id = $1
+          AND status = 'CONFIRMED'::purchase_invoice_status
+          AND payment_status IN ('UNPAID'::purchase_payment_status, 'PARTIAL'::purchase_payment_status)
+          AND deleted_at IS NULL
+          AND vendor_id IS NOT NULL
+        GROUP BY vendor_id
+      ) ob ON ob.vendor_id = v.id
+      WHERE v.account_id = $1 AND v.deleted_at IS NULL
       ${orderBy}
       `,
       [ctx.accountId]

@@ -54,6 +54,7 @@ const ROUTES = {
   'POST /vendors/{id}/delete':            '../vendors/deleteVendor',
   'POST /vendors/bulk-delete':            '../vendors/bulkDelete',
   'GET /vendors/{id}/ledger':             '../vendors/ledger',
+  'GET /vendors/{id}/outstanding':        '../vendors/outstanding',
   'POST /vendors/{id}/ledger/send-email': '../vendors/sendLedgerEmail',
 
   // ── Divisions ───────────────────────────────────────────────────────────────

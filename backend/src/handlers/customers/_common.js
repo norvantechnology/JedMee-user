@@ -30,7 +30,9 @@ function mapCustomerRow(r) {
     b2b_flag: Boolean(r.b2b_flag),
     credit_days: Number(r.credit_days || 0),
     credit_limit: Number(r.credit_limit || 0),
-    discount_percent: Number(r.discount_percent || 0)
+    discount_percent: Number(r.discount_percent || 0),
+    outstanding_amount: Number(r.outstanding_amount || 0),
+    outstandingAmount: Number(r.outstanding_amount || 0)
   };
 }
 

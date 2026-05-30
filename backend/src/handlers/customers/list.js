@@ -27,45 +27,57 @@ async function handler(event) {
   const accountSettings = forBilling ? await getAccountSettings(ctx.accountId) : null;
   const supportsWalkInColumn = await hasColumn("customers", "is_walk_in");
 
-  const wh = ["account_id = $1", "deleted_at IS NULL"];
+  const wh = ["c.account_id = $1", "c.deleted_at IS NULL"];
   const ps = [ctx.accountId];
   if (q) {
     ps.push(`%${q}%`);
-    wh.push(`(code ILIKE $${ps.length} OR name ILIKE $${ps.length} OR short_name ILIKE $${ps.length} OR phone_number ILIKE $${ps.length})`);
+    wh.push(`(c.code ILIKE $${ps.length} OR c.name ILIKE $${ps.length} OR c.short_name ILIKE $${ps.length} OR c.phone_number ILIKE $${ps.length})`);
   }
   if (type) {
     ps.push(type);
-    wh.push(`customer_type = $${ps.length}::customer_type_enum`);
+    wh.push(`c.customer_type = $${ps.length}::customer_type_enum`);
   }
   if (active === "true" || active === "false") {
     ps.push(active === "true");
-    wh.push(`is_active = $${ps.length}`);
+    wh.push(`c.is_active = $${ps.length}`);
   }
   if (hideWalkIn && supportsWalkInColumn) {
-    wh.push(`COALESCE(is_walk_in, false) = false`);
+    wh.push(`COALESCE(c.is_walk_in, false) = false`);
   }
   const whereSql = `WHERE ${wh.join(" AND ")}`;
   try {
-    const tc = await query(`SELECT COUNT(*)::int AS c FROM customers ${whereSql}`, ps);
+    const tc = await query(`SELECT COUNT(*)::int AS c FROM customers c ${whereSql}`, ps);
     const total = Number(tc.rows?.[0]?.c || 0);
     const listParams = [...ps];
-    let orderSql = `ORDER BY created_at DESC`;
+    let orderSql = `ORDER BY c.created_at DESC`;
     if (forBilling && supportsWalkInColumn) {
       listParams.push(roleCode);
       orderSql = `ORDER BY
            CASE
-             WHEN $${listParams.length}::text = 'RETAILER' AND COALESCE(is_walk_in, false) = true THEN 0
+             WHEN $${listParams.length}::text = 'RETAILER' AND COALESCE(c.is_walk_in, false) = true THEN 0
              ELSE 1
            END,
-           lower(name) ASC,
-           created_at DESC`;
+           lower(c.name) ASC,
+           c.created_at DESC`;
     }
     listParams.push(limit);
     const limitParam = listParams.length;
     listParams.push(offset);
     const offsetParam = listParams.length;
     const rs = await query(
-      `SELECT * FROM customers ${whereSql} ${orderSql} LIMIT $${limitParam} OFFSET $${offsetParam}`,
+      `SELECT c.*,
+              COALESCE(ob.outstanding_amount, 0)::numeric(14,2) AS outstanding_amount
+       FROM customers c
+       LEFT JOIN (
+         SELECT customer_id, SUM(balance_due)::numeric(14,2) AS outstanding_amount
+         FROM sales_invoices
+         WHERE account_id = $1
+           AND status = 'CONFIRMED'::sales_invoice_status
+           AND payment_status IN ('UNPAID'::sales_payment_status, 'PARTIAL'::sales_payment_status)
+           AND deleted_at IS NULL
+         GROUP BY customer_id
+       ) ob ON ob.customer_id = c.id
+       ${whereSql} ${orderSql} LIMIT $${limitParam} OFFSET $${offsetParam}`,
       listParams
     );
     const totalPages = Math.max(1, Math.ceil(total / limit));

@@ -1,0 +1,73 @@
+# This file configures the analyzer, which statically analyzes Dart code to
+# check for errors, warnings, and lints.
+#
+# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
+# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
+# invoked from the command line by running `flutter analyze`.
+
+# The following line activates a set of recommended lints for Flutter apps,
+# packages, and plugins designed to encourage good coding practices.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    # Treat missing return as error, not warning.
+    missing_return: error
+    # Catch unused imports as warnings.
+    unused_import: warning
+    # Catch unused local variables.
+    unused_local_variable: warning
+  exclude:
+    - build/**
+    - '**/*.g.dart'
+    - '**/*.freezed.dart'
+
+linter:
+  rules:
+    # ── Performance ──────────────────────────────────────────────────────────
+    # Prefer const constructors to reduce widget rebuilds.
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_declarations: true
+    prefer_const_literals_to_create_immutables: true
+    # Avoid unnecessary new keyword.
+    unnecessary_new: true
+    # Avoid unnecessary lambdas.
+    unnecessary_lambdas: true
+    # Avoid unnecessary overrides.
+    unnecessary_overrides: true
+    # Avoid unnecessary statements.
+    unnecessary_statements: true
+    # ── Code quality ─────────────────────────────────────────────────────────
+    avoid_print: true
+    prefer_single_quotes: true
+    # Avoid empty catch blocks.
+    avoid_empty_catches: true
+    # Prefer final for local variables that are not reassigned.
+    prefer_final_locals: true
+    # Prefer final for fields that are not reassigned.
+    prefer_final_fields: true
+    # Avoid redundant argument values.
+    avoid_redundant_argument_values: true
+    # Use super parameters where possible.
+    use_super_parameters: true
+    # Avoid positional boolean parameters.
+    avoid_positional_boolean_parameters: false
+    # ── Null safety ───────────────────────────────────────────────────────────
+    # Avoid null checks on non-nullable types.
+    avoid_null_checks_in_equality_operators: true
+    # ── Async ────────────────────────────────────────────────────────────────
+    # Avoid async functions that return void.
+    avoid_void_async: true
+    # Cancel stream subscriptions.
+    cancel_subscriptions: true
+    # Close sinks.
+    close_sinks: true
+    # ── Style ────────────────────────────────────────────────────────────────
+    # Sort constructors first.
+    sort_constructors_first: true
+    # Directives ordering.
+    directives_ordering: true
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options

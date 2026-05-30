@@ -119,6 +119,7 @@ async function handler(event) {
                 total_amount, amount_paid, balance_due, status, payment_status
               FROM sales_invoices si
               WHERE account_id = $1 AND deleted_at IS NULL
+                AND status = 'CONFIRMED'::sales_invoice_status
               ORDER BY created_at DESC
               LIMIT $5
             ),
@@ -347,6 +348,7 @@ async function handler(event) {
             FROM purchase_invoices pi
             LEFT JOIN vendors v ON v.id = pi.vendor_id AND v.account_id = pi.account_id
             WHERE pi.account_id = $1 AND pi.deleted_at IS NULL
+              AND pi.status = 'CONFIRMED'::purchase_invoice_status
             ORDER BY pi.created_at DESC
             LIMIT $2
             `,

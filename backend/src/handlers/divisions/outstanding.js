@@ -30,7 +30,10 @@ async function handler(event) {
       SELECT
         COUNT(*) FILTER (WHERE status = 'CONFIRMED' AND payment_status IN ('UNPAID','PARTIAL'))::int AS unpaid_invoices,
         COUNT(*)::int AS total_invoices,
-        COALESCE(SUM(balance_due) FILTER (WHERE status = 'CONFIRMED'), 0)::numeric(14,2) AS total_outstanding,
+        COALESCE(SUM(balance_due) FILTER (
+          WHERE status = 'CONFIRMED'
+            AND payment_status IN ('UNPAID','PARTIAL')
+        ), 0)::numeric(14,2) AS total_outstanding,
         MIN(invoice_date) FILTER (WHERE status = 'CONFIRMED' AND payment_status IN ('UNPAID','PARTIAL')) AS oldest_invoice_date
       FROM purchase_invoices
       WHERE account_id = $1 AND division_id = $2 AND deleted_at IS NULL
@@ -42,6 +45,8 @@ async function handler(event) {
       total_invoices: Number(row.total_invoices || 0),
       unpaid_invoices: Number(row.unpaid_invoices || 0),
       total_outstanding: Number(row.total_outstanding || 0),
+      outstanding_amount: Number(row.total_outstanding || 0),
+      outstandingAmount: Number(row.total_outstanding || 0),
       oldest_invoice_date: row.oldest_invoice_date || null
     });
   } catch {
