@@ -1,10 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
@@ -47,14 +45,6 @@ void main() {
       PaintingBinding.instance.imageCache.maximumSizeBytes = 150 << 20; // 150 MB
       // Allow up to 1000 image cache entries (default 1000, explicit for clarity).
       PaintingBinding.instance.imageCache.maximumSize = 1000;
-
-      // ── PERFORMANCE: Font fetching strategy ────────────────────────────────
-      // On mobile: disable runtime fetching — the font is cached after first use,
-      // eliminating 200–800 ms of startup jank on subsequent launches.
-      // On web: allow runtime fetching — fonts cannot be cached to disk in the
-      // browser sandbox, so they must be fetched from Google's CDN each session.
-      // To fully eliminate web fetching, bundle TTF files in assets/fonts/ (see pubspec).
-      GoogleFonts.config.allowRuntimeFetching = kIsWeb;
 
       // ── PERFORMANCE: Parallelize Firebase init + SharedPreferences read ──────
       // Running these concurrently saves ~100–300 ms on cold start vs sequential.

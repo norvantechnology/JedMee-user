@@ -198,11 +198,16 @@ async function handler(event) {
         "NEW_ORDER",
         `New order received – ${order.order_number}`,
         `${clean(actor?.firm_name) || clean(actor?.full_name) || "A retailer"} just placed an order worth ₹${totalAmount.toFixed(2)}.`,
-        { order_id: order.id },
+        { order_id: order.id, status: "PENDING", order_status: "PENDING" },
         `/orders/${order.id}`,
         "View order",
-        // Extra FCM data — enables Accept/Cancel action buttons on mobile
-        { orderId: order.id, orderNumber: order.order_number },
+        // Extra FCM data — action buttons only when orderStatus is PENDING
+        {
+          orderId: order.id,
+          orderNumber: order.order_number,
+          orderStatus: "PENDING",
+          status: "PENDING",
+        },
         // data-only so the mobile background handler can show action buttons
         true
       );

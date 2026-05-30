@@ -88,9 +88,12 @@ async function removeInvalidTokens(tokens) {
  *                                       field). Required for Android action buttons in background.
  *                                       title/body are included in the data payload instead.
  */
-function channelForPriority(priority, type) {
+function channelForPriority(priority, type, data = {}) {
   const t = String(type || "").toUpperCase();
-  if (t === "NEW_ORDER") return "jedmee_orders";
+  if (t === "NEW_ORDER") {
+    const st = String(data.orderStatus || data.order_status || data.status || "").toUpperCase();
+    if (st === "PENDING") return "jedmee_orders";
+  }
   const p = String(priority || dataPriorityFallback(type)).toUpperCase();
   if (p === "P1") return "jedmee_critical";
   return "jedmee_default";
@@ -110,7 +113,7 @@ async function sendPushNotification({ userIds, title, body, data = {}, type = ""
   if (!messaging) return; // Firebase not configured — skip silently.
 
   const priority = data.priority || dataPriorityFallback(type);
-  const channelId = channelForPriority(priority, type);
+  const channelId = channelForPriority(priority, type, data);
 
   let tokenRows;
   try {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
+import 'app_fonts.dart';
 import 'app_motion.dart';
 import 'app_spacing.dart';
 
@@ -11,10 +11,8 @@ import 'app_spacing.dart';
 ///
 /// PERFORMANCE OPTIMIZATION:
 /// The [light] getter is called every time MaterialApp rebuilds (e.g. on
-/// locale change, brightness change, or hot reload). GoogleFonts.plusJakartaSans
-/// TextTheme() is expensive — it creates a full TextTheme object with 13 styles.
-/// Caching it as a static field means it is computed exactly once per app
-/// lifecycle, saving ~2–5 ms per rebuild.
+/// locale change, brightness change, or hot reload). The base TextTheme is
+/// cached as a static field — computed once per app lifecycle.
 class AppTheme {
   AppTheme._();
 
@@ -30,11 +28,12 @@ class AppTheme {
   static const double modalRadius = 20;
   static const double pillRadius = 100;
 
-  // PERFORMANCE: Cache the Google Fonts text theme — computed once, reused
-  // on every theme access. Avoids repeated font-style object allocation.
-  static final TextTheme _cachedBaseText = GoogleFonts.plusJakartaSansTextTheme(
-    ThemeData.light(useMaterial3: true).textTheme,
-  );
+  static final TextTheme _cachedBaseText = ThemeData.light(useMaterial3: true)
+      .textTheme
+      .apply(
+        fontFamily: AppFonts.primary,
+        fontFamilyFallback: AppFonts.fallbacks,
+      );
 
   // PERFORMANCE: Cache the full ThemeData — the light getter is called on
   // every MaterialApp rebuild. Caching avoids re-creating 30+ theme objects.
@@ -193,6 +192,8 @@ class AppTheme {
       brightness: Brightness.light,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.bg,
+      fontFamily: AppFonts.primary,
+      fontFamilyFallback: AppFonts.fallbacks,
       textTheme: textTheme,
     );
 

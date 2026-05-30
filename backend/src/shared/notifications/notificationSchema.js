@@ -1,5 +1,6 @@
 const { query } = require("../db");
 const { getNotificationMeta } = require("./notificationCatalog");
+const { enrichNotificationsWithOrderStatus } = require("./notificationOrderUtils");
 
 let _hasPriorityColumns = null;
 let _hasPreferencesTable = null;
@@ -67,7 +68,7 @@ async function listNotificationRows({ userId, accountId, limit, offset, unreadOn
     [userId, accountId, limit, offset]
   );
 
-  return (rows.rows || []).map((r) => {
+  const mapped = (rows.rows || []).map((r) => {
     const meta = getNotificationMeta(r.type);
     return {
       id: r.id,
@@ -85,8 +86,10 @@ async function listNotificationRows({ userId, accountId, limit, offset, unreadOn
       read_at: r.read_at,
       created_at: r.created_at,
       created_by_user_id: r.created_by_user_id,
+      supports_order_actions: false,
     };
   });
+  return enrichNotificationsWithOrderStatus(mapped);
 }
 
 /**

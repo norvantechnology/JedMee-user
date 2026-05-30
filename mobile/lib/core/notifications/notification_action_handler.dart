@@ -43,6 +43,14 @@ Future<void> handleNotificationAction(String actionId, String payload) async {
     final orderId = (data['orderId'] ?? '').toString().trim();
     if (orderId.isEmpty) return;
 
+    final orderStatus = (data['orderStatus'] ??
+            data['order_status'] ??
+            data['status'] ??
+            '')
+        .toString()
+        .toUpperCase();
+    if (orderStatus.isNotEmpty && orderStatus != 'PENDING') return;
+
     final token = await _readAccessToken();
     if (token == null || token.isEmpty) return;
 
