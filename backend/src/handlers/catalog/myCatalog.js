@@ -1,6 +1,7 @@
 const { ok, fail } = require("../../shared/response");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
+const { productStockAggregateCte } = require("../../shared/productStockSql");
 const { clean, getAccountContextForUser } = require("../orders/_common");
 const { query } = require("../../shared/db");
 
@@ -35,11 +36,11 @@ async function handler(event) {
   try {
     const r = await query(
       `
-      WITH st AS (
-        SELECT account_id, product_id, COALESCE(SUM(current_stock), 0)::numeric(14,3) AS current_stock
-        FROM product_batches
-        WHERE deleted_at IS NULL
-        GROUP BY account_id, product_id
+      WITH ${productStockAggregateCte("$1")},
+      st AS (
+        SELECT account_id, product_id, total_stock AS current_stock,
+               total_stock AS total_quantity
+        FROM product_stock
       )
       SELECT
         wc.*,
@@ -47,7 +48,8 @@ async function handler(event) {
         p.name AS product_name,
         p.drug_name,
         p.sales_gst,
-        COALESCE(st.current_stock, 0) AS current_stock
+        COALESCE(st.current_stock, 0) AS current_stock,
+        COALESCE(st.total_quantity, 0) AS total_quantity
       FROM wholesaler_catalog wc
       JOIN products p ON p.id = wc.product_id AND p.account_id = wc.account_id AND p.deleted_at IS NULL
       LEFT JOIN st ON st.account_id = wc.account_id AND st.product_id = wc.product_id

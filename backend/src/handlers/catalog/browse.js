@@ -2,6 +2,7 @@ const { ok, fail } = require("../../shared/response");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { query } = require("../../shared/db");
+const { productStockAggregateCteAllAccounts } = require("../../shared/productStockSql");
 const { clean, getAccountContextForUser } = require("../orders/_common");
 
 async function handler(event) {
@@ -36,11 +37,12 @@ async function handler(event) {
   try {
     const r = await query(
       `
-      WITH stock AS (
-        SELECT account_id, product_id, COALESCE(SUM(current_stock), 0)::numeric(14,3) AS current_stock
-        FROM product_batches
-        WHERE deleted_at IS NULL
-        GROUP BY account_id, product_id
+      WITH ${productStockAggregateCteAllAccounts()},
+      stock AS (
+        SELECT account_id, product_id, total_stock AS current_stock,
+               total_stock AS total_quantity,
+               stock_billable, stock_free
+        FROM product_stock
       )
       SELECT
         wc.id,

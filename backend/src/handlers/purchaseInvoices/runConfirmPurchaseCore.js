@@ -26,7 +26,7 @@ function num(v, fallback = 0) {
  * @param {string|null} confirmNote
  */
 async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) {
-  const { accountId, actorId } = ctx;
+  const { accountId, actorId, confirmOptions } = ctx;
   const q = async (label, text, params) => {
     try {
       return await rawQ(text, params);

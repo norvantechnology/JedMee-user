@@ -8,6 +8,7 @@ import '../../core/utils/api_data.dart';
 import '../../core/utils/api_helpers.dart';
 import '../../core/utils/date.dart';
 import '../../core/utils/format.dart';
+import '../../core/utils/product_stock.dart';
 import '../../widgets/searchable_picker.dart';
 
 /// Stable string id for API rows (UUID, int, etc.).
@@ -97,6 +98,14 @@ List<Map<String, dynamic>> ensureBatchInList(
   return [...batches, normalized];
 }
 
+/// Product row label for invoice pickers — includes total stock (matches Quality Master).
+String productPickerLabel(Map<String, dynamic> product) {
+  final name = rowLabel(product, ['name', 'code']);
+  final qty = productTotalQuantity(product);
+  if (qty <= 0) return name;
+  return '$name · Stk ${formatStockQty(qty)}';
+}
+
 String productLineSummary(Map<String, dynamic> batch) {
   final name = (batch['product_name'] ?? batch['productName'] ?? 'Product').toString();
   final batchNo = (batch['batch_no'] ?? batch['batchNo'] ?? '').toString();
@@ -136,12 +145,12 @@ String batchDropdownLabel(Map<String, dynamic> b) {
   final name = b['product_name'] ?? b['productName'] ?? 'Product';
   final batch = b['batch_no'] ?? b['batchNo'] ?? '';
   final exp = fmtDisplayDate(b['expiry_date'] ?? b['expiryDate']);
-  // API returns total_stock (sum of qty + free_qty from inventory_txns).
-  // Fall back to opening_stock for batches that have no transactions yet.
-  final stock = b['total_stock'] ?? b['current_stock'] ?? b['opening_stock'];
+  final stock = batchTotalStock(b);
   final parts = [name, if (batch.toString().isNotEmpty) 'B:$batch'];
   if (exp.isNotEmpty) parts.add('Exp $exp');
-  if (stock != null) parts.add('Stk $stock');
+  if (stock > 0 || b['opening_stock'] != null) {
+    parts.add('Stk ${formatStockQty(stock)}');
+  }
   return parts.join(' · ');
 }
 

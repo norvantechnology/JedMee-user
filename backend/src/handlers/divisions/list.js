@@ -45,7 +45,7 @@ async function handler(event) {
         FROM purchase_invoices
         WHERE account_id = $1
           AND status = 'CONFIRMED'::purchase_invoice_status
-          AND payment_status IN ('UNPAID'::purchase_payment_status, 'PARTIAL'::purchase_payment_status)
+          AND payment_status IN ('UNPAID'::invoice_payment_status, 'PARTIAL'::invoice_payment_status)
           AND deleted_at IS NULL
           AND division_id IS NOT NULL
         GROUP BY division_id

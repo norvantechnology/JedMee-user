@@ -725,7 +725,7 @@ class _SalesInvoiceEditorScreenState
         .map(
           (p) => SearchablePickerItem(
             value: recordIdStr(p['id']),
-            label: rowLabel(p, ['name', 'code']),
+            label: productPickerLabel(p),
           ),
         )
         .toList();

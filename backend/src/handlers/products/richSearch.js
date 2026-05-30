@@ -2,6 +2,12 @@ const { ok, fail } = require("../../shared/response");
 const { query } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
+const {
+  batchInventoryStockJoin,
+  batchBillableStockSql,
+  batchFreeStockSql,
+  batchTotalStockSql
+} = require("../../shared/productStockSql");
 
 /**
  * GET /products/rich-search?q=<text>&include_batches=true&include_suppliers=true
@@ -70,7 +76,7 @@ async function handler(event) {
       return ok({ products: [], batches: [], suppliers: [] });
     }
 
-    const stockClause = stockOnly ? "AND pb.current_stock > 0" : "";
+    const stockClause = stockOnly ? `AND ${batchTotalStockSql} > 0` : "";
 
     const [batchesRes, suppliersRes] = await Promise.all([
       includeBatches
@@ -80,11 +86,16 @@ async function handler(event) {
               pb.id, pb.product_id, pb.batch_no, pb.expiry_date, pb.mfg_date,
               pb.mrp, pb.purchase_rate, pb.sales_rate, pb.retail_rate,
               pb.special_rate_1, pb.special_rate_2,
-              pb.current_stock, pb.loose_stock, pb.loose_unit_name,
+              ${batchBillableStockSql} AS stock_billable_qty,
+              ${batchFreeStockSql} AS stock_free_qty,
+              ${batchTotalStockSql} AS total_stock,
+              ${batchBillableStockSql} AS current_stock,
+              pb.loose_stock, pb.loose_unit_name,
               pb.sales_gst, pb.scheme_qty_paid, pb.scheme_qty_free, pb.sales_scheme,
               pb.is_hold, pb.hold_reason, pb.barcode,
               pb.vendor_id, v.name AS supplier_name
             FROM product_batches pb
+            ${batchInventoryStockJoin("$1")}
             LEFT JOIN vendors v ON v.id = pb.vendor_id AND v.account_id = pb.account_id AND v.deleted_at IS NULL
             WHERE pb.account_id = $1 AND pb.product_id = ANY($2::uuid[]) AND pb.deleted_at IS NULL
               ${stockClause}
