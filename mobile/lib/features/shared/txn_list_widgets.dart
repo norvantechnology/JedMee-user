@@ -686,7 +686,7 @@ class _ActiveFilterChips extends StatelessWidget {
         'amount_asc' => 'Amount ↑',
         'party_asc' => 'Name A–Z',
         'party_desc' => 'Name Z–A',
-        'date_asc' => 'Date ↑',
+        'date_asc' => 'Created ↑',
         _ => '',
       };
 

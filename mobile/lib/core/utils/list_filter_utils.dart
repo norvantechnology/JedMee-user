@@ -1,5 +1,6 @@
 import 'api_data.dart';
 import 'api_helpers.dart';
+import 'list_sort.dart';
 
 import '../../widgets/filter_bottom_sheet.dart';
 
@@ -92,37 +93,16 @@ List<Map<String, dynamic>> applyListFilters(
         });
     case 'date_asc':
       out = [...out]..sort((a, b) {
-          final ad = ymdFrom(
-            a['invoice_date'] ??
-                a['invoiceDate'] ??
-                a['order_date'] ??
-                a['created_at'],
-          );
-          final bd = ymdFrom(
-            b['invoice_date'] ??
-                b['invoiceDate'] ??
-                b['order_date'] ??
-                b['created_at'],
-          );
-          return ad.compareTo(bd);
+          final ad = sortTimestampFromRow(a);
+          final bd = sortTimestampFromRow(b);
+          if (ad != null && bd != null) return ad.compareTo(bd);
+          if (ad != null) return -1;
+          if (bd != null) return 1;
+          return 0;
         });
     case 'date_desc':
     default:
-      out = [...out]..sort((a, b) {
-          final ad = ymdFrom(
-            a['invoice_date'] ??
-                a['invoiceDate'] ??
-                a['order_date'] ??
-                a['created_at'],
-          );
-          final bd = ymdFrom(
-            b['invoice_date'] ??
-                b['invoiceDate'] ??
-                b['order_date'] ??
-                b['created_at'],
-          );
-          return bd.compareTo(ad);
-        });
+      out = sortRowsByCreatedAtDesc(out);
   }
 
   return out;

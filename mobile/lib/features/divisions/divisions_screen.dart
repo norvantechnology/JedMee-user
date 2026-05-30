@@ -11,6 +11,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/utils/access.dart';
 import '../../core/utils/api_helpers.dart';
+import '../../core/utils/list_sort.dart';
 import '../../core/utils/record_fields.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/auth_controller.dart';
@@ -70,6 +71,7 @@ class _DivisionsScreenState extends ConsumerState<DivisionsScreen> {
             ApiCache.instance.invalidateContaining('/divisions');
             final resp = await ref.read(divisionRepositoryProvider).list({
               if (search.isNotEmpty) 'search': search,
+              ...kCreatedAtDescSort,
             });
             final result = listFromResponse(resp);
             if (result.error != null) return result;

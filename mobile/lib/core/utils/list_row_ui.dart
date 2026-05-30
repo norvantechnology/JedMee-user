@@ -110,6 +110,18 @@ String listRowTitleFor(Map<String, dynamic> row) {
   }
 }
 
+String _invoiceListSubtitle(Map<String, dynamic> row) {
+  final party = _partyName(row);
+  final rawCount = row['item_count'] ?? row['itemCount'];
+  final parts = <String>[];
+  if (party.isNotEmpty) parts.add(party);
+  if (rawCount != null) {
+    final count = int.tryParse(rawCount.toString()) ?? 0;
+    if (count > 0) parts.add('$count item${count == 1 ? '' : 's'}');
+  }
+  return parts.join(' · ');
+}
+
 /// Single compact subtitle line — no duplicate labels, most useful info only.
 String listRowSubtitleForCompact(Map<String, dynamic> row) {
   final entity = detectRecordEntity(row);
@@ -120,18 +132,7 @@ String listRowSubtitleForCompact(Map<String, dynamic> row) {
       return _compactBatchSubtitle(row);
     case RecordEntity.salesInvoice:
     case RecordEntity.purchaseInvoice:
-      // Party name + items count for quick at-a-glance info
-      final party = _partyName(row);
-      final rawCount = row['item_count'] ?? row['itemCount'];
-      if (rawCount != null) {
-        final count = int.tryParse(rawCount.toString()) ?? 0;
-        if (count > 0) {
-          return party.isNotEmpty
-              ? '$party · $count item${count == 1 ? '' : 's'}'
-              : '$count item${count == 1 ? '' : 's'}';
-        }
-      }
-      return party;
+      return _invoiceListSubtitle(row);
     case RecordEntity.salesReturn:
     case RecordEntity.purchaseReturn:
       // Party name only — date is shown as meta on the right side
@@ -165,8 +166,6 @@ String listRowSubtitleForCompact(Map<String, dynamic> row) {
     case RecordEntity.user:
       return _firstNonEmpty(row, ['email']);
     default:
-      final created = row['created_at'] ?? row['createdAt'];
-      if (created != null) return fmtDisplayDate(created);
       return '';
   }
 }
@@ -201,20 +200,37 @@ String? listRowSecondarySubtitleFor(Map<String, dynamic> row) {
   return null;
 }
 
-/// Compact date shown above the amount on the right side.
+/// Compact date/time shown above the amount on the right side.
 String? listRowMetaFor(Map<String, dynamic> row) {
   final entity = detectRecordEntity(row);
   switch (entity) {
     case RecordEntity.salesInvoice:
     case RecordEntity.purchaseInvoice:
-      return fmtDisplayDate(row['invoice_date'] ?? row['invoiceDate']);
     case RecordEntity.salesReturn:
     case RecordEntity.purchaseReturn:
-      return fmtDisplayDate(row['return_date'] ?? row['returnDate']);
     case RecordEntity.payment:
-      return fmtDisplayDate(row['payment_date'] ?? row['paymentDate']);
+      final created = row['created_at'] ?? row['createdAt'];
+      if (created != null) {
+        final dt = fmtCreatedAt(created);
+        if (dt.isNotEmpty) return dt;
+      }
+      if (entity == RecordEntity.salesReturn || entity == RecordEntity.purchaseReturn) {
+        return fmtDisplayDate(row['return_date'] ?? row['returnDate']);
+      }
+      if (entity == RecordEntity.payment) {
+        return fmtDisplayDate(row['payment_date'] ?? row['paymentDate']);
+      }
+      return fmtDisplayDate(row['invoice_date'] ?? row['invoiceDate']);
     case RecordEntity.order:
-      return fmtDisplayDate(row['placed_at'] ?? row['placedAt'] ?? row['order_date']);
+      final placed = row['placed_at'] ??
+          row['placedAt'] ??
+          row['created_at'] ??
+          row['createdAt'];
+      if (placed != null) {
+        final dt = fmtCreatedAt(placed);
+        if (dt.isNotEmpty) return dt;
+      }
+      return fmtDisplayDate(row['order_date']);
     case RecordEntity.productBatch:
       // Show expiry date as meta for batch rows
       final exp = fmtDisplayDate(row['expiry_date'] ?? row['expiryDate']);

@@ -1,4 +1,4 @@
-import { fmtCurrency } from "../utils/format.js";
+import { fmtCurrency, fmtDateTime } from "../utils/format.js";
 import { useSeoMeta } from "../utils/seo.js";
 import { AppButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -79,15 +79,6 @@ const FULFILLMENT_STEPS = [
   { key: "dispatched", label: "Dispatched", getAt: (o) => o?.dispatched_at },
   { key: "delivered",  label: "Delivered",  getAt: (o) => o?.delivered_at },
 ];
-
-/* ── Format date without seconds ─────────────────────────── */
-function fmtDateTime(ts) {
-  if (!ts) return "—";
-  const d = new Date(ts);
-  const date = d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
-  const time = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
-  return `${date}, ${time}`;
-}
 
 /* ══════════════════════════════════════════════════════════════
    PAGE COMPONENT

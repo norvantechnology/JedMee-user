@@ -1,7 +1,7 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { fmtMoney, fmtCurrency } from "../utils/format.js";
+import { fmtMoney, fmtCurrency, fmtCreatedAt } from "../utils/format.js";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AppShell from "../layouts/AppShell.jsx";
@@ -231,7 +231,6 @@ export default function VendorPaymentsPage() {
             rows={rows}
             getRowId={(r) => r.id}
             columns={[
-              { id: "payment_date", header: "Date", render: (r) => String(r.payment_date || "").slice(0, 10) },
               {
                 id: "party_name",
                 header: isRetailer ? "Supplier" : "Division",
@@ -242,7 +241,7 @@ export default function VendorPaymentsPage() {
               { id: "payment_mode", header: "Mode", render: (r) => r.payment_mode || "" },
               { id: "reference_number", header: "Reference", render: (r) => r.reference_number || "" },
               { id: "notes", header: "Notes", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{r.notes || ""}</span> },
-              { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{String(r.created_at || "").slice(0, 10)}</span> }
+              { id: "created_at", header: "Date & time", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)", whiteSpace: "nowrap" }}>{fmtCreatedAt(r.created_at)}</span> }
             ]}
           />
         </div>

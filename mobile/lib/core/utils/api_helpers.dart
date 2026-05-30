@@ -147,7 +147,11 @@ String rowSubtitle(Map<String, dynamic> row) {
   if (smart.isNotEmpty) return smart;
   const _dateFields = {
     'invoice_date', 'invoiceDate', 'payment_date', 'paymentDate',
+    'return_date', 'returnDate', 'order_date', 'orderDate',
+  };
+  const _dateTimeFields = {
     'created_at', 'createdAt', 'updated_at', 'updatedAt',
+    'placed_at', 'placedAt', 'confirmed_at', 'confirmedAt',
   };
   for (final k in [
     'email',
@@ -162,11 +166,14 @@ String rowSubtitle(Map<String, dynamic> row) {
     'invoiceDate',
     'payment_date',
     'paymentDate',
-    'created_at',
-    'createdAt',
+    'return_date',
+    'returnDate',
+    'placed_at',
+    'placedAt',
   ]) {
     final v = row[k];
     if (v != null && v.toString().trim().isNotEmpty) {
+      if (_dateTimeFields.contains(k)) return fmtCreatedAt(v);
       if (_dateFields.contains(k)) return fmtDisplayDate(v);
       return v.toString();
     }

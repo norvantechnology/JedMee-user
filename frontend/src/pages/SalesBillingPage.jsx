@@ -1,7 +1,7 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { clean, fmtMoney, fmtCurrency, getCurrencySymbol } from "../utils/format.js";
+import { clean, fmtMoney, fmtCurrency, getCurrencySymbol, fmtCreatedAt } from "../utils/format.js";
 import { batchBillableQtyFromRow, batchFreeQtyFromRow } from "../utils/productStock.js";
 import { useLocale } from "../context/LocaleContext.jsx";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -619,6 +619,7 @@ export default function SalesBillingPage() {
   const [modalLoading, setModalLoading] = useState(false);
   const [loadingEditId, setLoadingEditId] = useState(null);
   const salesInvoiceLoadGenRef = useRef(0);
+  const salesFormRef = useRef(null);
   const [editing, setEditing] = useState(null);
   // Counter ergonomics: bump this whenever a save/confirm happens so the
   // ongoing-bills rail refetches and the rest of the staff sees the new draft.
@@ -1025,6 +1026,32 @@ export default function SalesBillingPage() {
     if (d.status >= 200 && d.status < 300 && d.json?.ok) setDivisions(d.json?.data?.divisions || []);
   }
 
+  async function refreshFormLineStockFromServer(items) {
+    const lines = Array.isArray(items) ? items : [];
+    const productIds = [...new Set(lines.map((x) => String(x.productId || "").trim()).filter(Boolean))];
+    if (!productIds.length) return lines;
+    const batchMap = new Map();
+    await Promise.all(
+      productIds.map(async (pid) => {
+        batchMap.set(pid, await loadBatchesForProduct(pid));
+      })
+    );
+    return lines.map((line) => {
+      const pid = String(line.productId || "");
+      const batchId = String(line.batchId || "");
+      if (!pid || !batchId) return line;
+      const batch = (batchMap.get(pid) || []).find((b) => String(b.id) === batchId);
+      if (!batch) return line;
+      return {
+        ...line,
+        availableStock: batchBillableQtyFromRow(batch),
+        availableFreeStock: batchFreeQtyFromRow(batch),
+        looseStock: Number(batch.loose_stock || line.looseStock || 0),
+        packingUnits: Math.max(1, Number(batch.packing_units || line.packingUnits || 10))
+      };
+    });
+  }
+
   async function runBulkPrint() {
     const selectedRows = (rows || []).filter((r) => selectedSalesIds.map(String).includes(String(r.id || "")));
     const printableRows = selectedRows.filter((r) => String(r.status || "").toUpperCase() === "CONFIRMED");
@@ -1119,6 +1146,7 @@ export default function SalesBillingPage() {
 
   async function loadSalesInvoiceForEdit(invoiceId, gen) {
     try {
+      await refreshMasterDropdowns();
       const g = await getSalesInvoice(invoiceId);
       if (gen !== salesInvoiceLoadGenRef.current) return;
       if (g.status >= 200 && g.status < 300 && g.json?.ok) {
@@ -1222,6 +1250,23 @@ export default function SalesBillingPage() {
   useEffect(() => {
     if (canView) refresh();
   }, [canView, search, statusFilter, paymentFilter, customerFilter, dateFrom, dateTo]);
+
+  salesFormRef.current = form;
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      await refreshMasterDropdowns();
+      if (cancelled || modalLoading) return;
+      const items = await refreshFormLineStockFromServer(salesFormRef.current?.items || []);
+      if (cancelled) return;
+      setForm((prev) => ({ ...prev, items }));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, modalLoading]);
 
   useEffect(() => {
     if (!isRetailer) return;
@@ -1745,7 +1790,6 @@ export default function SalesBillingPage() {
             columns={[
               { id: "invoice_number", header: "Invoice", render: (r) => <span style={{ fontWeight: 700 }}>{r.invoice_number}</span> },
               { id: "customer_name", header: "Customer", render: (r) => r.customer_name || "" },
-              { id: "invoice_date", header: "Date", render: (r) => String(r.invoice_date || "").slice(0, 10) },
               {
                 id: "status",
                 header: "Status",
@@ -1778,7 +1822,7 @@ export default function SalesBillingPage() {
               { id: "total_amount", header: "Total", align: "right", render: (r) => fmtMoney(r.total_amount || 0) },
               { id: "amount_paid", header: "Paid", align: "right", render: (r) => fmtMoney(r.amount_paid || 0) },
               { id: "balance_due", header: "Balance", align: "right", render: (r) => fmtMoney(r.balance_due || 0) },
-              { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{String(r.created_at || "").slice(0, 10)}</span> },
+              { id: "created_at", header: "Date & time", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)", whiteSpace: "nowrap" }}>{fmtCreatedAt(r.created_at)}</span> },
               {
                 id: "return_status",
                 header: "Returns",

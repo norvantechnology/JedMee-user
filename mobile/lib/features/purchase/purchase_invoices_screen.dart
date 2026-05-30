@@ -36,6 +36,7 @@ import '../../core/print/invoice_print_service.dart';
 import '../shared/master_ui.dart';
 import '../shared/invoice_bulk_helpers.dart';
 import '../shared/invoice_confirm_payment_dialog.dart';
+import '../shared/invoice_master_loader.dart';
 import '../shared/invoice_payment_helpers.dart';
 import '../shared/ongoing_bills_controller.dart';
 import '../shared/ongoing_bills_rail.dart';
@@ -116,6 +117,7 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
     if (!mounted) return;
     if (resp.ok) {
       showBulkInvoiceResultSnack(context, resp: resp, actionPast: 'cancelled');
+      invalidateBillingMasterCache();
       _listKey.currentState?.refresh();
     } else {
       showAppSnack(context, message: resp.parseErrorMessage(), type: AppSnackType.error);
@@ -340,6 +342,7 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
     if (!mounted) return;
     if (resp.ok) {
       showBulkInvoiceResultSnack(context, resp: resp, actionPast: 'confirmed');
+      invalidateBillingMasterCache();
       _listKey.currentState?.refresh();
     } else {
       showAppSnack(context, message: resp.parseErrorMessage(), type: AppSnackType.error);
@@ -401,6 +404,7 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
     // Clear again after returning so any persisted activeId in SharedPreferences
     // is wiped before refresh() re-reads the draft list.
     if (mounted) {
+      invalidateBillingMasterCache();
       await ref.read(ongoingPurchaseBillsProvider.notifier).setActive(null);
       ref.read(ongoingPurchaseBillsProvider.notifier).refresh();
     }
@@ -423,9 +427,11 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
     if (batch == null) {
       showAppSnack(
         context,
-        message: resp.parseErrorMessage().isNotEmpty
-            ? resp.parseErrorMessage()
-            : 'No product found for barcode "$code"',
+        message: resp.ok
+            ? 'No product found for barcode "$code"'
+            : (resp.parseErrorMessage().isNotEmpty
+                ? resp.parseErrorMessage()
+                : 'No product found for barcode "$code"'),
         type: AppSnackType.error,
       );
       return;
@@ -494,6 +500,7 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
         );
         if (!mounted) return;
         if (err == null) {
+          invalidateBillingMasterCache();
           showAppSnack(context, message: 'Bill confirmed', type: AppSnackType.success);
           refresh();
         } else {
@@ -505,6 +512,7 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
             await ref.read(purchaseRepositoryProvider).cancelPurchaseInvoice(id);
         if (!mounted) return;
         if (resp.ok) {
+          invalidateBillingMasterCache();
           showAppSnack(context, message: 'Invoice cancelled', type: AppSnackType.success);
           refresh();
         } else {

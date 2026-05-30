@@ -87,7 +87,7 @@ String fmtDisplayDate(dynamic value) {
   }
 }
 
-/// User-friendly date and time, e.g. "9 May 2026, 02:30 PM".
+/// User-friendly date and time in local timezone, e.g. "9 May 2026, 02:30 PM".
 String fmtDisplayDateTime(dynamic value) {
   final raw = value?.toString() ?? '';
   if (raw.isEmpty) return '';
@@ -98,6 +98,9 @@ String fmtDisplayDateTime(dynamic value) {
     return fmtDisplayDate(value);
   }
 }
+
+/// Created/updated timestamps in list rows.
+String fmtCreatedAt(dynamic value) => fmtDisplayDateTime(value);
 
 /// Indian-grouped amount without symbol (e.g. 31,500.00 or 1,00,000.00).
 /// Strips any non-breaking spaces (U+00A0) or regular spaces that some

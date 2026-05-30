@@ -12,6 +12,7 @@
 
 const { query } = require("./db");
 const { hasPermission } = require("./permissions");
+const { batchLiveStockInlineSql } = require("./productStockSql");
 const {
   getMfgForProduct,
   assertSaleAllowed,
@@ -36,17 +37,18 @@ async function checkUserActive(accountId, userId) {
 
 async function checkBatchAvailability(accountId, batchId, requestedQty) {
   const res = await query(
-    `SELECT id, batch_no, is_hold, current_stock FROM product_batches
-     WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`,
+    `SELECT id, batch_no, is_hold, ${batchLiveStockInlineSql}
+     FROM product_batches pb
+     WHERE pb.id = $1 AND pb.account_id = $2 AND pb.deleted_at IS NULL LIMIT 1`,
     [batchId, accountId]
   );
   const batch = res.rows?.[0];
   if (!batch) return "Batch not found.";
-  if (batch.is_hold) return `Batch ${batch.batch_no} is on hold and cannot be sold.`;
+  if (batch.is_hold) return `Batch ${batch.batch_no} is on hold.`;
   const available = Number(batch.current_stock || 0);
   const required = Number(requestedQty || 0);
   if (available < required) {
-    return `Insufficient stock for batch ${batch.batch_no}: available ${available}, requested ${required}.`;
+    return `Not enough stock for batch ${batch.batch_no}.`;
   }
   return null;
 }

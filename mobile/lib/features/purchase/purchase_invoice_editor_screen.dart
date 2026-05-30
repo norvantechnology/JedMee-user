@@ -20,11 +20,13 @@ import '../../providers/auth_controller.dart';
 import '../../widgets/confirm_dialog.dart';
 import '../../widgets/searchable_picker.dart';
 import '../../widgets/snackbar.dart';
+import '../../widgets/stable_text_form_field.dart';
 import '../shared/draft_auto_save.dart';
 import '../shared/invoice_editor_helpers.dart';
 import '../shared/txn_parse_utils.dart';
 import '../shared/invoice_editor_scaffold.dart';
 import '../shared/invoice_editor_summary.dart';
+import '../shared/invoice_master_loader.dart';
 import '../shared/invoice_payment_helpers.dart';
 import '../shared/invoice_payment_section.dart';
 import '../shared/ongoing_bills_controller.dart';
@@ -209,20 +211,11 @@ class _PurchaseInvoiceEditorScreenState extends ConsumerState<PurchaseInvoiceEdi
 
   Future<void> _init() async {
     try {
-      // Load master data in parallel for faster startup.
-      final futures = await Future.wait([
-        ref.read(vendorRepositoryProvider).list({'limit': '500'}),
-        ref.read(divisionRepositoryProvider).list({'limit': '500'}),
-        ref.read(productRepositoryProvider).listProducts({'limit': '500'}),
-        ref.read(productBatchRepositoryProvider).list({'limit': '2000'}),
-        if (_isEdit)
-          ref.read(purchaseRepositoryProvider).getPurchaseInvoice(widget.invoiceId!),
-      ]);
-
-      _vendors = listFromResponse(futures[0]).rows;
-      _divisions = listFromResponse(futures[1]).rows;
-      _products = listFromResponse(futures[2]).rows;
-      _batches = listFromResponse(futures[3]).rows;
+      final masters = await loadPurchaseInvoiceEditorMasters(ref);
+      _vendors = masters.vendors;
+      _divisions = masters.divisions;
+      _products = masters.products;
+      _batches = masters.batches;
 
       // Pre-populate first line from a listing-page barcode scan.
       final ib = widget.initialBatch;
@@ -235,8 +228,10 @@ class _PurchaseInvoiceEditorScreenState extends ConsumerState<PurchaseInvoiceEdi
         _applyHeaderAutofillFromBatch(batch);
       }
 
-      if (_isEdit && futures.length > 4) {
-        final resp = futures[4];
+      if (_isEdit) {
+        final resp = await ref
+            .read(purchaseRepositoryProvider)
+            .getPurchaseInvoice(widget.invoiceId!);
         if (resp.ok) {
           final data = extractDataMap(resp);
           final inv = data?['invoice'] is Map
@@ -388,6 +383,7 @@ class _PurchaseInvoiceEditorScreenState extends ConsumerState<PurchaseInvoiceEdi
       setState(() => _saving = false);
     }
     if (!mounted) return;
+    invalidateBillingMasterCache();
     showAppSnack(
       context,
       message: confirmAfter ? 'Bill saved and confirmed' : 'Bill saved',
@@ -414,7 +410,7 @@ class _PurchaseInvoiceEditorScreenState extends ConsumerState<PurchaseInvoiceEdi
     final resp = await ref.read(productBatchRepositoryProvider).findByBarcode(code);
     final batchListResp = await ref
         .read(productBatchRepositoryProvider)
-        .list({'limit': '2000'});
+        .list({'limit': '2000'}, true);
 
     if (!mounted) return;
 
@@ -430,9 +426,11 @@ class _PurchaseInvoiceEditorScreenState extends ConsumerState<PurchaseInvoiceEdi
     if (batch == null) {
       showAppSnack(
         context,
-        message: resp.parseErrorMessage().isNotEmpty
-            ? resp.parseErrorMessage()
-            : 'No product found for barcode "$code"',
+        message: resp.ok
+            ? 'No product found for barcode "$code"'
+            : (resp.parseErrorMessage().isNotEmpty
+                ? resp.parseErrorMessage()
+                : 'No product found for barcode "$code"'),
         type: AppSnackType.error,
       );
       return;
@@ -897,8 +895,9 @@ class _PurchaseInvoiceEditorScreenState extends ConsumerState<PurchaseInvoiceEdi
                 ),
                 const SizedBox(height: 12),
               ],
-              TextFormField(
-                initialValue: _vendorInvoiceNumber,
+              StableTextFormField(
+                fieldKey: 'purchase-vendor-invoice-no',
+                value: _vendorInvoiceNumber,
                 decoration: InputDecoration(
                   labelText: _isRetailer ? 'Supplier bill no.' : 'Their bill no.',
                   hintText: 'Number on their bill',
@@ -937,8 +936,9 @@ class _PurchaseInvoiceEditorScreenState extends ConsumerState<PurchaseInvoiceEdi
                 },
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                initialValue: _notes,
+              StableTextFormField(
+                fieldKey: 'purchase-notes',
+                value: _notes,
                 decoration: const InputDecoration(labelText: 'Notes'),
                 maxLines: 2,
                 onChanged: (v) => _touch(() => _notes = v),

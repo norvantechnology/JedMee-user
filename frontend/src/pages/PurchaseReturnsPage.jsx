@@ -10,7 +10,7 @@ import { listPurchaseReturns, confirmPurchaseReturn, getPurchaseReturn } from ".
 import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
-import { fmtMoney } from "../utils/format.js";
+import { fmtMoney, fmtCreatedAt } from "../utils/format.js";
 import { IconBtn, IconConfirm, IconView, IconPrint } from "../components/TableActionKit.jsx";
 import { downloadCsvFile } from "../components/reports/reportExport.js";
 import TableCsvActions from "../components/ui/TableCsvActions.jsx";
@@ -174,9 +174,14 @@ export default function PurchaseReturnsPage() {
                 render: (r) => <span style={{ fontWeight: 700 }}>{r.return_number || "—"}</span>
               },
               {
-                id: "return_date",
-                header: "Date",
-                render: (r) => String(r.return_date || "").slice(0, 10) || "—"
+                id: "created_at",
+                header: "Date & time",
+                sortable: false,
+                render: (r) => (
+                  <span style={{ color: "var(--color-text-3)", whiteSpace: "nowrap" }}>
+                    {fmtCreatedAt(r.created_at)}
+                  </span>
+                )
               },
               {
                 id: "vendor_name",

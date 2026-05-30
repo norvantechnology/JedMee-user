@@ -1,5 +1,10 @@
 const { clean, n, i, round4, isFutureDate, calculateLineItem, calculateInvoiceTotals } = require("../../shared/sales");
 const { MSG } = require("../../shared/apiMessages");
+const {
+  batchInventoryStockJoin,
+  batchLiveBillableColumn,
+  batchLiveFreeColumn
+} = require("../../shared/productStockSql");
 
 /**
  * Validate GSTIN format: 15-char alphanumeric per GST rules.
@@ -26,7 +31,7 @@ const SALES_LINE_BATCH_SELECT = `
        pb.loose_stock, pb.loose_unit_name,
        COALESCE(pb.packing_units, p.units_per_strip, 1) AS packing_units,
        COALESCE(p.sales_gst, pb.sales_gst) AS sales_gst,
-       pb.current_stock, pb.current_free_stock, pb.is_hold, pb.hold_reason,
+       ${batchLiveBillableColumn}, ${batchLiveFreeColumn}, pb.is_hold, pb.hold_reason,
        COALESCE(p.is_control, pb.is_control) AS is_control,
        COALESCE(p.is_half_scheme, pb.is_half_scheme) AS is_half_scheme,
        pb.is_net, pb.net_discount_percent,
@@ -97,6 +102,7 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
     FROM product_batches pb
     JOIN products p ON p.id = pb.product_id AND p.account_id = pb.account_id
     LEFT JOIN mfg_companies mc ON mc.id = p.mfg_company_id AND mc.account_id = p.account_id
+    ${batchInventoryStockJoin("$1")}
     WHERE pb.account_id = $1 AND pb.deleted_at IS NULL AND pb.id = ANY($2::uuid[])
     `,
     [accountId, batchIdList]

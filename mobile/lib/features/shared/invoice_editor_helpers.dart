@@ -10,6 +10,7 @@ import '../../core/utils/date.dart';
 import '../../core/utils/format.dart';
 import '../../core/utils/product_stock.dart';
 import '../../widgets/searchable_picker.dart';
+import '../../widgets/stable_text_form_field.dart';
 
 /// Stable string id for API rows (UUID, int, etc.).
 String recordIdStr(dynamic id) {
@@ -390,22 +391,28 @@ class InvoiceLineMetricsRow extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: TextFormField(
-                key: ValueKey('$lineKey-qty-$qty'),
-                initialValue: '$qty',
+              child: StableTextFormField(
+                fieldKey: '$lineKey-qty',
+                value: qty > 0 ? '$qty' : '',
                 decoration: _dec('Qty', hint: '1'),
                 keyboardType: TextInputType.number,
-                onChanged: (v) => onQtyChanged(int.tryParse(v) ?? 1),
+                onChanged: (v) {
+                  final n = int.tryParse(v);
+                  if (n != null) onQtyChanged(n);
+                },
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: TextFormField(
-                key: ValueKey('$lineKey-free-$freeQty'),
-                initialValue: '$freeQty',
+              child: StableTextFormField(
+                fieldKey: '$lineKey-free',
+                value: freeQty > 0 ? '$freeQty' : '',
                 decoration: _dec('Free'),
                 keyboardType: TextInputType.number,
-                onChanged: (v) => onFreeQtyChanged(int.tryParse(v) ?? 0),
+                onChanged: (v) {
+                  final n = int.tryParse(v);
+                  if (n != null) onFreeQtyChanged(n);
+                },
               ),
             ),
           ],
@@ -415,22 +422,28 @@ class InvoiceLineMetricsRow extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: TextFormField(
-                key: ValueKey('$lineKey-rate-$rate'),
-                initialValue: rate > 0 ? '$rate' : '',
+              child: StableTextFormField(
+                fieldKey: '$lineKey-rate',
+                value: rate > 0 ? '$rate' : '',
                 decoration: _dec(rateLabel),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                onChanged: (v) => onRateChanged(double.tryParse(v) ?? 0),
+                onChanged: (v) {
+                  final n = double.tryParse(v);
+                  if (n != null) onRateChanged(n);
+                },
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: TextFormField(
-                key: ValueKey('$lineKey-disc-$discountPercent'),
-                initialValue: discountPercent > 0 ? '$discountPercent' : '',
+              child: StableTextFormField(
+                fieldKey: '$lineKey-disc',
+                value: discountPercent > 0 ? '$discountPercent' : '',
                 decoration: _dec('Disc %'),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                onChanged: (v) => onDiscountChanged(double.tryParse(v) ?? 0),
+                onChanged: (v) {
+                  final n = double.tryParse(v);
+                  if (n != null) onDiscountChanged(n);
+                },
               ),
             ),
           ],

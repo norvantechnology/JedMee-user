@@ -40,6 +40,24 @@ const batchBillableStockSql = "COALESCE(st.qty, 0)::numeric(12, 3)";
 const batchFreeStockSql = "COALESCE(st.free_qty, 0)::numeric(12, 3)";
 const batchTotalStockSql = `(${batchBillableStockSql} + ${batchFreeStockSql})`;
 
+/** Live ledger stock — use instead of product_batches.current_stock (can be stale). */
+const batchLiveBillableColumn = `${batchBillableStockSql} AS current_stock`;
+const batchLiveFreeColumn = `${batchFreeStockSql} AS current_free_stock`;
+
+/** Inline subquery for a single batch inside a transaction (params: batchId, accountId). */
+const batchLiveStockInlineSql = `
+  (
+    SELECT COALESCE(SUM(qty), 0)::numeric(12, 3)
+    FROM inventory_txns
+    WHERE batch_id = $1 AND account_id = $2
+  ) AS current_stock,
+  (
+    SELECT COALESCE(SUM(free_qty), 0)::numeric(12, 3)
+    FROM inventory_txns
+    WHERE batch_id = $1 AND account_id = $2
+  ) AS current_free_stock
+`;
+
 /** Product-level total across batches (matches products.list total_quantity). */
 function productStockAggregateCte(accountSqlRef) {
   return `
@@ -81,6 +99,9 @@ module.exports = {
   batchBillableStockSql,
   batchFreeStockSql,
   batchTotalStockSql,
+  batchLiveBillableColumn,
+  batchLiveFreeColumn,
+  batchLiveStockInlineSql,
   productStockAggregateCte,
   productStockAggregateCteAllAccounts
 };

@@ -7,6 +7,7 @@ import '../../core/export/export_columns.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/access.dart';
 import '../../core/utils/api_helpers.dart';
+import '../../core/utils/list_sort.dart';
 import '../../core/utils/product_stock.dart';
 import '../../core/utils/record_fields.dart';
 import '../../providers/app_providers.dart';
@@ -533,6 +534,7 @@ class _QualityMasterScreenState extends ConsumerState<QualityMasterScreen>
                       final resp = await ref.read(productRepositoryProvider).listProducts({
                         if (search.isNotEmpty) 'search': search,
                         'limit': 500,
+                        ...kCreatedAtDescProductSort,
                       });
                       return listFromResponse(resp);
                     },
@@ -582,6 +584,7 @@ class _QualityMasterScreenState extends ConsumerState<QualityMasterScreen>
                     load: (search, _) async {
                       final resp = await ref.read(productBatchRepositoryProvider).list({
                         if (search.isNotEmpty) 'search': search,
+                        ...kCreatedAtDescSort,
                       });
                       return listFromResponse(resp);
                     },

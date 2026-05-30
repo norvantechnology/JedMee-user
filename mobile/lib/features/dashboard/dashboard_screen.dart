@@ -308,9 +308,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
             if (batch == null) {
               showAppSnack(
                 context,
-                message: resp.parseErrorMessage().isNotEmpty
-                    ? resp.parseErrorMessage()
-                    : 'No product found for barcode "$code"',
+                message: resp.ok
+                    ? 'No product found for barcode "$code"'
+                    : (resp.parseErrorMessage().isNotEmpty
+                        ? resp.parseErrorMessage()
+                        : 'No product found for barcode "$code"'),
                 type: AppSnackType.error,
               );
               return;

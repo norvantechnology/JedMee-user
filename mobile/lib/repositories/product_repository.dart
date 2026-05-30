@@ -10,11 +10,13 @@ class ProductRepository {
   /// PERFORMANCE: Product list cached for 5 minutes (master data TTL).
   /// Products change infrequently — caching eliminates repeated fetches when
   /// the user navigates between screens that show product lists.
-  Future<ApiResponse> listProducts([Map<String, dynamic>? params]) {
+  Future<ApiResponse> listProducts([Map<String, dynamic>? params, bool fresh = false]) {
     return _client.get(
       '/products',
       params: params,
-      options: const ApiRequestOptions(cacheTtl: ApiCache.masterDataTtl),
+      options: fresh
+          ? const ApiRequestOptions(skipCache: true)
+          : const ApiRequestOptions(cacheTtl: ApiCache.masterDataTtl),
     );
   }
 

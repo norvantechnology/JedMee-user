@@ -1,5 +1,6 @@
 const { fail } = require("../../shared/response");
-const { MSG } = require("../../shared/apiMessages");
+const { MSG, notEnoughStockMsg } = require("../../shared/apiMessages");
+const { batchLiveStockInlineSql } = require("../../shared/productStockSql");
 const { calculateInvoiceTotals, calculateLineItem, refreshSalesInvoicePaymentTotals } = require("../../shared/sales");
 const { enforceFinancialLimits } = require("./_common");
 const { getRoleCodeForAccount } = require("../../shared/accountRoleProfile");
@@ -76,7 +77,7 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
   const invoiceFreeQtyByBatch = new Map();
   for (const item of items) {
     const bRs = await q(
-      `SELECT pb.id, pb.batch_no, pb.current_stock, pb.current_free_stock, pb.is_hold, pb.hold_reason,
+      `SELECT pb.id, pb.batch_no, ${batchLiveStockInlineSql}, pb.is_hold, pb.hold_reason,
               pb.loose_stock, pb.loose_unit_name,
               COALESCE(pb.packing_units, p.units_per_strip, 1) AS packing_units,
               COALESCE(p.is_control, pb.is_control) AS is_control, pb.account_id,
@@ -239,11 +240,7 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
     const needFree = usedFree + lineFree;
     if (stockBillable < needBillable) {
       return {
-        err: fail(
-          400,
-          "BUSINESS_RULE",
-          `Insufficient billable (paid) stock for "${item.product_name}" batch "${item.batch_no}". Billable available: ${stockBillable}; free balance: ${stockFree} (sold separately  not mixed with paid qty). This invoice needs ${needBillable} billable (${usedBillable} on other lines + ${lineQty} here). Lower paid qty, or post/adjust stock so paid units sit in the billable bucket.`
-        )
+        err: fail(400, "BUSINESS_RULE", notEnoughStockMsg(item.product_name, item.batch_no))
       };
     }
     if (stockFree < needFree) {

@@ -1,7 +1,7 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { AppButton, AsyncButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { clean, fmtMoney, fmtCurrency } from "../utils/format.js";
+import { clean, fmtMoney, fmtCurrency, fmtCreatedAt } from "../utils/format.js";
 import {
   getPackagingFactors,
   getUnitOptions,
@@ -321,6 +321,7 @@ export default function PurchaseInvoicesPage() {
   const [modalLoading, setModalLoading] = useState(false);
   const [loadingEditId, setLoadingEditId] = useState(null);
   const purchaseInvoiceLoadGenRef = useRef(0);
+  const purchaseFormRef = useRef(null);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({
     invoiceNumber: "",
@@ -514,11 +515,40 @@ export default function PurchaseInvoicesPage() {
       listProducts({ page: 1, limit: 500, sortBy: "name", sortOrder: "asc" }),
       listVendors({ limit: 500 })
     ];
-    if (!isRetailer) calls.push(listDivisions({ sortBy: "name", sortDir: "asc" }));
+    if (!isRetailer) calls.push(listDivisions({ sortBy: "name", sortDir: "asc", isActive: true }));
     const [prd, vnd, ddr] = await Promise.all(calls);
     if (prd?.status >= 200 && prd?.status < 300 && prd?.json?.ok) setProducts(prd.json?.data?.items || []);
     if (vnd?.status >= 200 && vnd?.status < 300 && vnd?.json?.ok) setVendors(vnd.json?.data?.vendors || []);
     if (ddr?.status >= 200 && ddr?.status < 300 && ddr?.json?.ok) setDivisions(ddr.json?.data?.divisions || []);
+  }
+
+  async function refreshFormLineStockFromServer(items) {
+    const lines = Array.isArray(items) ? items : [];
+    const productIds = [...new Set(lines.map((x) => String(x.productId || "").trim()).filter(Boolean))];
+    if (!productIds.length) return lines;
+    const batchMap = new Map();
+    await Promise.all(
+      productIds.map(async (pid) => {
+        const b = await listProductBatches({ productId: pid, product_id: pid });
+        if (b.status >= 200 && b.status < 300 && b.json?.ok) {
+          batchMap.set(pid, sortBatchesByExpiryAsc(b.json?.data?.items || []));
+        } else {
+          batchMap.set(pid, []);
+        }
+      })
+    );
+    return lines.map((line) => {
+      const pid = String(line.productId || "");
+      const batchId = String(line.batchId || "");
+      if (!pid) return line;
+      const batches = batchMap.get(pid) || [];
+      const batch = batchId ? batches.find((b) => String(b.id) === batchId) : null;
+      return {
+        ...line,
+        availableBatches: batches,
+        currentStock: batch ? Number(batch.total_stock || 0) : line.currentStock
+      };
+    });
   }
 
   async function runBulkSettlePayments() {
@@ -892,6 +922,24 @@ export default function PurchaseInvoicesPage() {
     return () => cancelAnimationFrame(id);
   }, [open, modalLoading, editing?.id]);
 
+  // Refresh products, vendors, divisions and line stock every time the purchase modal opens.
+  purchaseFormRef.current = form;
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      await refreshMasterDropdowns();
+      if (cancelled || modalLoading) return;
+      const items = await refreshFormLineStockFromServer(purchaseFormRef.current?.items || []);
+      if (cancelled) return;
+      setForm((prev) => ({ ...prev, items }));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, modalLoading]);
+
   const hasLockedMfg = (form.items || []).some((it) => Boolean(it.mfgPurchaseLocked));
   const hasMissingNewBatchNo = (form.items || []).some((it) => Boolean(it.isNewBatch) && Boolean(clean(it.productId)) && !clean(it.batchNo));
   const hasLineValidationErrors = (form.items || []).some((it) => {
@@ -1088,6 +1136,7 @@ export default function PurchaseInvoicesPage() {
 
   async function loadPurchaseInvoiceForEdit(id, gen) {
     try {
+      await refreshMasterDropdowns();
       const r = await getPurchaseInvoice(id);
       if (gen !== purchaseInvoiceLoadGenRef.current) return;
       if (r.status >= 200 && r.status < 300 && r.json?.ok) {
@@ -1558,19 +1607,7 @@ export default function PurchaseInvoicesPage() {
                   return <span>{r.vendor_name || ""}</span>;
                 }
               },
-              { id: "invoice_date", header: "Invoice Date", render: (r) => <span>{ymd(r.invoice_date)}</span> },
-              { id: "due_date", header: "Due Date", sortable: false, render: (r) => <span>{ymd(r.due_date)}</span> },
-              {
-                id: "age",
-                header: "Age",
-                sortable: false,
-                align: "right",
-                render: (r) => {
-                  const d = daysFrom(r.invoice_date);
-                  const color = d == null ? undefined : d > 60 ? "var(--color-danger)" : d > 30 ? "var(--color-warning)" : d > 7 ? "var(--color-primary)" : "var(--color-text-3)";
-                  return <span style={{ fontWeight: 700, color }}>{d == null ? "" : `${d}d`}</span>;
-                }
-              },
+              { id: "created_at", header: "Date & time", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)", whiteSpace: "nowrap" }}>{fmtCreatedAt(r.created_at)}</span> },
               {
                 id: "due_in",
                 header: "Due In",
@@ -1598,7 +1635,6 @@ export default function PurchaseInvoicesPage() {
               },
               { id: "total_amount", header: "Total", align: "right", render: (r) => <span>{money(r.total_amount)}</span> },
               { id: "balance_due", header: "Balance", align: "right", render: (r) => <span>{money(r.balance_due)}</span> },
-              { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{ymd(r.created_at)}</span> },
               {
                 id: "return_status",
                 header: "Returns",

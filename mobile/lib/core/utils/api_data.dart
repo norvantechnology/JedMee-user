@@ -131,17 +131,22 @@ String txnRowTitle(Map<String, dynamic> row) {
 }
 
 String invoiceRowSubtitle(Map<String, dynamic> row) {
-  final date = fmtDisplayDate(row['invoice_date'] ?? row['invoiceDate'] ?? row['date'] ?? row['created_at']);
   final party = row['customer_name'] ??
       row['customerName'] ??
       row['vendor_name'] ??
       row['vendorName'] ??
       row['division_name'] ??
       row['divisionName'];
-  return [
-    if (date.isNotEmpty) date,
-    if (party != null && party.toString().trim().isNotEmpty) party.toString(),
-  ].join(' · ');
+  final parts = <String>[];
+  if (party != null && party.toString().trim().isNotEmpty) {
+    parts.add(party.toString().trim());
+  }
+  final rawCount = row['item_count'] ?? row['itemCount'];
+  if (rawCount != null) {
+    final count = int.tryParse(rawCount.toString()) ?? 0;
+    if (count > 0) parts.add('$count item${count == 1 ? '' : 's'}');
+  }
+  return parts.join(' · ');
 }
 
 dynamic invoiceRowAmount(Map<String, dynamic> row) {

@@ -9,11 +9,13 @@ class DivisionRepository {
 
   /// PERFORMANCE: Division list cached for 10 minutes (reference data TTL).
   /// Divisions are very stable — they rarely change within a session.
-  Future<ApiResponse> list([Map<String, dynamic>? params]) {
+  Future<ApiResponse> list([Map<String, dynamic>? params, bool fresh = false]) {
     return _client.get(
       '/divisions',
       params: params,
-      options: const ApiRequestOptions(cacheTtl: ApiCache.transactionTtl),
+      options: fresh
+          ? const ApiRequestOptions(skipCache: true)
+          : const ApiRequestOptions(cacheTtl: ApiCache.transactionTtl),
     );
   }
 

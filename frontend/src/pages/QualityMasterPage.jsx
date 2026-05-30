@@ -25,7 +25,7 @@ import { upsertSupplierProduct } from "../services/supplierProductService.js";
 import { NAV_LABELS } from "../constants/navLabels.js";
 import { IconProducts, IconStockAlert } from "../components/ui/AppIcons.jsx";
 import { IconBtn, IconEdit, IconLayers, IconPlus, IconTrash } from "../components/TableActionKit.jsx";
-import { clean, daysUntil, fmtMoney } from "../utils/format.js";
+import { clean, daysUntil, fmtMoney, fmtCreatedAt } from "../utils/format.js";
 import { formatBatchExpiryRelativePhrase } from "../utils/batchExpiryDisplay.js";
 import "./QualityMasterPage.css";
 import CsvImportWizard from "../components/import/CsvImportWizard.jsx";
@@ -68,7 +68,7 @@ export default function QualityMasterPage() {
   const [mfgLoading, setMfgLoading] = useState(false);
   const [vendorsLoading, setVendorsLoading] = useState(false);
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState({ by: "name", dir: "asc" });
+  const [sort, setSort] = useState({ by: "created_at", dir: "desc" });
   const [batchPresenceFilter, setBatchPresenceFilter] = useState(""); // "" | "with" | "without"
   const [expiryFilter, setExpiryFilter] = useState(""); // "" | "EXPIRED" | "NEAR" | "VALID" | "NONE"
   const [lowStockFilter, setLowStockFilter] = useState(""); // "" | "LOW_ANY" | "LOW_PRODUCT" | "LOW_BATCH" | "NORMAL" | "ALERTS_OFF"
@@ -977,7 +977,7 @@ export default function QualityMasterPage() {
                   );
                 }
               },
-              { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{String(r.created_at || "").slice(0, 10)}</span> },
+              { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)", whiteSpace: "nowrap" }}>{fmtCreatedAt(r.created_at)}</span> },
               {
                 id: "actions",
                 header: "Actions",

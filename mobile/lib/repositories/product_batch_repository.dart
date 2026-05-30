@@ -6,8 +6,12 @@ class ProductBatchRepository {
 
   final ApiClient _client;
 
-  Future<ApiResponse> list([Map<String, dynamic>? params]) {
-    return _client.get('/api/product-batches', params: params);
+  Future<ApiResponse> list([Map<String, dynamic>? params, bool fresh = false]) {
+    return _client.get(
+      '/api/product-batches',
+      params: params,
+      options: fresh ? const ApiRequestOptions(skipCache: true) : const ApiRequestOptions(),
+    );
   }
 
   Future<ApiResponse> get(Object id) {

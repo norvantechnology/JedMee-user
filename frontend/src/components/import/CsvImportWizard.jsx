@@ -5,6 +5,7 @@ import CommonModal from "../CommonModal.jsx";
 import { downloadCsvFile } from "../reports/reportExport.js";
 import { emitToast } from "../../services/toastBus.js";
 import { parseApiError } from "../../utils/api.js";
+import { fmtCreatedAt } from "../../utils/format.js";
 import { importParse, importValidate, importExecute, importTemplateMeta, importJobsList } from "../../services/importService.js";
 import {
   csvFieldColumnHeader,
@@ -305,7 +306,7 @@ export default function CsvImportWizard({ open, onClose, entityType, title, onCo
                     <tbody>
                       {importHistory.map((row) => (
                         <tr key={row.id}>
-                          <td>{String(row.created_at || "").slice(0, 10)}</td>
+                          <td>{fmtCreatedAt(row.created_at)}</td>
                           <td>{row.original_filename || ""}</td>
                           <td>{row.created_rows ?? 0}</td>
                           <td>{row.updated_rows ?? 0}</td>

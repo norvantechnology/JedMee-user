@@ -11,6 +11,7 @@ import TableCsvActions from "../components/ui/TableCsvActions.jsx";
 import { listPrescriptions } from "../services/prescriptionService.js";
 import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
+import { fmtCreatedAt } from "../utils/format.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
 
 export default function PrescriptionsPage() {
@@ -102,12 +103,11 @@ export default function PrescriptionsPage() {
               getRowId={(r) => r.id}
               columns={[
                 { id: "prescription_no", header: "Rx No", render: (r) => <span style={{ fontWeight: 700 }}>{r.prescription_no || ""}</span> },
-                { id: "prescription_date", header: "Date", render: (r) => String(r.prescription_date || r.created_at || "").slice(0, 10) },
                 { id: "patient_name", header: "Patient", render: (r) => r.patient_name || "" },
                 { id: "doctor_name", header: "Doctor", render: (r) => r.doctor_name || "" },
                 { id: "invoice_number", header: "Invoice", render: (r) => r.invoice_number || "" },
                 { id: "notes", header: "Notes", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{r.notes || ""}</span> },
-                { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{String(r.created_at || "").slice(0, 10)}</span> }
+                { id: "created_at", header: "Date & time", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)", whiteSpace: "nowrap" }}>{fmtCreatedAt(r.created_at)}</span> }
               ]}
             />
             <CsvImportWizard

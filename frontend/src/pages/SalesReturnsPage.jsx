@@ -1,4 +1,4 @@
-import { fmtMoney, fmtCurrency } from "../utils/format.js";
+import { fmtMoney, fmtCurrency, fmtCreatedAt } from "../utils/format.js";
 import { useSeoMeta } from "../utils/seo.js";
 import { AppButton, InlineButtonProgress } from "../components/ui/buttons.jsx";
 import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
@@ -92,6 +92,7 @@ export default function SalesReturnsPage() {
   const [dateTo, setDateTo] = useState("");
   const [open, setOpen] = useState(false);
   useEffect(() => { if (!open) setSubmitted(false); }, [open]);
+  const returnFormRef = useRef(null);
   const [modalLoading, setModalLoading] = useState(false);
   const returnPrefillGenRef = useRef(0);
   const [form, setForm] = useState({ customerId: "", salesInvoiceId: "", returnDate: todayYmdLocal(), returnReason: "OTHER", notes: "", items: [emptyReturnItem()] });
@@ -140,6 +141,50 @@ export default function SalesReturnsPage() {
     if (b.status >= 200 && b.status < 300 && b.json?.ok) return sortBatchesByExpiryAsc(b.json?.data?.items || []);
     return [];
   }
+
+  async function refreshReturnModalMasters() {
+    const [c, s, pr] = await Promise.all([
+      listCustomers({ limit: 500 }),
+      listSalesInvoices({ limit: 500, status: "CONFIRMED" }),
+      listProducts({ limit: 500 })
+    ]);
+    if (c.status >= 200 && c.status < 300 && c.json?.ok) setCustomers(c.json?.data?.customers || []);
+    if (s.status >= 200 && s.status < 300 && s.json?.ok) setInvoices(s.json?.data?.items || []);
+    if (pr.status >= 200 && pr.status < 300 && pr.json?.ok) setProducts(pr.json?.data?.items || []);
+  }
+
+  returnFormRef.current = form;
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    (async () => {
+      await refreshReturnModalMasters();
+      if (cancelled || modalLoading) return;
+      const lines = returnFormRef.current?.items || [];
+      const productIds = [...new Set(lines.map((x) => String(x.productId || "").trim()).filter(Boolean))];
+      if (!productIds.length) return;
+      const batchMap = new Map();
+      await Promise.all(
+        productIds.map(async (pid) => {
+          batchMap.set(pid, await loadBatchesForProduct(pid));
+        })
+      );
+      if (cancelled) return;
+      setForm((prev) => ({
+        ...prev,
+        items: (prev.items || []).map((line) => {
+          const pid = String(line.productId || "");
+          if (!pid) return line;
+          return { ...line, availableBatches: batchMap.get(pid) || [] };
+        })
+      }));
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, modalLoading]);
+
   useEffect(() => { if (canView) refresh(); }, [canView, search, statusFilter, customerFilter, dateFrom, dateTo]);
 
   async function refreshCustomersOnly() {
@@ -269,11 +314,10 @@ export default function SalesReturnsPage() {
             columns={[
               { id: "return_number", header: "Return No", render: (r) => <span style={{ fontWeight: 700 }}>{r.return_number}</span> },
               { id: "customer_name", header: "Customer", render: (r) => r.customer_name || "" },
-              { id: "return_date", header: "Date", render: (r) => String(r.return_date || "").slice(0, 10) },
               { id: "invoice_number", header: "Ref Invoice", sortable: false, render: (r) => r.invoice_number || r.sales_invoice_number || "" },
               { id: "status", header: "Status", render: (r) => <span style={{ fontWeight: 700 }}>{r.status}</span> },
               { id: "total_return_amount", header: "Amount", align: "right", render: (r) => fmtMoney(r.total_return_amount || 0) },
-              { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{String(r.created_at || "").slice(0, 10)}</span> },
+              { id: "created_at", header: "Date & time", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)", whiteSpace: "nowrap" }}>{fmtCreatedAt(r.created_at)}</span> },
               {
                 id: "actions",
                 header: "Actions",

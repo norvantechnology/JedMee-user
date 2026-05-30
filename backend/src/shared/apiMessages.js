@@ -50,6 +50,13 @@ const MSG = {
   LOOSE_QTY_TOO_HIGH: "Loose qty is too high for this batch."
 };
 
+function notEnoughStockMsg(productName, batchNo) {
+  const name = String(productName || "item").trim() || "item";
+  const batch = String(batchNo || "").trim();
+  if (batch) return `Not enough stock for ${name} (batch ${batch}).`;
+  return MSG.NOT_ENOUGH_STOCK;
+}
+
 const SHORTEN_RULES = [
   [/Insufficient billable.*stock/i, MSG.NOT_ENOUGH_PAID_STOCK],
   [/Insufficient free stock/i, MSG.NOT_ENOUGH_FREE_STOCK],
@@ -95,4 +102,4 @@ function shortUserMessage(message) {
   return m;
 }
 
-module.exports = { MSG, shortUserMessage };
+module.exports = { MSG, shortUserMessage, notEnoughStockMsg };

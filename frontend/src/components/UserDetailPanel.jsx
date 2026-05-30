@@ -13,6 +13,7 @@ import "./CommonModal.css";
 import "./StructuredForm.css";
 import "./UserDetailPanel.css";
 import { useLocale } from "../context/LocaleContext.jsx";
+import { fmtDateTime } from "../utils/format.js";
 
 function initials(name = "") {
   const parts = String(name || "")
@@ -39,26 +40,6 @@ function roleStyle(role) {
     PHARMACIST: { cls: "udpCap_pharmacist", label: "Pharmacist" }
   };
   return map[r] || { cls: "udpCap_plain", label: raw || "" };
-}
-
-function fmtDateTime(value) {
-  if (!value) return "-";
-  const s = String(value || "").trim();
-  if (!s) return "-";
-  const ms = Date.parse(s);
-  if (Number.isNaN(ms)) return s;
-  const d = new Date(ms);
-  try {
-    return d.toLocaleString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  } catch {
-    return d.toISOString().slice(0, 16).replace("T", " ");
-  }
 }
 
 export default function UserDetailPanel({

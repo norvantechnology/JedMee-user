@@ -28,6 +28,7 @@ import CommonModal, {
 import ModalFooterShell from "../components/ui/ModalFooterShell.jsx";
 import "./RolesAccessPage.css";
 import { can } from "../utils/access.js";
+import { fmtCreatedAt } from "../utils/format.js";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import { IconShieldKey } from "../components/ui/AppIcons.jsx";
 import { NAV_LABELS } from "../constants/navLabels.js";
@@ -257,7 +258,7 @@ export default function RolesAccessPage() {
                 id: "created_at",
                 header: "Created",
                 sortable: false,
-                render: (r) => <span style={{ color: "var(--color-text-3)" }}>{String(r.created_at || "").slice(0, 10)}</span>
+                render: (r) => <span style={{ color: "var(--color-text-3)", whiteSpace: "nowrap" }}>{fmtCreatedAt(r.created_at)}</span>
               },
               {
                 id: "actions",

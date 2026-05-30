@@ -15,10 +15,10 @@ async function handler(event) {
   const search = clean(qs.search || qs.q);
   const mfgId = clean(qs.mfg_company_id || qs.mfgCompanyId);
   const active = clean(qs.is_active ?? qs.isActive);
-  const sortBy = clean(qs.sort_by || qs.sortBy || "name");
-  const sortDir = clean(qs.sort_dir || qs.sortDir || "asc").toLowerCase() === "desc" ? "DESC" : "ASC";
+  const sortBy = clean(qs.sort_by || qs.sortBy || "created_at");
+  const sortDir = clean(qs.sort_dir || qs.sortDir || "desc").toLowerCase() === "asc" ? "ASC" : "DESC";
   const ORDER_MAP = { name: "d.name", code: "d.code", created_at: "d.created_at", credit_days: "d.credit_days" };
-  const orderCol = ORDER_MAP[sortBy] || "d.name";
+  const orderCol = ORDER_MAP[sortBy] || "d.created_at";
 
   const wh = ["d.account_id = $1", "d.deleted_at IS NULL"];
   const ps = [ctx.accountId];

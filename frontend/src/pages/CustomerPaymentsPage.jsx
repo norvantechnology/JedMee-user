@@ -1,7 +1,7 @@
 import AmountInput from "../components/ui/AmountInput.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { InlineButtonProgress } from "../components/ui/buttons.jsx";
-import { fmtMoney, fmtCurrency } from "../utils/format.js";
+import { fmtMoney, fmtCurrency, fmtCreatedAt } from "../utils/format.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import AppShell from "../layouts/AppShell.jsx";
@@ -188,7 +188,6 @@ export default function CustomerPaymentsPage() {
             rows={rows}
             getRowId={(r) => r.id}
             columns={[
-              { id: "payment_date", header: "Date", render: (r) => String(r.payment_date || "").slice(0, 10) },
               { id: "customer_name", header: "Customer", render: (r) => r.customer_name || "" },
               { id: "invoice_number", header: "Invoice", render: (r) => r.invoice_number || (String(r.allocation_type || r.allocation_type_resolved || "").toUpperCase() === "ON_ACCOUNT" ? "On Account" : "") },
               {
@@ -205,7 +204,7 @@ export default function CustomerPaymentsPage() {
               { id: "payment_mode", header: "Mode", render: (r) => r.payment_mode || "" },
               { id: "reference_number", header: "Reference", render: (r) => r.reference_number || "" },
               { id: "notes", header: "Notes", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{r.notes || ""}</span> },
-              { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{String(r.created_at || "").slice(0, 10)}</span> }
+              { id: "created_at", header: "Date & time", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)", whiteSpace: "nowrap" }}>{fmtCreatedAt(r.created_at)}</span> }
             ]}
           />
         </div>

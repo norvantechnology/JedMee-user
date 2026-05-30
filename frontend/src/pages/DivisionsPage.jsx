@@ -34,7 +34,7 @@ export default function DivisionsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [mfgFilter, setMfgFilter] = useState("");
-  const [sort, setSort] = useState({ by: "name", dir: "asc" });
+  const [sort, setSort] = useState({ by: "created_at", dir: "desc" });
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);

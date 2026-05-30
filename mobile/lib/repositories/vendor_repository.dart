@@ -8,11 +8,13 @@ class VendorRepository {
   final ApiClient _client;
 
   /// PERFORMANCE: Vendor list cached for 5 minutes (master data TTL).
-  Future<ApiResponse> list([Map<String, dynamic>? params]) {
+  Future<ApiResponse> list([Map<String, dynamic>? params, bool fresh = false]) {
     return _client.get(
       '/vendors',
       params: params,
-      options: const ApiRequestOptions(cacheTtl: ApiCache.transactionTtl),
+      options: fresh
+          ? const ApiRequestOptions(skipCache: true)
+          : const ApiRequestOptions(cacheTtl: ApiCache.transactionTtl),
     );
   }
 

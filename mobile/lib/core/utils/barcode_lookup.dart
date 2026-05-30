@@ -13,7 +13,10 @@ Map<String, dynamic>? batchFromBarcodeResponse(ApiResponse resp) {
   if (!resp.ok) return null;
   final data = extractDataMap(resp);
   if (data == null) return null;
-  final batch = data['batch'] ?? data['productBatch'] ?? data['product_batch'];
+  final batch = data['batch'] ??
+      data['productBatch'] ??
+      data['product_batch'] ??
+      data['item'];
   if (batch is Map) return Map<String, dynamic>.from(batch);
   if (data.containsKey('product_id') ||
       data.containsKey('productId') ||

@@ -22,11 +22,13 @@ import '../../widgets/responsive.dart';
 import '../../widgets/searchable_picker.dart';
 import '../../widgets/section_divider.dart';
 import '../../widgets/snackbar.dart';
+import '../../widgets/stable_text_form_field.dart';
 import '../shared/draft_auto_save.dart';
 import '../shared/invoice_editor_helpers.dart';
 import '../shared/txn_parse_utils.dart';
 import '../shared/invoice_editor_scaffold.dart';
 import '../shared/invoice_editor_summary.dart';
+import '../shared/invoice_master_loader.dart';
 import '../shared/invoice_payment_helpers.dart';
 import '../shared/invoice_payment_section.dart';
 import '../shared/ongoing_bills_controller.dart';
@@ -206,20 +208,11 @@ class _SalesInvoiceEditorScreenState
 
   Future<void> _init() async {
     try {
-      // Load master data in parallel for faster startup.
-      final futures = await Future.wait([
-        ref.read(customerRepositoryProvider).list({'limit': '500'}),
-        ref.read(divisionRepositoryProvider).list({'limit': '500'}),
-        ref.read(productRepositoryProvider).listProducts({'limit': '500'}),
-        ref.read(productBatchRepositoryProvider).list({'limit': '2000'}),
-        if (_isEdit)
-          ref.read(salesRepositoryProvider).getSalesInvoice(_currentInvoiceId!),
-      ]);
-
-      _customers = listFromResponse(futures[0]).rows;
-      _divisions = listFromResponse(futures[1]).rows;
-      _products = listFromResponse(futures[2]).rows;
-      _batches = listFromResponse(futures[3]).rows;
+      final masters = await loadSalesInvoiceEditorMasters(ref);
+      _customers = masters.customers;
+      _divisions = masters.divisions;
+      _products = masters.products;
+      _batches = masters.batches;
 
       if (_isRetailer) {
         _rateType = 'MRP';
@@ -236,8 +229,10 @@ class _SalesInvoiceEditorScreenState
         _applyHeaderAutofillFromBatch(batch);
       }
 
-      if (_isEdit && futures.length > 4) {
-        final resp = futures[4];
+      if (_isEdit) {
+        final resp = await ref
+            .read(salesRepositoryProvider)
+            .getSalesInvoice(_currentInvoiceId!);
         if (resp.ok) {
           final data = extractDataMap(resp);
           final inv = data?['invoice'] is Map
@@ -398,6 +393,7 @@ class _SalesInvoiceEditorScreenState
       setState(() => _saving = false);
     }
     if (!mounted) return;
+    invalidateBillingMasterCache();
     showAppSnack(
       context,
       message: confirmAfter ? 'Bill saved and confirmed' : 'Bill saved',
@@ -431,7 +427,7 @@ class _SalesInvoiceEditorScreenState
     // Also refresh the full batch list to get latest stock data.
     final batchListResp = await ref
         .read(productBatchRepositoryProvider)
-        .list({'limit': '2000'});
+        .list({'limit': '2000'}, true);
 
     if (!mounted) return;
 
@@ -446,12 +442,14 @@ class _SalesInvoiceEditorScreenState
 
     final batch = batchFromBarcodeResponse(resp);
     if (batch == null) {
-      final errMsg = resp.parseErrorMessage();
+      final errMsg = resp.ok
+          ? 'No product found for barcode "$code". Please check the barcode and try again.'
+          : (resp.parseErrorMessage().isNotEmpty
+              ? resp.parseErrorMessage()
+              : 'No product found for barcode "$code". Please check the barcode and try again.');
       showAppSnack(
         context,
-        message: errMsg.isNotEmpty
-            ? errMsg
-            : 'No product found for barcode "$code". Please check the barcode and try again.',
+        message: errMsg,
         type: AppSnackType.error,
       );
       return;
@@ -1051,22 +1049,25 @@ class _SalesInvoiceEditorScreenState
                 ],
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                initialValue:
-                    _globalDiscount > 0 ? '$_globalDiscount' : '',
+              StableTextFormField(
+                fieldKey: 'sales-global-discount',
+                value: _globalDiscount > 0 ? '$_globalDiscount' : '',
                 decoration: const InputDecoration(
                   labelText: 'Discount on all items %',
                   hintText: 'For every item',
                 ),
                 keyboardType: const TextInputType.numberWithOptions(
                     decimal: true),
-                onChanged: (v) =>
-                    _touch(() => _globalDiscount = double.tryParse(v) ?? 0),
+                onChanged: (v) {
+                  final n = double.tryParse(v);
+                  if (n != null) _touch(() => _globalDiscount = n);
+                },
               ),
               if (_billType == 'CASH_MEMO') ...[
                 const SizedBox(height: 12),
-                TextFormField(
-                  initialValue: _cashReceived,
+                StableTextFormField(
+                  fieldKey: 'sales-cash-received',
+                  value: _cashReceived,
                   decoration: const InputDecoration(
                     labelText: 'Cash note',
                     hintText: 'Optional',
@@ -1076,8 +1077,9 @@ class _SalesInvoiceEditorScreenState
                 ),
               ],
               const SizedBox(height: 12),
-              TextFormField(
-                initialValue: _notes,
+              StableTextFormField(
+                fieldKey: 'sales-notes',
+                value: _notes,
                 decoration: const InputDecoration(labelText: 'Notes'),
                 maxLines: 2,
                 onChanged: (v) => _touch(() => _notes = v),

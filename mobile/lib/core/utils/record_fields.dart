@@ -438,8 +438,21 @@ String humanizeKey(String key) {
       .join(' ');
 }
 
-bool _shouldHideField(String key, Map<String, dynamic> row) {
+bool _shouldHideField(String key, Map<String, dynamic> row, {RecordEntity? entity}) {
   if (_hiddenExact.contains(key)) return true;
+  if (entity != null &&
+      (key == 'created_at' ||
+          key == 'createdAt' ||
+          key == 'updated_at' ||
+          key == 'updatedAt')) {
+    if (entity == RecordEntity.salesInvoice ||
+        entity == RecordEntity.purchaseInvoice ||
+        entity == RecordEntity.salesReturn ||
+        entity == RecordEntity.purchaseReturn ||
+        entity == RecordEntity.payment) {
+      return true;
+    }
+  }
   if (key.endsWith('_id') || key.endsWith('Id')) {
     final nameKeys = _hiddenWhenNamePresent[key];
     if (nameKeys != null) {
@@ -664,7 +677,6 @@ List<String> _orderedKeysForEntity(RecordEntity entity) {
         'purchase_source_type',
         'notes',
         'confirmed_at',
-        'created_at',
         'updated_at',
         // Financial summary
         'round_off',
@@ -689,7 +701,7 @@ List<String> _orderedKeysForEntity(RecordEntity entity) {
         'total_amount',
         'return_reason',
         'notes',
-        'created_at',
+        'confirmed_at',
       ];
     default:
       return [];
@@ -758,7 +770,7 @@ List<DetailSection> buildDetailSections(Map<String, dynamic> row, {RecordEntity?
   final sections = <String, List<DetailField>>{};
 
   void addField(String key) {
-    if (_shouldHideField(key, row) || used.contains(key)) return;
+    if (_shouldHideField(key, row, entity: type) || used.contains(key)) return;
     if (type == RecordEntity.productBatch &&
         const {'health', 'health_label', 'healthLabel', 'expiry_status', 'expiryStatus'}
             .contains(key)) {
@@ -835,12 +847,21 @@ String listRowSubtitleFor(Map<String, dynamic> row) {
       return party?.toString().trim() ?? '';
     case RecordEntity.salesInvoice:
     case RecordEntity.purchaseInvoice:
-      // Party name only — date is shown as meta on the right side
-      final invoiceParty = row['customer_name'] ??
+      final party = row['customer_name'] ??
           row['customerName'] ??
           row['vendor_name'] ??
-          row['vendorName'];
-      return invoiceParty?.toString().trim() ?? '';
+          row['vendorName'] ??
+          row['division_name'] ??
+          row['divisionName'];
+      final partyStr = party?.toString().trim() ?? '';
+      final rawCount = row['item_count'] ?? row['itemCount'];
+      final parts = <String>[];
+      if (partyStr.isNotEmpty) parts.add(partyStr);
+      if (rawCount != null) {
+        final count = int.tryParse(rawCount.toString()) ?? 0;
+        if (count > 0) parts.add('$count item${count == 1 ? '' : 's'}');
+      }
+      return parts.join(' · ');
     case RecordEntity.customer:
     case RecordEntity.vendor:
       // Phone is the most actionable info; city/GST adds clutter in list view
@@ -861,8 +882,6 @@ String listRowSubtitleFor(Map<String, dynamic> row) {
     case RecordEntity.mfgCompany:
       return (row['short_name'] ?? row['shortName'] ?? row['code'] ?? '').toString();
     default:
-      final created = row['created_at'] ?? row['createdAt'];
-      if (created != null) return fmtDisplayDate(created);
       return '';
   }
 }

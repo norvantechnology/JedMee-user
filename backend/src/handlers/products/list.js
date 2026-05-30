@@ -27,10 +27,10 @@ async function handler(event) {
     requireActiveBatchRaw === "1" ||
     requireActiveBatchRaw.toLowerCase() === "true" ||
     requireActiveBatchRaw.toLowerCase() === "yes";
-  const sortBy = clean(qs.sort_by || qs.sortBy || "name");
-  const sortOrder = clean(qs.sort_order || qs.sortOrder || "asc").toLowerCase() === "desc" ? "DESC" : "ASC";
+  const sortBy = clean(qs.sort_by || qs.sortBy || "created_at");
+  const sortOrder = clean(qs.sort_order || qs.sortOrder || "desc").toLowerCase() === "asc" ? "ASC" : "DESC";
   const allowedSort = new Set(["name", "code", "created_at", "updated_at", "total_quantity", "active_batch_count", "low_batch_count"]);
-  const orderBy = allowedSort.has(sortBy) ? sortBy : "name";
+  const orderBy = allowedSort.has(sortBy) ? sortBy : "created_at";
 
   const wh = ["p.account_id = $1", "p.deleted_at IS NULL"];
   const ps = [ctx.accountId];

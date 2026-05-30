@@ -10,6 +10,7 @@ import '../../core/performance/list_scroll.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/access.dart';
 import '../../core/utils/api_helpers.dart';
+import '../../core/utils/list_sort.dart';
 import '../../core/utils/record_fields.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/auth_controller.dart';
@@ -129,6 +130,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     ApiCache.instance.invalidateContaining('/customers');
     final resp = await ref.read(customerRepositoryProvider).list({
       if (_search.isNotEmpty) 'search': _search,
+      ...kCreatedAtDescSort,
     });
     final result = listFromResponse(resp);
     if (!mounted) return;

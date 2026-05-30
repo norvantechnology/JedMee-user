@@ -13,6 +13,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_typography.dart';
 import '../../core/utils/access.dart';
 import '../../core/utils/api_helpers.dart';
+import '../../core/utils/list_sort.dart';
 import '../../core/utils/record_fields.dart';
 import '../../widgets/app_bottom_sheet.dart';
 import '../../providers/app_providers.dart';
@@ -122,6 +123,7 @@ class _VendorsScreenState extends ConsumerState<VendorsScreen> {
     ApiCache.instance.invalidateContaining('/vendors');
     final resp = await ref.read(vendorRepositoryProvider).list({
       if (_search.isNotEmpty) 'search': _search,
+      ...kCreatedAtDescSort,
     });
     final result = listFromResponse(resp);
     if (!mounted) return;

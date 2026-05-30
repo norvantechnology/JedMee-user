@@ -10,11 +10,13 @@ class CustomerRepository {
   /// PERFORMANCE: Customer list cached for 5 minutes (master data TTL).
   /// Customer data is stable within a session — caching prevents redundant
   /// fetches when navigating between screens.
-  Future<ApiResponse> list([Map<String, dynamic>? params]) {
+  Future<ApiResponse> list([Map<String, dynamic>? params, bool fresh = false]) {
     return _client.get(
       '/customers',
       params: params,
-      options: const ApiRequestOptions(cacheTtl: ApiCache.transactionTtl),
+      options: fresh
+          ? const ApiRequestOptions(skipCache: true)
+          : const ApiRequestOptions(cacheTtl: ApiCache.transactionTtl),
     );
   }
 

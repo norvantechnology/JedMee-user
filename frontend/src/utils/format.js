@@ -82,15 +82,26 @@ export function fmtDateIndian(value) {
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
-/** Format a date-time string as a localized readable stamp (e.g., "23 Jan 2023, 02:30 PM"). */
+/** Format a date-time string in the user's local timezone (e.g. "9 May 2026, 02:30 pm"). */
 export function fmtDateTime(value) {
   if (!value) return "-";
   const s = String(value).trim();
   if (!s) return "-";
   const ms = Date.parse(s);
   if (!Number.isFinite(ms)) return s;
-  const d = new Date(ms);
-  return d.toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return new Date(ms).toLocaleString(undefined, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+/** Alias for created/updated timestamps in list tables. */
+export function fmtCreatedAt(value) {
+  return fmtDateTime(value);
 }
 
 // ─── Misc ──────────────────────────────────────────────────────────────────

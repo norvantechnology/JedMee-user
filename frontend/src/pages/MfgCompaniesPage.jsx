@@ -1,4 +1,4 @@
-import { fmtCurrency } from "../utils/format.js";
+import { fmtCurrency, fmtCreatedAt } from "../utils/format.js";
 import { useEffect, useMemo, useState } from "react";
 import { useSeoMeta } from "../utils/seo.js";
 import AppShell from "../layouts/AppShell.jsx";
@@ -285,7 +285,7 @@ export default function MfgCompaniesPage() {
                   return <span style={{ color: "var(--color-text-3)" }}>{parts.length ? parts.join(", ") : ""}</span>;
                 }
               },
-              { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)" }}>{String(r.created_at || "").slice(0, 10)}</span> },
+              { id: "created_at", header: "Created", sortable: false, render: (r) => <span style={{ color: "var(--color-text-3)", whiteSpace: "nowrap" }}>{fmtCreatedAt(r.created_at)}</span> },
               {
                 id: "actions",
                 header: "Actions",
