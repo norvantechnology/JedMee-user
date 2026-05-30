@@ -1,4 +1,5 @@
 const { clean, computeInvoiceTotals, computeLineAmounts, ensureDateNotFuture, n, addCalendarDaysYmd } = require("../../shared/purchase");
+const { MSG } = require("../../shared/apiMessages");
 const { validateDivision, resolveDueDateFromDivision } = require("../../shared/divisionsCore");
 
 function isValidDateYmd(v) {
@@ -23,8 +24,8 @@ async function validateVendor(q, accountId, vendorId) {
     [id, accountId]
   );
   const row = r.rows?.[0];
-  if (!row) return { ok: false, message: "Selected vendor was not found for this account." };
-  if (!Boolean(row.is_active)) return { ok: false, message: "Selected vendor is inactive." };
+  if (!row) return { ok: false, message: MSG.VENDOR_NOT_FOUND };
+  if (!Boolean(row.is_active)) return { ok: false, message: MSG.VENDOR_INACTIVE };
   return { ok: true, vendor: row };
 }
 
@@ -42,7 +43,7 @@ async function enrichAndValidateItems(q, accountId, party, itemsInput) {
   const divisionId = party?.divisionId != null ? clean(party.divisionId) : "";
   const divisionMfgCompanyId = party?.divisionMfgCompanyId != null ? clean(party.divisionMfgCompanyId) : "";
   const items = Array.isArray(itemsInput) ? itemsInput : [];
-  if (!items.length) return { ok: false, message: "At least one line item is required." };
+  if (!items.length) return { ok: false, message: MSG.LINE_ITEM_REQUIRED };
 
   const out = [];
   const errs = [];
@@ -79,7 +80,7 @@ async function enrichAndValidateItems(q, accountId, party, itemsInput) {
   }
 
   if (errs.length) return { ok: false, message: errs[0], details: errs };
-  if (!lineMetas.length) return { ok: false, message: "At least one line item is required." };
+  if (!lineMetas.length) return { ok: false, message: MSG.LINE_ITEM_REQUIRED };
 
   const productIds = [...new Set(lineMetas.map((m) => m.productId))];
   const pr = await q(
@@ -163,7 +164,7 @@ async function validateInvoiceHeader(body) {
   if (invErr) return { ok: false, message: invErr };
   if (dueDate) {
     const d = new Date(`${dueDate}T00:00:00.000Z`);
-    if (Number.isNaN(d.getTime())) return { ok: false, message: "Due date is invalid." };
+    if (Number.isNaN(d.getTime())) return { ok: false, message: MSG.DUE_DATE_INVALID };
   }
   return {
     ok: true,
@@ -208,7 +209,7 @@ async function resolvePurchaseParty(q, accountId, header) {
       creditSource: v.vendor
     };
   }
-  return { ok: false, message: "Division or vendor is required." };
+  return { ok: false, message: MSG.DIVISION_OR_VENDOR_REQUIRED };
 }
 
 function mapInvoiceRow(row) {

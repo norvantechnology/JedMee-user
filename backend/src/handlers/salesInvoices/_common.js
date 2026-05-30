@@ -1,4 +1,5 @@
 const { clean, n, i, round4, isFutureDate, calculateLineItem, calculateInvoiceTotals } = require("../../shared/sales");
+const { MSG } = require("../../shared/apiMessages");
 
 /**
  * Validate GSTIN format: 15-char alphanumeric per GST rules.
@@ -14,8 +15,8 @@ function isValidGstin(g) {
 async function validateCustomer(q, accountId, customerId) {
   const rs = await q(`SELECT * FROM customers WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`, [customerId, accountId]);
   const c = rs.rows?.[0] || null;
-  if (!c) return { ok: false, message: "Customer not found." };
-  if (!Boolean(c.is_active)) return { ok: false, message: "Customer is inactive." };
+  if (!c) return { ok: false, message: MSG.CUSTOMER_NOT_FOUND };
+  if (!Boolean(c.is_active)) return { ok: false, message: MSG.CUSTOMER_INACTIVE };
   return { ok: true, customer: c };
 }
 
@@ -82,12 +83,12 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
     const qty = i(it.qty);
     const looseQtyCheck = Number(it.looseQty ?? it.loose_qty ?? 0);
     if (!productId || !batchId || (qty <= 0 && looseQtyCheck <= 0)) {
-      return { ok: false, message: "Each line must include product, batch, and qty > 0 (or loose qty > 0 for unit sales)." };
+      return { ok: false, message: MSG.LINE_LOOSE_INVALID };
     }
   }
   const batchIdList = [...new Set(items.map((x) => clean(x.batchId || x.batch_id)).filter(Boolean))];
   if (!batchIdList.length) {
-    return { ok: false, message: "Each line must include product, batch, and qty > 0." };
+    return { ok: false, message: MSG.LINE_INVALID };
   }
   const load = await q(
     `
@@ -109,15 +110,15 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
     const freeQty = i(it.freeQty || it.free_qty || 0);
     const looseQtyCheck = Number(it.looseQty ?? it.loose_qty ?? 0);
     if (!productId || !batchId || (qty <= 0 && looseQtyCheck <= 0)) {
-      return { ok: false, message: "Each line must include product, batch, and qty > 0 (or loose qty > 0 for unit sales)." };
+      return { ok: false, message: MSG.LINE_LOOSE_INVALID };
     }
 
     let batch = batchById.get(batchId) || null;
     if (batch && String(batch.product_id) !== String(productId)) batch = null;
-    if (!batch) return { ok: false, message: "Invalid product/batch combination." };
-    if (batch.is_hold) return { ok: false, message: `Batch "${batch.batch_no}" is on hold and cannot be sold.` };
+    if (!batch) return { ok: false, message: MSG.INVALID_PRODUCT_BATCH };
+    if (batch.is_hold) return { ok: false, message: MSG.BATCH_ON_HOLD };
     if (Boolean(batch.sale_lock)) {
-      return { ok: false, message: `Sales are locked for manufacturer "${batch.mfg_company_name || "policy"}" (batch "${batch.batch_no}").` };
+      return { ok: false, message: MSG.SALE_LOCKED };
     }
 
     // packing_units: units per strip — from batch snapshot, fallback to product, fallback to 10
@@ -487,10 +488,10 @@ function validateInvoiceHeader(body) {
       return Math.round(v * 100) / 100;
     })()
   };
-  if (!header.customerId) return { ok: false, message: "Customer is required." };
-  if (!header.invoiceDate) return { ok: false, message: "Invoice date is required." };
+  if (!header.customerId) return { ok: false, message: MSG.CUSTOMER_REQUIRED };
+  if (!header.invoiceDate) return { ok: false, message: MSG.INVOICE_DATE_REQUIRED };
   if (isFutureDate(header.invoiceDate, { clientTodayYmd: clean(body.clientToday) })) {
-    return { ok: false, message: "Invoice date cannot be in future." };
+    return { ok: false, message: MSG.INVOICE_DATE_FUTURE };
   }
   return { ok: true, header };
 }

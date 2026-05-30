@@ -57,6 +57,7 @@ import {
   updatePurchaseInvoice
 } from "../services/purchaseService.js";
 import { parseApiError } from "../utils/api.js";
+import { formatBulkInvoiceToast } from "../utils/bulkInvoiceResult.js";
 import { EMAIL_RE } from "../utils/customerContactPayload.js";
 import { sortBatchesByExpiryAsc } from "../utils/batchSort.js";
 import { batchExpiryDaysInlineSuffix, formatBatchExpiryRelativePhrase } from "../utils/batchExpiryDisplay.js";
@@ -845,6 +846,11 @@ export default function PurchaseInvoicesPage() {
     return (rows || []).filter((r) => sel.has(String(r.id)) && String(r.status || "").toUpperCase() === "DRAFT").length;
   }, [rows, selectedPurchaseIds]);
 
+  const bulkCancelEligibleCount = useMemo(() => {
+    const sel = new Set((selectedPurchaseIds || []).map((x) => String(x)));
+    return (rows || []).filter((r) => sel.has(String(r.id)) && String(r.status || "").toUpperCase() !== "CANCELLED").length;
+  }, [rows, selectedPurchaseIds]);
+
   const selectedDivisionMfgId = useMemo(() => {
     const d = (divisions || []).find((x) => String(x.id) === String(form.divisionId));
     return d?.mfg_company_id ? String(d.mfg_company_id) : "";
@@ -1520,8 +1526,8 @@ export default function PurchaseInvoicesPage() {
                 ? {
                     label: "Cancel All",
                     confirmTitle: "Cancel selected purchase invoices?",
-                    confirmMessage: (n) =>
-                      `Cancel ${n} invoice(s)? Confirmed invoices will be reversed in stock where applicable; some rows may fail individually.`,
+                    confirmMessage: () =>
+                      `Cancel ${bulkCancelEligibleCount} bill(s)? Some rows may fail if they have payments.`,
                     confirmLabel: "Cancel All",
                     danger: true,
                     isRowSelectable: (r) => r.status !== "CANCELLED",
@@ -1530,8 +1536,7 @@ export default function PurchaseInvoicesPage() {
                       const r = await bulkCancelPurchaseInvoices(ids, { cancelReason: "Bulk cancelled from UI" });
                       setBusy(false);
                       if (r.status >= 200 && r.status < 300 && r.json?.ok) {
-                        const failed = r.json?.data?.failed || [];
-                        if (failed.length) emitToast({ type: "warning", message: `${failed.length} invoice(s) could not be cancelled.` });
+                        emitToast(formatBulkInvoiceToast(r.json?.data, { actionPast: "cancelled" }));
                         await refreshPurchaseTableOnly();
                       } else if (r.status !== 401) emitToast({ type: "error", message: parseApiError(r) });
                     }
@@ -3002,7 +3007,7 @@ export default function PurchaseInvoicesPage() {
         message={
           <div>
             <p style={{ margin: "0 0 10px" }}>
-              Post stock and confirm {bulkConfirmPurchaseDialog.ids?.length || 0} draft purchase(s)?
+              Post stock and confirm {bulkDraftPurchaseConfirmCount || bulkConfirmPurchaseDialog.ids?.length || 0} draft bill(s)?
             </p>
             <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
               <input
@@ -3052,18 +3057,7 @@ export default function PurchaseInvoicesPage() {
             });
             setBulkConfirmPurchaseDialog({ open: false, ids: [], markPaid: false, paymentMode: "CASH" });
             if (r.status >= 200 && r.status < 300 && r.json?.ok) {
-              const failed = r.json?.data?.failed || [];
-              if (failed.length) {
-                emitToast({
-                  type: "warning",
-                  message: `${failed.length} failed: ${failed
-                    .map((f) => f.message)
-                    .slice(0, 2)
-                    .join("; ")}${failed.length > 2 ? "…" : ""}`
-                });
-              } else {
-                emitToast({ type: "success", message: r.json?.meta?.message || "Purchase invoices confirmed." });
-              }
+              emitToast(formatBulkInvoiceToast(r.json?.data, { actionPast: "confirmed" }));
               await refreshPurchaseTableOnly();
             } else if (r.status !== 401) {
               emitToast({ type: "error", message: parseApiError(r) });

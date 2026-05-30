@@ -6,6 +6,7 @@ import '../core/theme/app_typography.dart';
 import 'list_card_surface.dart';
 import '../core/utils/api_data.dart';
 import '../core/utils/format.dart';
+import '../core/utils/list_row_ui.dart';
 import '../core/utils/record_fields.dart';
 import 'status_badge.dart';
 
@@ -27,9 +28,9 @@ class TransactionListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final title = invoiceRowTitle(row);
     final subtitle = listRowSubtitleFor(row);
-    final status = row['status']?.toString();
-    final payment =
-        (row['payment_status'] ?? row['paymentStatus'])?.toString();
+    final vm = presentListRow(row);
+    final status = vm.status;
+    final payment = vm.secondaryStatus;
     final amt = amount ?? fmtCurrency(invoiceRowAmount(row));
 
     return ListCardSurface(
@@ -64,20 +65,22 @@ class TransactionListTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(amt, style: AppTypography.amount),
-              if (status != null && status.isNotEmpty) ...[
+              if ((status != null && status.isNotEmpty) ||
+                  (payment != null && payment.isNotEmpty)) ...[
                 const SizedBox(height: 5),
                 Wrap(
                   spacing: 4,
                   runSpacing: 3,
                   alignment: WrapAlignment.end,
                   children: [
-                    StatusBadge(
-                      status: status,
-                      size: StatusBadgeSize.small,
-                    ),
+                    if (status != null && status.isNotEmpty)
+                      StatusBadge(
+                        status: status,
+                        size: StatusBadgeSize.small,
+                      ),
                     if (payment != null &&
                         payment.isNotEmpty &&
-                        payment.toUpperCase() != status.toUpperCase())
+                        payment.toUpperCase() != (status ?? '').toUpperCase())
                       StatusBadge(
                         status: payment,
                         size: StatusBadgeSize.small,

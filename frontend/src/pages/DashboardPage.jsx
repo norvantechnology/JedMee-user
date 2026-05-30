@@ -16,7 +16,7 @@ import EmptyState from "../components/ui/EmptyState.jsx";
 import { getDashboardSummary } from "../services/dashboardService.js";
 import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   BarChart3, CreditCard, FileSpreadsheet,
   IconAlert, IconChevronsDown, IconChevronsUp, IconChevronRight,
@@ -108,6 +108,7 @@ export default function DashboardPage() {
   const [q, setQ]                 = useState("");
   const [animateBars, setAnimateBars]     = useState(false);
   const navigate   = useNavigate();
+  const location   = useLocation();
   const [autoTick, setAutoTick]           = useState(0);
   const [trendChartType, setTrendChartType]   = useState("LINE");
   const [weekChartType, setWeekChartType]     = useState("BAR");
@@ -181,6 +182,40 @@ export default function DashboardPage() {
     if (!dateFrom && preset === "MONTH") applyPreset("MONTH");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Live data when returning to dashboard from another route.
+  useEffect(() => {
+    if (location.pathname !== "/dashboard") return;
+    const from = String(dateFrom || "").trim();
+    const to = String(dateTo || "").trim();
+    if (!from || !to) return;
+    void refresh(from, to);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
+  // Live data when the browser tab becomes visible again.
+  useEffect(() => {
+    function onVisibility() {
+      if (document.visibilityState !== "visible") return;
+      if (location.pathname !== "/dashboard") return;
+      const from = String(dateFrom || "").trim();
+      const to = String(dateTo || "").trim();
+      if (!from || !to) return;
+      void refresh(from, to);
+    }
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, dateFrom, dateTo]);
+
+  // Live data when switching recent-activity tabs (Sales / Purchases / Returns).
+  useEffect(() => {
+    const from = String(dateFrom || "").trim();
+    const to = String(dateTo || "").trim();
+    if (!from || !to) return;
+    void refresh(from, to);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recentTab]);
 
   useEffect(() => {
     const from = String(dateFrom || "").trim(), to = String(dateTo || "").trim();

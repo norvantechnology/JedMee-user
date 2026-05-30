@@ -256,13 +256,25 @@ String? listRowAmountLabelFor(Map<String, dynamic> row) {
   };
 }
 
+/// Sales/purchase lists: only DRAFT rows get a status pin (confirmed bills stay clean).
+bool _isSalesOrPurchaseInvoice(RecordEntity entity) =>
+    entity == RecordEntity.salesInvoice ||
+    entity == RecordEntity.purchaseInvoice;
+
 /// Primary status badge — invoice/record status (DRAFT / CONFIRMED / CANCELLED).
 /// Payment status is shown separately via [listRowSecondaryStatusFor].
 String? listRowStatusFor(
   Map<String, dynamic> row, {
   String? override,
 }) {
-  if (override != null && override.trim().isNotEmpty) return override;
+  if (override != null && override.trim().isNotEmpty) {
+    final entity = detectRecordEntity(row);
+    if (_isSalesOrPurchaseInvoice(entity) &&
+        override.toUpperCase() != 'DRAFT') {
+      return null;
+    }
+    return override;
+  }
 
   if (row['is_blocked'] == true || row['isBlocked'] == true) return 'BLOCKED';
   if (row['is_active'] == false || row['isActive'] == false) return 'INACTIVE';
@@ -271,8 +283,13 @@ String? listRowStatusFor(
   if (entity == RecordEntity.product) return productListStatusChip(row);
   if (entity == RecordEntity.productBatch) return batchListStatusChip(row);
 
-  // For invoices/returns: always show invoice status as primary badge
   final status = row['status']?.toString();
+  if (_isSalesOrPurchaseInvoice(entity)) {
+    if (status != null && status.toUpperCase() == 'DRAFT') return status;
+    return null;
+  }
+
+  // Returns and other transactions: show invoice status as primary badge
   if (status != null && status.isNotEmpty) return status;
 
   // Fallback: payment status if no invoice status
@@ -285,9 +302,14 @@ String? listRowStatusFor(
 /// Secondary status badge — payment status for invoices (PAID / UNPAID / PARTIAL).
 String? listRowSecondaryStatusFor(Map<String, dynamic> row) {
   final entity = detectRecordEntity(row);
-  if (entity == RecordEntity.salesInvoice ||
-      entity == RecordEntity.purchaseInvoice ||
-      entity == RecordEntity.salesReturn ||
+  if (_isSalesOrPurchaseInvoice(entity)) {
+    final st = (row['status'] ?? '').toString().toUpperCase();
+    if (st == 'CANCELLED' || st == 'DRAFT') return null;
+    final pay = (row['payment_status'] ?? row['paymentStatus'])?.toString();
+    if (pay != null && pay.isNotEmpty) return pay;
+    return null;
+  }
+  if (entity == RecordEntity.salesReturn ||
       entity == RecordEntity.purchaseReturn) {
     final pay = (row['payment_status'] ?? row['paymentStatus'])?.toString();
     if (pay != null && pay.isNotEmpty) return pay;

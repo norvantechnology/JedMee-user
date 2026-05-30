@@ -6,6 +6,7 @@ const { getPermissionsForUser } = require("../../shared/permissions");
 const { refreshLowStockNotifications } = require("../../shared/lowStockInstantNotify");
 const { runConfirmSalesInvoiceInTx } = require("./runConfirmSalesCore");
 const { parseConfirmPaymentOptions } = require("../../shared/paymentModes");
+const { MSG } = require("../../shared/apiMessages");
 
 async function handler(event) {
   const auth = await requirePermission(event, "SALES_INVOICES", "UPDATE");
@@ -13,8 +14,8 @@ async function handler(event) {
   const actorId = String(auth.claims?.sub || "");
   const invoiceId = String(event?.pathParameters?.id || "");
   const ctx = await getPermissionsForUser(actorId);
-  if (!ctx.accountId) return fail(400, "BAD_REQUEST", "account not found");
-  if (!invoiceId) return fail(400, "VALIDATION_ERROR", "invoice id is required");
+  if (!ctx.accountId) return fail(400, "BAD_REQUEST", MSG.ACCOUNT_NOT_FOUND);
+  if (!invoiceId) return fail(400, "VALIDATION_ERROR", MSG.INVOICE_ID_REQUIRED);
 
   const body = parseJsonBody(event);
   const confirmOptions = parseConfirmPaymentOptions(body);
@@ -26,7 +27,7 @@ async function handler(event) {
     });
     if (result?.err) return result.err;
     await refreshLowStockNotifications(ctx.accountId, result?.affectedBatchIds || []);
-    return ok({ id: invoiceId }, { message: "Sales invoice confirmed.", warnings: result?.warnings || [] });
+    return ok({ id: invoiceId }, { message: MSG.SALES_CONFIRMED, warnings: result?.warnings || [] });
   } catch (e) {
     // eslint-disable-next-line no-console
     console.error("[sales-invoice:confirm] failed", {
@@ -44,7 +45,7 @@ async function handler(event) {
       routine: e?.routine,
       where: e?.where
     });
-    return fail(500, "INTERNAL_ERROR", "Something went wrong.", { subMessage: String(e.message || "Please try again.") });
+    return fail(500, "INTERNAL_ERROR", MSG.SOMETHING_WRONG, { subMessage: MSG.TRY_AGAIN });
   }
 }
 

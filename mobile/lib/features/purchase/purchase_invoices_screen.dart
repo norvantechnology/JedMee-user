@@ -34,6 +34,7 @@ import '../../widgets/snackbar.dart';
 import '../../core/pdf/pdf_service.dart';
 import '../../core/print/invoice_print_service.dart';
 import '../shared/master_ui.dart';
+import '../shared/invoice_bulk_helpers.dart';
 import '../shared/invoice_confirm_payment_dialog.dart';
 import '../shared/invoice_payment_helpers.dart';
 import '../shared/ongoing_bills_controller.dart';
@@ -87,12 +88,24 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
     });
   }
 
+  List<Map<String, dynamic>> _invoiceRows() {
+    final raw = _listKey.currentState?.rows ?? [];
+    return raw
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+  }
+
   Future<void> _bulkCancel(BuildContext context) async {
     if (_selectedIds.isEmpty) return;
-    final count = _selectedIds.length;
+    final eligible = countEligibleInvoices(
+      _invoiceRows(),
+      _selectedIds,
+      invoiceCanCancel,
+    );
     final ok = await showConfirmDialog(
       context,
-      title: 'Cancel $count invoice${count == 1 ? '' : 's'}?',
+      title: 'Cancel $eligible invoice${eligible == 1 ? '' : 's'}?',
       message: 'This will cancel the selected purchase invoices.',
       destructive: true,
     );
@@ -102,7 +115,7 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
     final resp = await ref.read(purchaseRepositoryProvider).bulkCancelPurchaseInvoices(ids);
     if (!mounted) return;
     if (resp.ok) {
-      showAppSnack(context, message: '$count invoice${count == 1 ? '' : 's'} cancelled', type: AppSnackType.success);
+      showBulkInvoiceResultSnack(context, resp: resp, actionPast: 'cancelled');
       _listKey.currentState?.refresh();
     } else {
       showAppSnack(context, message: resp.parseErrorMessage(), type: AppSnackType.error);
@@ -131,10 +144,22 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
 
   Future<void> _bulkCompletePayment(BuildContext context) async {
     if (_selectedIds.isEmpty) return;
-    final ids = _selectedIds.toList();
-    final count = ids.length;
+    final eligible = countEligibleInvoices(
+      _invoiceRows(),
+      _selectedIds,
+      invoiceCanSettlePayment,
+    );
+    if (eligible == 0) {
+      showAppSnack(context, message: 'No bills with balance due', type: AppSnackType.warning);
+      return;
+    }
+    final ids = _invoiceRows()
+        .where((r) =>
+            _selectedIds.contains(invoiceRowId(r)) && invoiceCanSettlePayment(r))
+        .map(invoiceRowId)
+        .toList();
 
-    final result = await _showBulkPaymentDialog(context, count);
+    final result = await _showBulkPaymentDialog(context, eligible);
     if (result == null || !context.mounted) return;
 
     _exitSelectionMode();
@@ -148,9 +173,12 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
       });
       if (!context.mounted) return resp.ok;
       if (resp.ok) {
-        showAppSnack(context,
-            message: '$count payment${count == 1 ? '' : 's'} completed',
-            type: AppSnackType.success);
+        final done = bulkInvoiceSuccessCount(resp.data);
+        showAppSnack(
+          context,
+          message: '$done payment${done == 1 ? '' : 's'} completed',
+          type: AppSnackType.success,
+        );
         _listKey.currentState?.refresh();
       } else {
         showAppSnack(context,
@@ -285,14 +313,25 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
 
   Future<void> _bulkConfirm(BuildContext context) async {
     if (_selectedIds.isEmpty) return;
-    final count = _selectedIds.length;
+    final eligible = countEligibleInvoices(
+      _invoiceRows(),
+      _selectedIds,
+      invoiceCanConfirm,
+    );
+    if (eligible == 0) {
+      showAppSnack(context, message: 'No draft bills to confirm', type: AppSnackType.warning);
+      return;
+    }
     final prefs = await showBulkConfirmPaymentDialog(
       context,
-      count: count,
+      count: eligible,
       isSales: false,
     );
     if (prefs == null || !context.mounted) return;
-    final ids = _selectedIds.toList();
+    final ids = _invoiceRows()
+        .where((r) => _selectedIds.contains(invoiceRowId(r)) && invoiceCanConfirm(r))
+        .map(invoiceRowId)
+        .toList();
     _exitSelectionMode();
     final resp = await ref.read(purchaseRepositoryProvider).bulkConfirmPurchaseInvoices({
       'ids': ids,
@@ -300,7 +339,7 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
     });
     if (!mounted) return;
     if (resp.ok) {
-      showAppSnack(context, message: '$count invoice${count == 1 ? '' : 's'} confirmed', type: AppSnackType.success);
+      showBulkInvoiceResultSnack(context, resp: resp, actionPast: 'confirmed');
       _listKey.currentState?.refresh();
     } else {
       showAppSnack(context, message: resp.parseErrorMessage(), type: AppSnackType.error);
@@ -589,6 +628,11 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
     final canView = can(auth, 'PURCHASE_INVOICES', 'VIEW');
     final canPayment = can(auth, 'VENDOR_PAYMENTS', 'ADD');
     final totalCount = _listKey.currentState?.rows.length ?? 0;
+    final rows = _invoiceRows();
+    final confirmEligible = countEligibleInvoices(rows, _selectedIds, invoiceCanConfirm);
+    final paymentEligible =
+        countEligibleInvoices(rows, _selectedIds, invoiceCanSettlePayment);
+    final cancelEligible = countEligibleInvoices(rows, _selectedIds, invoiceCanCancel);
 
     return PermissionGate(
       resource: 'PURCHASE_INVOICES',
@@ -611,16 +655,18 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
                 actions: [
                   if (canConfirm)
                     BulkAction(
-                      label: 'Confirm',
+                      label: bulkActionLabel('Confirm', confirmEligible),
                       icon: AppIcons.confirm,
                       color: AppColors.success,
+                      enabled: confirmEligible > 0,
                       onTap: () => _bulkConfirm(context),
                     ),
                   if (canPayment)
                     BulkAction(
-                      label: 'Payment',
+                      label: bulkActionLabel('Payment', paymentEligible),
                       icon: AppIcons.payment,
                       color: const Color(0xFF059669),
+                      enabled: paymentEligible > 0,
                       onTap: () => _bulkCompletePayment(context),
                     ),
                   if (canView)
@@ -631,9 +677,10 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
                     ),
                   if (canCancel)
                     BulkAction(
-                      label: 'Cancel',
+                      label: bulkActionLabel('Cancel', cancelEligible),
                       icon: AppIcons.cancel,
                       destructive: true,
+                      enabled: cancelEligible > 0,
                       onTap: () => _bulkCancel(context),
                     ),
                 ],

@@ -77,25 +77,54 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   String _dateFrom = '';
   String _dateTo   = todayYmdLocal();
   String _preset   = 'MONTH';
   bool   _loading  = true;
   Map<String, dynamic>? _data;
   late TabController _tabController;
+  int _lastRecentTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _tabController = TabController(length: 3, vsync: this);
+    _lastRecentTabIndex = _tabController.index;
+    _tabController.addListener(_onRecentTabChanged);
     _applyPreset('MONTH');
   }
 
   @override
+  void activate() {
+    super.activate();
+    // When this route is shown again without dispose (e.g. nested nav), reload live data.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _load();
+    });
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _tabController.removeListener(_onRecentTabChanged);
     _tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      _load();
+    }
+  }
+
+  void _onRecentTabChanged() {
+    if (_tabController.indexIsChanging) return;
+    if (_tabController.index == _lastRecentTabIndex) return;
+    _lastRecentTabIndex = _tabController.index;
+    _load();
   }
 
   void _applyPreset(String preset) {
@@ -126,9 +155,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final resp = await ref.read(dashboardRepositoryProvider).getDashboardSummary({
+    // Always bypass cache — dashboard must reflect latest sales/stock after other screens.
+    final resp =
+        await ref.read(dashboardRepositoryProvider).refreshDashboardSummary({
       if (_dateFrom.isNotEmpty) 'dateFrom': _dateFrom,
-      if (_dateTo.isNotEmpty)   'dateTo':   _dateTo,
+      if (_dateTo.isNotEmpty) 'dateTo': _dateTo,
     });
     if (!mounted) return;
     setState(() {
@@ -302,6 +333,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
           ),
         ],
         trailingActions: [
+          BottomAction(
+            icon: AppIcons.refresh,
+            label: 'Refresh',
+            tooltip: 'Reload dashboard with latest data',
+            onTap: _load,
+          ),
           BottomAction(
             icon: AppIcons.invoice,
             label: 'Bills',

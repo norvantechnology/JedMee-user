@@ -11,6 +11,9 @@ import { formatBatchExpiryRelativePhrase } from "../utils/batchExpiryDisplay.js"
 import { readAuth } from "../services/authStorage.js";
 import { isRetailerAuth } from "../utils/businessRole.js";
 import BarcodeDisplay from "./BarcodeDisplay.jsx";
+import BarcodeLabelSection from "./BarcodeLabelSection.jsx";
+import { printBarcodeLabel } from "../utils/printBarcodeLabel.js";
+import { IconPrint } from "./ui/AppIcons.jsx";
 import {
   BadgeIndianRupee,
   Flag,
@@ -650,6 +653,15 @@ export default function ProductBatchModal({
       }
     >
       <div className="pbm">
+        {readOnly ? (
+          <BarcodeLabelSection
+            value={form.barcode}
+            productName={form.productName || form.product_name}
+            batchNo={form.batchNo || form.batch_no}
+            prominent
+            className="pbmBarcodeHero"
+          />
+        ) : null}
         <div className="pbmDashWrap">
           <div className="pbmDash">
             {kpis.map((k) => (
@@ -805,8 +817,22 @@ export default function ProductBatchModal({
                     />
                     {showErr("barcode") && errors.barcode ? <div className="mfzErr">{errors.barcode}</div> : null}
                     {clean(form.barcode) ? (
-                      <div style={{ marginTop: 10 }}>
+                      <div className="barcodeFieldPreview">
                         <BarcodeDisplay value={form.barcode} height={48} />
+                        <button
+                          type="button"
+                          className="btn btnSecondary barcodeFieldPreview_print"
+                          onClick={() =>
+                            printBarcodeLabel({
+                              value: form.barcode,
+                              productName: form.productName,
+                              batchNo: form.batchNo,
+                            })
+                          }
+                        >
+                          <IconPrint />
+                          Print barcode
+                        </button>
                       </div>
                     ) : null}
                   </ModalFormField>

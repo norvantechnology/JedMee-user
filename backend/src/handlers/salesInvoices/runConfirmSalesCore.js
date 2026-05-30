@@ -1,4 +1,5 @@
 const { fail } = require("../../shared/response");
+const { MSG } = require("../../shared/apiMessages");
 const { calculateInvoiceTotals, calculateLineItem, refreshSalesInvoicePaymentTotals } = require("../../shared/sales");
 const { enforceFinancialLimits } = require("./_common");
 const { getRoleCodeForAccount } = require("../../shared/accountRoleProfile");
@@ -23,8 +24,8 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
     [invoiceId, accountId]
   );
   const invoice = invRs.rows?.[0] || null;
-  if (!invoice) return { err: fail(404, "NOT_FOUND", "Invoice not found") };
-  if (String(invoice.status) !== "DRAFT") return { err: fail(400, "BUSINESS_RULE", "Only DRAFT invoices can be confirmed.") };
+  if (!invoice) return { err: fail(404, "NOT_FOUND", MSG.INVOICE_NOT_FOUND) };
+  if (String(invoice.status) !== "DRAFT") return { err: fail(400, "BUSINESS_RULE", MSG.ONLY_DRAFT_CONFIRM) };
 
   // BE-14: Validate bill_type
   const VALID_BILL_TYPES_CONFIRM = ["CASH_MEMO", "TAX_INVOICE", "DEBIT", "CREDIT"];
@@ -35,19 +36,19 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
 
   const custRs = await q(`SELECT * FROM customers WHERE id = $1 AND account_id = $2 AND deleted_at IS NULL LIMIT 1`, [invoice.customer_id, accountId]);
   const customer = custRs.rows?.[0] || null;
-  if (!customer) return { err: fail(400, "VALIDATION_ERROR", "Customer not found") };
+  if (!customer) return { err: fail(400, "VALIDATION_ERROR", MSG.CUSTOMER_NOT_FOUND) };
   if (String(invoice.bill_type || "").toUpperCase() === "TAX_INVOICE" && !invoice.is_walk_in_sale && !String(customer.gst_number || "").trim()) {
     return {
       err: fail(
         400,
         "BUSINESS_RULE",
-        "Tax Invoice requires customer GSTIN. Add customer GSTIN or switch bill type to Cash Memo."
+        MSG.TAX_INVOICE_NEED_GSTIN
       )
     };
   }
   const itemRs = await q(`SELECT * FROM sales_invoice_items WHERE sales_invoice_id = $1 AND account_id = $2 ORDER BY created_at ASC`, [invoiceId, accountId]);
   const items = itemRs.rows || [];
-  if (!items.length) return { err: fail(400, "BUSINESS_RULE", "Cannot confirm empty invoice.") };
+  if (!items.length) return { err: fail(400, "BUSINESS_RULE", MSG.EMPTY_INVOICE) };
   const mfgIds = [...new Set(items.map((x) => String(x.mfg_company_id || "")).filter(Boolean))];
 
   let looseUnitFactor = 10;
@@ -122,13 +123,13 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
           prevent_net_rate
         }
       : null;
-    if (!batch) return { err: fail(400, "BUSINESS_RULE", `Batch not found: ${item.batch_no}`) };
-    if (batch.is_hold) return { err: fail(400, "BUSINESS_RULE", `Batch "${item.batch_no}" is on hold and cannot be sold. Reason: ${batch.hold_reason || "Not specified"}`) };
-    if (batch.sale_lock) return { err: fail(400, "BUSINESS_RULE", `Sales are locked for manufacturer "${batch.mfg_name}".`) };
+    if (!batch) return { err: fail(400, "BUSINESS_RULE", MSG.BATCH_NOT_FOUND) };
+    if (batch.is_hold) return { err: fail(400, "BUSINESS_RULE", MSG.BATCH_ON_HOLD) };
+    if (batch.sale_lock) return { err: fail(400, "BUSINESS_RULE", MSG.SALE_LOCKED) };
     if (batch.is_control) {
-      if (!String(item.prescription_no || "").trim()) return { err: fail(400, "BUSINESS_RULE", `Prescription number is required for controlled batch "${item.batch_no}".`) };
-      if (!String(item.doctor_name || "").trim()) return { err: fail(400, "BUSINESS_RULE", `Doctor name is required for controlled batch "${item.batch_no}".`) };
-      if (!String(item.patient_name || "").trim()) return { err: fail(400, "BUSINESS_RULE", `Patient name is required for controlled batch "${item.batch_no}".`) };
+      if (!String(item.prescription_no || "").trim()) return { err: fail(400, "BUSINESS_RULE", MSG.PRESCRIPTION_REQUIRED) };
+      if (!String(item.doctor_name || "").trim()) return { err: fail(400, "BUSINESS_RULE", MSG.DOCTOR_REQUIRED) };
+      if (!String(item.patient_name || "").trim()) return { err: fail(400, "BUSINESS_RULE", MSG.PATIENT_REQUIRED) };
     }
 
     // packing_units: units per strip for this batch (used for loose break-pack calculation)
@@ -173,8 +174,7 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
       if (packsToBreak > 0) {
         if (stockBillable < packsToBreak) {
           return {
-            err: fail(400, "BUSINESS_RULE",
-              `Cannot break ${packsToBreak} pack(s) for loose sale of "${item.product_name}" batch "${item.batch_no}". Need ${packsToBreak} strip(s) but only ${stockBillable} available.`)
+            err: fail(400, "BUSINESS_RULE", MSG.CANNOT_BREAK_PACK)
           };
         }
         await q(
@@ -251,7 +251,7 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
         err: fail(
           400,
           "BUSINESS_RULE",
-          `Insufficient free stock for "${item.product_name}" batch "${item.batch_no}". Available free: ${stockFree}, this invoice needs ${needFree} (${usedFree} on other lines + ${lineFree} here). Reduce free qty or use another batch.`
+          MSG.NOT_ENOUGH_FREE_STOCK
         )
       };
     }
@@ -314,7 +314,7 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
             err: fail(
               400,
               "BUSINESS_RULE",
-              `Cannot break ${packsToBreak} pack(s) for loose sale of "${item.product_name}" batch "${item.batch_no}". Need ${packsToBreak} more strip(s) but only ${residualBillable} remain after this line. Reduce loose qty or pick another batch.`
+              MSG.CANNOT_BREAK_PACK
             )
           };
         }

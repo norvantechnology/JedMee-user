@@ -42,6 +42,7 @@ import { listProducts } from "../services/productService.js";
 import BarcodeScanInput from "../components/BarcodeScanInput.jsx";
 import { createProductBatch, listProductBatches } from "../services/productBatchService.js";
 import { parseApiError, parseApiErrorToast } from "../utils/api.js";
+import { formatBulkInvoiceToast } from "../utils/bulkInvoiceResult.js";
 import { toDivisionOption } from "../utils/divisionLabel.js";
 import { formatProductLabel, toProductOption } from "../utils/productLabel.js";
 import { sortBatchesByExpiryAsc } from "../utils/batchSort.js";
@@ -741,6 +742,11 @@ export default function SalesBillingPage() {
   const bulkDraftConfirmCount = useMemo(() => {
     const sel = new Set((selectedSalesIds || []).map((x) => String(x)));
     return (rows || []).filter((r) => sel.has(String(r.id)) && String(r.status || "").toUpperCase() === "DRAFT").length;
+  }, [rows, selectedSalesIds]);
+
+  const bulkCancelEligibleCount = useMemo(() => {
+    const sel = new Set((selectedSalesIds || []).map((x) => String(x)));
+    return (rows || []).filter((r) => sel.has(String(r.id)) && String(r.status || "").toUpperCase() !== "CANCELLED").length;
   }, [rows, selectedSalesIds]);
 
   const selectedPaymentInvoice = useMemo(
@@ -1719,7 +1725,7 @@ export default function SalesBillingPage() {
                     label: "Cancel All",
                     confirmTitle: "Cancel selected invoices?",
                     confirmMessage: (n) =>
-                      `Cancel ${n} invoice(s)? Unpaid drafts and confirmed invoices with no payments can be cancelled; other rows may fail individually.`,
+                      `Cancel ${bulkCancelEligibleCount} invoice(s)? Some selected rows may fail if they have payments.`,
                     confirmLabel: "Cancel All",
                     danger: true,
                     isRowSelectable: (r) => r.status !== "CANCELLED",
@@ -1728,8 +1734,8 @@ export default function SalesBillingPage() {
                       const r = await bulkCancelSalesInvoices(ids, { cancelReason: "Bulk cancelled from UI" });
                       setBusy(false);
                       if (r.status >= 200 && r.status < 300 && r.json?.ok) {
-                        const failed = r.json?.data?.failed || [];
-                        if (failed.length) emitToast({ type: "warning", message: `${failed.length} invoice(s) could not be cancelled.` });
+                        const toast = formatBulkInvoiceToast(r.json?.data, { actionPast: "cancelled" });
+                        emitToast(toast);
                         await refreshSalesTableOnly();
                       } else if (r.status !== 401) emitToast({ type: "error", message: parseApiError(r) });
                     }
@@ -3040,7 +3046,7 @@ export default function SalesBillingPage() {
         message={
           <div>
             <p style={{ margin: "0 0 10px" }}>
-              Post stock and confirm {bulkConfirmSalesDialog.ids?.length || 0} draft invoice(s)?
+              Post stock and confirm {bulkDraftConfirmCount || bulkConfirmSalesDialog.ids?.length || 0} draft bill(s)?
             </p>
             <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
               <input
@@ -3086,18 +3092,7 @@ export default function SalesBillingPage() {
             });
             setBulkConfirmSalesDialog({ open: false, ids: [], markPaid: false, paymentMode: "CASH" });
             if (r.status >= 200 && r.status < 300 && r.json?.ok) {
-              const failed = r.json?.data?.failed || [];
-              if (failed.length) {
-                emitToast({
-                  type: "warning",
-                  message: `${failed.length} failed: ${failed
-                    .map((f) => f.message)
-                    .slice(0, 2)
-                    .join("; ")}${failed.length > 2 ? "…" : ""}`
-                });
-              } else {
-                emitToast({ type: "success", message: r.json?.meta?.message || "Invoices confirmed." });
-              }
+              emitToast(formatBulkInvoiceToast(r.json?.data, { actionPast: "confirmed" }));
               await refreshSalesTableOnly();
             } else if (r.status !== 401) {
               emitToast({ type: "error", message: parseApiError(r) });

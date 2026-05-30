@@ -1,4 +1,5 @@
 const { clean } = require("../../shared/sales");
+const { MSG } = require("../../shared/apiMessages");
 
 /**
  * Cancel one sales invoice inside an existing transaction (q).
@@ -14,7 +15,7 @@ async function cancelSalesInvoiceTx(q, { accountId, actorId, invoiceId, cancelRe
   const reason = clean(cancelReason || "Cancelled from UI");
   const invRs = await q(`SELECT * FROM sales_invoices WHERE id = $1 AND account_id = $2 LIMIT 1`, [invoiceId, accountId]);
   const invoice = invRs.rows?.[0] || null;
-  if (!invoice) return { ok: false, code: "NOT_FOUND", message: "Invoice not found" };
+  if (!invoice) return { ok: false, code: "NOT_FOUND", message: MSG.INVOICE_NOT_FOUND };
   if (String(invoice.status) === "CANCELLED") return { ok: true, alreadyCancelled: true, affectedBatchIds: [] };
 
   const amountPaid = Number(invoice.amount_paid || 0);
@@ -34,7 +35,7 @@ async function cancelSalesInvoiceTx(q, { accountId, actorId, invoiceId, cancelRe
       return {
         ok: false,
         code: "BUSINESS_RULE",
-        message: `Cannot cancel invoice with manual payments received (₹${amountPaid} paid). Reverse the payments first.`
+        message: MSG.CANNOT_CANCEL_WITH_PAYMENTS
       };
     }
     // All payments are auto-settled — delete them so the cancel can proceed

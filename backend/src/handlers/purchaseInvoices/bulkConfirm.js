@@ -1,32 +1,31 @@
 const { ok, fail } = require("../../shared/response");
 const { parseJsonBody } = require("../../shared/request");
-const { withTransaction } = require("../../shared/db");
+const { withTransaction, query } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { parseIdsFromBody } = require("../../shared/bulkIds");
 const { refreshLowStockNotifications } = require("../../shared/lowStockInstantNotify");
 const { runConfirmPurchaseInvoiceInTx } = require("./runConfirmPurchaseCore");
 const { parseConfirmPaymentOptions } = require("../../shared/paymentModes");
-
-function errMessage(errResp) {
-  try {
-    const b = JSON.parse(errResp.body || "{}");
-    return String(b?.error?.message || b?.error?.subMessage || "Cannot confirm purchase.");
-  } catch {
-    return "Cannot confirm purchase.";
-  }
-}
+const { MSG } = require("../../shared/apiMessages");
+const {
+  bulkErrMessage,
+  enrichBulkFailuresWithInvoiceNumbers,
+  buildBulkInvoiceOkPayload,
+  bulkMetaMessage,
+  shortUserMessage
+} = require("../../shared/bulkInvoiceResult");
 
 async function handler(event) {
   const auth = await requirePermission(event, "PURCHASE_INVOICES", "UPDATE");
   if (!auth.ok) return auth.resp;
   const actorId = String(auth.claims?.sub || "");
   const ctx = await getPermissionsForUser(actorId);
-  if (!ctx.accountId) return fail(400, "BAD_REQUEST", "account not found");
+  if (!ctx.accountId) return fail(400, "BAD_REQUEST", MSG.ACCOUNT_NOT_FOUND);
 
   const body = parseJsonBody(event);
   const parsed = parseIdsFromBody(body, { max: 200 });
-  if (!parsed.ok) return fail(400, "VALIDATION_ERROR", parsed.error);
+  if (!parsed.ok) return fail(400, "VALIDATION_ERROR", shortUserMessage(parsed.error));
   const ids = parsed.ids;
   const confirmOptions = parseConfirmPaymentOptions(body);
 
@@ -40,27 +39,37 @@ async function handler(event) {
         runConfirmPurchaseInvoiceInTx(q, { accountId: ctx.accountId, actorId, confirmOptions }, invoiceId, null)
       );
       if (result?.err) {
-        failed.push({ id: invoiceId, message: errMessage(result.err) });
+        failed.push({ id: invoiceId, message: bulkErrMessage(result.err) });
         continue;
       }
       confirmedIds.push(invoiceId);
       for (const b of result?.affectedBatchIds || []) allAffectedBatches.add(String(b));
     } catch (e) {
-      failed.push({ id: invoiceId, message: String(e.message || "Error") });
+      failed.push({ id: invoiceId, message: shortUserMessage(e.message || MSG.CANNOT_PROCESS) });
     }
   }
 
   await refreshLowStockNotifications(ctx.accountId, [...allAffectedBatches]);
 
+  const enrichedFailed = await enrichBulkFailuresWithInvoiceNumbers(query, {
+    accountId: ctx.accountId,
+    tableName: "purchase_invoices",
+    failed
+  });
+
   return ok(
-    { confirmedIds, failed },
+    buildBulkInvoiceOkPayload({
+      succeededIds: confirmedIds,
+      failed: enrichedFailed,
+      selectedCount: ids.length,
+      succeededKey: "confirmedIds"
+    }),
     {
-      message:
-        failed.length && confirmedIds.length
-          ? `Confirmed ${confirmedIds.length} purchase(s); ${failed.length} failed.`
-          : failed.length
-            ? "No purchase invoices were confirmed."
-            : `Confirmed ${confirmedIds.length} purchase invoice(s).`
+      message: bulkMetaMessage({
+        verbPast: "confirmed",
+        successCount: confirmedIds.length,
+        failedCount: enrichedFailed.length
+      })
     }
   );
 }

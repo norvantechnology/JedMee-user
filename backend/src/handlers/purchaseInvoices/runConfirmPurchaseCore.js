@@ -1,4 +1,5 @@
 const { fail } = require("../../shared/response");
+const { MSG } = require("../../shared/apiMessages");
 const { clean, refreshInvoicePaymentSummary } = require("../../shared/purchase");
 const { normalizeVendorPaymentMode } = require("../../shared/paymentModes");
 const { getMfgCompany, assertPurchaseAllowed } = require("../../shared/mfgCompanyPolicy");
@@ -45,9 +46,9 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
     [invoiceId, accountId]
   );
   const invoice = invRes.rows?.[0];
-  if (!invoice) return { err: fail(404, "NOT_FOUND", "Purchase invoice not found.") };
+  if (!invoice) return { err: fail(404, "NOT_FOUND", MSG.PURCHASE_NOT_FOUND) };
   if (String(invoice.status) === "CONFIRMED") return { invoice, alreadyConfirmed: true, affectedBatchIds: [] };
-  if (String(invoice.status) !== "DRAFT") return { err: fail(400, "INVALID_STATE", "Only draft invoices can be confirmed.") };
+  if (String(invoice.status) !== "DRAFT") return { err: fail(400, "INVALID_STATE", MSG.ONLY_DRAFT_CONFIRM) };
 
   const itemsRes = await q(
     "load-items",
@@ -55,7 +56,7 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
     [invoiceId, accountId]
   );
   const items = itemsRes.rows || [];
-  if (!items.length) return { err: fail(400, "VALIDATION_ERROR", "Invoice has no line items.") };
+  if (!items.length) return { err: fail(400, "VALIDATION_ERROR", MSG.EMPTY_INVOICE) };
 
   if (invoice.division_id) {
     const divMfg = await q(

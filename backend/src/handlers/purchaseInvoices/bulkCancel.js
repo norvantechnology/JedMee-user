@@ -1,21 +1,29 @@
 const { ok, fail } = require("../../shared/response");
 const { parseJsonBody } = require("../../shared/request");
-const { withTransaction } = require("../../shared/db");
+const { withTransaction, query } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { parseIdsFromBody } = require("../../shared/bulkIds");
 const { cancelPurchaseInvoiceTx } = require("./cancelCore");
+const { refreshLowStockNotifications } = require("../../shared/lowStockInstantNotify");
+const { MSG } = require("../../shared/apiMessages");
+const {
+  enrichBulkFailuresWithInvoiceNumbers,
+  buildBulkInvoiceOkPayload,
+  bulkMetaMessage,
+  shortUserMessage
+} = require("../../shared/bulkInvoiceResult");
 
 async function handler(event) {
   const auth = await requirePermission(event, "PURCHASE_INVOICES", "UPDATE");
   if (!auth.ok) return auth.resp;
   const actorId = String(auth.claims?.sub || "");
   const ctx = await getPermissionsForUser(actorId);
-  if (!ctx.accountId) return fail(400, "BAD_REQUEST", "account not found");
+  if (!ctx.accountId) return fail(400, "BAD_REQUEST", MSG.ACCOUNT_NOT_FOUND);
 
   const body = parseJsonBody(event);
   const parsed = parseIdsFromBody(body);
-  if (!parsed.ok) return fail(400, "VALIDATION_ERROR", parsed.error);
+  if (!parsed.ok) return fail(400, "VALIDATION_ERROR", shortUserMessage(parsed.error));
   const ids = parsed.ids;
   const cancelReason = String(body.cancelReason || body.cancel_reason || "Cancelled from UI").trim() || "Cancelled from UI";
 
@@ -25,28 +33,41 @@ async function handler(event) {
 
   for (const invoiceId of ids) {
     try {
-      const result = await withTransaction(async (q) => cancelPurchaseInvoiceTx(q, { accountId: ctx.accountId, actorId, invoiceId, cancelReason }));
-      if (!result.ok) failed.push({ id: invoiceId, message: result.message, code: result.code });
-      else {
+      const result = await withTransaction(async (q) =>
+        cancelPurchaseInvoiceTx(q, { accountId: ctx.accountId, actorId, invoiceId, cancelReason })
+      );
+      if (!result.ok) {
+        failed.push({ id: invoiceId, message: shortUserMessage(result.message), code: result.code });
+      } else {
         cancelledIds.push(invoiceId);
         for (const b of result.affectedBatchIds || []) allAffectedBatches.add(b);
       }
     } catch (e) {
-      failed.push({ id: invoiceId, message: String(e.message || "Error") });
+      failed.push({ id: invoiceId, message: shortUserMessage(e.message || MSG.CANNOT_PROCESS) });
     }
   }
 
   await refreshLowStockNotifications(ctx.accountId, [...allAffectedBatches]);
 
+  const enrichedFailed = await enrichBulkFailuresWithInvoiceNumbers(query, {
+    accountId: ctx.accountId,
+    tableName: "purchase_invoices",
+    failed
+  });
+
   return ok(
-    { cancelledIds, failed },
+    buildBulkInvoiceOkPayload({
+      succeededIds: cancelledIds,
+      failed: enrichedFailed,
+      selectedCount: ids.length,
+      succeededKey: "cancelledIds"
+    }),
     {
-      message:
-        failed.length && cancelledIds.length
-          ? `Cancelled ${cancelledIds.length} invoice(s); ${failed.length} could not be cancelled.`
-          : failed.length
-            ? "No invoices were cancelled."
-            : `Cancelled ${cancelledIds.length} invoice(s).`
+      message: bulkMetaMessage({
+        verbPast: "cancelled",
+        successCount: cancelledIds.length,
+        failedCount: enrichedFailed.length
+      })
     }
   );
 }

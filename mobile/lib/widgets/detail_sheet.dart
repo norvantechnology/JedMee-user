@@ -96,12 +96,33 @@ class _RecordDetailSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final resolvedEntity = entity ?? detectRecordEntity(row);
-    final sections = buildDetailSections(row, entity: resolvedEntity);
+    var sections = buildDetailSections(row, entity: resolvedEntity);
+    if (resolvedEntity == RecordEntity.productBatch) {
+      sections = sections
+          .map(
+            (s) => DetailSection(
+              title: s.title,
+              fields: s.fields
+                  .where((f) => f.label.toLowerCase() != 'barcode')
+                  .toList(),
+            ),
+          )
+          .where((s) => s.fields.isNotEmpty)
+          .toList();
+    }
     final chips = statusChipsForRow(row);
     final expiry = resolvedEntity == RecordEntity.productBatch
         ? productExpiryUrgency(row)
         : null;
-    final barcodeText = (row['barcode'] ?? '').toString().trim();
+    final barcodeText = (row['barcode'] ?? row['barcode_value'] ?? '')
+        .toString()
+        .trim();
+    final batchProductName = (row['product_name'] ??
+            row['productName'] ??
+            row['name'] ??
+            '')
+        .toString();
+    final batchNo = (row['batch_no'] ?? row['batchNo'] ?? '').toString();
     final bottom = MediaQuery.paddingOf(context).bottom;
 
     return DraggableScrollableSheet(
@@ -221,12 +242,16 @@ class _RecordDetailSheet extends StatelessWidget {
                         padding: EdgeInsets.fromLTRB(14, 0, 14, 12 + bottom),
                         sliver: SliverList(
                           delegate: SliverChildListDelegate([
-                            if (resolvedEntity == RecordEntity.productBatch &&
-                                barcodeText.isNotEmpty) ...[
-                              const SectionDividerLabel(label: 'Barcode'),
-                              const SizedBox(height: 6),
-                              AppBarcodeImage(data: barcodeText),
-                              const SizedBox(height: 10),
+                            if (resolvedEntity == RecordEntity.productBatch) ...[
+                              AppBarcodeImage(
+                                data: barcodeText,
+                                productName: batchProductName.isNotEmpty
+                                    ? batchProductName
+                                    : null,
+                                batchNo:
+                                    batchNo.isNotEmpty ? batchNo : null,
+                              ),
+                              const SizedBox(height: 12),
                             ],
                             for (final section in sections) ...[
                               SectionDividerLabel(label: section.title),

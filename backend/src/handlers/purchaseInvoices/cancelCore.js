@@ -1,4 +1,5 @@
 const { clean } = require("../../shared/purchase");
+const { MSG } = require("../../shared/apiMessages");
 
 /**
  * Cancel one purchase invoice inside an existing transaction (q).
@@ -11,13 +12,13 @@ async function cancelPurchaseInvoiceTx(q, { accountId, actorId, invoiceId, cance
     [invoiceId, accountId]
   );
   const invoice = invR.rows?.[0];
-  if (!invoice) return { ok: false, code: "NOT_FOUND", message: "Purchase invoice not found." };
+  if (!invoice) return { ok: false, code: "NOT_FOUND", message: MSG.PURCHASE_NOT_FOUND };
   if (String(invoice.status) === "CANCELLED") return { ok: true, alreadyCancelled: true, affectedBatchIds: [] };
   if (Number(invoice.amount_paid || 0) > 0 || ["PARTIAL", "PAID"].includes(String(invoice.payment_status || "").toUpperCase())) {
     return {
       ok: false,
       code: "BUSINESS_RULE",
-      message: `Cannot cancel invoice with payments recorded (₹${Number(invoice.amount_paid || 0).toFixed(2)} paid).`
+      message: MSG.CANNOT_CANCEL_WITH_PAYMENTS
     };
   }
 

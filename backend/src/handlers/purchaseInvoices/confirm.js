@@ -7,15 +7,16 @@ const { clean } = require("../../shared/purchase");
 const { refreshLowStockNotifications } = require("../../shared/lowStockInstantNotify");
 const { runConfirmPurchaseInvoiceInTx } = require("./runConfirmPurchaseCore");
 const { parseConfirmPaymentOptions } = require("../../shared/paymentModes");
+const { MSG } = require("../../shared/apiMessages");
 
 async function handler(event) {
   const auth = await requirePermission(event, "PURCHASE_INVOICES", "UPDATE");
   if (!auth.ok) return auth.resp;
   const actorId = String(auth.claims?.sub || "");
   const ctx = await getPermissionsForUser(actorId);
-  if (!ctx.accountId) return fail(400, "BAD_REQUEST", "account not found");
+  if (!ctx.accountId) return fail(400, "BAD_REQUEST", MSG.ACCOUNT_NOT_FOUND);
   const id = String(event?.pathParameters?.id || "").trim();
-  if (!id) return fail(400, "BAD_REQUEST", "id is required");
+  if (!id) return fail(400, "BAD_REQUEST", MSG.ID_REQUIRED);
   const body = parseJsonBody(event);
 
   let lastQueryLabel = "init";
@@ -49,8 +50,8 @@ async function handler(event) {
       queryText: e._queryText,
       queryParams: e._queryParams
     });
-    return fail(500, "INTERNAL_ERROR", "Something went wrong.", {
-      subMessage: String(e.message || "Please try again."),
+    return fail(500, "INTERNAL_ERROR", MSG.SOMETHING_WRONG, {
+      subMessage: MSG.TRY_AGAIN,
       step: e._queryLabel || lastQueryLabel,
       pgCode: e.code || null,
       pgTable: e.table || null,

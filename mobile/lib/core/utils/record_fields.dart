@@ -869,11 +869,27 @@ String listRowSubtitleFor(Map<String, dynamic> row) {
 
 List<String>? statusChipsForRow(Map<String, dynamic> row) {
   final chips = <String>[];
+  final entity = detectRecordEntity(row);
   final status = row['status']?.toString();
   final pay = row['payment_status'] ?? row['paymentStatus'];
   final health = row['health'] ?? row['health_label'] ?? row['healthLabel'];
-  if (status != null && status.isNotEmpty) chips.add(status);
-  if (pay != null && pay.toString().isNotEmpty) chips.add(pay.toString());
+  if (status != null && status.isNotEmpty) {
+    if (entity == RecordEntity.salesInvoice ||
+        entity == RecordEntity.purchaseInvoice) {
+      if (status.toUpperCase() == 'DRAFT') chips.add(status);
+    } else {
+      chips.add(status);
+    }
+  }
+  if (pay != null && pay.toString().isNotEmpty) {
+    final st = (status ?? '').toString().toUpperCase();
+    if (entity == RecordEntity.salesInvoice ||
+        entity == RecordEntity.purchaseInvoice) {
+      if (st != 'CANCELLED' && st != 'DRAFT') chips.add(pay.toString());
+    } else {
+      chips.add(pay.toString());
+    }
+  }
   if (health != null && health.toString().isNotEmpty) chips.add(health.toString());
   return chips.isEmpty ? null : chips;
 }
