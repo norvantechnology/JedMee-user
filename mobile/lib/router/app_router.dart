@@ -157,7 +157,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/vendors', builder: (_, __) => const VendorsScreen()),
       GoRoute(path: '/quality-master', builder: (_, __) => const QualityMasterScreen()),
       GoRoute(path: '/mfg-companies', builder: (_, __) => const MfgCompaniesScreen()),
-      GoRoute(path: '/purchase-invoices', builder: (_, __) => const PurchaseInvoicesScreen()),
+      GoRoute(
+        path: '/purchase-invoices',
+        builder: (_, state) => PurchaseInvoicesScreen(
+          initialDateFrom: state.uri.queryParameters['dateFrom'],
+          initialDateTo: state.uri.queryParameters['dateTo'],
+        ),
+      ),
       GoRoute(
         path: '/purchase-invoices/new',
         pageBuilder: (c, s) => AppPageTransitions.slide(
@@ -179,7 +185,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(path: '/customers', builder: (_, __) => const CustomersScreen()),
-      GoRoute(path: '/sales-billing', builder: (_, __) => const SalesBillingScreen()),
+      GoRoute(
+        path: '/sales-billing',
+        builder: (_, state) => SalesBillingScreen(
+          initialDateFrom: state.uri.queryParameters['dateFrom'],
+          initialDateTo: state.uri.queryParameters['dateTo'],
+        ),
+      ),
       GoRoute(
         path: '/sales-billing/new',
         pageBuilder: (c, s) => AppPageTransitions.slide(

@@ -26,7 +26,15 @@ function money(v) {
   return fmtCurrency(v) || fmtCurrency(0);
 }
 
-function DeltaBadge({ pct }) {
+function DeltaBadge({ pct, comparable, prevValue }) {
+  const prev = Number(prevValue ?? 0);
+  if (comparable === false || prev <= 0.0001) {
+    return (
+      <span className="dbDelta dbDelta_flat">
+        No cash comparison — yesterday had no money received
+      </span>
+    );
+  }
   if (pct == null || !Number.isFinite(pct)) return null;
   const up = pct > 0;
   const flat = pct === 0;
@@ -173,35 +181,41 @@ export default function DayBookReportPage() {
 
           {data && (
             <>
-              <p className="dbStory">{story}</p>
-              <p className="dbStoryNote">Cash totals include walk-in sales and customer collections only — credit bills are shown separately.</p>
-
-              {/* Hero — cash drawer */}
-              <div className={`dbHeroCard${closingNeg ? " dbHeroCard_warn" : ""}`}>
-                <div className="dbHeroRow">
-                  <span className="dbHeroLabel">Cash at start of day</span>
-                  <span className="dbHeroVal">{money(cash.opening_cash)}</span>
-                </div>
-                <div className="dbHeroRow dbHeroRow_in">
-                  <span className="dbHeroLabel">+ Money received</span>
-                  <span className="dbHeroVal dbHeroVal_in">{money(cash.cash_received)}</span>
-                </div>
-                <div className="dbHeroRow dbHeroRow_out">
-                  <span className="dbHeroLabel">− Paid to suppliers</span>
-                  <span className="dbHeroVal dbHeroVal_out">{money(cash.cash_paid)}</span>
-                </div>
-                <div className="dbHeroDivider" />
-                <div className="dbHeroRow dbHeroRow_result">
-                  <span className="dbHeroLabel">Cash at end of day (expected)</span>
-                  <span className="dbHeroVal">{money(cash.closing_cash)}</span>
-                </div>
-                {closingNeg && (
-                  <div className="dbCashWarning">
-                    <AlertTriangle size={14} aria-hidden="true" />
-                    More cash went out than came in today.
+              {closingNeg && (
+                <div className="dbDeficitAlert" role="alert">
+                  <div className="dbDeficitAlertHdr">
+                    <AlertTriangle width={22} height={22} aria-hidden="true" />
+                    <div>
+                      <div className="dbDeficitAlertTitle">Cash deficit today</div>
+                      <div className="dbDeficitAlertAmt">{money(cash.closing_cash)}</div>
+                    </div>
                   </div>
-                )}
-                <DeltaBadge pct={cmp.receipts_delta_pct} />
+                  <p className="dbDeficitAlertBody">
+                    {money(cash.cash_received)} received in cash · {money(cash.cash_paid)} paid to suppliers
+                  </p>
+                  <p className="dbDeficitAlertNote">
+                    More went out of the drawer than came in today. Check supplier payments and opening cash.
+                  </p>
+                </div>
+              )}
+
+              <div className={`dbSummaryCard${closingNeg ? " dbSummaryCard_warn" : ""}`}>
+                <p className="dbStory">{story}</p>
+                <p className="dbStoryNote">Cash totals include walk-in sales and customer collections only — credit bills are shown separately.</p>
+                <div className="dbSummaryClosing">
+                  <span className="dbSummaryClosingLbl">Expected cash at end of day</span>
+                  <span className={`dbSummaryClosingVal${closingNeg ? " dbSummaryClosingVal_neg" : ""}`}>
+                    {money(cash.closing_cash)}
+                  </span>
+                  {(cash.opening_cash ?? 0) > 0.01 && (
+                    <span className="dbSummaryOpening">Started with {money(cash.opening_cash)} in the drawer</span>
+                  )}
+                </div>
+                <DeltaBadge
+                  pct={cmp.receipts_delta_pct}
+                  comparable={cmp.receipts_comparable}
+                  prevValue={cmp.receipts}
+                />
               </div>
 
               <div className="dbTabs" role="tablist">

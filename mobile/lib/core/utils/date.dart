@@ -5,6 +5,13 @@ import 'timezone.dart';
 /// Local calendar date as `YYYY-MM-DD` (device / screen timezone).
 String todayYmdLocal([DateTime? dt]) => todayYmdInScreenZone(dt);
 
+/// Add [days] to a `YYYY-MM-DD` string (returns empty if invalid).
+String addDaysYmd(String ymd, int days) {
+  final dt = parseApiDate(ymd);
+  if (dt == null) return '';
+  return todayYmdLocal(dt.add(Duration(days: days)));
+}
+
 /// Date parsing helpers for API payloads.
 DateTime? parseApiDate(dynamic value) {
   if (value == null) return null;

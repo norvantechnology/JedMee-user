@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Single source of truth for app icons (Material — compatible with all platforms).
+/// Single source of truth for app icons.
 class AppIcons {
   AppIcons._();
 
@@ -150,7 +150,10 @@ class AppIcons {
 
   // ── Finance & Trends ──────────────────────────────────────────────────────
   static const IconData wallet = Icons.account_balance_wallet_outlined;
+  static const IconData moneyIn = Icons.south_west;
+  static const IconData moneyOut = Icons.north_east;
   static const IconData trendUp = Icons.trending_up;
+  static const IconData gstLandmark = Icons.account_balance_outlined;
   static const IconData trendDown = Icons.trending_down;
   static const IconData arrowUp = Icons.arrow_upward;
   static const IconData arrowDown = Icons.arrow_downward;

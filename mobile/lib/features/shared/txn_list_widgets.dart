@@ -310,6 +310,8 @@ class TxnListPage extends ConsumerStatefulWidget {
     /// When true, hides the filter icon button from the search bar header.
     /// Use when the filter sheet is accessible from a bottom action bar instead.
     this.hideFilterButton = false,
+    this.initialDateFrom,
+    this.initialDateTo,
   });
 
   final TxnLoadFn load;
@@ -348,6 +350,10 @@ class TxnListPage extends ConsumerStatefulWidget {
   /// Use when the filter sheet is accessible from a bottom action bar instead.
   final bool hideFilterButton;
 
+  /// Pre-fill date range (e.g. from Day Book navigation).
+  final String? initialDateFrom;
+  final String? initialDateTo;
+
   @override
   ConsumerState<TxnListPage> createState() => TxnListPageState();
 }
@@ -369,6 +375,12 @@ class TxnListPageState extends ConsumerState<TxnListPage> {
   @override
   void initState() {
     super.initState();
+    final from = widget.initialDateFrom?.trim() ?? '';
+    final to = widget.initialDateTo?.trim() ?? '';
+    if (from.isNotEmpty) {
+      _dateFrom = from;
+      _dateTo = to.isNotEmpty ? to : from;
+    }
     if (widget.useBranchFilter) {
       Future.microtask(() => ref.read(branchControllerProvider.notifier).load());
     }

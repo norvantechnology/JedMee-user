@@ -164,6 +164,27 @@ String fmtAmount(dynamic value, [String? code]) {
   return _formatAmountCore(n, getCurrencyConfig(code));
 }
 
+/// Compact INR for small KPI chips (e.g. Avg ₹1.3L). Full value via tooltip/tap.
+String fmtCompactInr(dynamic value) {
+  final n = parseCurrencyValue(value);
+  if (n == null) return '—';
+  final abs = n.abs();
+  final sign = n < 0 ? '-' : '';
+  if (abs >= 10000000) {
+    final v = abs / 10000000;
+    return '$sign₹${v >= 10 ? v.toStringAsFixed(0) : v.toStringAsFixed(1)}Cr';
+  }
+  if (abs >= 100000) {
+    final v = abs / 100000;
+    return '$sign₹${v >= 10 ? v.toStringAsFixed(0) : v.toStringAsFixed(1)}L';
+  }
+  if (abs >= 1000) {
+    final v = abs / 1000;
+    return '$sign₹${v >= 10 ? v.toStringAsFixed(0) : v.toStringAsFixed(1)}K';
+  }
+  return fmtCurrency(n);
+}
+
 /// Dashboard amounts — same full Indian grouping as [fmtCurrency] (e.g. ₹32,04,665.10).
 ///
 /// No L/Cr abbreviations; use on all dashboard KPI and chart labels.

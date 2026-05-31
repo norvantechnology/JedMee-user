@@ -47,7 +47,14 @@ import '../shared/txn_list_widgets.dart';
 const _kSalesPaymentModes = ['CASH', 'UPI', 'CARD', 'CHEQUE', 'NEFT', 'OTHER'];
 
 class SalesBillingScreen extends ConsumerStatefulWidget {
-  const SalesBillingScreen({super.key});
+  const SalesBillingScreen({
+    super.key,
+    this.initialDateFrom,
+    this.initialDateTo,
+  });
+
+  final String? initialDateFrom;
+  final String? initialDateTo;
 
   @override
   ConsumerState<SalesBillingScreen> createState() => _SalesBillingScreenState();
@@ -755,6 +762,8 @@ class _SalesBillingScreenState extends ConsumerState<SalesBillingScreen> {
   Widget _buildList(bool canAdd) {
     return TxnListPage(
       key: _listKey,
+      initialDateFrom: widget.initialDateFrom,
+      initialDateTo: widget.initialDateTo,
       searchHint: 'Search sales invoices…',
       emptyTitle: 'No sales invoices',
       emptyMessage: 'Create your first invoice to start tracking sales.',

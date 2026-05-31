@@ -48,7 +48,14 @@ import '../shared/txn_list_widgets.dart';
 const _kPaymentModes = ['CASH', 'UPI', 'CARD', 'CHEQUE', 'NEFT', 'OTHER'];
 
 class PurchaseInvoicesScreen extends ConsumerStatefulWidget {
-  const PurchaseInvoicesScreen({super.key});
+  const PurchaseInvoicesScreen({
+    super.key,
+    this.initialDateFrom,
+    this.initialDateTo,
+  });
+
+  final String? initialDateFrom;
+  final String? initialDateTo;
 
   @override
   ConsumerState<PurchaseInvoicesScreen> createState() =>
@@ -745,6 +752,8 @@ class _PurchaseInvoicesScreenState extends ConsumerState<PurchaseInvoicesScreen>
   Widget _buildList(bool canAdd) {
     return TxnListPage(
       key: _listKey,
+      initialDateFrom: widget.initialDateFrom,
+      initialDateTo: widget.initialDateTo,
       searchHint: 'Search purchase invoices…',
       emptyTitle: 'No purchase invoices',
       emptyMessage: 'Record a purchase to update stock and payables.',

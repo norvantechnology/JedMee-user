@@ -21,10 +21,12 @@ function prevYmd(ymd) {
   return `${py}-${pm}-${pd}`;
 }
 
+/** % change vs prior day; null when prior is zero (avoids misleading ±100% badges). */
 function deltaPct(current, previous) {
-  if (previous > 0) return Math.round(((current - previous) / previous) * 1000) / 10;
-  if (current > 0) return 100;
-  return null;
+  const cur = n(current);
+  const prev = n(previous);
+  if (prev <= 0.0001) return null;
+  return Math.round(((cur - prev) / prev) * 1000) / 10;
 }
 
 async function handler(event) {
@@ -382,8 +384,10 @@ async function handler(event) {
         prev_date: prevDate,
         receipts: prevTotalReceipts,
         receipts_delta_pct: deltaPct(totalReceipts, prevTotalReceipts),
+        receipts_comparable: prevTotalReceipts > 0.0001,
         payments: prevSupplierPayments,
-        payments_delta_pct: deltaPct(totalPayments, prevSupplierPayments)
+        payments_delta_pct: deltaPct(totalPayments, prevSupplierPayments),
+        payments_comparable: prevSupplierPayments > 0.0001
       },
       recent: {
         sales: (recentSalesRs.rows || []).map((r) => ({
