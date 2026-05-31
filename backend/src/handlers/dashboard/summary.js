@@ -1182,10 +1182,3 @@ async function handler(event) {
 }
 
 module.exports = { handler };
-
-|| "Please try again.") });
-  }
-}
-
-module.exports = { handler };
-
