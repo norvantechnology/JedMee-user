@@ -3,6 +3,8 @@ const { ok, fail } = require('../../shared/response');
 const { requirePermission } = require('../../shared/auth');
 const { getPermissionsForUser } = require('../../shared/permissions');
 const { query } = require('../../shared/db');
+const { resolveClientTimeZone } = require('../../shared/dateFilters');
+const { monthStartYmd, monthEndYmd } = require('../../shared/timezone');
 
 /**
  * GSTR-2 / Purchase ITC Report
@@ -40,9 +42,9 @@ async function handler(event) {
     return fail(400, 'VALIDATION_ERROR', 'year (>=2000) and month (1-12) are required.');
   }
 
-  const fromDate = `${year}-${String(month).padStart(2, '0')}-01`;
-  const lastDay  = new Date(year, month, 0).getDate();
-  const toDate   = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  const timeZone = resolveClientTimeZone(qs);
+  const fromDate = monthStartYmd(year, month, timeZone);
+  const toDate = monthEndYmd(year, month, timeZone);
 
   try {
     const data = await buildGstr2Data(ctx.accountId, year, month, fromDate, toDate);

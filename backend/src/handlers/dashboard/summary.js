@@ -2,7 +2,7 @@ const { ok, fail } = require("../../shared/response");
 const { query } = require("../../shared/db");
 const { requireApprovedUser } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
-const { resolveDateRange, todayYmdInTimeZone } = require("../../shared/dateFilters");
+const { resolveDateRange, todayYmdInTimeZone, resolveClientTimeZone } = require("../../shared/dateFilters");
 
 function hasView(perms, resource) {
   const r = String(resource || "").toUpperCase();
@@ -50,10 +50,11 @@ async function handler(event) {
   if (!ctx.accountId) return fail(400, "BAD_REQUEST", "account not found");
 
   const qs = event?.queryStringParameters || {};
-  const istToday = todayYmdInTimeZone("Asia/Kolkata");
+  const timeZone = resolveClientTimeZone(qs);
+  const clientToday = todayYmdInTimeZone(timeZone);
   const range = resolveDateRange(qs);
-  const dateFrom = range.from || monthStartYmd(istToday);
-  const dateTo = range.to || istToday;
+  const dateFrom = range.from || monthStartYmd(clientToday);
+  const dateTo = range.to || clientToday;
   const recentLimit = clampLimit(qs.recent_limit, 6, 3, 20);
   const expiryDays = clampLimit(qs.expiry_days, 30, 7, 180);
 
@@ -153,7 +154,7 @@ async function handler(event) {
               (SELECT json_agg(sales_trend ORDER BY day) FROM sales_trend) AS sales_trend,
               (SELECT json_agg(sales_week ORDER BY day) FROM sales_week) AS sales_week
             `,
-            [ctx.accountId, istToday, dateFrom, dateTo, recentLimit]
+            [ctx.accountId, clientToday, dateFrom, dateTo, recentLimit]
           )
         : Promise.resolve({ rows: [{ sales_today: null, sales_range: null, sales_prev_day: null, recent_sales: [], sales_trend: [], sales_week: [] }] })
     );
@@ -172,6 +173,14 @@ async function handler(event) {
               WHERE account_id = $1 AND deleted_at IS NULL
                 AND status = 'CONFIRMED'::purchase_invoice_status
                 AND invoice_date = $2::date
+            ),
+            pur_prev_day AS (
+              SELECT
+                COALESCE(SUM(total_amount),0)::numeric(14,2) AS total
+              FROM purchase_invoices
+              WHERE account_id = $1 AND deleted_at IS NULL
+                AND status = 'CONFIRMED'::purchase_invoice_status
+                AND invoice_date = ($2::date - INTERVAL '1 day')::date
             ),
             pur_range AS (
               SELECT
@@ -199,9 +208,9 @@ async function handler(event) {
               (SELECT row_to_json(pur_range) FROM pur_range) AS pur_range,
               (SELECT json_agg(pur_trend ORDER BY day) FROM pur_trend) AS pur_trend
             `,
-            [ctx.accountId, istToday, dateFrom, dateTo]
+            [ctx.accountId, clientToday, dateFrom, dateTo]
           )
-        : Promise.resolve({ rows: [{ pur_today: null, pur_range: null, pur_trend: [] }] })
+        : Promise.resolve({ rows: [{ pur_today: null, pur_prev_day: null, pur_range: null, pur_trend: [] }] })
     );
 
     // Payment mode donut (from customer_payments on confirmed sales in range)
@@ -226,6 +235,50 @@ async function handler(event) {
         : Promise.resolve({ rows: [] })
     );
 
+    // Payment modes — previous calendar month (for share trend vs current period)
+    calls.push(
+      canSales
+        ? query(
+            `
+            SELECT COALESCE(cp.payment_mode::text, 'CASH') AS mode,
+                   COALESCE(SUM(cp.amount),0)::numeric(14,2) AS total
+            FROM customer_payments cp
+            JOIN sales_invoices si ON si.id = cp.sales_invoice_id AND si.account_id = cp.account_id
+            WHERE cp.account_id = $1
+              AND si.deleted_at IS NULL
+              AND si.status = 'CONFIRMED'::sales_invoice_status
+              AND si.invoice_date BETWEEN
+                date_trunc('month', $2::date - INTERVAL '1 month')::date
+                AND (date_trunc('month', $2::date) - INTERVAL '1 day')::date
+              AND COALESCE(cp.allocation_type, 'INVOICE') = 'INVOICE'
+            GROUP BY COALESCE(cp.payment_mode::text, 'CASH')
+            ORDER BY total DESC
+            `,
+            [ctx.accountId, dateTo]
+          )
+        : Promise.resolve({ rows: [] })
+    );
+
+    // Sales by ISO day of week (Mon=1 … Sun=7) for selected period
+    calls.push(
+      canSales
+        ? query(
+            `
+            SELECT
+              EXTRACT(ISODOW FROM invoice_date)::int AS dow,
+              COALESCE(SUM(total_amount),0)::numeric(14,2) AS total
+            FROM sales_invoices
+            WHERE account_id = $1 AND deleted_at IS NULL
+              AND status = 'CONFIRMED'::sales_invoice_status
+              AND invoice_date BETWEEN $2::date AND $3::date
+            GROUP BY EXTRACT(ISODOW FROM invoice_date)::int
+            ORDER BY dow
+            `,
+            [ctx.accountId, dateFrom, dateTo]
+          )
+        : Promise.resolve({ rows: [] })
+    );
+
     // Top products (by sales total)
     calls.push(
       canSales
@@ -234,7 +287,8 @@ async function handler(event) {
             SELECT
               sii.product_id,
               MAX(sii.product_name) AS product_name,
-              COALESCE(SUM(sii.line_total),0)::numeric(14,2) AS total
+              COALESCE(SUM(sii.line_total),0)::numeric(14,2) AS total,
+              COALESCE(SUM(sii.qty),0)::numeric(14,3) AS qty_sold
             FROM sales_invoice_items sii
             INNER JOIN sales_invoices si
               ON si.id = sii.sales_invoice_id AND si.account_id = sii.account_id
@@ -477,6 +531,31 @@ async function handler(event) {
         : Promise.resolve({ rows: [{ amount: 0, invoices: 0 }] })
     );
 
+    // Purchase invoices due today (unpaid balance, due_date = today)
+    calls.push(
+      canPurchases
+        ? query(
+            `
+            SELECT
+              pi.id,
+              pi.invoice_number,
+              COALESCE(v.name, '') AS vendor_name,
+              pi.balance_due,
+              pi.due_date
+            FROM purchase_invoices pi
+            LEFT JOIN vendors v ON v.id = pi.vendor_id AND v.account_id = pi.account_id
+            WHERE pi.account_id = $1 AND pi.deleted_at IS NULL
+              AND pi.status = 'CONFIRMED'::purchase_invoice_status
+              AND pi.balance_due > 0
+              AND pi.due_date = CURRENT_DATE
+            ORDER BY pi.balance_due DESC
+            LIMIT 10
+            `,
+            [ctx.accountId]
+          )
+        : Promise.resolve({ rows: [] })
+    );
+
     // Total outstanding receivables (all-time, not date-filtered) — balance sheet item
     calls.push(
       canSales
@@ -584,6 +663,14 @@ async function handler(event) {
                   date_trunc('month', $2::date - INTERVAL '1 month')::date
                   AND (date_trunc('month', $2::date) - INTERVAL '1 day')::date
                 THEN total_amount ELSE 0 END),0)::numeric(14,2) AS last_month_sales,
+              (SELECT COALESCE(SUM(pi.total_amount),0)::numeric(14,2)
+               FROM purchase_invoices pi
+               WHERE pi.account_id = $1 AND pi.deleted_at IS NULL
+                 AND pi.status = 'CONFIRMED'::purchase_invoice_status
+                 AND pi.invoice_date BETWEEN
+                   date_trunc('month', $2::date - INTERVAL '1 month')::date
+                   AND (date_trunc('month', $2::date) - INTERVAL '1 day')::date
+              ) AS last_month_purchases,
               COALESCE(SUM(CASE
                 WHEN invoice_date BETWEEN
                   date_trunc('month', $2::date - INTERVAL '13 months')::date
@@ -599,7 +686,7 @@ async function handler(event) {
             `,
             [ctx.accountId, dateTo]
           )
-        : Promise.resolve({ rows: [{ last_month_sales: 0, same_month_last_year: 0, current_month_to_date: 0 }] })
+        : Promise.resolve({ rows: [{ last_month_sales: 0, last_month_purchases: 0, same_month_last_year: 0, current_month_to_date: 0 }] })
     );
 
     // Overdue receivables aging buckets (0-30, 31-60, 61-90, 90+ days)
@@ -784,6 +871,8 @@ async function handler(event) {
       salesPack,
       purchasePack,
       payModes,
+      payModesPrev,
+      salesByDow,
       topProducts,
       topCustomers,
       expiryWatch,
@@ -804,7 +893,8 @@ async function handler(event) {
       invoicePayStatus,
       expiryValueAtRisk,
       nonMovingValue,
-      stockCoverage
+      stockCoverage,
+      purchaseDueToday
     ] = await Promise.all(calls);
 
     const salesRow = salesPack.rows?.[0] || {};
@@ -814,11 +904,17 @@ async function handler(event) {
     const salesPrev = salesRow.sales_prev_day || null;
     const salesRange = salesRow.sales_range || null;
     const purToday = purchaseRow.pur_today || null;
+    const purPrev = purchaseRow.pur_prev_day || null;
     const purRange = purchaseRow.pur_range || null;
 
     const todaySales = toNum(salesToday?.total);
     const yesterdaySales = toNum(salesPrev?.total);
     const todaySalesDeltaPct = yesterdaySales > 0 ? ((todaySales - yesterdaySales) / yesterdaySales) * 100 : null;
+
+    const todayPurchases = toNum(purToday?.total);
+    const yesterdayPurchases = toNum(purPrev?.total);
+    const todayPurchasesDeltaPct =
+      yesterdayPurchases > 0 ? ((todayPurchases - yesterdayPurchases) / yesterdayPurchases) * 100 : null;
 
     // Gross profit = period sales revenue − period purchase cost (can be negative; do NOT clamp to 0)
     // Always calculate when canSales is true; use 0 for purchases when canPurchases is false
@@ -855,7 +951,9 @@ async function handler(event) {
     return ok({
       meta: {
         account_id: ctx.accountId,
-        ist_today: istToday,
+        ist_today: clientToday,
+        client_today: clientToday,
+        timezone: timeZone,
         range: { from: dateFrom, to: dateTo },
         visibility: {
           sales: canSales,
@@ -887,12 +985,24 @@ async function handler(event) {
               note: "Derived on client from payment mode split (optional)."
             }
           : null,
-        today_purchases: canPurchases ? { value: toNum(purToday?.total), invoices: toNum(purToday?.invoices) } : null,
+        today_purchases: canPurchases
+          ? {
+              value: todayPurchases,
+              prev_value: yesterdayPurchases,
+              delta_pct: todayPurchasesDeltaPct,
+              invoices: toNum(purToday?.invoices)
+            }
+          : null,
         range_purchases: canPurchases ? { value: toNum(purRange?.total), invoices: toNum(purRange?.invoices) } : null,
         gross_profit: grossProfit != null ? { value: grossProfit } : null,
         // Payables = total outstanding balance_due across ALL confirmed purchase invoices (balance sheet item)
         payables: canPurchases ? { value: toNum(totalPayRow.amount), invoices: toNum(totalPayRow.invoices) } : null,
-        bills_today: canSales ? { value: toNum(salesToday?.bills), confirmed: toNum(salesToday?.bills), drafts: 0, returns: null } : null
+        bills_today: canSales ? { value: toNum(salesToday?.bills), confirmed: toNum(salesToday?.bills), drafts: 0, returns: null } : null,
+        invoice_count: canSales ? { value: Number(salesRange?.bills || 0) } : null,
+        avg_order_value:
+          canSales && Number(salesRange?.bills || 0) > 0
+            ? { value: toNum(salesRange?.total) / Number(salesRange.bills) }
+            : null
       },
       widgets: {
         recent_sales: canSales ? salesRow.recent_sales || [] : [],
@@ -902,6 +1012,8 @@ async function handler(event) {
         sales_week_7d: canSales ? salesWeek : [],
         purchase_trend_30d: canPurchases ? purchaseRow.pur_trend || [] : [],
         payment_modes: canSales ? (payModes.rows || []) : [],
+        payment_modes_prev: canSales ? (payModesPrev.rows || []) : [],
+        sales_by_dow: canSales ? (salesByDow.rows || []) : [],
         top_products: canSales ? (topProducts.rows || []) : [],
         top_customers: canSales && canCustomers ? (topCustomers.rows || []) : [],
         expiry_watch: canBatches ? (expiryWatch.rows || []) : [],
@@ -910,6 +1022,7 @@ async function handler(event) {
         supplier_payables: canPurchases && canVendors ? (supplierPayables.rows || []) : [],
         overdue_receivables: canSales ? overdueRecv.rows?.[0] || { amount: 0, invoices: 0 } : { amount: 0, invoices: 0 },
         overdue_payables: canPurchases ? overduePay.rows?.[0] || { amount: 0, invoices: 0 } : { amount: 0, invoices: 0 },
+        purchase_due_today: canPurchases ? purchaseDueToday.rows || [] : [],
         non_moving_count: canBatches ? Number(nonMovingCount.rows?.[0]?.c || 0) : 0,
         // ── NEW ANALYTICS WIDGETS ──────────────────────────────────────────
         pending_orders: (() => {
@@ -925,15 +1038,23 @@ async function handler(event) {
           const r = momComparison.rows?.[0] || {};
           const currentPeriodSales = toNum(salesRange?.total);
           const lastMonthSales = toNum(r.last_month_sales);
+          const lastMonthPurchases = toNum(r.last_month_purchases);
+          const currentPeriodPurchases = canPurchases ? toNum(purRange?.total) : 0;
           const sameMonthLastYear = toNum(r.same_month_last_year);
           const momDeltaPct = lastMonthSales > 0 ? ((currentPeriodSales - lastMonthSales) / lastMonthSales) * 100 : null;
+          const purchaseMomDeltaPct =
+            lastMonthPurchases > 0
+              ? ((currentPeriodPurchases - lastMonthPurchases) / lastMonthPurchases) * 100
+              : null;
           const yoyDeltaPct = sameMonthLastYear > 0 ? ((currentPeriodSales - sameMonthLastYear) / sameMonthLastYear) * 100 : null;
           return canSales ? {
             current_period: currentPeriodSales,
             last_month: lastMonthSales,
+            last_month_purchases: lastMonthPurchases,
             same_month_last_year: sameMonthLastYear,
             current_month_to_date: toNum(r.current_month_to_date),
             mom_delta_pct: momDeltaPct,
+            purchase_mom_delta_pct: purchaseMomDeltaPct,
             yoy_delta_pct: yoyDeltaPct
           } : null;
         })(),
@@ -990,54 +1111,79 @@ async function handler(event) {
           avg_daily_qty: toNum(r.avg_daily_qty),
           coverage_days: Number(r.coverage_days || 0)
         })) : [],
-        alerts: [
-          ...(canBatches
-            ? (expiryWatch.rows || []).slice(0, 2).map((x) => ({
-                kind: "EXPIRY",
-                severity: "red",
-                title: `${x.product_name}  Batch ${x.batch_no}`,
-                subtitle: `Expires: ${String(x.expiry_date || "").slice(0, 10)} · Stock: ${toNum(x.current_stock)}`,
-                badge: "Exp Soon"
-              }))
-            : []),
-          ...(canBatches
-            ? (lowStock.rows || []).slice(0, 2).map((x) => ({
-                kind: "LOW_STOCK",
-                severity: "amber",
-                title: `${x.product_name}  Low stock`,
-                subtitle: `Stock: ${toNum(x.qty)} · Threshold: ${toNum(x.threshold)}`,
-                badge: "Low Stock"
-              }))
-            : []),
-          ...(canSales && toNum(overdueRecv.rows?.[0]?.amount) > 0
-            ? [
-                {
-                  kind: "RECEIVABLES",
-                  severity: "blue",
-                  title: `Overdue Receivables  ${toNum(overdueRecv.rows?.[0]?.invoices)} invoices`,
-                  subtitle: `Amount: ₹${toNum(overdueRecv.rows?.[0]?.amount).toFixed(2)}`,
-                  badge: "Overdue"
-                }
-              ]
-            : []),
-          ...(canPurchases && toNum(overduePay.rows?.[0]?.amount) > 0
-            ? [
-                {
-                  kind: "PAYABLES",
-                  severity: "red",
-                  title: `Overdue Payables  ${toNum(overduePay.rows?.[0]?.invoices)} invoices`,
-                  subtitle: `Amount: ₹${toNum(overduePay.rows?.[0]?.amount).toFixed(2)}`,
-                  badge: "Due"
-                }
-              ]
-            : [])
-        ]
+        alerts: (() => {
+          const criticalExpiry = canBatches
+            ? (expiryWatch.rows || []).filter((x) => {
+                const exp = String(x.expiry_date || "").slice(0, 10);
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(exp)) return false;
+                const ms = Date.parse(`${exp}T00:00:00Z`);
+                const todayMs = Date.parse(`${clientToday}T00:00:00Z`);
+                const days = Math.floor((ms - todayMs) / 86400000);
+                return days >= 0 && days <= 7;
+              })
+            : [];
+          return [
+            ...criticalExpiry.slice(0, 4).map((x) => ({
+              kind: "EXPIRY",
+              severity: "red",
+              title: `${x.product_name} · Batch ${x.batch_no}`,
+              subtitle: `Expires ${String(x.expiry_date || "").slice(0, 10)} · Stock ${toNum(x.current_stock)}`,
+              badge: "Exp Soon"
+            })),
+            ...(canBatches
+              ? (lowStock.rows || []).slice(0, 3).map((x) => ({
+                  kind: "LOW_STOCK",
+                  severity: "amber",
+                  title: `${x.product_name} · Low stock`,
+                  subtitle: `Stock ${toNum(x.qty)} · Threshold ${toNum(x.threshold)}`,
+                  badge: "Low Stock"
+                }))
+              : []),
+            ...(canSales && toNum(overdueRecv.rows?.[0]?.amount) > 0
+              ? [
+                  {
+                    kind: "RECEIVABLES",
+                    severity: "blue",
+                    title: `Overdue invoices · ${toNum(overdueRecv.rows?.[0]?.invoices)} customers`,
+                    subtitle: `Outstanding ${toNum(overdueRecv.rows?.[0]?.amount).toFixed(2)}`,
+                    badge: "Overdue"
+                  }
+                ]
+              : []),
+            ...(canPurchases && toNum(overduePay.rows?.[0]?.amount) > 0
+              ? [
+                  {
+                    kind: "PAYABLES",
+                    severity: "red",
+                    title: `Overdue payables · ${toNum(overduePay.rows?.[0]?.invoices)} bills`,
+                    subtitle: `Due ${toNum(overduePay.rows?.[0]?.amount).toFixed(2)}`,
+                    badge: "Overdue"
+                  }
+                ]
+              : []),
+            ...(canPurchases
+              ? (purchaseDueToday.rows || []).slice(0, 3).map((x) => ({
+                  kind: "PAYABLES_DUE_TODAY",
+                  severity: "amber",
+                  title: `${x.vendor_name || "Supplier"} · ${x.invoice_number || "Purchase"}`,
+                  subtitle: `Pay today · ${toNum(x.balance_due).toFixed(2)}`,
+                  badge: "Due today"
+                }))
+              : [])
+          ];
+        })()
       },
       permissions: ctx.permissions || {}
     });
   } catch (e) {
     void actorId;
     return fail(500, "INTERNAL_ERROR", "Something went wrong.", { subMessage: String(e.message || "Please try again.") });
+  }
+}
+
+module.exports = { handler };
+
+|| "Please try again.") });
   }
 }
 

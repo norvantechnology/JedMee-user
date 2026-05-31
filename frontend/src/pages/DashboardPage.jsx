@@ -113,7 +113,6 @@ export default function DashboardPage() {
   const [trendChartType, setTrendChartType]   = useState("LINE");
   const [weekChartType, setWeekChartType]     = useState("BAR");
   const [payChartType, setPayChartType]       = useState("DONUT");
-  const [profitChartType, setProfitChartType] = useState("AREA");
   const [filterOpen, setFilterOpen]         = useState(false);
   const searchRef  = useRef(null);
   const reqSeqRef  = useRef(0);
@@ -360,13 +359,17 @@ export default function DashboardPage() {
   const hasNonMovingVal  = nonMovingVal != null && nonMovingVal.count > 0;
   const hasStockCoverage = stockCoverage.length > 0;
 
-  // Purchase-to-sales ratio (derived, no new query)
+  // Purchase-to-sales ratio (derived, matches active preset KPIs)
   const purchaseToSalesRatio = useMemo(() => {
-    const sales = Number(data?.kpis?.range_sales?.value || 0);
-    const pur   = Number(data?.kpis?.range_purchases?.value || 0);
+    const sales = preset === "TODAY"
+      ? Number(data?.kpis?.today_sales?.value || 0)
+      : Number(data?.kpis?.range_sales?.value || 0);
+    const pur = preset === "TODAY"
+      ? Number(data?.kpis?.today_purchases?.value || 0)
+      : Number(data?.kpis?.range_purchases?.value || 0);
     if (sales <= 0) return null;
     return Math.round((pur / sales) * 100);
-  }, [data]);
+  }, [data, preset]);
 
   /* ─── render ─── */
   return (
@@ -623,7 +626,9 @@ export default function DashboardPage() {
                       <div className="kpi-card-footer">
                         <span className="kpi-badge kpi-badge-neutral">
                           {(() => {
-                            const sales = Number(data.kpis?.range_sales?.value || 0);
+                            const sales = preset === "TODAY"
+                              ? Number(data.kpis?.today_sales?.value || 0)
+                              : Number(data.kpis?.range_sales?.value || 0);
                             const profit = Number(data.kpis.gross_profit.value || 0);
                             return sales > 0 ? `${((profit / sales) * 100).toFixed(1)}% margin` : "0.0% margin";
                           })()}
@@ -829,49 +834,6 @@ export default function DashboardPage() {
                       ) : (
                         <DonutChart height={180} slices={payMode.rows.map((x) => ({ id: String(x.mode), label: String(x.mode), value: Number(x.total || 0), color: payColor(x.mode) }))} centerLabel={fmtCurrency(payMode.total || 0) || fmtCurrency(0)} valueFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)} />
                       )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* ══ REVENUE BREAKDOWN ══ */}
-                <div className="dash-row">
-                  <div className="panel panel-full">
-                    <div className="panel-header">
-                      <div className="panel-title">
-                        <BarChart3 aria-hidden="true" size={15} strokeWidth={2.2} />
-                        Revenue Breakdown — Sales vs Purchases
-                      </div>
-                      <div className="panel-controls">
-                        <div className="chart-legend">
-                          {[["var(--color-primary)", "Sales"], ["var(--color-warning-strong)", "Purchases"]].map(([c, l]) => (
-                            <span key={l} className="legend-item">
-                              <span className="legend-dot" style={{ background: c }} />
-                              {l}
-                            </span>
-                          ))}
-                        </div>
-                        <div className="seg-ctrl" aria-label="Revenue chart type">
-                          {[["GROUPED","Grouped"],["STACKED","Stacked"],["AREA","Area"]].map(([v,l]) => (
-                            <button key={v} className={`seg-btn ${profitChartType===v?"active":""}`} onClick={()=>setProfitChartType(v)}>{l}</button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="panel-body">
-                      {profitChartType === "AREA" ? (
-                        <LineAreaChart height={180} series={trendChartData.lineSeries} variant="AREA" yFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)} />
-                      ) : (
-                        <BarChart
-                          height={180}
-                          groups={trendChartData.barGroups}
-                          variant={profitChartType === "STACKED" ? "STACKED" : "GROUPED"}
-                          yFormatter={(v) => fmtCurrency(v) || fmtCurrency(0)}
-                        />
-                      )}
-                      <div className="chart-axis-labels">
-                        <span>{ymd(data.meta?.range?.from)}</span>
-                        <span>{ymd(data.meta?.range?.to)}</span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -1240,11 +1202,6 @@ export default function DashboardPage() {
                             For every ₹100 sold, <strong>₹{purchaseToSalesRatio}</strong> was spent on purchases.
                             {purchaseToSalesRatio > 90 ? " ⚠️ High cost ratio." : purchaseToSalesRatio < 50 ? " ✅ Healthy margin." : " Moderate margin."}
                           </p>
-                          <div className="ratio-kpis">
-                            <div><span>Sales</span><span>{fmtCurrency(data?.kpis?.range_sales?.value || 0) || fmtCurrency(0)}</span></div>
-                            <div><span>Purchases</span><span>{fmtCurrency(data?.kpis?.range_purchases?.value || 0) || fmtCurrency(0)}</span></div>
-                            <div><span>Gross Profit</span><span className="green-text">{fmtCurrency(data?.kpis?.gross_profit?.value || 0) || fmtCurrency(0)}</span></div>
-                          </div>
                         </div>
                       </div>
                     )}

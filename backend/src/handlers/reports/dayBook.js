@@ -2,7 +2,7 @@ const { ok, fail } = require("../../shared/response");
 const { query } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
-const { resolveSingleDate } = require("../../shared/dateFilters");
+const { resolveSingleDate, resolveClientTimeZone } = require("../../shared/dateFilters");
 
 function n(v) {
   const x = Number(v);
@@ -20,7 +20,8 @@ async function handler(event) {
   const ctx = await getPermissionsForUser(actorId);
   if (!ctx.accountId) return fail(400, "BAD_REQUEST", "account not found");
   const qs = event?.queryStringParameters || {};
-  const date = resolveSingleDate(qs.date);
+  const timeZone = resolveClientTimeZone(qs);
+  const date = resolveSingleDate(qs.date, qs);
 
   try {
     const [settingsRs, salesRs, receiptsRs, paymentsRs, profitRs, purchaseReturnsRs, salesReturnsRs] = await Promise.all([

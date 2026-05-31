@@ -1,5 +1,6 @@
 const DEFAULT_BASE_URL = "http://localhost:4000";
 import { emitApiToastFromResponse } from "./toastBus.js";
+import { withScreenTimezone } from "../utils/timezone.js";
 import { readAuth, clearAuth } from "./authStorage.js";
 import { tryRefreshSession } from "./authRefresh.js";
 import { requestNotificationInboxRefresh, shouldRefreshNotificationInboxFromRequest } from "./notificationInboxBus.js";
@@ -94,13 +95,8 @@ async function apiFetch(method, url, body, opts, attempt = 0) {
 export async function apiGet(path, opts) {
   const base = `${getApiBaseUrl()}${path.startsWith("/") ? "" : "/"}${path}`;
   const params = opts?.params && typeof opts.params === "object" ? opts.params : null;
-  const qs = params
-    ? new URLSearchParams(
-        Object.entries(params)
-          .filter(([, v]) => v !== undefined && v !== null && String(v) !== "")
-          .map(([k, v]) => [k, String(v)])
-      ).toString()
-    : "";
+  const merged = params ? withScreenTimezone(params) : withScreenTimezone({});
+  const qs = new URLSearchParams(Object.entries(merged)).toString();
   const url = qs ? `${base}?${qs}` : base;
   return await apiFetch("GET", url, null, opts);
 }

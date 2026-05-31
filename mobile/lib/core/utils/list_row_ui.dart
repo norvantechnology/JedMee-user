@@ -11,6 +11,7 @@ class ListRowViewModel {
     required this.title,
     this.subtitle,
     this.secondarySubtitle,
+    this.boldSubtitle,
     this.meta,
     this.amount,
     this.status,
@@ -20,8 +21,10 @@ class ListRowViewModel {
 
   final String title;
   final String? subtitle;
-  /// Extra info line below subtitle (e.g. balance due, items count).
+  /// Extra info line below subtitle (e.g. balance due, batch count).
   final String? secondarySubtitle;
+  /// Bold line below subtitle — e.g. product stock qty.
+  final String? boldSubtitle;
   /// Small line under amount (e.g. invoice date).
   final String? meta;
   final String? amount;
@@ -170,9 +173,20 @@ String listRowSubtitleForCompact(Map<String, dynamic> row) {
   }
 }
 
+/// Bold line below subtitle — product stock qty on its own row.
+String? listRowBoldSubtitleFor(Map<String, dynamic> row) {
+  if (detectRecordEntity(row) != RecordEntity.product) return null;
+  return 'Stock ${formatStockQty(productTotalQuantity(row))}';
+}
+
 /// Extra info line below subtitle — balance due for invoices, product names for orders.
 String? listRowSecondarySubtitleFor(Map<String, dynamic> row) {
   final entity = detectRecordEntity(row);
+
+  if (entity == RecordEntity.product) {
+    final line = productStockMetaLine(row);
+    return line.isNotEmpty ? line : null;
+  }
 
   if (entity == RecordEntity.salesInvoice ||
       entity == RecordEntity.purchaseInvoice) {
@@ -256,7 +270,7 @@ String? listRowAmountFor(Map<String, dynamic> row) {
       final amt = row['total_amount'] ?? row['totalAmount'] ?? row['amount'];
       return amt != null ? fmtCurrency(amt) : null;
     case RecordEntity.product:
-      return formatStockQty(productTotalQuantity(row));
+      return null;
     case RecordEntity.productBatch:
       return formatStockQty(batchTotalStock(row));
     default:
@@ -355,6 +369,7 @@ ListRowViewModel presentListRow(
     title: title ?? listRowTitleFor(row),
     subtitle: subtitle ?? listRowSubtitleForCompact(row),
     secondarySubtitle: listRowSecondarySubtitleFor(row),
+    boldSubtitle: listRowBoldSubtitleFor(row),
     meta: listRowMetaFor(row),
     amount: listRowAmountFor(row),
     status: listRowStatusFor(row, override: status),

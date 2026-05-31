@@ -3,6 +3,8 @@ const { ok, fail } = require('../../shared/response');
 const { requirePermission } = require('../../shared/auth');
 const { getPermissionsForUser } = require('../../shared/permissions');
 const { query } = require('../../shared/db');
+const { resolveClientTimeZone } = require('../../shared/dateFilters');
+const { monthStartYmd, monthEndYmd } = require('../../shared/timezone');
 
 const LARGE_B2C_THRESHOLD = 250000; // ₹2.5 lakh
 
@@ -37,6 +39,7 @@ async function handler(event) {
   if (!ctx.accountId) return fail(400, 'BAD_REQUEST', 'account not found');
 
   const qs = event.queryStringParameters || {};
+  const timeZone = resolveClientTimeZone(qs);
 
   // Support both month/year and custom date range
   let fromDate, toDate;
@@ -49,9 +52,8 @@ async function handler(event) {
     if (!year || !month || month < 1 || month > 12 || year < 2000 || year > 2100) {
       return fail(400, 'VALIDATION_ERROR', 'Provide year+month (1-12) or from_date+to_date (YYYY-MM-DD).');
     }
-    const lastDay = new Date(year, month, 0).getDate();
-    fromDate = `${year}-${String(month).padStart(2, '0')}-01`;
-    toDate   = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+    fromDate = monthStartYmd(year, month, timeZone);
+    toDate = monthEndYmd(year, month, timeZone);
   }
 
   // Optional search (customer name, invoice number, GSTIN)

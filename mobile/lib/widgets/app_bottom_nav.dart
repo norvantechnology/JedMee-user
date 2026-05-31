@@ -40,6 +40,7 @@ class AppBottomActionBar extends StatelessWidget {
     required this.primaryAction,
     this.leadingActions = const [],
     this.trailingActions = const [],
+    this.emphasizePrimary = true,
   }) : assert(
           leadingActions.length <= 2 && trailingActions.length <= 2,
           'Max 2 leading and 2 trailing actions',
@@ -48,6 +49,7 @@ class AppBottomActionBar extends StatelessWidget {
   final BottomAction primaryAction;
   final List<BottomAction> leadingActions;
   final List<BottomAction> trailingActions;
+  final bool emphasizePrimary;
 
   List<BottomAction> get _allActions => [
         ...leadingActions.take(2),
@@ -101,7 +103,7 @@ class AppBottomActionBar extends StatelessWidget {
                   child: _BarButton(
                     action: action,
                     label: _resolveLabel(action),
-                    isPrimary: isPrimary,
+                    isPrimary: emphasizePrimary && isPrimary,
                   ),
                 );
               }).toList(),

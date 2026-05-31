@@ -4,6 +4,8 @@ const { requirePermission } = require('../../shared/auth');
 const { getPermissionsForUser } = require('../../shared/permissions');
 const { query, withTransaction } = require('../../shared/db');
 const { buildGstr3bData } = require('./gstr3b');
+const { resolveClientTimeZone } = require('../../shared/dateFilters');
+const { monthStartYmd, monthEndYmd } = require('../../shared/timezone');
 
 /**
  * GSTR3B File/Lock handler — POST /reports/gstr3b/{year}/{month}/file
@@ -42,10 +44,12 @@ async function handler(event) {
     // ignore parse errors — we'll re-calculate
   }
 
+  const qs = event.queryStringParameters || {};
+  const timeZone = resolveClientTimeZone(qs);
+
   // ── Date range ──────────────────────────────────────────────────────────────
-  const fromDate  = `${year}-${String(month).padStart(2, '0')}-01`;
-  const lastDay   = new Date(year, month, 0).getDate();
-  const toDate    = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  const fromDate = monthStartYmd(year, month, timeZone);
+  const toDate = monthEndYmd(year, month, timeZone);
   const nextMonth = month === 12 ? 1  : month + 1;
   const nextYear  = month === 12 ? year + 1 : year;
   const dueDate   = `${nextYear}-${String(nextMonth).padStart(2, '0')}-20`;

@@ -101,8 +101,7 @@ String productMasterMetaLine(Map<String, dynamic> row) {
 }
 
 /// Stock / batch summary line for product master rows.
-/// NOTE: Stock qty is intentionally omitted here — it is shown in the
-/// trailing column of [ProductMasterListTile] to avoid duplication.
+/// Stock qty is shown on the bold line below the subtitle in list tiles.
 String productStockMetaLine(Map<String, dynamic> row) {
   final batches = productActiveBatchCount(row);
   final loose = productLooseQuantity(row);

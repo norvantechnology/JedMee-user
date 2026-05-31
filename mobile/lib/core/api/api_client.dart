@@ -8,6 +8,7 @@ import '../../config/app_config.dart';
 import '../auth/auth_storage.dart';
 import '../cache/api_cache.dart';
 import '../logger/app_logger.dart';
+import '../utils/timezone.dart';
 import 'api_response.dart';
 
 /// Options for API calls (mirrors web `opts` on apiClient.js).
@@ -460,8 +461,9 @@ class ApiClient {
   }
 
   String _buildQueryString(Map<String, dynamic>? params) {
-    if (params == null || params.isEmpty) return '';
-    final entries = params.entries
+    final merged = withScreenTimezone(params);
+    if (merged.isEmpty) return '';
+    final entries = merged.entries
         .where((e) =>
             e.value != null && e.value.toString().trim().isNotEmpty)
         .map((e) => MapEntry(e.key, e.value.toString()))

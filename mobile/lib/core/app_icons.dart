@@ -28,6 +28,7 @@ class AppIcons {
   static const IconData gstItcReport = Icons.description_outlined;
   static const IconData gstReturn3B = Icons.schedule_outlined;
   static const IconData ledger = Icons.menu_outlined;
+  static const IconData target = Icons.track_changes_outlined;
   static const IconData salesReturns = Icons.swap_horiz;
   static const IconData purchaseReturns = Icons.swap_horiz;
   static const IconData divisionPayments = Icons.business_outlined;

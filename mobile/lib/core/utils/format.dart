@@ -102,9 +102,24 @@ String fmtDisplayDateTime(dynamic value) {
 /// Created/updated timestamps in list rows.
 String fmtCreatedAt(dynamic value) => fmtDisplayDateTime(value);
 
-/// Indian-grouped amount without symbol (e.g. 31,500.00 or 1,00,000.00).
-/// Strips any non-breaking spaces (U+00A0) or regular spaces that some
-/// versions of the intl package insert as grouping/decimal separators.
+/// Parses currency-bearing values (same rules as [fmtCurrency]).
+num? parseCurrencyValue(dynamic value) {
+  if (value == null) return null;
+  if (value is Map) {
+    return parseCurrencyValue(
+      value['value'] ??
+          value['amount'] ??
+          value['total'] ??
+          value['total_amount'],
+    );
+  }
+  if (value is num) return value.isFinite ? value : null;
+  return num.tryParse(value.toString());
+}
+
+/// Indian (2-2-3) grouped amount without symbol — e.g. 32,04,665.10 or 1,42,500.00.
+/// Uses [NumberFormat] pattern `#,##,##0.00` with locale `en_IN` for INR.
+/// Strips non-breaking spaces some intl versions insert as separators.
 String _formatAmountCore(num n, CurrencyConfig cfg) {
   final String raw;
   if (cfg.code == 'INR') {
@@ -112,13 +127,13 @@ String _formatAmountCore(num n, CurrencyConfig cfg) {
   } else {
     raw = NumberFormat('#,##0.00', cfg.locale).format(n);
   }
-  // Remove any spaces (regular or non-breaking) that may appear before the
-  // decimal separator due to locale quirks in certain intl versions.
   return raw.replaceAll('\u00a0', '').replaceAll(' ', '');
 }
 
-/// Format amount with currency symbol — no space before decimal (e.g. ₹31,500.00).
-/// Returns "—" only when value is null/unparseable (0 displays as ₹0.00).
+/// Full currency with symbol — Indian grouping + paise (e.g. ₹32,04,665.10).
+///
+/// Use on list rows, detail sheets, modals, invoices, and financial tables.
+/// Never abbreviate (no ₹32L) outside dashboard summary cards.
 String fmtCurrency(dynamic value, [String? code]) {
   if (value == null) return '—';
   if (value is Map) {
@@ -126,34 +141,103 @@ String fmtCurrency(dynamic value, [String? code]) {
     return fmtCurrency(inner, code);
   }
   final num? parsed = value is num ? value : num.tryParse(value.toString());
-  if (parsed == null) return '—';
-  final n = parsed;
-  if (!n.isFinite) return '—';
+  if (parsed == null || !parsed.isFinite) return '—';
 
   final cfg = getCurrencyConfig(code);
   try {
-    final amount = _formatAmountCore(n, cfg);
-    return '${cfg.symbol}$amount';
+    return '${cfg.symbol}${_formatAmountCore(parsed, cfg)}';
   } catch (_) {
-    return '${cfg.symbol}${n.toStringAsFixed(cfg.decimals)}';
+    return '${cfg.symbol}${parsed.toStringAsFixed(cfg.decimals)}';
   }
 }
 
-/// Alias for [fmtCurrency] — single entry point for currency display.
+/// Alias — full Indian-format currency for detail UI.
+String fmtCurrencyDetail(dynamic value, [String? code]) => fmtCurrency(value, code);
+
+/// Alias for [fmtCurrency].
 String formatCurrency(dynamic value, [String? code]) => fmtCurrency(value, code);
 
-/// Two-decimal plain number string using active currency locale grouping.
-String fmtMoney(dynamic value, [String? code]) {
-  final num n = num.tryParse(value?.toString() ?? '') ?? double.nan;
-  if (!n.isFinite) return '';
+/// Amount without symbol — same grouping as [fmtCurrency] (tables, PDF cells).
+String fmtAmount(dynamic value, [String? code]) {
+  final n = parseCurrencyValue(value);
+  if (n == null) return '—';
+  return _formatAmountCore(n, getCurrencyConfig(code));
+}
 
-  final cfg = getCurrencyConfig(code);
-  try {
-    final formatter = NumberFormat.decimalPattern(cfg.locale)
-      ..minimumFractionDigits = cfg.decimals
-      ..maximumFractionDigits = cfg.decimals;
-    return formatter.format(n);
-  } catch (_) {
-    return n.toStringAsFixed(cfg.decimals);
+/// Dashboard amounts — same full Indian grouping as [fmtCurrency] (e.g. ₹32,04,665.10).
+///
+/// No L/Cr abbreviations; use on all dashboard KPI and chart labels.
+String fmtDashboardCurrency(dynamic value, [String? code]) =>
+    fmtCurrency(value, code);
+
+/// Whether dashboard display differs from full [fmtCurrency] (tooltip warranted).
+bool dashboardAmountHasExactDetail(dynamic value, [String? code]) => false;
+
+/// Dashboard currency text (full Indian format).
+class DashboardAmountText extends StatelessWidget {
+  const DashboardAmountText(
+    this.value, {
+    super.key,
+    this.style,
+    this.prefix = '',
+    this.suffix = '',
+    this.textAlign,
+    this.maxLines = 1,
+    this.overflow = TextOverflow.ellipsis,
+  });
+
+  final dynamic value;
+  final TextStyle? style;
+  final String prefix;
+  final String suffix;
+  final TextAlign? textAlign;
+  final int? maxLines;
+  final TextOverflow? overflow;
+
+  @override
+  Widget build(BuildContext context) {
+    final n = parseCurrencyValue(value);
+    if (n == null) {
+      return Text(
+        '—',
+        style: style,
+        textAlign: textAlign,
+        maxLines: maxLines,
+        overflow: overflow,
+      );
+    }
+    return Text(
+      '$prefix${fmtDashboardCurrency(n)}$suffix',
+      style: style,
+      textAlign: textAlign,
+      maxLines: maxLines,
+      overflow: overflow,
+    );
   }
+}
+
+/// Plain grouped number (no symbol) — prefer [fmtAmount] for INR money columns.
+String fmtMoney(dynamic value, [String? code]) => fmtAmount(value, code);
+
+/// True when [fmtCurrency] used international (3-digit) grouping instead of Indian.
+bool usesInternationalInrGrouping(num value) {
+  final formatted = fmtCurrency(value, 'INR');
+  final digits = formatted.replaceAll(RegExp(r'[^\d]'), '');
+  if (digits.length < 5) return false;
+  // International millions: 1,420,500 — Indian lakh: 14,20,500 (same digit count,
+  // distinguish via comma pattern after ₹).
+  final body = formatted.replaceFirst('₹', '');
+  final commas = ','.allMatches(body).length;
+  if (value >= 100000 && commas == 2) {
+    // Indian lakh+ has 2 commas; international million+ often has 2 as well —
+    // check first group length (Indian first group is 1–3 digits from the right).
+    final parts = body.split('.').first.split(',');
+    if (parts.length >= 2 && parts[parts.length - 2].length == 2) {
+      return false; // e.g. 14,20,500
+    }
+    if (parts.length >= 2 && parts[0].length <= 3 && parts[1].length == 3) {
+      return true; // e.g. 1,420,500
+    }
+  }
+  return false;
 }

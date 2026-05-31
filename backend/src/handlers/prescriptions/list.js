@@ -2,7 +2,8 @@ const { ok, fail } = require("../../shared/response");
 const { query } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
-const { resolveDateRange, applyDateRangeDate } = require("../../shared/dateFilters");
+const { resolveDateRange, applyDateRangeDate, resolveClientTimeZone } = require("../../shared/dateFilters");
+const { sqlLocalDateFromTimestamptz } = require("../../shared/timezone");
 
 function clean(v) {
   return String(v ?? "").trim();
@@ -19,13 +20,17 @@ async function handler(event) {
   const page = Math.max(1, Number(qs.page) || 1);
   const limit = Math.min(200, Math.max(1, Number(qs.limit) || 50));
   const offset = (page - 1) * limit;
+  const timeZone = resolveClientTimeZone(qs);
   const dateRange = resolveDateRange(qs);
   const doctor = clean(qs.doctor || qs.doctorName);
   const search = clean(qs.search || qs.q);
 
   const where = ["p.account_id = $1"];
   const params = [ctx.accountId];
-  applyDateRangeDate(where, params, "COALESCE(p.prescription_date, (p.created_at AT TIME ZONE 'Asia/Kolkata')::date)", dateRange);
+  params.push(timeZone);
+  const tzIdx = params.length;
+  const prescriptionDateExpr = `COALESCE(p.prescription_date, ${sqlLocalDateFromTimestamptz("p.created_at", tzIdx)})`;
+  applyDateRangeDate(where, params, prescriptionDateExpr, dateRange);
   if (doctor) {
     params.push(`%${doctor}%`);
     where.push(`COALESCE(p.doctor_name,'') ILIKE $${params.length}`);
@@ -59,7 +64,7 @@ async function handler(event) {
     FROM prescriptions p
     LEFT JOIN sales_invoices si ON si.id = p.sales_invoice_id AND si.account_id = p.account_id
     ${whereSql}
-    ORDER BY COALESCE(p.prescription_date, (p.created_at AT TIME ZONE 'Asia/Kolkata')::date) DESC, p.created_at DESC
+    ORDER BY ${prescriptionDateExpr} DESC, p.created_at DESC
     LIMIT $${params.length + 1} OFFSET $${params.length + 2}
     `,
     [...params, limit, offset]

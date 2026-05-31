@@ -1,9 +1,16 @@
+import { screenTimeZone, todayYmdInScreenZone, withScreenTimezone } from "./timezone.js";
+
+export { screenTimeZone, todayYmdInScreenZone, withScreenTimezone };
+
 function pad2(n) {
   return String(n).padStart(2, "0");
 }
 
-/** Local calendar date as YYYY-MM-DD (no UTC conversion). */
+/** Local calendar date as YYYY-MM-DD in the screen timezone. */
 export function todayYmdLocal(d = new Date()) {
+  if (!d || d.getTime() === Date.now()) {
+    return todayYmdInScreenZone();
+  }
   const y = d.getFullYear();
   const m = pad2(d.getMonth() + 1);
   const day = pad2(d.getDate());

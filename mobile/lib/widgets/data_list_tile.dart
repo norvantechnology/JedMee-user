@@ -18,6 +18,8 @@ class DataListTile extends StatelessWidget {
     this.title,
     this.subtitle,
     this.secondarySubtitle,
+    this.boldSubtitle,
+    this.boldSubtitleColor,
     this.secondarySubtitleColor,
     this.trailing,
     this.status,
@@ -35,6 +37,9 @@ class DataListTile extends StatelessWidget {
   final String? title;
   final String? subtitle;
   final String? secondarySubtitle;
+  final String? boldSubtitle;
+  /// Override color for [boldSubtitle]. Defaults to [AppColors.text].
+  final Color? boldSubtitleColor;
   /// Override color for the secondary subtitle dot + text. Defaults to [AppColors.warning].
   final Color? secondarySubtitleColor;
   final Widget? trailing;
@@ -101,6 +106,8 @@ class DataListTile extends StatelessWidget {
     final useIcon = showLeadingIcon ?? vm?.showLeadingIcon ?? true;
     final extraLine = (secondarySubtitle ?? vm?.secondarySubtitle)?.trim();
     final hasExtra = extraLine != null && extraLine.isNotEmpty;
+    final boldLine = (boldSubtitle ?? vm?.boldSubtitle)?.trim();
+    final hasBoldLine = boldLine != null && boldLine.isNotEmpty;
 
     final urgency = entity == RecordEntity.productBatch && row != null
         ? productExpiryUrgency(row!)
@@ -316,7 +323,22 @@ class DataListTile extends StatelessWidget {
                   ),
                 ],
 
-                // Extra line — batch/stock/low-stock info
+                // Stock qty — bold on its own line (products)
+                if (hasBoldLine) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    boldLine,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: boldSubtitleColor ?? AppColors.text,
+                      height: 1.3,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ],
+
+                // Extra line — batch/low-stock info
                 if (hasExtra) ...[
                   const SizedBox(height: 4),
                   Row(

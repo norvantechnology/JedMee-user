@@ -3,6 +3,8 @@ const { ok, fail } = require('../../shared/response');
 const { requirePermission } = require('../../shared/auth');
 const { getPermissionsForUser } = require('../../shared/permissions');
 const { query, withTransaction } = require('../../shared/db');
+const { resolveClientTimeZone } = require('../../shared/dateFilters');
+const { monthStartYmd, monthEndYmd } = require('../../shared/timezone');
 
 /**
  * GSTR-3B Monthly Summary Report — Complete rewrite.
@@ -44,9 +46,9 @@ async function handler(event) {
     return fail(400, 'VALIDATION_ERROR', 'year (>=2000) and month (1-12) are required.');
   }
 
-  const fromDate  = `${year}-${String(month).padStart(2, '0')}-01`;
-  const lastDay   = new Date(year, month, 0).getDate();
-  const toDate    = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  const timeZone = resolveClientTimeZone(qs);
+  const fromDate = monthStartYmd(year, month, timeZone);
+  const toDate = monthEndYmd(year, month, timeZone);
   const nextMonth = month === 12 ? 1 : month + 1;
   const nextYear  = month === 12 ? year + 1 : year;
   const dueDate   = `${nextYear}-${String(nextMonth).padStart(2, '0')}-20`;

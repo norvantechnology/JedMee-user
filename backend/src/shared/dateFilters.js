@@ -1,3 +1,9 @@
+const {
+  resolveClientTimeZone,
+  todayYmdInTimeZone: todayYmdInTz,
+  pickFirstQueryParam
+} = require("./timezone");
+
 function clean(v) {
   return String(v ?? "").trim();
 }
@@ -19,21 +25,18 @@ function getQueryParam(qs, key) {
   return match ? qs[match] : undefined;
 }
 
-function pickFirstQueryParam(qs, keys) {
-  for (const k of keys) {
-    const v = getQueryParam(qs, k);
-    if (v !== undefined && v !== null && String(v).trim() !== "") return v;
-  }
-  return undefined;
-}
-
-function resolveDateRange(qs = {}) {
+function resolveDateRange(qs = {}, options = {}) {
+  const timeZone = options.timeZone || resolveClientTimeZone(qs);
   const fromRaw = pickFirstQueryParam(qs, ["date_from", "dateFrom", "from"]);
   const toRaw = pickFirstQueryParam(qs, ["date_to", "dateTo", "to"]);
-  const from = normalizeYmd(fromRaw);
-  const to = normalizeYmd(toRaw);
-  if (from && to && from > to) return { from: to, to: from };
-  return { from, to };
+  let from = normalizeYmd(fromRaw);
+  let to = normalizeYmd(toRaw);
+  if (from && to && from > to) {
+    const swap = from;
+    from = to;
+    to = swap;
+  }
+  return { from, to, timeZone };
 }
 
 function applyDateRangeDate(wh, ps, columnExpr, range) {
@@ -47,20 +50,22 @@ function applyDateRangeDate(wh, ps, columnExpr, range) {
   }
 }
 
-function todayYmdInTimeZone(timeZone = "Asia/Kolkata") {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit"
-  }).formatToParts(new Date());
-  const get = (t) => parts.find((p) => p.type === t)?.value || "";
-  return `${get("year")}-${get("month")}-${get("day")}`;
+function todayYmdInTimeZone(timeZone) {
+  return todayYmdInTz(timeZone);
 }
 
-function resolveSingleDate(value, fallbackTimeZone = "Asia/Kolkata") {
+/**
+ * Single civil date from query (e.g. day book).
+ * @param {string} value - YYYY-MM-DD or empty
+ * @param {object|string} qsOrTimeZone - query object or IANA/offset timezone
+ */
+function resolveSingleDate(value, qsOrTimeZone = {}) {
+  const timeZone =
+    typeof qsOrTimeZone === "string"
+      ? qsOrTimeZone
+      : resolveClientTimeZone(qsOrTimeZone || {});
   const date = normalizeYmd(value);
-  return date || todayYmdInTimeZone(fallbackTimeZone);
+  return date || todayYmdInTimeZone(timeZone);
 }
 
 module.exports = {
@@ -71,5 +76,6 @@ module.exports = {
   resolveDateRange,
   applyDateRangeDate,
   resolveSingleDate,
+  resolveClientTimeZone,
   todayYmdInTimeZone
 };
