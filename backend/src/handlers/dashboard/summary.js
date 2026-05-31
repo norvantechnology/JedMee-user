@@ -57,7 +57,8 @@ async function handler(event) {
   const qs = event?.queryStringParameters || {};
   const timeZone = resolveClientTimeZone(qs);
   const clientToday = todayYmdInTimeZone(timeZone);
-  const range = resolveDateRange(qs);
+  const { day: analyticsDay } = resolveAnalyticsDay(qs, { timeZone });
+  const range = resolveDateRange(qs, { timeZone });
   const dateFrom = range.from || monthStartYmd(clientToday);
   const dateTo = range.to || clientToday;
   const recentLimit = clampLimit(qs.recent_limit, 6, 3, 20);
