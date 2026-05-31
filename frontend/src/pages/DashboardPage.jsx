@@ -157,9 +157,9 @@ export default function DashboardPage() {
     const ranges = {
       TODAY:   { from: today,                          to: today },
       WEEK:    { from: weekStartYmd,                   to: today },
-      MONTH:   { from: `${today.slice(0, 8)}01`,       to: monthEndYmd(today) },
-      QUARTER: { from: quarterStartYmd(today),          to: quarterEndYmd(today) },
-      YEAR:    { from: `${today.slice(0, 4)}-01-01`,   to: `${today.slice(0, 4)}-12-31` },
+      MONTH:   { from: `${today.slice(0, 8)}01`,       to: today },
+      QUARTER: { from: quarterStartYmd(today),          to: today },
+      YEAR:    { from: `${today.slice(0, 4)}-01-01`,   to: today },
     };
     const { from, to } = ranges[p] || { from: "", to: today };
     setDateFrom(from);
@@ -170,7 +170,9 @@ export default function DashboardPage() {
   async function refresh(nextFrom, nextTo) {
     const seq = ++reqSeqRef.current;
     setBusy(true); setAnimateBars(false);
-    const r = await getDashboardSummary({ dateFrom: nextFrom || undefined, dateTo: nextTo || undefined });
+    const params = { dateFrom: nextFrom || undefined, dateTo: nextTo || undefined };
+    if (nextFrom && nextFrom === nextTo) params.date = nextFrom;
+    const r = await getDashboardSummary(params);
     if (seq !== reqSeqRef.current) return;
     if (r.status >= 200 && r.status < 300 && r.json?.ok) setData(r.json?.data || null);
     else if (r.status !== 401) emitToast({ type: "error", message: parseApiError(r) });

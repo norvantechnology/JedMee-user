@@ -34,8 +34,13 @@ export function todayYmdInScreenZone() {
  * @param {Record<string, unknown>} [params]
  * @returns {Record<string, string>}
  */
+function screenOffsetMinutes() {
+  return -new Date().getTimezoneOffset();
+}
+
 export function withScreenTimezone(params = {}) {
   const out = { ...params };
+  out.tz_offset_minutes = screenOffsetMinutes();
   const hasTz =
     out.timezone != null && String(out.timezone).trim() !== "" ||
     out.tz != null && String(out.tz).trim() !== "";

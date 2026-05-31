@@ -170,6 +170,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
         await ref.read(dashboardRepositoryProvider).refreshDashboardSummary({
       if (_dateFrom.isNotEmpty) 'dateFrom': _dateFrom,
       if (_dateTo.isNotEmpty) 'dateTo': _dateTo,
+      if (_dateFrom.isNotEmpty &&
+          _dateTo.isNotEmpty &&
+          _dateFrom == _dateTo)
+        'date': _dateFrom,
     });
     if (!mounted) return;
     setState(() {

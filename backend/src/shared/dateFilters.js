@@ -55,17 +55,38 @@ function todayYmdInTimeZone(timeZone) {
 }
 
 /**
- * Single civil date from query (e.g. day book).
+ * Civil date for single-day analytics (dashboard KPIs, day book).
+ * Order: explicit `date` → single-day range (`dateFrom` === `dateTo`) → calendar today in client TZ.
+ */
+function resolveAnalyticsDay(qs = {}, options = {}) {
+  const timeZone = options.timeZone || resolveClientTimeZone(qs);
+  const explicit = normalizeYmd(
+    pickFirstQueryParam(qs, ["date", "analytics_date", "analyticsDate"])
+  );
+  if (explicit) {
+    return { day: explicit, timeZone, source: "date" };
+  }
+  const from = normalizeYmd(pickFirstQueryParam(qs, ["date_from", "dateFrom", "from"]));
+  const to = normalizeYmd(pickFirstQueryParam(qs, ["date_to", "dateTo", "to"]));
+  if (from && to && from === to) {
+    return { day: from, timeZone, source: "range" };
+  }
+  return { day: todayYmdInTimeZone(timeZone), timeZone, source: "today" };
+}
+
+/**
+ * Single civil date from query (e.g. day book `date` param).
  * @param {string} value - YYYY-MM-DD or empty
  * @param {object|string} qsOrTimeZone - query object or IANA/offset timezone
  */
 function resolveSingleDate(value, qsOrTimeZone = {}) {
-  const timeZone =
-    typeof qsOrTimeZone === "string"
-      ? qsOrTimeZone
-      : resolveClientTimeZone(qsOrTimeZone || {});
-  const date = normalizeYmd(value);
-  return date || todayYmdInTimeZone(timeZone);
+  if (typeof qsOrTimeZone === "string") {
+    const date = normalizeYmd(value);
+    return date || todayYmdInTimeZone(qsOrTimeZone);
+  }
+  const explicit = normalizeYmd(value);
+  if (explicit) return explicit;
+  return resolveAnalyticsDay(qsOrTimeZone || {}).day;
 }
 
 module.exports = {
@@ -75,6 +96,7 @@ module.exports = {
   pickFirstQueryParam,
   resolveDateRange,
   applyDateRangeDate,
+  resolveAnalyticsDay,
   resolveSingleDate,
   resolveClientTimeZone,
   todayYmdInTimeZone

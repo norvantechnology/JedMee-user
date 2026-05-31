@@ -2,7 +2,12 @@ const { ok, fail } = require("../../shared/response");
 const { query } = require("../../shared/db");
 const { requireApprovedUser } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
-const { resolveDateRange, todayYmdInTimeZone, resolveClientTimeZone } = require("../../shared/dateFilters");
+const {
+  resolveDateRange,
+  resolveAnalyticsDay,
+  todayYmdInTimeZone,
+  resolveClientTimeZone
+} = require("../../shared/dateFilters");
 
 function hasView(perms, resource) {
   const r = String(resource || "").toUpperCase();
@@ -154,7 +159,7 @@ async function handler(event) {
               (SELECT json_agg(sales_trend ORDER BY day) FROM sales_trend) AS sales_trend,
               (SELECT json_agg(sales_week ORDER BY day) FROM sales_week) AS sales_week
             `,
-            [ctx.accountId, clientToday, dateFrom, dateTo, recentLimit]
+            [ctx.accountId, analyticsDay, dateFrom, dateTo, recentLimit]
           )
         : Promise.resolve({ rows: [{ sales_today: null, sales_range: null, sales_prev_day: null, recent_sales: [], sales_trend: [], sales_week: [] }] })
     );
@@ -205,10 +210,11 @@ async function handler(event) {
             )
             SELECT
               (SELECT row_to_json(pur_today) FROM pur_today) AS pur_today,
+              (SELECT row_to_json(pur_prev_day) FROM pur_prev_day) AS pur_prev_day,
               (SELECT row_to_json(pur_range) FROM pur_range) AS pur_range,
               (SELECT json_agg(pur_trend ORDER BY day) FROM pur_trend) AS pur_trend
             `,
-            [ctx.accountId, clientToday, dateFrom, dateTo]
+            [ctx.accountId, analyticsDay, dateFrom, dateTo]
           )
         : Promise.resolve({ rows: [{ pur_today: null, pur_prev_day: null, pur_range: null, pur_trend: [] }] })
     );
@@ -953,6 +959,7 @@ async function handler(event) {
         account_id: ctx.accountId,
         ist_today: clientToday,
         client_today: clientToday,
+        analytics_day: analyticsDay,
         timezone: timeZone,
         range: { from: dateFrom, to: dateTo },
         visibility: {

@@ -1,17 +1,15 @@
 import { AsyncButton } from "../components/ui/buttons.jsx";
 import { useSeoMeta } from "../utils/seo.js";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLocale } from "../context/LocaleContext.jsx";
 import { can } from "../utils/access.js";
 import { parseApiError } from "../utils/api.js";
 import { emitToast } from "../services/toastBus.js";
 import { getDayBookReport } from "../services/reportService.js";
 import { fmtDateIndian, fmtCurrency } from "../utils/format.js";
-import { todayYmdLocal } from "../utils/date.js";
-import {
-  ReportShell,
-  ReportDenied
-} from "../components/reports/index.js";
+import { todayYmdInScreenZone } from "../utils/timezone.js";
+import { ReportShell, ReportDenied } from "../components/reports/index.js";
 import {
   IconDayBook,
   IconPsCalendar,
@@ -19,19 +17,68 @@ import {
   IconWallet,
   IconReceipt,
   IconTrendUp,
+  IconChevronRight,
   AlertTriangle,
 } from "../components/ui/AppIcons.jsx";
 import "./DayBookReportPage.css";
 
+function money(v) {
+  return fmtCurrency(v) || fmtCurrency(0);
+}
+
+function DeltaBadge({ pct }) {
+  if (pct == null || !Number.isFinite(pct)) return null;
+  const up = pct > 0;
+  const flat = pct === 0;
+  const cls = flat ? "dbDelta_flat" : up ? "dbDelta_up" : "dbDelta_down";
+  const arrow = flat ? "—" : up ? "▲" : "▼";
+  return (
+    <span className={`dbDelta ${cls}`}>
+      {arrow} {Math.abs(pct).toFixed(1)}% vs yesterday
+    </span>
+  );
+}
+
+function Row({ label, value, note, total, muted }) {
+  return (
+    <div className={`dbRow${total ? " dbRow_total" : ""}${muted ? " dbRow_muted" : ""}`}>
+      <span className="dbRowLabel">
+        {label}
+        {note ? <span className="dbInfoBadge">{note}</span> : null}
+      </span>
+      <span className="dbRowValue">{value}</span>
+    </div>
+  );
+}
+
+function RecentList({ title, empty, children, onViewAll }) {
+  return (
+    <div className="dbRecentBlock">
+      <div className="dbRecentHdr">
+        <h3 className="dbRecentTitle">{title}</h3>
+        {onViewAll ? (
+          <button type="button" className="dbLinkBtn" onClick={onViewAll}>
+            View all <IconChevronRight width={12} height={12} />
+          </button>
+        ) : null}
+      </div>
+      {empty ? <p className="dbRecentEmpty">{empty}</p> : <ul className="dbRecentList">{children}</ul>}
+    </div>
+  );
+}
+
 export default function DayBookReportPage() {
-  useSeoMeta({ title: "Day Book Report" });
+  useSeoMeta({ title: "Day Book" });
   const { taxLabel } = useLocale();
-  // FE-03 fix: Day Book shows both sales and purchase data.
-  // Allow access if the user can view either sales invoices or purchase invoices.
+  const navigate = useNavigate();
   const canView = can("SALES_INVOICES", "VIEW") || can("PURCHASE_INVOICES", "VIEW");
+  const canSales = can("SALES_INVOICES", "VIEW");
+  const canPurchases = can("PURCHASE_INVOICES", "VIEW");
+
   const [busy, setBusy] = useState(false);
-  const [date, setDate] = useState(todayYmdLocal());
+  const [date, setDate] = useState(todayYmdInScreenZone());
   const [data, setData] = useState(null);
+  const [tab, setTab] = useState("cash");
 
   async function refresh(d) {
     setBusy(true);
@@ -47,39 +94,54 @@ export default function DayBookReportPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canView]);
 
-  if (!canView) return <ReportDenied title="Day Book" message="You don't have permission to view this report." />;
+  if (!canView) {
+    return <ReportDenied title="Day Book" message="You don't have permission to view this report." />;
+  }
 
-  const rec    = data?.receipts      || {};
-  const pay    = data?.payments      || {};
-  const cash   = data?.cash_position || {};
-  const profit = data?.profit        || {};
-  // FE-09: purchase returns and sales returns
-  const hasPurchaseReturns = (pay.purchase_returns ?? 0) > 0;
-  const hasSalesReturns    = (profit.sales_returns ?? 0) > 0;
-  const money = (v) => fmtCurrency(v) || fmtCurrency(0);
-  const pct   = (v) => `${Number(v ?? 0).toFixed(1)}%`;
+  const rec = data?.receipts || {};
+  const pay = data?.payments || {};
+  const cash = data?.cash_position || {};
+  const profit = data?.profit || {};
+  const counts = data?.counts || {};
+  const purchases = data?.purchases;
+  const credit = data?.credit_activity;
+  const gst = data?.gst;
+  const cmp = data?.comparison || {};
+  const headline = data?.headline || {};
+  const modes = data?.payment_modes || [];
+  const recent = data?.recent || {};
+
   const displayDate = fmtDateIndian(data?.date || date);
-  const closingNeg  = (cash.closing_cash ?? 0) < 0;
-  const profitNeg   = (profit.gross_profit ?? 0) < 0;
+  const isToday = (data?.date || date) === todayYmdInScreenZone();
+  const closingNeg = (cash.closing_cash ?? 0) < 0;
+  const profitNeg = (profit.gross_profit ?? 0) < 0;
+
+  const storyParts = [];
+  if (headline.money_in > 0) storyParts.push(`received ${money(headline.money_in)}`);
+  if (headline.money_out > 0) storyParts.push(`paid ${money(headline.money_out)} to suppliers`);
+  if (canPurchases && (headline.purchases_total ?? 0) > 0) {
+    storyParts.push(`bought stock worth ${money(headline.purchases_total)}`);
+  }
+  const story =
+    storyParts.length > 0
+      ? `On this day you ${storyParts.join(", ")}.`
+      : "No sales or payments recorded for this day yet.";
 
   return (
     <ReportShell>
       <div className="pageWrap">
         <div className="dbPage">
-
-          {/* ── Page header ── */}
           <div className="dbHeader">
             <div className="dbHeaderLeft">
               <h1 className="dbTitle">Day Book</h1>
-              <p className="dbSub">Daily cash flow summary</p>
+              <p className="dbSub">Your cash drawer and sales for one day</p>
             </div>
             <div className="dbDateBadge">
               <IconPsCalendar width={13} height={13} />
-              {displayDate}
+              {isToday ? `Today · ${displayDate}` : displayDate}
             </div>
           </div>
 
-          {/* ── Toolbar ── */}
           <div className="dbToolbar">
             <div className="dbFilterGroup">
               <span className="dbFilterGroupIcon">
@@ -97,228 +159,300 @@ export default function DayBookReportPage() {
               type="button"
               className="dbTodayBtn"
               onClick={() => {
-                const t = todayYmdLocal();
+                const t = todayYmdInScreenZone();
                 setDate(t);
                 refresh(t);
               }}
             >
               Today
             </button>
-            <AsyncButton
-              variant="primary"
-              size="sm"
-              type="button"
-              onClick={() => refresh(date)}
-              loading={busy}
-              loadingText="Loading…"
-            >
-              Apply
+            <AsyncButton variant="primary" size="sm" type="button" onClick={() => refresh(date)} loading={busy} loadingText="Loading…">
+              Load
             </AsyncButton>
           </div>
 
-          {/* ── Summary stat cards ── */}
-          <div className="dbSummaryRow" aria-label="Day summary">
-            <div className="dbSumCard">
-              <div className="dbSumIcon dbSumIcon_in">
-                <IconReceipt width={22} height={22} />
-              </div>
-              <div className="dbSumText">
-                <div className="dbSumVal dbSumVal_in">{money(rec.total_receipts)}</div>
-                <div className="dbSumLbl">Cash Receipts</div>
-              </div>
-            </div>
-            <div className="dbSumCard">
-              <div className="dbSumIcon dbSumIcon_out">
-                <IconPayment width={22} height={22} />
-              </div>
-              <div className="dbSumText">
-                <div className="dbSumVal dbSumVal_out">{money(pay.total_payments)}</div>
-                <div className="dbSumLbl">Total Payments</div>
-              </div>
-            </div>
-            <div className="dbSumCard">
-              <div className="dbSumIcon dbSumIcon_cash">
-                <IconWallet width={22} height={22} />
-              </div>
-              <div className="dbSumText">
-                <div className="dbSumVal dbSumVal_cash">{money(cash.closing_cash)}</div>
-                <div className="dbSumLbl">Closing Cash</div>
-              </div>
-            </div>
-            <div className="dbSumCard">
-              <div className={`dbSumIcon ${profitNeg ? "dbSumIcon_out" : "dbSumIcon_profit"}`}>
-                <IconTrendUp width={22} height={22} />
-              </div>
-              <div className="dbSumText">
-                <div className={`dbSumVal ${profitNeg ? "dbSumVal_out" : "dbSumVal_profit"}`}>
-                  {money(profit.gross_profit)}
-                </div>
-                <div className="dbSumLbl">Gross Profit</div>
-              </div>
-            </div>
-          </div>
+          {data && (
+            <>
+              <p className="dbStory">{story}</p>
+              <p className="dbStoryNote">Cash totals include walk-in sales and customer collections only — credit bills are shown separately.</p>
 
-          {/* ── Two-column grid: Money In / Money Out ── */}
-          <div className="dbGrid">
-
-            {/* Money In */}
-            <div className="dbSection">
-              <div className="dbSectionHdr">
-                <div className="dbSectionHdrIcon dbSectionHdrIcon_in">
-                  <IconReceipt width={14} height={14} />
+              {/* Hero — cash drawer */}
+              <div className={`dbHeroCard${closingNeg ? " dbHeroCard_warn" : ""}`}>
+                <div className="dbHeroRow">
+                  <span className="dbHeroLabel">Cash at start of day</span>
+                  <span className="dbHeroVal">{money(cash.opening_cash)}</span>
                 </div>
-                <h2 className="dbSectionTitle">Money In — Cash Receipts</h2>
-              </div>
-              <div className="dbSectionBody">
-                <div className="dbRow">
-                  <span className="dbRowLabel">Cash Sales</span>
-                  <span className="dbRowValue">{money(rec.cash_sales)}</span>
+                <div className="dbHeroRow dbHeroRow_in">
+                  <span className="dbHeroLabel">+ Money received</span>
+                  <span className="dbHeroVal dbHeroVal_in">{money(cash.cash_received)}</span>
                 </div>
-                <div className="dbRow">
-                  <span className="dbRowLabel">Customer Payments</span>
-                  <span className="dbRowValue">{money(rec.customer_receipts)}</span>
+                <div className="dbHeroRow dbHeroRow_out">
+                  <span className="dbHeroLabel">− Paid to suppliers</span>
+                  <span className="dbHeroVal dbHeroVal_out">{money(cash.cash_paid)}</span>
                 </div>
-                <div className="dbRow dbRow_total dbRow_total_in">
-                  <span className="dbRowLabel">Total Cash Receipts</span>
-                  <span className="dbRowValue">{money(rec.total_receipts)}</span>
+                <div className="dbHeroDivider" />
+                <div className="dbHeroRow dbHeroRow_result">
+                  <span className="dbHeroLabel">Cash at end of day (expected)</span>
+                  <span className="dbHeroVal">{money(cash.closing_cash)}</span>
                 </div>
-                {/* Informational: credit sales are not cash — shown separately */}
-                {(rec.credit_sales ?? 0) > 0 && (
-                  <div className="dbRow dbRow_info">
-                    <span className="dbRowLabel dbRowLabel_info">
-                      Credit Sales Today
-                      <span className="dbInfoBadge">not cash</span>
-                    </span>
-                    <span className="dbRowValue dbRowValue_info">{money(rec.credit_sales)}</span>
+                {closingNeg && (
+                  <div className="dbCashWarning">
+                    <AlertTriangle size={14} aria-hidden="true" />
+                    More cash went out than came in today.
                   </div>
                 )}
+                <DeltaBadge pct={cmp.receipts_delta_pct} />
               </div>
-            </div>
 
-            {/* Money Out */}
-            <div className="dbSection">
-              <div className="dbSectionHdr">
-                <div className="dbSectionHdrIcon dbSectionHdrIcon_out">
-                  <IconPayment width={14} height={14} />
-                </div>
-                <h2 className="dbSectionTitle">Money Out — Payments</h2>
+              <div className="dbTabs" role="tablist">
+                {["cash", "business", "lists"].map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    role="tab"
+                    aria-selected={tab === t}
+                    className={`dbTab${tab === t ? " dbTab_active" : ""}`}
+                    onClick={() => setTab(t)}
+                  >
+                    {t === "cash" ? "Money" : t === "business" ? "Sales & purchases" : "Today’s bills"}
+                  </button>
+                ))}
               </div>
-              <div className="dbSectionBody">
-                <div className="dbRow">
-                  <span className="dbRowLabel">Supplier Payments</span>
-                  <span className="dbRowValue">{money(pay.supplier_payments)}</span>
-                </div>
-                {/* FE-09: Purchase returns reduce outstanding payables */}
-                {hasPurchaseReturns && (
-                  <div className="dbRow dbRow_info">
-                    <span className="dbRowLabel dbRowLabel_info">
-                      Purchase Returns
-                      <span className="dbInfoBadge">reduces payables</span>
-                    </span>
-                    <span className="dbRowValue dbRowValue_info">− {money(pay.purchase_returns)}</span>
+
+              {tab === "cash" && (
+                <div className="dbGrid">
+                  <div className="dbSection">
+                    <div className="dbSectionHdr">
+                      <div className="dbSectionHdrIcon dbSectionHdrIcon_in">
+                        <IconReceipt width={14} height={14} />
+                      </div>
+                      <h2 className="dbSectionTitle">Money in</h2>
+                    </div>
+                    <div className="dbSectionBody">
+                      <Row label="Cash sales (walk-in)" value={money(rec.cash_sales)} />
+                      <Row label="Collected from customers" value={money(rec.customer_receipts)} />
+                      {(credit?.collected_on_older_bills ?? 0) > 0 && (
+                        <Row
+                          label="Collected on older bills"
+                          value={money(credit.collected_on_older_bills)}
+                          muted
+                          note="not new sales"
+                        />
+                      )}
+                      <Row label="Total money in" value={money(rec.total_receipts)} total />
+                      {(rec.credit_sales ?? 0) > 0 && (
+                        <Row
+                          label="Sold on credit"
+                          value={money(rec.credit_sales)}
+                          muted
+                          note="not in drawer"
+                        />
+                      )}
+                    </div>
                   </div>
-                )}
-                <div className="dbRow dbRow_total dbRow_total_out">
-                  <span className="dbRowLabel">Net Payments</span>
-                  <span className="dbRowValue">{money(pay.total_payments)}</span>
-                </div>
-              </div>
-            </div>
 
-          </div>
+                  <div className="dbSection">
+                    <div className="dbSectionHdr">
+                      <div className="dbSectionHdrIcon dbSectionHdrIcon_out">
+                        <IconPayment width={14} height={14} />
+                      </div>
+                      <h2 className="dbSectionTitle">Money out</h2>
+                    </div>
+                    <div className="dbSectionBody">
+                      <Row label="Paid to suppliers" value={money(pay.supplier_payments)} />
+                      {(pay.purchase_returns ?? 0) > 0 && (
+                        <Row
+                          label="Supplier credits (returns)"
+                          value={`− ${money(pay.purchase_returns)}`}
+                          muted
+                          note="reduces what you owe"
+                        />
+                      )}
+                      <Row label="Net paid out" value={money(pay.total_payments)} total />
+                    </div>
+                  </div>
 
-          {/* ── Profit Summary ── */}
-          <div className="dbProfitCard">
-            <div className="dbSectionHdr">
-              <div className={`dbSectionHdrIcon ${profitNeg ? "dbSectionHdrIcon_out" : "dbSectionHdrIcon_profit"}`}>
-                <IconTrendUp width={14} height={14} />
-              </div>
-              <h2 className="dbSectionTitle">Gross Profit — Today's Sales</h2>
-              {(profit.profit_margin_pct != null) && (
-                <span className={`dbProfitMarginBadge ${profitNeg ? "dbProfitMarginBadge_neg" : ""}`}>
-                  {pct(profit.profit_margin_pct)} margin
-                </span>
-              )}
-            </div>
-            <div className="dbSectionBody">
-              <div className="dbRow">
-                <span className="dbRowLabel">Sales Revenue (excl. {taxLabel})</span>
-                <span className="dbRowValue">{money(profit.total_revenue)}</span>
-              </div>
-              {/* FE-09: Sales returns reduce revenue */}
-              {hasSalesReturns && (
-                <div className="dbRow dbRow_info">
-                  <span className="dbRowLabel dbRowLabel_info">
-                    Sales Returns
-                    <span className="dbInfoBadge">reduces revenue</span>
-                  </span>
-                  <span className="dbRowValue dbRowValue_info">− {money(profit.sales_returns)}</span>
-                </div>
-              )}
-              {hasSalesReturns && (
-                <div className="dbRow">
-                  <span className="dbRowLabel">Net Revenue</span>
-                  <span className="dbRowValue">{money(profit.net_revenue)}</span>
+                  {modes.length > 0 && (
+                    <div className="dbSection dbSection_full">
+                      <div className="dbSectionHdr">
+                        <div className="dbSectionHdrIcon dbSectionHdrIcon_in">
+                          <IconWallet width={14} height={14} />
+                        </div>
+                        <h2 className="dbSectionTitle">How customers paid today</h2>
+                      </div>
+                      <div className="dbModeChips">
+                        {modes.map((m) => (
+                          <span key={m.mode} className="dbModeChip">
+                            {m.mode} · {money(m.total)}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
-              <div className="dbRow">
-                <span className="dbRowLabel">Cost of Goods Sold (COGS)</span>
-                <span className="dbRowValue dbRowValue_cogs">− {money(profit.total_cogs)}</span>
-              </div>
-              <div className={`dbRow dbRow_total ${profitNeg ? "dbRow_total_out" : "dbRow_total_in"}`}>
-                <span className="dbRowLabel">Gross Profit</span>
-                <span className="dbRowValue">{money(profit.gross_profit)}</span>
-              </div>
-            </div>
-            <div className="dbProfitNote">
-              Gross profit = net sales revenue (excl. {taxLabel} and returns) − purchase cost of items sold.
-              Does not include overheads, salaries, or other expenses.
-            </div>
-          </div>
 
-          {/* ── Cash Position ── */}
-          <div className="dbCashCard">
-            <div className="dbCashHdr">
-              <div className="dbCashHdrIcon">
-                <IconDayBook width={14} height={14} />
-              </div>
-              <h2 className="dbCashTitle">Cash Position</h2>
-            </div>
-            <div className="dbCashBody">
-              {/* Clean table-style rows instead of confusing equation chips */}
-              <div className="dbCashRows">
-                <div className="dbCashRow">
-                  <span className="dbCashRowLabel">Opening Cash</span>
-                  <span className="dbCashRowVal">{money(cash.opening_cash)}</span>
-                </div>
-                <div className="dbCashRow dbCashRow_plus">
-                  <span className="dbCashRowLabel">
-                    <span className="dbCashRowOp dbCashRowOp_plus">+</span>
-                    Cash Received
-                  </span>
-                  <span className="dbCashRowVal dbCashRowVal_in">{money(cash.cash_received)}</span>
-                </div>
-                <div className="dbCashRow dbCashRow_minus">
-                  <span className="dbCashRowLabel">
-                    <span className="dbCashRowOp dbCashRowOp_minus">−</span>
-                    Cash Paid Out
-                  </span>
-                  <span className="dbCashRowVal dbCashRowVal_out">{money(cash.cash_paid)}</span>
-                </div>
-              </div>
-              <div className={`dbCashResult${closingNeg ? " dbCashResult_neg" : ""}`}>
-                <span className="dbCashResultLabel">Closing Cash (Expected)</span>
-                <span className="dbCashResultVal">{money(cash.closing_cash)}</span>
-              </div>
-              {closingNeg && (
-                <div className="dbCashWarning">
-                  <AlertTriangle size={14} aria-hidden="true" />
-                  Closing cash is negative — cash paid out exceeds cash received today.
+              {tab === "business" && (
+                <>
+                  <div className="dbSummaryRow">
+                    {canSales && (
+                      <div className="dbSumCard">
+                        <div className="dbSumVal">{money(rec.total_sales ?? headline.total_sales ?? 0)}</div>
+                        <div className="dbSumLbl">Total sales</div>
+                        <div className="dbSumSub">All confirmed bills</div>
+                      </div>
+                    )}
+                    {canSales && (
+                      <div className="dbSumCard">
+                        <div className="dbSumVal">{counts.sales_bills ?? 0}</div>
+                        <div className="dbSumLbl">Sales bills</div>
+                        {(counts.avg_bill_value ?? 0) > 0 && (
+                          <div className="dbSumSub">Avg {money(counts.avg_bill_value)}</div>
+                        )}
+                      </div>
+                    )}
+                    {canPurchases && purchases && (
+                      <div className="dbSumCard">
+                        <div className="dbSumVal">{purchases.invoice_count ?? 0}</div>
+                        <div className="dbSumLbl">Purchase bills</div>
+                        <div className="dbSumSub">{money(purchases.total)}</div>
+                      </div>
+                    )}
+                    {canSales && (
+                      <div className="dbSumCard">
+                        <div className={`dbSumVal ${profitNeg ? "dbSumVal_out" : "dbSumVal_profit"}`}>
+                          {money(profit.gross_profit)}
+                        </div>
+                        <div className="dbSumLbl">Profit on sales</div>
+                        <div className="dbSumSub">{Number(profit.profit_margin_pct ?? 0).toFixed(1)}% margin</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {canSales && (
+                    <div className="dbProfitCard">
+                      <div className="dbSectionHdr">
+                        <div className={`dbSectionHdrIcon ${profitNeg ? "dbSectionHdrIcon_out" : "dbSectionHdrIcon_profit"}`}>
+                          <IconTrendUp width={14} height={14} />
+                        </div>
+                        <h2 className="dbSectionTitle">Profit on today’s sales</h2>
+                      </div>
+                      <div className="dbSectionBody">
+                        <Row label={`Sales value (before ${taxLabel})`} value={money(profit.total_revenue)} />
+                        {(profit.sales_returns ?? 0) > 0 && (
+                          <Row label="Sales returns" value={`− ${money(profit.sales_returns)}`} muted />
+                        )}
+                        <Row label="Cost of goods sold" value={`− ${money(profit.total_cogs)}`} />
+                        <Row label="Profit" value={money(profit.gross_profit)} total />
+                      </div>
+                      <p className="dbProfitNote">Profit = sales value minus cost of items sold. Excludes rent, salaries, and other expenses.</p>
+                    </div>
+                  )}
+
+                  {canPurchases && purchases && (purchases.total ?? 0) > 0 && (
+                    <div className="dbSection dbSection_full">
+                      <div className="dbSectionHdr">
+                        <h2 className="dbSectionTitle">Stock purchased today</h2>
+                      </div>
+                      <div className="dbSectionBody">
+                        <Row label="Purchase bills" value={String(purchases.invoice_count ?? 0)} />
+                        <Row label="Total purchase value" value={money(purchases.total)} total />
+                      </div>
+                    </div>
+                  )}
+
+                  {credit && (credit.credit_sales ?? 0) > 0 && (
+                    <div className="dbSection dbSection_full">
+                      <div className="dbSectionBody">
+                        <Row label="Sold on credit today" value={money(credit.credit_sales)} />
+                        <Row label="Still due from today’s credit bills" value={money(credit.new_outstanding)} muted />
+                      </div>
+                    </div>
+                  )}
+
+                  {gst && (gst.output_gst > 0 || gst.input_gst > 0) && (
+                    <div className="dbSection dbSection_full">
+                      <div className="dbSectionHdr">
+                        <h2 className="dbSectionTitle">{taxLabel} today</h2>
+                      </div>
+                      <div className="dbSectionBody">
+                        {canSales && <Row label={`${taxLabel} on sales`} value={money(gst.output_gst)} />}
+                        {canPurchases && <Row label={`${taxLabel} on purchases`} value={money(gst.input_gst)} />}
+                        <Row label={`Net ${taxLabel}`} value={money(gst.net_gst)} total />
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {tab === "lists" && (
+                <div className="dbLists">
+                  {canSales && (
+                    <RecentList
+                      title="Sales bills today"
+                      empty="No sales bills on this day."
+                      onViewAll={() => navigate("/sales-billing")}
+                    >
+                      {(recent.sales || []).map((inv) => (
+                        <li key={inv.id}>
+                          <button
+                            type="button"
+                            className="dbRecentItem"
+                            onClick={() => navigate(`/sales-billing/edit/${inv.id}`)}
+                          >
+                            <span className="dbRecentMain">
+                              {inv.invoice_number} · {inv.customer_name || "Customer"}
+                            </span>
+                            <span className="dbRecentAmt">{money(inv.total_amount)}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </RecentList>
+                  )}
+                  {canSales && (
+                    <RecentList
+                      title="Customer payments today"
+                      empty="No customer payments on this day."
+                      onViewAll={() => navigate("/customer-payments")}
+                    >
+                      {(recent.customer_payments || []).map((p) => (
+                        <li key={p.id}>
+                          <span className="dbRecentItem dbRecentItem_static">
+                            <span className="dbRecentMain">
+                              {p.payment_mode} · {p.invoice_number || "Payment"}
+                            </span>
+                            <span className="dbRecentAmt">{money(p.amount)}</span>
+                          </span>
+                        </li>
+                      ))}
+                    </RecentList>
+                  )}
+                  {canPurchases && (
+                    <RecentList
+                      title="Purchase bills today"
+                      empty="No purchase bills on this day."
+                      onViewAll={() => navigate("/purchase-invoices")}
+                    >
+                      {(recent.purchases || []).map((inv) => (
+                        <li key={inv.id}>
+                          <button
+                            type="button"
+                            className="dbRecentItem"
+                            onClick={() => navigate(`/purchase-invoices/edit/${inv.id}`)}
+                          >
+                            <span className="dbRecentMain">
+                              {inv.invoice_number} · {inv.vendor_name || "Supplier"}
+                            </span>
+                            <span className="dbRecentAmt">{money(inv.total_amount)}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </RecentList>
+                  )}
                 </div>
               )}
-            </div>
-          </div>
-
+            </>
+          )}
         </div>
       </div>
     </ReportShell>
