@@ -277,7 +277,12 @@ async function handler(event) {
     const profitMarginPct =
       netRevenue > 0 ? Math.round((grossProfit / netRevenue) * 10000) / 100 : 0;
 
-    const totalReceipts = cashSales + customerReceipts;
+    // Money in = actual receipts (customer_payments), the single source of truth.
+    // Walk-in / instant-cash sales already create a customer_payments row at confirm,
+    // so adding invoice totals on top would double-count the same cash. Split the
+    // receipts into "for today's sales" vs "collected on older bills" for display.
+    const totalReceipts = customerReceipts;
+    const receiptsForTodaySales = Math.max(0, customerReceipts - collectedOnOldBills);
     const totalSales = cashSales + creditSales;
     const totalPayments = Math.max(0, supplierPayments - purchaseReturns);
     const cashReceived = totalReceipts;
@@ -287,16 +292,13 @@ async function handler(event) {
     const salesBills = Number(salesRs.rows?.[0]?.sales_bills || 0);
     const avgBillValue = salesBills > 0 ? Math.round((totalSales / salesBills) * 100) / 100 : 0;
 
-    const prevCashSales = n(prevSalesRs.rows?.[0]?.cash_sales);
+    const prevTotalSales = n(prevSalesRs.rows?.[0]?.total_sales);
     const prevCustomerReceipts = n(prevReceiptsRs.rows?.[0]?.customer_receipts);
-    const prevTotalReceipts = prevCashSales + prevCustomerReceipts;
+    const prevTotalReceipts = prevCustomerReceipts;
     const prevSupplierPayments = n(prevPayRs.rows?.[0]?.supplier_payments);
 
-    // Payment modes: customer payments + walk-in cash as CASH bucket
+    // Payment modes from actual customer payments (already includes walk-in auto-settle).
     const paymentModes = [];
-    if (cashSales > 0) {
-      paymentModes.push({ mode: "CASH", total: cashSales, source: "walk_in_sales" });
-    }
     for (const row of payModesRs.rows || []) {
       const mode = String(row.mode || "OTHER").toUpperCase();
       const existing = paymentModes.find((p) => p.mode === mode);
@@ -349,6 +351,8 @@ async function handler(event) {
         cash_sales: cashSales,
         credit_sales: creditSales,
         customer_receipts: customerReceipts,
+        received_for_today_sales: receiptsForTodaySales,
+        collected_on_older_bills: collectedOnOldBills,
         total_receipts: totalReceipts,
         total_sales: totalSales
       },
@@ -387,7 +391,10 @@ async function handler(event) {
         receipts_comparable: prevTotalReceipts > 0.0001,
         payments: prevSupplierPayments,
         payments_delta_pct: deltaPct(totalPayments, prevSupplierPayments),
-        payments_comparable: prevSupplierPayments > 0.0001
+        payments_comparable: prevSupplierPayments > 0.0001,
+        prev_total_sales: prevTotalSales,
+        sales_delta_pct: deltaPct(totalSales, prevTotalSales),
+        sales_comparable: prevTotalSales > 0.0001
       },
       recent: {
         sales: (recentSalesRs.rows || []).map((r) => ({

@@ -496,7 +496,12 @@ function validateInvoiceHeader(body) {
   };
   if (!header.customerId) return { ok: false, message: MSG.CUSTOMER_REQUIRED };
   if (!header.invoiceDate) return { ok: false, message: MSG.INVOICE_DATE_REQUIRED };
-  if (isFutureDate(header.invoiceDate, { clientTodayYmd: clean(body.clientToday) })) {
+  if (
+    isFutureDate(header.invoiceDate, {
+      clientTodayYmd: clean(body.clientToday),
+      timeZone: clean(body.timezone || body.timeZone || body.tz)
+    })
+  ) {
     return { ok: false, message: MSG.INVOICE_DATE_FUTURE };
   }
   return { ok: true, header };

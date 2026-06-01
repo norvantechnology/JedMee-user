@@ -874,6 +874,44 @@ async function handler(event) {
         : Promise.resolve({ rows: [] })
     );
 
+    // Range gross profit — taxable revenue − COGS − sales returns (matches Day Book).
+    // COGS uses batch purchase_rate of the items actually sold, NOT period purchases,
+    // so this reconciles with the Day Book "profit" figure for the same period.
+    calls.push(
+      canSales
+        ? query(
+            `
+            SELECT
+              COALESCE(SUM(sii.taxable_amount), 0)::numeric(14,2) AS revenue,
+              COALESCE(SUM(
+                sii.qty * COALESCE(pb.purchase_rate, 0)
+                + CASE
+                    WHEN COALESCE(sii.loose_qty, 0) > 0 AND COALESCE(pb.packing_units, 1) > 0
+                    THEN (sii.loose_qty / COALESCE(pb.packing_units, 1)) * COALESCE(pb.purchase_rate, 0)
+                    ELSE 0
+                  END
+              ), 0)::numeric(14,2) AS cogs,
+              COALESCE((
+                SELECT SUM(sr.total_return_amount)
+                FROM sales_returns sr
+                WHERE sr.account_id = $1 AND sr.deleted_at IS NULL
+                  AND sr.status = 'CONFIRMED'
+                  AND sr.return_date BETWEEN $2::date AND $3::date
+              ), 0)::numeric(14,2) AS sales_returns
+            FROM sales_invoice_items sii
+            INNER JOIN sales_invoices si
+              ON si.id = sii.sales_invoice_id AND si.account_id = sii.account_id
+            LEFT JOIN product_batches pb
+              ON pb.id = sii.batch_id AND pb.account_id = sii.account_id
+            WHERE sii.account_id = $1 AND si.deleted_at IS NULL
+              AND si.status = 'CONFIRMED'::sales_invoice_status
+              AND si.invoice_date BETWEEN $2::date AND $3::date
+            `,
+            [ctx.accountId, dateFrom, dateTo]
+          )
+        : Promise.resolve({ rows: [{ revenue: 0, cogs: 0, sales_returns: 0 }] })
+    );
+
     const [
       salesPack,
       purchasePack,
@@ -890,6 +928,7 @@ async function handler(event) {
       nonMovingCount,
       overdueRecv,
       overduePay,
+      purchaseDueToday,
       totalRecv,
       totalPay,
       stockSummary,
@@ -901,7 +940,7 @@ async function handler(event) {
       expiryValueAtRisk,
       nonMovingValue,
       stockCoverage,
-      purchaseDueToday
+      rangeProfit
     ] = await Promise.all(calls);
 
     const salesRow = salesPack.rows?.[0] || {};
@@ -923,11 +962,19 @@ async function handler(event) {
     const todayPurchasesDeltaPct =
       yesterdayPurchases > 0 ? ((todayPurchases - yesterdayPurchases) / yesterdayPurchases) * 100 : null;
 
-    // Gross profit = period sales revenue − period purchase cost (can be negative; do NOT clamp to 0)
-    // Always calculate when canSales is true; use 0 for purchases when canPurchases is false
-    const grossProfit = canSales
-      ? toNum(salesRange?.total) - (canPurchases ? toNum(purRange?.total) : 0)
-      : null;
+    // Gross profit = taxable revenue − sales returns − COGS (cost of goods actually sold).
+    // This is true gross profit and reconciles with the Day Book; it is NOT
+    // sales − purchases (that is a cash-flow figure shown separately as net cash flow).
+    const profitRow = rangeProfit.rows?.[0] || {};
+    const profitRevenue = toNum(profitRow.revenue);
+    const profitCogs = toNum(profitRow.cogs);
+    const profitReturns = toNum(profitRow.sales_returns);
+    const profitNetRevenue = profitRevenue - profitReturns;
+    const grossProfit = canSales ? profitNetRevenue - profitCogs : null;
+    const grossMarginPct =
+      canSales && profitNetRevenue > 0
+        ? Math.round((grossProfit / profitNetRevenue) * 1000) / 10
+        : null;
 
     // Total outstanding receivables and payables (balance sheet items — not date-filtered)
     const totalRecvRow = totalRecv.rows?.[0] || { amount: 0, invoices: 0 };
@@ -1002,7 +1049,16 @@ async function handler(event) {
             }
           : null,
         range_purchases: canPurchases ? { value: toNum(purRange?.total), invoices: toNum(purRange?.invoices) } : null,
-        gross_profit: grossProfit != null ? { value: grossProfit } : null,
+        gross_profit:
+          grossProfit != null
+            ? {
+                value: grossProfit,
+                revenue: profitNetRevenue,
+                cogs: profitCogs,
+                sales_returns: profitReturns,
+                margin_pct: grossMarginPct
+              }
+            : null,
         // Payables = total outstanding balance_due across ALL confirmed purchase invoices (balance sheet item)
         payables: canPurchases ? { value: toNum(totalPayRow.amount), invoices: toNum(totalPayRow.invoices) } : null,
         bills_today: canSales ? { value: toNum(salesToday?.bills), confirmed: toNum(salesToday?.bills), drafts: 0, returns: null } : null,

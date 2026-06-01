@@ -37,13 +37,35 @@ function addCalendarDaysYmd(ymd, days) {
   return localCalendarYmd(dt);
 }
 
-/** Upper bound for civil dates: browser "today" if trustworthy, else server local; capped at server+1 day slack. */
+/**
+ * Upper bound for civil dates (invoice/payment dates).
+ *
+ * Civil "today" depends on the user's timezone, not the server's. A Lambda runs
+ * in UTC, so at e.g. 01:00 IST the server's local date is still "yesterday".
+ * Without a timezone hint that would wrongly reject the user's real "today".
+ *
+ * Resolution order:
+ *   1. explicit client today (`clientTodayYmd`), capped at server+1 day slack
+ *   2. civil today in the client's timezone (`timeZone`), if provided
+ *   3. server local date + 1 day slack — the max civil date anywhere on earth
+ *      for the current UTC instant (covers up to UTC+14 without allowing real
+ *      future dates beyond a single day of timezone skew)
+ */
 function effectiveInvoiceDateCap(opts = {}) {
   const server = localCalendarYmd();
-  const c = clean(opts.clientTodayYmd);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(c)) return server;
   const slack = addCalendarDaysYmd(server, 1);
-  return c <= slack ? c : slack;
+  const c = clean(opts.clientTodayYmd);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(c)) return c <= slack ? c : slack;
+  const tz = clean(opts.timeZone);
+  if (tz) {
+    try {
+      const tzToday = require("./timezone").todayYmdInTimeZone(tz);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(tzToday)) return tzToday <= slack ? tzToday : slack;
+    } catch {
+      /* fall through to slack */
+    }
+  }
+  return slack;
 }
 
 /** @deprecated Prefer localCalendarYmd — kept for backward compatibility */

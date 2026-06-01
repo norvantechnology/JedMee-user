@@ -367,8 +367,8 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
             `INSERT INTO vendor_payments (
                account_id, vendor_id, purchase_invoice_id, allocation_type, payment_date, amount, payment_mode, notes, created_by_user_id
              )
-             VALUES ($1,$2,$3,'INVOICE',CURRENT_DATE,$4::numeric,'OTHER'::payment_mode_type,'Advance adjusted on purchase confirm',$5)`,
-            [accountId, invoice.vendor_id, invoiceId, use, actorId]
+             VALUES ($1,$2,$3,'INVOICE',COALESCE($6::date, CURRENT_DATE),$4::numeric,'OTHER'::payment_mode_type,'Advance adjusted on purchase confirm',$5)`,
+            [accountId, invoice.vendor_id, invoiceId, use, actorId, invoice.invoice_date || null]
           );
         } else {
           await q(
@@ -420,8 +420,8 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
           `INSERT INTO division_payments (
              account_id, division_id, mfg_company_id, purchase_invoice_id, payment_date, amount, payment_mode, notes, created_by_user_id
            )
-           VALUES ($1,$2,$3,$4,CURRENT_DATE,$5::numeric,$6::payment_mode_type,$7,$8)`,
-          [accountId, row.division_id, mfgId, invoiceId, balanceDue, payMode, payNote, actorId]
+           VALUES ($1,$2,$3,$4,COALESCE($9::date, CURRENT_DATE),$5::numeric,$6::payment_mode_type,$7,$8)`,
+          [accountId, row.division_id, mfgId, invoiceId, balanceDue, payMode, payNote, actorId, invoice.invoice_date || null]
         );
       } else if (row?.vendor_id) {
         await q(
@@ -429,8 +429,8 @@ async function runConfirmPurchaseInvoiceInTx(rawQ, ctx, invoiceId, confirmNote) 
           `INSERT INTO vendor_payments (
              account_id, vendor_id, purchase_invoice_id, allocation_type, payment_date, amount, payment_mode, notes, created_by_user_id
            )
-           VALUES ($1,$2,$3,'INVOICE',CURRENT_DATE,$4::numeric,$5::payment_mode_type,$6,$7)`,
-          [accountId, row.vendor_id, invoiceId, balanceDue, payMode, payNote, actorId]
+           VALUES ($1,$2,$3,'INVOICE',COALESCE($8::date, CURRENT_DATE),$4::numeric,$5::payment_mode_type,$6,$7)`,
+          [accountId, row.vendor_id, invoiceId, balanceDue, payMode, payNote, actorId, invoice.invoice_date || null]
         );
       }
       await refreshInvoicePaymentSummary(rawQ, accountId, invoiceId);

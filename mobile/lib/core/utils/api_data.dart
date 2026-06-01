@@ -30,6 +30,17 @@ num? kpiValue(Map<String, dynamic>? kpis, String key) {
   return pickNum(block);
 }
 
+/// Read a specific numeric field from a nested KPI block, e.g.
+/// `kpiField(kpis, 'gross_profit', 'cogs')`.
+num? kpiField(Map<String, dynamic>? kpis, String key, String field) {
+  if (kpis == null) return null;
+  final block = kpis[key];
+  if (block is! Map) return null;
+  final v = block[field];
+  if (v is num) return v;
+  return num.tryParse(v?.toString() ?? '');
+}
+
 /// `delta_pct` / `deltaPct` on a nested KPI block.
 double? kpiDeltaPct(Map<String, dynamic>? kpis, String key) {
   if (kpis == null) return null;

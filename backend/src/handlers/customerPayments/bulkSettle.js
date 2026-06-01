@@ -4,6 +4,7 @@ const { withTransaction } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { clean, n, isFutureDate, localCalendarYmd, refreshSalesInvoicePaymentTotals } = require("../../shared/sales");
+const { resolveClientTimeZone } = require("../../shared/timezone");
 
 function uniqueIds(values) {
   const out = [];
@@ -32,7 +33,12 @@ async function handler(event) {
   const notes = clean(body.notes) || null;
 
   if (!invoiceIds.length) return fail(400, "VALIDATION_ERROR", "invoiceIds is required.");
-  if (isFutureDate(paymentDate, { clientTodayYmd: clean(body.clientToday) })) {
+  if (
+    isFutureDate(paymentDate, {
+      clientTodayYmd: clean(body.clientToday),
+      timeZone: clean(body.timezone || body.timeZone || body.tz) || resolveClientTimeZone(event?.queryStringParameters || {})
+    })
+  ) {
     return fail(400, "VALIDATION_ERROR", "Payment date cannot be in future.");
   }
   if (!["CASH", "CHEQUE", "NEFT", "UPI", "CARD", "OTHER"].includes(paymentMode)) return fail(400, "VALIDATION_ERROR", "Invalid payment mode.");

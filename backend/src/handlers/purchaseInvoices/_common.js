@@ -160,7 +160,10 @@ async function enrichAndValidateItems(q, accountId, party, itemsInput) {
 async function validateInvoiceHeader(body) {
   const invoiceDate = clean(body.invoiceDate);
   const dueDate = clean(body.dueDate);
-  const invErr = ensureDateNotFuture(invoiceDate, "Invoice date", { clientTodayYmd: clean(body.clientToday) });
+  const invErr = ensureDateNotFuture(invoiceDate, "Invoice date", {
+    clientTodayYmd: clean(body.clientToday),
+    timeZone: clean(body.timezone || body.timeZone || body.tz)
+  });
   if (invErr) return { ok: false, message: invErr };
   if (dueDate) {
     const d = new Date(`${dueDate}T00:00:00.000Z`);

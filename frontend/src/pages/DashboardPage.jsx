@@ -615,7 +615,7 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  {canSales && canPurchases && data.kpis?.gross_profit != null && (
+                  {canSales && data.kpis?.gross_profit != null && (
                     <div className="kpi-card kpi-success" style={{ "--i": 3 }}>
                       <div className="kpi-card-glow" />
                       <div className="kpi-card-header">
@@ -628,14 +628,14 @@ export default function DashboardPage() {
                       <div className="kpi-card-footer">
                         <span className="kpi-badge kpi-badge-neutral">
                           {(() => {
-                            const sales = preset === "TODAY"
-                              ? Number(data.kpis?.today_sales?.value || 0)
-                              : Number(data.kpis?.range_sales?.value || 0);
-                            const profit = Number(data.kpis.gross_profit.value || 0);
-                            return sales > 0 ? `${((profit / sales) * 100).toFixed(1)}% margin` : "0.0% margin";
+                            const gp = data.kpis.gross_profit;
+                            if (gp.margin_pct != null) return `${Number(gp.margin_pct).toFixed(1)}% margin`;
+                            const revenue = Number(gp.revenue || 0);
+                            const profit = Number(gp.value || 0);
+                            return revenue > 0 ? `${((profit / revenue) * 100).toFixed(1)}% margin` : "0.0% margin";
                           })()}
                         </span>
-                        <span className="kpi-card-sub">sales − purchases</span>
+                        <span className="kpi-card-sub">revenue − cost of goods</span>
                       </div>
                     </div>
                   )}

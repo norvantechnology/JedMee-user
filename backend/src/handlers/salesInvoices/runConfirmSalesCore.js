@@ -378,8 +378,8 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
       `INSERT INTO customer_payments (
          account_id, customer_id, sales_invoice_id, allocation_type, payment_date, amount, payment_mode, notes, created_by_user_id
        )
-       VALUES ($1,$2,$3,'INVOICE',CURRENT_DATE,$4::numeric,$5::customer_payment_mode_type,$6,$7)`,
-      [accountId, invoice.customer_id, invoiceId, totalAmt, settleMode, paymentNote, actorId]
+       VALUES ($1,$2,$3,'INVOICE',COALESCE($8::date, CURRENT_DATE),$4::numeric,$5::customer_payment_mode_type,$6,$7)`,
+      [accountId, invoice.customer_id, invoiceId, totalAmt, settleMode, paymentNote, actorId, invoice.invoice_date || null]
     );
     await refreshSalesInvoicePaymentTotals(q, accountId, invoiceId);
   }

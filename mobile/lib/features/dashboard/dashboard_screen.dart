@@ -2111,15 +2111,19 @@ class _ProfitSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Gross profit = period sales − period purchases (from backend calculation)
+    // Gross profit = taxable revenue − COGS − returns (true gross profit from backend;
+    // reconciles with Day Book). This is NOT sales − purchases (that is net cash flow).
     final grossProfitRaw = kpiValue(kpis, 'gross_profit') ?? kpiValue(kpis, 'net_profit');
     final grossProfit    = (grossProfitRaw ?? 0).toDouble();
-    // Revenue = period sales (range_sales for non-TODAY, today_sales for TODAY)
-    final totalRevenue   = (kpiValue(kpis, 'range_sales') ?? kpiValue(kpis, 'today_sales') ?? 0).toDouble();
-    // Period purchases (used as COGS proxy)
-    final totalPurchases = (kpiValue(kpis, 'range_purchases') ?? kpiValue(kpis, 'today_purchases') ?? 0).toDouble();
-    final totalCogs      = (kpiValue(kpis, 'total_cogs') ?? kpiValue(kpis, 'cogs') ?? totalPurchases).toDouble();
-    final marginRaw      = summary?['profit_margin_pct'] ?? summary?['profitMarginPct'];
+    // Revenue basis for the gross profit (net taxable revenue), falling back to period sales.
+    final totalRevenue   = (kpiField(kpis, 'gross_profit', 'revenue')
+        ?? kpiValue(kpis, 'range_sales') ?? kpiValue(kpis, 'today_sales') ?? 0).toDouble();
+    // Cost of goods actually sold (from backend); fall back to period purchases only if absent.
+    final totalCogs      = (kpiField(kpis, 'gross_profit', 'cogs')
+        ?? kpiValue(kpis, 'range_purchases') ?? kpiValue(kpis, 'today_purchases') ?? 0).toDouble();
+    final backendMargin  = kpiField(kpis, 'gross_profit', 'margin_pct');
+    final marginRaw      = backendMargin
+        ?? summary?['profit_margin_pct'] ?? summary?['profitMarginPct'];
     // Margin = gross_profit / revenue * 100 (only when revenue > 0)
     final marginPct      = marginRaw != null
         ? (marginRaw is num ? marginRaw.toDouble() : double.tryParse(marginRaw.toString()) ?? 0.0)
@@ -2166,7 +2170,7 @@ class _ProfitSummaryCard extends StatelessWidget {
         if (!isPositive) ...[
           const SizedBox(height: 4),
           const Text(
-            'Purchases exceed sales this month',
+            'Cost of goods sold exceeds revenue',
             style: TextStyle(fontSize: 11, color: AppColors.textMuted),
           ),
         ],
@@ -2174,7 +2178,7 @@ class _ProfitSummaryCard extends StatelessWidget {
         _ProfitMetric(label: 'Revenue', amount: totalRevenue, color: AppColors.primary),
         if (totalCogs > 0) ...[
           const SizedBox(height: 4),
-          _ProfitMetric(label: 'Purchases', amount: totalCogs, color: AppColors.textMuted),
+          _ProfitMetric(label: 'Cost of goods', amount: totalCogs, color: AppColors.textMuted),
         ],
         const SizedBox(height: 4),
         _ProfitMetric(

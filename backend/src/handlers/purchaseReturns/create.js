@@ -21,7 +21,10 @@ async function handler(event) {
   const items = Array.isArray(body.items) ? body.items : [];
   if (!purchaseInvoiceId) return fail(400, "VALIDATION_ERROR", "purchaseInvoiceId is required.");
   if (!returnDate) return fail(400, "VALIDATION_ERROR", "returnDate is required.");
-  const retDateErr = ensureDateNotFuture(returnDate, "Return date", { clientTodayYmd: clean(body.clientToday) });
+  const retDateErr = ensureDateNotFuture(returnDate, "Return date", {
+    clientTodayYmd: clean(body.clientToday),
+    timeZone: clean(body.timezone || body.timeZone || body.tz)
+  });
   if (retDateErr) return fail(400, "VALIDATION_ERROR", retDateErr);
   const VALID_RETURN_REASONS = ["EXPIRED", "DAMAGED", "WRONG_PRODUCT", "EXCESS", "QUALITY_ISSUE", "OTHER"];
   if (!VALID_RETURN_REASONS.includes(returnReason)) {

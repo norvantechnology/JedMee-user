@@ -243,21 +243,23 @@ export default function DayBookReportPage() {
                       <h2 className="dbSectionTitle">Money in</h2>
                     </div>
                     <div className="dbSectionBody">
-                      <Row label="Cash sales (walk-in)" value={money(rec.cash_sales)} />
-                      <Row label="Collected from customers" value={money(rec.customer_receipts)} />
-                      {(credit?.collected_on_older_bills ?? 0) > 0 && (
+                      <Row
+                        label="Received for today’s sales"
+                        value={money(rec.received_for_today_sales ?? rec.cash_sales)}
+                      />
+                      {(rec.collected_on_older_bills ?? credit?.collected_on_older_bills ?? 0) > 0 && (
                         <Row
                           label="Collected on older bills"
-                          value={money(credit.collected_on_older_bills)}
+                          value={money(rec.collected_on_older_bills ?? credit?.collected_on_older_bills)}
                           muted
                           note="not new sales"
                         />
                       )}
                       <Row label="Total money in" value={money(rec.total_receipts)} total />
-                      {(rec.credit_sales ?? 0) > 0 && (
+                      {(credit?.new_outstanding ?? 0) > 0 && (
                         <Row
-                          label="Sold on credit"
-                          value={money(rec.credit_sales)}
+                          label="Credit not yet collected"
+                          value={money(credit.new_outstanding)}
                           muted
                           note="not in drawer"
                         />

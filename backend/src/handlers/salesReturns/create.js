@@ -4,6 +4,7 @@ const { withTransaction } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { clean, i, n, round4, nextSalesNumber, isFutureDate, localCalendarYmd } = require("../../shared/sales");
+const { resolveClientTimeZone } = require("../../shared/timezone");
 const { isValidGstin } = require("../salesInvoices/_common");
 
 async function handler(event) {
@@ -16,7 +17,12 @@ async function handler(event) {
   const customerId = clean(body.customerId || body.customer_id);
   if (!customerId) return fail(400, "VALIDATION_ERROR", "customerId is required");
   const returnDate = clean(body.returnDate || body.return_date) || localCalendarYmd();
-  if (isFutureDate(returnDate, { clientTodayYmd: clean(body.clientToday) })) {
+  if (
+    isFutureDate(returnDate, {
+      clientTodayYmd: clean(body.clientToday),
+      timeZone: clean(body.timezone || body.timeZone || body.tz) || resolveClientTimeZone(event?.queryStringParameters || {})
+    })
+  ) {
     return fail(400, "VALIDATION_ERROR", "Return date cannot be in future.");
   }
   const returnReason = clean(body.returnReason || body.return_reason || "OTHER").toUpperCase();

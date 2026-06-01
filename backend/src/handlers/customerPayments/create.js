@@ -4,6 +4,7 @@ const { withTransaction } = require("../../shared/db");
 const { requirePermission } = require("../../shared/auth");
 const { getPermissionsForUser } = require("../../shared/permissions");
 const { clean, n, isFutureDate, localCalendarYmd, refreshSalesInvoicePaymentTotals } = require("../../shared/sales");
+const { resolveClientTimeZone } = require("../../shared/timezone");
 
 function appendNote(base, suffix) {
   const a = clean(base);
@@ -111,7 +112,12 @@ async function handler(event) {
   if (!useBatchAlloc && !(amount > 0) && !(invoiceId && useAdvanceFirst)) {
     return fail(400, "VALIDATION_ERROR", "amount must be greater than 0.");
   }
-  if (isFutureDate(paymentDate, { clientTodayYmd: clean(body.clientToday) })) {
+  if (
+    isFutureDate(paymentDate, {
+      clientTodayYmd: clean(body.clientToday),
+      timeZone: clean(body.timezone || body.timeZone || body.tz) || resolveClientTimeZone(event?.queryStringParameters || {})
+    })
+  ) {
     return fail(400, "VALIDATION_ERROR", "Payment date cannot be in future.");
   }
   if (!["CASH", "CHEQUE", "NEFT", "UPI", "CARD", "OTHER"].includes(paymentMode)) {
