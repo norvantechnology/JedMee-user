@@ -382,6 +382,41 @@
   border-top: 1px dashed color-mix(in srgb, var(--color-border) 40%, transparent);
 }
 
+.dbMetricsNote {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-card));
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-3);
+}
+
+.dbMetricsNote strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--color-text-2);
+}
+
+.dbMetricsNote ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.dbMetricsNote li {
+  margin-bottom: 4px;
+}
+
+.dbMetricsNote li:last-child {
+  margin-bottom: 0;
+}
+
+.dbMetricsLabel {
+  font-weight: 700;
+  color: var(--color-text-2);
+}
+
 /* ── Cash Position card ── */
 .dbCashCard {
   background: var(--color-card);

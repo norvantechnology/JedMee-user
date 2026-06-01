@@ -557,6 +557,51 @@
   font-weight: 600;
 }
 
+.kpi-card-help {
+  margin: 0 0 10px;
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--color-text-4);
+  font-weight: 500;
+}
+
+.dash-metrics-note {
+  margin: 12px 0 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 22%, var(--color-border));
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-card));
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-3);
+}
+
+.dash-metrics-note strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--color-text-2);
+}
+
+.dash-metrics-note ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.dash-metrics-note li {
+  margin-bottom: 4px;
+}
+
+.dash-metrics-note li:last-child {
+  margin-bottom: 0;
+}
+
+.dash-metrics-label {
+  font-weight: 700;
+  color: var(--color-text-2);
+}
+
 /* Sparkline overlay inside KPI card */
 .kpi-sparkline {
   position: absolute;

@@ -548,12 +548,12 @@ export default function DashboardPage() {
                               <IconChevronsUp />
                               {data.kpis?.today_sales?.delta_pct != null ? `${Number(data.kpis.today_sales.delta_pct).toFixed(1)}%` : ""}
                             </span>
-                            <span className="kpi-card-sub">vs {fmtCurrency(data.kpis?.today_sales?.prev_value || 0) || fmtCurrency(0)} yesterday</span>
+                            <span className="kpi-card-sub">invoice total incl. GST · vs yesterday</span>
                           </>
                         ) : (
                           <>
                             <span className="kpi-badge kpi-badge-neutral">{ymd(data.meta?.range?.from)} → {ymd(data.meta?.range?.to)}</span>
-                            <span className="kpi-card-sub">selected range</span>
+                            <span className="kpi-card-sub">invoice total incl. GST</span>
                           </>
                         )}
                       </div>
@@ -605,7 +605,7 @@ export default function DashboardPage() {
                             ? `${Number(data.kpis?.today_purchases?.invoices || 0)} invoices`
                             : `${Number(data.kpis?.range_purchases?.invoices || 0)} invoices`}
                         </span>
-                        <span className="kpi-card-sub">{preset === "TODAY" ? "today" : "selected range"}</span>
+                        <span className="kpi-card-sub">invoice total incl. GST</span>
                       </div>
                       {kpiSparklines.purchases.length >= 2 && (
                         <div className="kpi-sparkline">
@@ -635,8 +635,14 @@ export default function DashboardPage() {
                             return revenue > 0 ? `${((profit / revenue) * 100).toFixed(1)}% margin` : "0.0% margin";
                           })()}
                         </span>
-                        <span className="kpi-card-sub">revenue − cost of goods</span>
+                        <span className="kpi-card-sub">ex-GST margin · not sales − purchases</span>
                       </div>
+                      {data.kpis.gross_profit.revenue > 0 && (
+                        <p className="kpi-card-help">
+                          Sales value (ex-GST) {fmtCurrency(data.kpis.gross_profit.revenue)} − COGS{" "}
+                          {fmtCurrency(data.kpis.gross_profit.cogs ?? 0)}
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -660,6 +666,51 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </section>
+
+                {canSales && data.kpis?.gross_profit != null && (() => {
+                  const salesTotal =
+                    preset === "TODAY"
+                      ? Number(data.kpis?.today_sales?.value || 0)
+                      : Number(data.kpis?.range_sales?.value || 0);
+                  const purchTotal = canPurchases
+                    ? preset === "TODAY"
+                      ? Number(data.kpis?.today_purchases?.value || 0)
+                      : Number(data.kpis?.range_purchases?.value || 0)
+                    : 0;
+                  const netBills = salesTotal - purchTotal;
+                  const revenue = Number(data.kpis.gross_profit.revenue || 0);
+                  const gstApprox = salesTotal > revenue + 0.01 ? salesTotal - revenue : 0;
+                  if (!(salesTotal > 0 && (purchTotal > 0 || revenue > 0))) return null;
+                  return (
+                    <div className="dash-metrics-note" role="note">
+                      <strong>How these numbers relate</strong>
+                      <ul>
+                        <li>
+                          <span className="dash-metrics-label">Period sales</span> {fmtCurrency(salesTotal)} — confirmed
+                          sales invoice total <em>(incl. GST)</em>.
+                        </li>
+                        {revenue > 0 && (
+                          <li>
+                            <span className="dash-metrics-label">Gross profit</span> {fmtCurrency(data.kpis.gross_profit.value)} — margin on
+                            goods sold: sales value ex-GST minus cost of goods sold (COGS).
+                          </li>
+                        )}
+                        {canPurchases && purchTotal > 0 && (
+                          <li>
+                            <span className="dash-metrics-label">Sales − purchases</span> {fmtCurrency(netBills)} — bill totals only;{" "}
+                            <strong>not</strong> the same as gross profit.
+                          </li>
+                        )}
+                        {gstApprox > 0.01 && (
+                          <li>
+                            <span className="dash-metrics-label">GST in sales</span> ≈ {fmtCurrency(gstApprox)} — included in period sales,
+                            excluded from profit margin. See Day Book for output/input GST.
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  );
+                })()}
 
                 {/* ══ QUICK ACTIONS ══ */}
                 <section className="qa-section" aria-label="Quick actions">

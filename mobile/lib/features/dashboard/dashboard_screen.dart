@@ -520,6 +520,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen>
                           sales: salesKpi ?? 0,
                           purchases: purchaseKpi ?? 0,
                           profit: displayProfit,
+                          profitRevenue: kpiField(kpis, 'gross_profit', 'revenue'),
                           salesLabel: salesLabel,
                           comparePeriodLabel: comparePeriodLabel,
                           salesDeltaPct: salesDeltaPct,
@@ -2297,6 +2298,15 @@ class _GstSummaryCard extends StatelessWidget {
         ],
         if (igst > 0)
           _ProfitMetric(label: 'IGST', amount: igst, color: AppColors.textMuted),
+        const SizedBox(height: 6),
+        Text(
+          'GST is part of sales & purchase invoice totals. Gross profit uses amounts before GST.',
+          style: AppTypography.caption.copyWith(
+            fontSize: 10,
+            color: AppColors.textFaint,
+            height: 1.35,
+          ),
+        ),
       ]),
     );
   }
@@ -3709,8 +3719,21 @@ class _CashFlowCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Expanded(
-                child: Text('Cash flow', style: AppTypography.cardTitle),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Bill totals', style: AppTypography.cardTitle),
+                    Text(
+                      'Not gross profit',
+                      style: AppTypography.caption.copyWith(
+                        fontSize: 10,
+                        color: AppColors.textMuted,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               if (netMarginPct != null)
                 Container(
@@ -3737,7 +3760,7 @@ class _CashFlowCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           _CashFlowProgressRow(
             label: 'Cash in',
-            subtitle: 'Sales',
+            subtitle: 'Sales invoices (incl. GST)',
             amount: cashInVal,
             baseline: barBaseline,
             fillFullWidth: true,
@@ -3746,7 +3769,7 @@ class _CashFlowCard extends StatelessWidget {
           const SizedBox(height: 10),
           _CashFlowProgressRow(
             label: 'Cash out',
-            subtitle: 'Purchases',
+            subtitle: 'Purchase invoices (incl. GST)',
             amount: cashOutVal,
             baseline: barBaseline,
             color: AppColors.danger,
@@ -3776,6 +3799,16 @@ class _CashFlowCard extends StatelessWidget {
                 height: 1.1,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Sales invoice total minus purchase invoice total for the period. '
+            'For margin on goods sold, see Gross profit above.',
+            style: AppTypography.caption.copyWith(
+              fontSize: 10,
+              color: AppColors.textFaint,
+              height: 1.35,
             ),
           ),
         ],
@@ -5116,6 +5149,7 @@ class _KeyMetricsSummaryRow extends StatelessWidget {
     required this.sales,
     required this.purchases,
     required this.profit,
+    this.profitRevenue,
     required this.salesLabel,
     required this.comparePeriodLabel,
     this.salesDeltaPct,
@@ -5127,6 +5161,8 @@ class _KeyMetricsSummaryRow extends StatelessWidget {
   final num sales;
   final num purchases;
   final num? profit;
+  /// Taxable sales value used for gross profit (ex-GST); when set, we can show GST hint.
+  final num? profitRevenue;
   final String salesLabel;
   final String comparePeriodLabel;
   final double? salesDeltaPct;
@@ -5144,6 +5180,12 @@ class _KeyMetricsSummaryRow extends StatelessWidget {
         profitPositive ? AppColors.success : AppColors.danger;
     final hasReceivables = (receivables ?? 0) > 0;
     final hasPayables = (payables ?? 0) > 0;
+    final salesVal = sales.toDouble();
+    final purchVal = purchases.toDouble();
+    final netBills = salesVal - purchVal;
+    final gstInSales = profitRevenue != null && salesVal > (profitRevenue!.toDouble() + 0.01)
+        ? salesVal - profitRevenue!.toDouble()
+        : null;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -5183,6 +5225,16 @@ class _KeyMetricsSummaryRow extends StatelessWidget {
                       letterSpacing: 0.2,
                     ),
                   ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Margin on goods sold (sales value − cost of goods, ex-GST). '
+                    'Not the same as sales − purchases below.',
+                    style: AppTypography.caption.copyWith(
+                      fontSize: 10,
+                      color: AppColors.textMuted,
+                      height: 1.35,
+                    ),
+                  ),
                   const SizedBox(height: 8),
                   FittedBox(
                     fit: BoxFit.scaleDown,
@@ -5218,6 +5270,7 @@ class _KeyMetricsSummaryRow extends StatelessWidget {
                 child: _CompactSummaryMetric(
                   label: salesLabel,
                   value: sales,
+                  footnote: 'Incl. GST',
                   color: AppColors.primary,
                   deltaPct: salesDeltaPct,
                   compareHint: comparePeriodLabel,
@@ -5229,6 +5282,7 @@ class _KeyMetricsSummaryRow extends StatelessWidget {
                 child: _CompactSummaryMetric(
                   label: 'Purchases',
                   value: purchases,
+                  footnote: 'Incl. GST',
                   color: AppColors.primaryMid,
                   deltaPct: purchaseDeltaPct,
                   compareHint: comparePeriodLabel,
@@ -5237,6 +5291,17 @@ class _KeyMetricsSummaryRow extends StatelessWidget {
               ),
             ],
           ),
+          if (salesVal > 0.01 && purchVal > 0.01) ...[
+            const SizedBox(height: 8),
+            _DashMetricHintBox(
+              lines: [
+                'Sales − purchases = ${fmtCurrency(netBills)} (invoice totals, incl. GST). '
+                'Shown as Net cash flow — not gross profit.',
+                if (gstInSales != null && gstInSales > 0.01)
+                  'GST in sales total ≈ ${fmtCurrency(gstInSales)} (included in sales, not in profit margin).',
+              ],
+            ),
+          ],
           if (hasReceivables || hasPayables) ...[
             const SizedBox(height: 10),
             const Divider(height: 1, color: AppColors.border),
@@ -5311,11 +5376,47 @@ class _MetricComparisonLine extends StatelessWidget {
   }
 }
 
+/// Muted explainer for dashboard metrics (profit vs bill totals).
+class _DashMetricHintBox extends StatelessWidget {
+  const _DashMetricHintBox({required this.lines});
+  final List<String> lines;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (var i = 0; i < lines.length; i++) ...[
+            if (i > 0) const SizedBox(height: 4),
+            Text(
+              lines[i],
+              style: AppTypography.caption.copyWith(
+                fontSize: 10,
+                color: AppColors.textMuted,
+                height: 1.35,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _CompactSummaryMetric extends StatelessWidget {
   const _CompactSummaryMetric({
     required this.label,
     required this.value,
     required this.color,
+    this.footnote,
     this.deltaPct,
     this.compareHint,
     this.invertDeltaColors = false,
@@ -5323,6 +5424,7 @@ class _CompactSummaryMetric extends StatelessWidget {
   final String label;
   final num value;
   final Color color;
+  final String? footnote;
   final double? deltaPct;
   final String? compareHint;
   final bool invertDeltaColors;
@@ -5350,6 +5452,17 @@ class _CompactSummaryMetric extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
+          if (footnote != null && footnote!.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              footnote!,
+              style: AppTypography.caption.copyWith(
+                fontSize: 9,
+                color: AppColors.textFaint,
+                height: 1.2,
+              ),
+            ),
+          ],
           const SizedBox(height: 6),
           FittedBox(
             fit: BoxFit.scaleDown,

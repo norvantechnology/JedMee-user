@@ -201,7 +201,10 @@ export default function DayBookReportPage() {
 
               <div className={`dbSummaryCard${closingNeg ? " dbSummaryCard_warn" : ""}`}>
                 <p className="dbStory">{story}</p>
-                <p className="dbStoryNote">Cash totals include walk-in sales and customer collections only — credit bills are shown separately.</p>
+                <p className="dbStoryNote">
+                  Cash totals are money actually received or paid today — not the same as sales invoice totals on the Sales tab.
+                  Credit not yet collected is shown separately.
+                </p>
                 <div className="dbSummaryClosing">
                   <span className="dbSummaryClosingLbl">Expected cash at end of day</span>
                   <span className={`dbSummaryClosingVal${closingNeg ? " dbSummaryClosingVal_neg" : ""}`}>
@@ -310,12 +313,49 @@ export default function DayBookReportPage() {
 
               {tab === "business" && (
                 <>
+                  {canSales && (() => {
+                    const totalSales = Number(rec.total_sales ?? headline.total_sales ?? 0);
+                    const gross = Number(profit.gross_profit ?? 0);
+                    const revenue = Number(profit.total_revenue ?? 0);
+                    const purchTotal = Number(purchases?.total ?? 0);
+                    const gstApprox = Number(gst?.output_gst ?? 0) || (totalSales > revenue + 0.01 ? totalSales - revenue : 0);
+                    const netBills = totalSales - purchTotal;
+                    if (!(totalSales > 0 && gross !== 0)) return null;
+                    return (
+                      <div className="dbMetricsNote" role="note">
+                        <strong>How these numbers relate</strong>
+                        <ul>
+                          <li>
+                            <span className="dbMetricsLabel">Total sales</span> {money(totalSales)} — invoice total{" "}
+                            <em>(incl. {taxLabel})</em>.
+                          </li>
+                          <li>
+                            <span className="dbMetricsLabel">Gross profit</span> {money(gross)} — sales value ex-{taxLabel} minus cost of
+                            goods sold (see breakdown below).
+                          </li>
+                          {canPurchases && purchTotal > 0.01 && (
+                            <li>
+                              <span className="dbMetricsLabel">Sales − purchases</span> {money(netBills)} — bill totals only;{" "}
+                              <strong>not</strong> gross profit.
+                            </li>
+                          )}
+                          {gstApprox > 0.01 && (
+                            <li>
+                              <span className="dbMetricsLabel">{taxLabel} on sales</span> {money(gstApprox)} — in invoice total, not in
+                              profit margin.
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    );
+                  })()}
+
                   <div className="dbSummaryRow">
                     {canSales && (
                       <div className="dbSumCard">
                         <div className="dbSumVal">{money(rec.total_sales ?? headline.total_sales ?? 0)}</div>
                         <div className="dbSumLbl">Total sales</div>
-                        <div className="dbSumSub">All confirmed bills</div>
+                        <div className="dbSumSub">Incl. {taxLabel} · all confirmed bills</div>
                       </div>
                     )}
                     {canSales && (
@@ -354,14 +394,24 @@ export default function DayBookReportPage() {
                         <h2 className="dbSectionTitle">Profit on today’s sales</h2>
                       </div>
                       <div className="dbSectionBody">
-                        <Row label={`Sales value (before ${taxLabel})`} value={money(profit.total_revenue)} />
+                        {canSales && (rec.total_sales ?? headline.total_sales) > 0 && (
+                          <Row
+                            label={`Invoice total (incl. ${taxLabel})`}
+                            value={money(rec.total_sales ?? headline.total_sales ?? 0)}
+                            muted
+                          />
+                        )}
+                        <Row label={`Sales value (ex-${taxLabel})`} value={money(profit.total_revenue)} />
                         {(profit.sales_returns ?? 0) > 0 && (
                           <Row label="Sales returns" value={`− ${money(profit.sales_returns)}`} muted />
                         )}
                         <Row label="Cost of goods sold" value={`− ${money(profit.total_cogs)}`} />
-                        <Row label="Profit" value={money(profit.gross_profit)} total />
+                        <Row label="Gross profit" value={money(profit.gross_profit)} total />
                       </div>
-                      <p className="dbProfitNote">Profit = sales value minus cost of items sold. Excludes rent, salaries, and other expenses.</p>
+                      <p className="dbProfitNote">
+                        Gross profit is margin on goods sold (ex-{taxLabel}), not sales minus purchases. Purchases are stock bought;
+                        COGS is the cost of items on today’s sales bills. Excludes rent, salaries, and other expenses.
+                      </p>
                     </div>
                   )}
 
@@ -396,6 +446,9 @@ export default function DayBookReportPage() {
                         {canPurchases && <Row label={`${taxLabel} on purchases`} value={money(gst.input_gst)} />}
                         <Row label={`Net ${taxLabel}`} value={money(gst.net_gst)} total />
                       </div>
+                      <p className="dbProfitNote">
+                        {taxLabel} is included in invoice totals (Total sales / purchases above). Profit uses amounts before {taxLabel}.
+                      </p>
                     </div>
                   )}
                 </>
