@@ -262,11 +262,23 @@ jobs:
 
           aws s3 sync dist/ s3://${BUCKET}/ \
             --exclude "index.html" \
+            --exclude "about/index.html" \
+            --exclude "contact/index.html" \
+            --exclude "terms/index.html" \
             --cache-control "max-age=31536000,immutable" \
             --delete
 
+          # Prerendered public SEO pages (no-cache — content changes with SEO agents)
           aws s3 cp dist/index.html s3://${BUCKET}/index.html \
-            --cache-control "no-cache"
+            --cache-control "no-cache" --content-type "text/html"
+
+          for PAGE in about contact terms; do
+            aws s3 cp dist/${PAGE}/index.html s3://${BUCKET}/${PAGE}/index.html \
+              --cache-control "no-cache" --content-type "text/html"
+            # Extensionless key so S3 REST + CloudFront serves /about without trailing slash
+            aws s3 cp dist/${PAGE}/index.html s3://${BUCKET}/${PAGE} \
+              --cache-control "no-cache" --content-type "text/html"
+          done
 
       - name: Invalidate CloudFront cache
         run: |

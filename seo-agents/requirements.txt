@@ -1,0 +1,9 @@
+# Phase 0 — DataCollector
+requests>=2.32.0
+beautifulsoup4>=4.12.0
+python-dotenv>=1.0.0
+
+# Phase 1+ (installed now; used in later steps)
+playwright>=1.49.0
+google-api-python-client>=2.150.0
+google-auth>=2.35.0
