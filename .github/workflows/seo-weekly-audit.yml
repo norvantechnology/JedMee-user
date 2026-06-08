@@ -33,14 +33,10 @@ jobs:
           cache: pip
           cache-dependency-path: seo-agents/requirements.txt
 
-      - uses: microsoft/playwright-python@v1
-        with:
-          browsers: chromium
-
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          playwright install chromium
+          playwright install chromium --with-deps
           chmod +x scripts/setup_ci_env.sh
 
       - name: Write .env from secrets

@@ -106,15 +106,10 @@ jobs:
           cache: pip
           cache-dependency-path: seo-agents/requirements.txt
 
-      - uses: microsoft/playwright-python@v1
-        with:
-          browsers: chromium
-
       - name: Install SEO agent dependencies
         working-directory: seo-agents
         run: |
           pip install -r requirements.txt
-          playwright install chromium
           chmod +x scripts/setup_ci_env.sh
 
       - name: Write SEO agents .env from secrets
