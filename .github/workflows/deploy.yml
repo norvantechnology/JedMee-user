@@ -90,6 +90,7 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend (Vite → S3 + CloudFront + SEO)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment: dev
     needs: deploy-backend
 

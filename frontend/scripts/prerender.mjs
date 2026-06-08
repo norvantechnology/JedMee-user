@@ -119,6 +119,9 @@ async function startPreview(port) {
       }
     });
 
+    // Prevent open stdio pipes from keeping Node alive after we kill the server
+    child.unref();
+
     waitForServer(`${baseUrl}/`)
       .then(() => {
         if (settled) return;
@@ -148,6 +151,30 @@ async function writeRouteHtml(page, baseUrl, route) {
   }
 }
 
+async function stopPreview(child) {
+  if (!child || child.exitCode !== null) return;
+
+  return new Promise((resolve) => {
+    const forceKill = setTimeout(() => {
+      try {
+        child.kill("SIGKILL");
+      } catch {
+        /* already exited */
+      }
+      resolve();
+    }, 5000);
+
+    child.once("exit", () => {
+      clearTimeout(forceKill);
+      resolve();
+    });
+
+    child.stdout?.destroy?.();
+    child.stderr?.destroy?.();
+    child.kill("SIGTERM");
+  });
+}
+
 async function main() {
   console.log("Prerendering public routes...");
   await ensureDistExists();
@@ -167,7 +194,7 @@ async function main() {
     console.log("Prerender complete.");
   } finally {
     if (browser) await browser.close();
-    preview.kill("SIGTERM");
+    await stopPreview(preview);
   }
 }
 
