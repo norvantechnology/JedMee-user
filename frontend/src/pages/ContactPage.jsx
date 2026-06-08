@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LandingLayout from "../components/LandingLayout.jsx";
-import { useSeoMeta } from "../utils/seo.js";
+import { useSeoMeta, useJsonLd } from "../utils/seo.js";
 import "./LandingPage.css";
 import "./InnerPages.css";
 
@@ -40,6 +40,19 @@ export default function ContactPage() {
       "contact JedMee, pharmacy software support, pharmacy software demo, medicine shop software help, JedMee support, pharmacy management contact, pharmacy billing demo",
     canonical: "https://jedmee.com/contact",
   });
+
+  useJsonLd([
+    {
+      "@context": "https://schema.org",
+      "@type": "ContactPage",
+      "name": "Contact JedMee — Pharmacy Software Support & Sales",
+      "url": "https://jedmee.com/contact",
+      "description":
+        "Contact JedMee for pharmacy software support, pricing, or a free demo.",
+      "inLanguage": "en",
+      "isPartOf": { "@type": "WebSite", "url": "https://jedmee.com" },
+    },
+  ]);
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 

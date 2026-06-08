@@ -1,0 +1,52 @@
+name: Validate Public SEO
+
+on:
+  pull_request:
+    paths:
+      - 'frontend/src/pages/LandingPage.jsx'
+      - 'frontend/src/pages/AboutPage.jsx'
+      - 'frontend/src/pages/ContactPage.jsx'
+      - 'frontend/src/pages/TermsPage.jsx'
+      - 'frontend/src/utils/seo.js'
+      - 'frontend/public/**'
+      - 'frontend/index.html'
+      - 'frontend/vite.config.js'
+      - 'frontend/scripts/prerender.mjs'
+
+jobs:
+  validate-seo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Install Playwright Chromium
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install chromium --with-deps
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Static SEO checks
+        run: python seo-agents/scripts/validate_public_seo.py --mode static
+
+      - name: Build with prerender
+        working-directory: frontend
+        run: npm run build
+
+      - name: Live SEO checks (prerendered dist)
+        run: python seo-agents/scripts/validate_public_seo.py --mode live

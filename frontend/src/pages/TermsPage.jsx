@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LandingLayout from "../components/LandingLayout.jsx";
-import { useSeoMeta } from "../utils/seo.js";
+import { useSeoMeta, useJsonLd } from "../utils/seo.js";
 import "./LandingPage.css";
 import "./InnerPages.css";
 
@@ -99,11 +99,23 @@ export default function TermsPage() {
   useSeoMeta({
     title: "Terms of Service — JedMee Pharmacy Software",
     description:
-      "Read JedMee's Terms of Service. Understand your rights when using our pharmacy management software, billing system, and inventory management tools.",
+      "Read JedMee",
     keywords:
       "JedMee terms of service, pharmacy software terms, medicine shop software terms, pharmacy management terms, pharmacy billing terms",
     canonical: "https://jedmee.com/terms",
   });
+
+  useJsonLd([
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Terms of Service — JedMee Pharmacy Software",
+      "url": "https://jedmee.com/terms",
+      "description": "JedMee Terms of Service for pharmacy management software.",
+      "inLanguage": "en",
+      "isPartOf": { "@type": "WebSite", "url": "https://jedmee.com" },
+    },
+  ]);
 
   const scrollTo = (id) => {
     const el = document.getElementById(id);

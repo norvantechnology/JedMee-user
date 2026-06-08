@@ -4,21 +4,279 @@
 > **Status:** Full critical audit + production-ready redesign  
 > **Core principle:** Every run is research-first. No hardcoded keywords. No template outputs. Manager reasons from fresh evidence every cycle.
 
+> **Implementation sync (2026-06-06, final):** This document is the **single source of truth** for JedMee SEO agents — architecture, code paths, GitHub CI, third-party APIs, frontend targets, and what remains to build. Give this file to any Cursor session to extend frontend, backend, or agents.
+>
+> Status tags: **✅ Implemented** · **🔶 Partial** · **📋 Planned** · **❌ Not possible (paid API)**
+
 ### Document map (all parts)
 
 | Part | Title | What it covers |
 |------|-------|----------------|
+| **M** | **Cursor Handoff Guide** | **START HERE** — full repo map, secrets, workflows, DB, agents, frontend, what's left |
 | A | Critical Audit | Flaws in the original static checklist plan |
-| B | Redesigned Architecture | DataCollector, Manager, 5 worker agents |
-| C | Research & Scrape Pipeline | Tools, DB schema, sample JSON |
+| B | Redesigned Architecture | DataCollector, Manager, **6 worker agents ✅** (+ Backlink **📋**) |
+| C | Research & Scrape Pipeline | Tools, DB schema (13 tables), sample JSON |
 | D | Manager Pseudocode | `plan_sprint()` + `synthesize()` |
 | E | Additional Gaps | Human approval, llms.txt, CI, prerender, quota |
 | F | Third-Party APIs | Every external service: setup, limits, fallbacks |
-| G | GitHub Pipeline | Workflows, secrets, cron, PR gates, deploy integration |
+| G | GitHub Pipeline | 5 SEO workflows + deploy.yml integration |
 | H | Phased Rollout | Week-by-week plan, deliverables, exit criteria |
-| I | File-by-File Process | Every `seo-agents/` and CI file: inputs, outputs, when it runs |
+| I | File-by-File Process | Every `seo-agents/` file (~54 files): inputs, outputs, when it runs |
 | J | Dynamic Agent Runbooks | Step-wise flows per agent driven by `run_context.json` |
 | K | Architecture Diagrams | Mermaid flows for the full system |
+| L | Human Trust & Feedback Loop | **✅** `rate` CLI, `human_feedback` table; prompt retraining **📋** |
+
+### Implementation Status (quick reference)
+
+Last verified: **2026-06-06**. Full detail in **Part M**.
+
+| Area | Status |
+|------|--------|
+| Core pipeline (collect → 6 agents → stage → apply/deploy) | ✅ |
+| DB: 13 tables, migrations `001`–`008` | ✅ |
+| GitHub: 5 SEO workflows + `deploy.yml` SEO steps | ✅ |
+| Human feedback + `rate` CLI | ✅ |
+| SERP v2 (PAA, headings, related searches) | ✅ |
+| AI Visibility | 🔶 Gemini only (free tier) |
+| Content auto-apply | 🔶 FAQ additions only |
+| Backlink Agent | ❌ Needs paid SE Ranking / Ahrefs |
+| Reddit SERP mining | ❌ Extra SerpAPI quota |
+| Prompt retraining from rejections | 📋 |
+| `schemas/*.json` | 📋 |
+
+---
+
+## PART M — Cursor Handoff Guide (read this first)
+
+> **Purpose:** Any Cursor (or developer) can use this section alone to understand the full JedMee SEO system — what exists in code, what runs in GitHub, what third-party keys are needed, and what frontend/backend files agents touch.
+
+### M.1 Monorepo layout
+
+```
+JedMee-user/                          # git root
+├── frontend/                         # React 19 + Vite — DEPLOYED to S3/CloudFront
+│   ├── scripts/prerender.mjs         # ✅ Prerenders /, /about, /contact, /terms
+│   ├── src/pages/
+│   │   ├── LandingPage.jsx           # SEO_CONFIG + useSeoMeta + useJsonLd + FAQs
+│   │   ├── AboutPage.jsx             # useSeoMeta + useJsonLd (AboutPage schema)
+│   │   ├── ContactPage.jsx           # useSeoMeta + useJsonLd (ContactPage schema) ✅
+│   │   └── TermsPage.jsx             # useSeoMeta + useJsonLd (WebPage schema) ✅
+│   ├── src/utils/seo.js              # useSeoMeta(), useJsonLd() hooks
+│   └── public/
+│       ├── sitemap.xml                 # 4 public URLs
+│       ├── robots.txt
+│       └── llms.txt
+│
+├── seo-agents/                       # Python multi-agent SEO system
+│   ├── main.py                       # CLI entry (9 commands)
+│   ├── config.py                     # Paths, API keys, quotas
+│   ├── agents/                       # Manager + 6 workers + orchestrator
+│   ├── collectors/                   # DataCollector Steps 1–7
+│   ├── tools/                        # DB, patches, LLM, GSC, scoring
+│   ├── db/migrations/                # 001–008 SQL migrations
+│   ├── scripts/                      # 8 operational scripts
+│   ├── outputs/<run_id>/             # gitignored JSON artifacts
+│   ├── db/runs.db                    # gitignored SQLite
+│   └── secrets/                      # gitignored GSC OAuth JSON
+│
+├── .github/workflows/
+│   ├── deploy.yml                    # ✅ Main deploy + SEO auto-optimize
+│   ├── seo-weekly-audit.yml          # ✅ Monday cron
+│   ├── seo-pr-validation.yml         # ✅ PR gate (validate_public_seo.py)
+│   ├── seo-apply-branch.yml          # ✅ Manual apply → PR
+│   └── seo-gsc-health.yml            # ✅ Daily GSC health
+│
+└── docs/SEO_AGENTS_IMPLEMENTATION_PLAN.md   # THIS FILE
+```
+
+### M.2 Third-party services & credentials
+
+| Service | Used by | Required? | Env var (local `.env`) | GitHub secret | Free tier |
+|---------|---------|-----------|------------------------|---------------|-----------|
+| **Google PageSpeed Insights** | DataCollector Step 4, TechnicalAgent | **Yes** | `GOOGLE_PSI_API_KEY` | `GOOGLE_PSI_API_KEY` | ~25k req/day |
+| **Google Search Console API** | Step 5, Analytics, deploy notify | **Yes** | `GSC_OAUTH_CLIENT_JSON`, `GSC_OAUTH_TOKEN_JSON`, `GSC_AUTH_MODE=oauth` | `GSC_OAUTH_CLIENT_JSON`, `GSC_OAUTH_TOKEN_JSON` (base64 JSON files) | Free |
+| **SerpAPI** | Step 6, ResearchAgent | **Yes** | `SERPAPI_KEY` | `SERPAPI_KEY` | 100 searches/month |
+| **Google Custom Search** | SERP fallback | Optional | `GOOGLE_CSE_API_KEY`, `GOOGLE_CSE_CX` | same | 100/day |
+| **Google Gemini** | ContentAgent, AIVisibilityAgent | Optional | `GEMINI_API_KEY` | `GEMINI_API_KEY` | Free tier generous |
+| **Anthropic Claude** | ContentAgent fallback | Optional | `ANTHROPIC_API_KEY` | `ANTHROPIC_API_KEY` | Pay-per-token |
+| **Playwright Chromium** | Step 2 (local/weekly audit) | Yes in full runs | N/A (installed) | CI installs via action | Free (compute) |
+| **Slack Webhook** | Weekly audit notify | Optional | `SLACK_WEBHOOK_URL` | `SLACK_WEBHOOK_URL` | Free |
+| **AWS S3 + CloudFront** | Frontend deploy | **Yes** (existing) | N/A | `AWS_*`, `FRONTEND_S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID` | Existing infra |
+| **SE Ranking / Ahrefs** | Backlink Agent | ❌ Not implemented | — | — | **Paid only** |
+| **ChatGPT / Perplexity APIs** | Full AI Visibility | ❌ Not implemented | — | — | **Paid only** |
+
+**One-time GSC OAuth setup (local):**
+```bash
+cd seo-agents
+# Save OAuth client JSON → secrets/gsc-oauth-client.json
+python scripts/authorize_gsc_oauth.py
+python scripts/notify_gsc.py   # should print gsc_api: submitted
+```
+
+**CI writes `.env` automatically:** `scripts/setup_ci_env.sh` (used by `deploy.yml` and `seo-weekly-audit.yml`).
+
+### M.3 CLI commands (`seo-agents/main.py`)
+
+| Command | When to use | Writes frontend? |
+|---------|-------------|------------------|
+| `collect` | Data only (Steps 1–7) | No |
+| `run` | Full audit, stage recs for review | No |
+| `deploy` | Production: audit → auto-apply ONPAGE → (CI builds/deploys) | Yes (ONPAGE meta only in CI) |
+| `review` | List pending/approved/rejected recs | No |
+| `approve` | Approve recs + log `human_feedback` | No |
+| `reject` | Reject rec + log `human_feedback` | No |
+| `rate` | Score rec quality 1–5 + update `agent_accuracy_scores` | No |
+| `apply` | Apply approved ONPAGE + FAQ content patches | Yes |
+| `activity` | View `agent_activity` audit log | No |
+
+```bash
+python main.py run --goal "Weekly audit"
+python main.py review --run-id <uuid>
+python main.py approve --run-id <uuid> --rec-id R001
+python main.py rate --run-id <uuid> --rec-id R001 --score 4
+python main.py apply --run-id <uuid>
+python main.py activity --run-id <uuid>
+```
+
+### M.4 Agents (what each does + output file)
+
+| Agent | File | Input | Output JSON | Can patch frontend? |
+|-------|------|-------|-------------|---------------------|
+| **Orchestrator** | `agents/orchestrator.py` | — | `report.md` + all agent JSONs | Coordinates only |
+| **Manager** | `agents/manager.py` | `run_context.json` | `task_graph.json`, `executive_summary.json` | No — stages recs |
+| **TechnicalAgent** | `agents/technical.py` | ctx, tasks | `technical.json` | No |
+| **ResearchAgent** | `agents/research.py` | ctx, tasks | `research.json` | No — uses SERP v2 PAA + heading trees |
+| **OnPageAgent** | `agents/onpage.py` | ctx, tasks, results | `onpage.json` | Stages `file_patch` for `useSeoMeta` |
+| **ContentAgent** | `agents/content.py` | ctx, tasks, results | `content.json` | Stages FAQ/section proposals |
+| **AnalyticsAgent** | `agents/analytics.py` | all results | `analytics.json` | No — GSC week-over-week |
+| **AIVisibilityAgent** | `agents/ai_visibility.py` | ctx | `ai_visibility.json` | 🔶 Gemini only; probes 3 prompts |
+
+**Run order:** collect → Manager.plan → Technical → Research → OnPage → Content → Analytics → AIVisibility → Manager.synthesize → stage.
+
+**Manager is rule-based Python** (no LLM). `MANAGER_MODEL` in config is unused.
+
+### M.5 DataCollector steps (`collectors/data_collector.py`)
+
+| Step | Module | Third-party | Output in `run_context.json` |
+|------|--------|-------------|------------------------------|
+| 1 Raw HTTP | `http_crawler.py` | — | `pages[].raw_*` |
+| 2 Playwright | `playwright_crawler.py` | Chromium | `pages[].rendered_*` (skippable `--skip-playwright`) |
+| 3 Repo parse | `repo_parser.py` | — | `repo_parse.*` from JSX + sitemap + robots + llms.txt |
+| 4 PSI | `psi_client.py` | Google PSI API | `pagespeed` |
+| 5 GSC | `gsc_client.py` | GSC OAuth API | `gsc_summary`, `gsc_queries` |
+| 6 SERP | `serp_client.py` | SerpAPI / CSE | `serp_snapshots` (incl. PAA, related searches), `competitor_pages` (H1–H6 trees) |
+| 7 SPA delta | `render_delta.py` | — | `pages[].spa_risk_score` |
+
+### M.6 Database (SQLite `seo-agents/db/runs.db`)
+
+Migrations run automatically on first command via `tools/db.py:init_db()`.
+
+| Migration | Tables / changes |
+|-----------|------------------|
+| `001_init.sql` | `runs`, `page_snapshots` |
+| `002_rendered_columns.sql` | ALTER `page_snapshots` — rendered HTML, headings, SPA risk |
+| `003_api_cache.sql` | `api_cache`, `quota_usage`, `serp_snapshots` |
+| `004_recommendations.sql` | `sprints`, `pending_recommendations`, `agent_outputs`, `gsc_baselines` |
+| `005_agent_activity.sql` | `agent_activity` — per-task audit log |
+| `006_serp_v2_columns.sql` | ALTER `serp_snapshots` — `people_also_ask`, `related_searches`, `answer_box` |
+| `007_human_feedback.sql` | `human_feedback`, `agent_accuracy_scores` |
+| `008_ai_visibility.sql` | `ai_visibility_snapshots` |
+
+**13 tables total:** `runs`, `page_snapshots`, `api_cache`, `quota_usage`, `serp_snapshots`, `sprints`, `pending_recommendations`, `agent_outputs`, `gsc_baselines`, `agent_activity`, `human_feedback`, `agent_accuracy_scores`, `ai_visibility_snapshots`.
+
+### M.7 GitHub workflows (what runs when)
+
+| Workflow | Trigger | What it does |
+|----------|---------|--------------|
+| **`deploy.yml`** | Push to `main` | SEO `deploy` (auto-ONPAGE) → build+prerender → S3 → CloudFront → `notify_gsc.py` → `[seo-auto]` commit if JSX changed |
+| **`seo-weekly-audit.yml`** | Mon 06:00 UTC + manual | Full `run` (read-only) → `render_summary.py` → optional Slack → upload artifacts |
+| **`seo-pr-validation.yml`** | PR touching public pages | `validate_public_seo.py --mode static` → build → `--mode live` |
+| **`seo-apply-branch.yml`** | Manual `workflow_dispatch` | `apply --no-git` → commit → open PR |
+| **`seo-gsc-health.yml`** | Daily 12:00 UTC + manual | `check_gsc_health.py` |
+
+**GitHub secrets required for SEO CI:**
+
+| Secret | Used in |
+|--------|---------|
+| `GOOGLE_PSI_API_KEY` | weekly audit, deploy |
+| `SERPAPI_KEY` | weekly audit, deploy |
+| `GSC_OAUTH_CLIENT_JSON` | weekly audit, deploy, GSC health (base64 OAuth client file) |
+| `GSC_OAUTH_TOKEN_JSON` | same (base64 token file) |
+| `GEMINI_API_KEY` | optional — Content + AI Visibility |
+| `SLACK_WEBHOOK_URL` | optional — weekly Slack summary |
+
+### M.8 Scripts (`seo-agents/scripts/`)
+
+| Script | Purpose |
+|--------|---------|
+| `setup_ci_env.sh` | Write `.env` + decode GSC OAuth secrets (CI) |
+| `authorize_gsc_oauth.py` | One-time local GSC OAuth browser login |
+| `notify_gsc.py` | Resubmit sitemap post-deploy |
+| `validate_public_seo.py` | 7 static + live prerender checks (PR CI) |
+| `check_gsc_health.py` | Daily GSC credential check |
+| `render_summary.py` | GitHub Step Summary for weekly audit |
+| `notify_slack.py` | Post run summary to Slack (optional) |
+
+### M.9 Frontend patching (what agents can auto-change)
+
+| Patch type | Tool | Target file | Auto in `deploy`? | Auto in `apply`? |
+|------------|------|-------------|-------------------|------------------|
+| ONPAGE title/meta/keywords | `tools/jsx_patcher.py` | `*Page.jsx` `useSeoMeta` | **Yes** | Yes (if approved) |
+| FAQ addition | `tools/content_patcher.py` | `LandingPage.jsx` `SEO_CONFIG.faqs` | No | Yes (if approved) |
+| New H2 section / llms.txt | — | — | No — manual | No — manual |
+| sitemap lastmod | — | `public/sitemap.xml` | No | No |
+
+### M.10 What is NOT built (and why)
+
+| Item | Status | Blocker |
+|------|--------|---------|
+| **Backlink Agent** (`agents/backlink.py`) | ❌ | SE Ranking (~$44/mo) or Ahrefs (~$99/mo) — no free API |
+| **Full AI Visibility** (ChatGPT, Claude, Perplexity probes) | ❌ | Paid API keys per platform |
+| **Reddit intent mining** | ❌ | Burns SerpAPI quota |
+| **Prompt retraining from rejections** | 📋 | Needs ≥20 rated recs; design in Part L |
+| **Section expansion auto-apply** | 📋 | LLM-generated copy — human review required |
+| **`schemas/*.json`** | 📋 | Agent output schemas not formalized yet |
+
+### M.11 How to extend (for Cursor)
+
+**Add a new public page (e.g. `/pricing`):**
+1. Create `frontend/src/pages/PricingPage.jsx` with `useSeoMeta` + `useJsonLd`
+2. Add route in frontend router
+3. Add path to `frontend/scripts/prerender.mjs` routes
+4. Add to `seo-agents/config.py` → `PUBLIC_PATHS`, `FRONTEND_PAGES`, `PUBLIC_URLS`
+5. Add to `frontend/public/sitemap.xml`
+6. Update `scripts/validate_public_seo.py` checks
+7. Update `seo-pr-validation.yml` path filters
+
+**Add a new agent:**
+1. Create `seo-agents/agents/my_agent.py` with `run(ctx, tasks, results) -> dict`
+2. Register in `agents/orchestrator.py` after existing agents
+3. Add tasks in `agents/manager.py:plan_sprint()`
+4. Log via `tools/activity_log.py`
+5. Stage recs in `manager.py:stage_for_review()` if needed
+6. Add migration if new DB table required
+
+**Add a new third-party API:**
+1. Add env var to `config.py` + `.env.example`
+2. Add GitHub secret + `setup_ci_env.sh` line
+3. Gate via `tools/quota_manager.py`
+4. Call from appropriate collector or agent
+5. Document in Part F of this file
+
+### M.12 Full run flow (today)
+
+```
+collect (Steps 1–7) → run_context.json
+  → Manager.plan_sprint → task_graph.json
+  → Technical → Research → OnPage → Content → Analytics → AIVisibility
+  → Manager.synthesize → executive_summary.json
+  → Manager.stage_for_review → pending_recommendations
+  → human: review | approve | reject | rate
+  → apply: ONPAGE meta + FAQ patches → git branch seo/<short-id>
+  → OR deploy (CI): auto-approve ONPAGE → build → S3 → GSC notify
+```
+
+All steps logged to `agent_activity`. View with `python main.py activity --run-id <uuid>`.
 
 ---
 
@@ -97,6 +355,8 @@ The plan has no degraded-mode logic. If SerpAPI is down or quota-exhausted, does
 ---
 
 ## PART B — Redesigned Agent Architecture
+
+> **Implementation note:** B.0–B.6 and the Manager are **✅ implemented** (Manager is rule-based Python, not LLM). B.2.1, B.7, B.8 are **📋 planned** extensions documented below.
 
 ### Core Design Principles
 
@@ -582,6 +842,111 @@ def replan_from_analytics(analytics_output, last_sprint_tasks):
 
 ---
 
+#### B.2.1 Enhanced SERP Structure Analysis (v2 — **✅ Partial** · Reddit **❌**)
+
+> **Current code:** `collectors/serp_client.py` fetches organic results (top 10 positions) and competitor pages (top **5** per query) with flat `h1` + `h2s` only. Research Agent uses H2 gaps from that data. Everything below is the **target v2 design** — not yet implemented.
+
+The original Step 3 competitor analysis (H2s only) is **insufficient for production**. v2 adds a dedicated SERP structure pipeline inside the Research Agent (and DataCollector Step 6b):
+
+**Additional inputs:**
+- `serp_snapshots[*].people_also_ask` — from SerpAPI `related_questions` field
+- `serp_snapshots[*].heading_hierarchy` — full H1–H6 per top-10 URL
+- `reddit_threads[]` (optional) — real user language from Reddit search
+
+**Enhanced processing (runs after Step 2 SERP fetch):**
+
+```
+Step 2b — SERP feature extraction (per query)
+  From SerpAPI response extract:
+    - organic_results[1..10]
+    - related_questions (People Also Ask)
+    - related_searches
+    - answer_box (if present)
+
+Step 3b — Full heading hierarchy scrape (top 10, not just top 3)
+  FOR each organic result position 1..10:
+    Fetch page (requests + BS4)
+    Extract: h1, h2, h3, h4, h5, h6 as nested tree:
+      heading_tree: [{level: 1, text: "..."}, {level: 2, text: "...", parent: "..."}]
+    Store word_count, schema_types, faq_schema, video_embed
+
+Step 3c — People Also Ask aggregation
+  FOR each PAA question across all queries this run:
+    Dedupe by normalized text
+    Map to target_page (same logic as keyword clusters)
+    IF PAA question NOT in JedMee FAQs AND NOT in rendered H2s:
+      → missing_topic candidate
+
+Step 3d — Reddit intent scrape (OPTIONAL, quota-capped at 5 queries/run)
+  IF REDDIT_ENABLED=true in config:
+    FOR top 5 GSC queries by impressions:
+      SerpAPI site:reddit.com search OR Reddit JSON API (if key set)
+      Extract: thread title, top comment snippets, upvote-weighted themes
+    Merge into user_intent_signals[]
+
+Step 4b — Missing topics report (replaces simple H2 gap list)
+  missing_topics = (
+    topics in top-5 competitor heading_trees
+    UNION paa_questions
+    UNION reddit_themes
+  ) MINUS (
+    jedmee rendered H2s + H3s + SEO_CONFIG.faqs
+  )
+  For each missing_topic:
+    evidence_sources: ["competitor_h3", "paa", "reddit"]
+    recommended_agent: ContentAgent | OnPageAgent
+```
+
+**Enhanced output fields (add to `research.json`):**
+
+```json
+{
+  "serp_structure": [
+    {
+      "query": "pharmacy billing software india",
+      "people_also_ask": [
+        {"question": "Which software is best for pharmacy billing?", "snippet": "..."},
+        {"question": "Is GST mandatory for pharmacy billing?", "snippet": "..."}
+      ],
+      "top10_heading_trees": [
+        {
+          "position": 1,
+          "url": "https://competitor.com/...",
+          "h1": "Pharmacy Billing Software",
+          "headings": [
+            {"level": 2, "text": "GST Billing"},
+            {"level": 3, "text": "Barcode Scanning"},
+            {"level": 2, "text": "Expiry Alerts"}
+          ]
+        }
+      ],
+      "missing_topics": [
+        {
+          "topic": "multi-branch pharmacy management",
+          "evidence": ["competitor_h2", "paa"],
+          "covered_by_jedmee": false,
+          "priority_score": 7.2
+        }
+      ]
+    }
+  ],
+  "reddit_intent_signals": [
+    {
+      "query": "pharmacy billing software",
+      "thread_url": "https://reddit.com/r/...",
+      "themes": ["GST confusion", "inventory sync", "free trial requests"]
+    }
+  ]
+}
+```
+
+**Success criteria (v2 additions):**
+- Every primary query has PAA questions captured (when SerpAPI returns them)
+- Top 10 heading trees stored for ≥ 80% of fetched SERP results
+- `missing_topics` report generated with ≥ 1 evidence source per topic
+
+---
+
 ### B.3 — Technical SEO Agent
 
 **Role:** Diagnose crawlability, rendering, performance, and schema issues using live site data and repo source, producing severity-scored structured findings.
@@ -975,6 +1340,183 @@ def replan_from_analytics(analytics_output, last_sprint_tasks):
 
 ---
 
+### B.7 — Backlink Intelligence Agent (**📋 Planned**)
+
+> **Current code:** Not implemented. No `agents/backlink.py`, `collectors/backlink_client.py`, or migration `005`. Manager does not create `BACKLINK_AUDIT` tasks yet.
+
+**Role:** Compare JedMee's backlink profile against top competitors, identify link gaps (domains linking to competitors but not JedMee), and produce actionable outreach targets.
+
+**Why separate from Research:** Backlink data requires different APIs, different refresh cadence (monthly not weekly), and different human workflow (outreach, not JSX edits). Mixing into Research would blur agent responsibilities.
+
+**Inputs:**
+- `run_context.serp_snapshots` — top competitor domains from SERP
+- `db/backlink_snapshots` — historical referring domain counts
+- SE Ranking API or Ahrefs API — full backlink export
+
+**Tools/APIs:**
+- **SE Ranking API** (preferred for cost): Backlinks endpoint, referring domains
+- **Ahrefs API v3** (fallback): Site Explorer → referring domains
+- Hunter.io or manual WHOIS (optional): contact email for outreach targets
+
+**Processing Logic:**
+
+```
+1. Identify competitor set
+   FROM serp_snapshots: unique domains in positions 1–5 across all queries
+   Take top 3 by frequency (most often ranking above JedMee)
+   Add jedmee.com as baseline
+
+2. Pull backlink profiles (monthly — skip if cache < 30 days)
+   FOR domain IN [jedmee.com, comp1, comp2, comp3]:
+     IF cache fresh: use db/backlink_snapshots
+     ELSE: API call → store referring_domains[], total_backlinks, domain_rating
+
+3. Link gap analysis
+   link_gaps = referring_domains(competitors) MINUS referring_domains(jedmee.com)
+   Filter: domain_rating > 20 OR traffic > 10k/mo (if API provides)
+   Sort by: comp_count (how many competitors have this link)
+
+4. Outreach target enrichment
+   FOR each link_gap domain (top 20):
+     Try Hunter.io domain search → contact_email
+     ELSE: scrape /contact page for mailto:
+     Classify: directory | blog | news | SaaS review | pharmacy association
+
+5. Priority scoring
+   outreach_score = (
+     comp_count * 3 +                    # linked by multiple competitors
+     domain_rating / 10 +                # authority
+     (1 if category == "SaaS review" else 0) * 5
+   )
+
+6. Output recommendations (human approval required — outreach is manual)
+   DO NOT auto-send emails. Stage as CONTENT type OUTREACH_TARGET.
+```
+
+**Output schema:**
+
+```json
+{
+  "run_id": "uuid",
+  "generated_at": "ISO8601",
+  "agent": "backlink",
+  "jedmee_profile": {
+    "referring_domains": 42,
+    "total_backlinks": 318,
+    "domain_rating": 28
+  },
+  "competitor_profiles": [
+    {"domain": "competitor-a.com", "referring_domains": 890, "domain_rating": 52}
+  ],
+  "link_gaps": [
+    {
+      "gap_id": "LG001",
+      "referring_domain": "pharmacytechreview.com",
+      "links_to_competitors": ["competitor-a.com", "competitor-b.com"],
+      "links_to_jedmee": false,
+      "domain_rating": 45,
+      "category": "SaaS review",
+      "contact_email": "editor@pharmacytechreview.com",
+      "outreach_score": 8.4,
+      "suggested_pitch": "Guest post or product listing — JedMee free trial for pharmacies",
+      "requires_human_approval": true
+    }
+  ],
+  "summary": {
+    "total_gaps_found": 156,
+    "high_priority_gaps": 12,
+    "jedmee_vs_avg_competitor_rd": "-94%"
+  }
+}
+```
+
+**Runs:** Monthly (not every weekly sprint). Manager creates `BACKLINK_AUDIT` task only when `days_since_last_backlink_run > 28`.
+
+**Implementation file:** `seo-agents/agents/backlink.py`, collector helper: `collectors/backlink_client.py`
+
+---
+
+### B.8 — AI Visibility Agent (**🔶 Partial** — Gemini free tier only · ChatGPT/Perplexity **❌**)
+
+> **Current code:** Not implemented. No `agents/ai_visibility.py` or migration `008`. Uses existing LLM keys when built — same pattern as optional ContentAgent drafting.
+
+**Role:** Track whether JedMee is mentioned when users ask AI assistants about pharmacy software — a growing discovery channel beyond Google.
+
+**Why it matters:** ChatGPT, Claude, Perplexity, and Gemini increasingly answer "best pharmacy billing software" directly. If JedMee isn't mentioned, you lose visibility even with perfect Google rankings.
+
+**Inputs:**
+- Fixed prompt set (not hardcoded keywords — templated from GSC top queries)
+- Existing LLM keys: `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` (optional), Perplexity API
+
+**Prompt templates (derived from GSC each run):**
+
+```
+1. "What is the best pharmacy billing software in India?"
+2. "Recommend pharmacy management software for a small medicine shop"
+3. "Compare pharmacy billing software options with free trial"
+4. "{gsc_top_query_1}"  ← dynamic from run_context
+5. "{gsc_top_query_2}"
+```
+
+**Processing Logic:**
+
+```
+1. FOR each prompt × each platform [chatgpt, claude, gemini, perplexity]:
+     Send prompt via API (no browsing unless platform supports it)
+     Parse response text for mentions of:
+       - "JedMee" / "jedmee.com"
+       - Known competitors (from SERP data)
+     Record: mentioned (bool), position_in_list (1-N or null), sentiment (positive/neutral/negative)
+
+2. Compare to prior run (db/ai_visibility_snapshots)
+     NEW_MENTION → positive signal
+     LOST_MENTION → negative signal
+     COMPETITOR_MENTION_UP → competitive pressure signal
+
+3. Route signals to Manager → Content Agent (add FAQ/copy addressing gaps AI assistants cite)
+```
+
+**Output schema:**
+
+```json
+{
+  "run_id": "uuid",
+  "generated_at": "ISO8601",
+  "agent": "ai_visibility",
+  "results": [
+    {
+      "platform": "gemini",
+      "prompt": "What is the best pharmacy billing software in India?",
+      "jedmee_mentioned": false,
+      "competitors_mentioned": ["Marg ERP", "Vyapar", "TallyPrime"],
+      "response_snippet": "...",
+      "sentiment_toward_jedmee": null
+    },
+    {
+      "platform": "claude",
+      "prompt": "What is the best pharmacy billing software in India?",
+      "jedmee_mentioned": true,
+      "mention_context": "listed as option #4 for GST billing",
+      "sentiment_toward_jedmee": "neutral"
+    }
+  ],
+  "summary": {
+    "mention_rate": 0.25,
+    "platforms_with_mention": ["claude"],
+    "platforms_without_mention": ["gemini", "chatgpt", "perplexity"],
+    "vs_last_run": {"mention_rate_delta": +0.1}
+  }
+}
+```
+
+**Cost control:** Max 5 prompts × 4 platforms = 20 LLM calls/run. Cache responses 7 days. **Estimated cost:** ~$0.10–0.50/run with Flash/Haiku models.
+
+**Runs:** Bi-weekly (every other weekly sprint). Uses existing keys — no new vendor required if Gemini + Anthropic already configured.
+
+**Implementation file:** `seo-agents/agents/ai_visibility.py`
+
+---
+
 ## PART C — Research & Scrape Pipeline
 
 ### C.1 Tool Selection Rationale
@@ -989,8 +1531,113 @@ def replan_from_analytics(analytics_output, last_sprint_tasks):
 
 ### C.2 Data Model
 
+Part C.2 is split into **what exists in migrations today** vs **planned extensions** (B.2.1, B.7, B.8, Part L).
+
+#### C.2.1 Implemented schema (**✅** migrations `001`–`008`)
+
+These tables are created by `db/migrations/` (applied in sorted order by `tools/db.py:init_db()`) and used by `tools/db.py`:
+
 ```sql
--- Core run tracking
+-- 001_init.sql
+CREATE TABLE runs (
+    run_id          TEXT PRIMARY KEY,
+    started_at      TEXT NOT NULL,
+    completed_at      TEXT,
+    trigger         TEXT NOT NULL DEFAULT 'manual',
+    goal            TEXT,
+    status          TEXT NOT NULL DEFAULT 'running'
+);
+
+CREATE TABLE page_snapshots (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id          TEXT NOT NULL REFERENCES runs(run_id),
+    url             TEXT NOT NULL,
+    path            TEXT NOT NULL,
+    captured_at     TEXT NOT NULL,
+    http_status     INTEGER,
+    response_time_ms INTEGER,
+    raw_html        TEXT,
+    raw_title       TEXT,
+    raw_meta_desc   TEXT,
+    raw_schema_ld_json TEXT,
+    canonical_url   TEXT,
+    has_noindex     INTEGER DEFAULT 0
+    -- 002_rendered_columns.sql adds: rendered_html, rendered_title, rendered_meta_desc,
+    --   h1, h2s, h3s, word counts, spa_risk_score, internal_links, schema_ld_json, etc.
+);
+
+-- 003_api_cache.sql
+CREATE TABLE api_cache (
+    api TEXT, cache_key TEXT, response_json TEXT, cached_at TEXT,
+    UNIQUE(api, cache_key)
+);
+CREATE TABLE quota_usage (
+    api TEXT, period TEXT, period_key TEXT, count INTEGER DEFAULT 0,
+    UNIQUE(api, period, period_key)
+);
+CREATE TABLE serp_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id TEXT NOT NULL,
+    query TEXT NOT NULL,
+    location TEXT,
+    captured_at TEXT NOT NULL,
+    cached INTEGER DEFAULT 0,
+    source TEXT,                    -- 'serpapi' | 'google_cse'
+    jedmee_position INTEGER,
+    results_json TEXT               -- organic results array
+);
+
+-- 004_recommendations.sql
+CREATE TABLE sprints (
+    run_id TEXT PRIMARY KEY, goal TEXT, task_graph_json TEXT NOT NULL, created_at TEXT NOT NULL
+);
+CREATE TABLE pending_recommendations (
+    run_id TEXT NOT NULL, recommendation_id TEXT NOT NULL,
+    type TEXT, page TEXT, category TEXT,
+    file_path TEXT, field TEXT, old_value TEXT, new_value TEXT, proposed_content TEXT,
+    rationale TEXT, priority_score REAL,
+    approval_status TEXT NOT NULL DEFAULT 'PENDING',  -- PENDING | APPROVED | REJECTED
+    rejection_reason TEXT, created_at TEXT NOT NULL,
+    UNIQUE(run_id, recommendation_id)
+);
+CREATE TABLE agent_outputs (
+    run_id TEXT NOT NULL, agent TEXT NOT NULL, output_json TEXT NOT NULL,
+    created_at TEXT NOT NULL, UNIQUE(run_id, agent)
+);
+CREATE TABLE gsc_baselines (
+    run_id TEXT NOT NULL, impressions INTEGER DEFAULT 0, clicks INTEGER DEFAULT 0, captured_at TEXT NOT NULL
+);
+
+-- 005_agent_activity.sql
+CREATE TABLE agent_activity (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id          TEXT NOT NULL,
+    agent           TEXT NOT NULL,       -- DataCollector | TechnicalAgent | Manager | Deploy | system
+    task            TEXT NOT NULL,       -- e.g. raw_http | plan_sprint | apply_patches
+    status          TEXT NOT NULL DEFAULT 'ok',  -- ok | error | skipped | warning
+    detail          TEXT,                -- short success summary
+    error_message   TEXT,                -- full error when status=error
+    created_at      TEXT NOT NULL
+);
+```
+
+**Implemented table count: 13** — `runs`, `page_snapshots`, `api_cache`, `quota_usage`, `serp_snapshots`, `sprints`, `pending_recommendations`, `agent_outputs`, `gsc_baselines`, `agent_activity`, `human_feedback`, `agent_accuracy_scores`, `ai_visibility_snapshots`.
+
+**Activity logging:** `tools/activity_log.py` wraps `db.log_agent_activity()`. Called from:
+- `collectors/data_collector.py` — each Step 1–7 (ok/skip/warn/error)
+- `agents/orchestrator.py` — each agent run + Manager plan/synthesize/stage
+- `main.py` — deploy steps (auto_approve, apply_patches, notify_gsc, git_push) + system errors
+
+**View activity:** `python main.py activity --run-id <uuid>` or `python main.py activity` (last 50 entries).
+
+**Human review today:** `approve` / `reject` update `pending_recommendations.approval_status` and `rejection_reason` — not a separate `human_feedback` table.
+
+#### C.2.2 Planned schema extensions (**📋** migration `009+`)
+
+Migrations `006`–`008` are **✅ implemented** (SERP v2 columns, human feedback, AI visibility). The blocks below are the **target design** for Backlink Agent and future normalizations — **not yet migrated**.
+
+```sql
+-- Core run tracking (reference — superseded by C.2.1 for implemented runs table)
 CREATE TABLE runs (
     run_id          TEXT PRIMARY KEY,  -- UUID
     started_at      DATETIME,
@@ -1000,7 +1647,7 @@ CREATE TABLE runs (
     status          TEXT               -- 'running', 'completed', 'failed'
 );
 
--- Raw and rendered page snapshots
+-- Raw and rendered page snapshots (extended reference model)
 CREATE TABLE page_snapshots (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     run_id          TEXT REFERENCES runs(run_id),
@@ -1027,7 +1674,7 @@ CREATE TABLE page_snapshots (
     has_noindex     BOOLEAN
 );
 
--- Competitor page snapshots
+-- Competitor page snapshots (v2: full heading hierarchy per B.2.1)
 CREATE TABLE competitor_snapshots (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     run_id          TEXT REFERENCES runs(run_id),
@@ -1038,14 +1685,16 @@ CREATE TABLE competitor_snapshots (
     title           TEXT,
     meta_desc       TEXT,
     h1              TEXT,
-    h2s             TEXT,              -- JSON array
+    h2s             TEXT,              -- JSON array (legacy flat list)
+    heading_hierarchy TEXT,          -- JSON: [{level: 1-6, text, parent?}] full H1–H6 tree
     word_count      INTEGER,
     has_faq_schema  BOOLEAN,
     has_review_schema BOOLEAN,
-    schema_types    TEXT               -- JSON array
+    schema_types    TEXT,              -- JSON array
+    has_video_embed BOOLEAN
 );
 
--- SERP snapshots
+-- SERP snapshots (v2: PAA + related searches per B.2.1)
 CREATE TABLE serp_snapshots (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
     run_id          TEXT REFERENCES runs(run_id),
@@ -1053,7 +1702,10 @@ CREATE TABLE serp_snapshots (
     location        TEXT,              -- 'in', 'global'
     captured_at     DATETIME,
     cached          BOOLEAN,
-    results         TEXT               -- JSON array of {position, url, title, meta}
+    results         TEXT,              -- JSON array of {position, url, title, meta}
+    people_also_ask TEXT,              -- JSON array of {question, snippet, link?}
+    related_searches TEXT,             -- JSON array of strings
+    answer_box      TEXT               -- JSON {title, snippet, link} or null
 );
 
 -- GSC data
@@ -1121,7 +1773,74 @@ CREATE TABLE applied_changes (
     gsc_position_before REAL,
     gsc_ctr_before  REAL
 );
+
+-- Backlink profiles (B.7 — monthly cadence, 30-day cache)
+CREATE TABLE backlink_snapshots (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id              TEXT REFERENCES runs(run_id),
+    domain              TEXT NOT NULL,       -- jedmee.com or competitor domain
+    captured_at         DATETIME,
+    source_api          TEXT,                -- 'se_ranking' | 'ahrefs'
+    referring_domains   INTEGER,
+    total_backlinks     INTEGER,
+    domain_rating       REAL,                -- DR/DA score from API
+    referring_domains_json TEXT,             -- JSON array of {domain, dr, first_seen, anchor_sample}
+    cache_expires_at    DATETIME             -- skip API if NOW() < cache_expires_at
+);
+
+-- AI visibility probes (B.8 — bi-weekly LLM mention tracking)
+CREATE TABLE ai_visibility_snapshots (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id              TEXT REFERENCES runs(run_id),
+    captured_at         DATETIME,
+    platform            TEXT,                -- 'chatgpt' | 'claude' | 'gemini' | 'perplexity'
+    prompt              TEXT,
+    jedmee_mentioned    BOOLEAN,
+    competitors_mentioned TEXT,              -- JSON array of domain/brand strings
+    mention_context     TEXT,                -- snippet where JedMee cited
+    sentiment           TEXT,                -- 'positive' | 'neutral' | 'negative' | null
+    response_snippet    TEXT,
+    raw_response        TEXT                 -- full response (truncated to 8k chars)
+);
+
+-- Human trust & feedback loop (Part L)
+CREATE TABLE human_feedback (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id              TEXT REFERENCES runs(run_id),
+    recommendation_id   TEXT NOT NULL,       -- e.g. R001
+    approved            BOOLEAN,               -- true=approve, false=reject, null=not yet rated
+    quality_score       INTEGER,               -- 1–5 stars on agent output quality (independent of approve/reject)
+    rejection_reason    TEXT,
+    rated_by            TEXT,                  -- GitHub username or email
+    rated_at            DATETIME,
+    agent_type          TEXT,                  -- 'technical' | 'research' | 'onpage' | 'content' | 'backlink' | 'ai_visibility'
+    prompt_version      TEXT,                  -- semver tag of agent prompt used (for retraining traceability)
+    UNIQUE(run_id, recommendation_id)
+);
+
+-- Agent accuracy rollup (materialized weekly by Analytics Agent)
+CREATE TABLE agent_accuracy_scores (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    week_start          DATE,
+    agent_type          TEXT,
+    total_recommendations INTEGER,
+    approved_count      INTEGER,
+    rejected_count      INTEGER,
+    avg_quality_score   REAL,                  -- mean of quality_score where not null
+    approval_rate       REAL,                  -- approved / (approved + rejected)
+    top_rejection_reasons TEXT,                -- JSON array of {reason, count}
+    computed_at         DATETIME
+);
 ```
+
+**Migration files (planned):** `009_backlink_snapshots.sql`, optional `competitor_snapshots` normalization.
+
+**Implemented migrations `006`–`008`:**
+- `006_serp_v2_columns.sql` — `people_also_ask`, `related_searches`, `answer_box` on `serp_snapshots`
+- `007_human_feedback.sql` — `human_feedback`, `agent_accuracy_scores`
+- `008_ai_visibility.sql` — `ai_visibility_snapshots`
+
+**Note:** PSI and GSC data live in `run_context.json` and `api_cache` today — dedicated `psi_snapshots` / `gsc_snapshots` tables are optional future normalizations, not required for current runs.
 
 ### C.3 Sample `site_snapshot.json`
 
@@ -1911,14 +2630,43 @@ class QuotaManager:
 | Keyword discovery | Hardcoded seed list | GSC → SERP → competitor analysis every run |
 | Manager logic | Fixed DAG (always same steps) | Conditional task graph from live data |
 | Agent outputs | Markdown files | Typed JSON with defined schemas |
-| Competitor analysis | Not implemented | DataCollector fetches top-3–5 per query, every run |
-| SPA rendering | "Recommended, TBD" | Blocking P0 — system detects and reports raw vs rendered delta |
-| Human review | Mentioned in prose | Explicit CLI with branch-per-run, DB-recorded approvals |
-| API quota | Listed, not enforced | QuotaManager with hard gates + cache fallback |
-| Re-planning | Analytics → Manager described vaguely | Concrete `Signal` objects with `route_to_agent` and `weight` |
-| llms.txt | Listed as strength, no owner | ContentAgent audits every run |
-| CI hook | "optional script" | Required CI gate on all `frontend/src/pages/` PRs |
-| Data storage | `AuditRun` mentioned | Full schema: 8 tables, all runs linked by `run_id` UUID |
+| Competitor analysis | Not implemented | **✅** Top-5 competitor fetch + flat H2 gaps; **📋** v2: top-10 heading trees + PAA + Reddit (B.2.1) |
+| SPA rendering | "Recommended, TBD" | **✅** Prerender script + SPA delta scoring in DataCollector |
+| Human review | Mentioned in prose | **✅** CLI approve/reject on `pending_recommendations`; **📋** Part L ratings + accuracy rollup |
+| API quota | Listed, not enforced | **✅** QuotaManager with hard gates + cache fallback |
+| Re-planning | Analytics → Manager described vaguely | **✅** Analytics signals in JSON; Manager rule-based (not LLM) |
+| llms.txt | Listed as strength, no owner | **✅** ContentAgent audits every run |
+| CI hook | "optional script" | **🔶** `seo-pr-validation.yml` (inline checks); **📋** `validate_public_seo.py` |
+| Data storage | `AuditRun` mentioned | **✅** 13 tables (001–008); **📋** backlink table when paid API added |
+| Activity audit log | Not in original plan | **✅** `agent_activity` + `activity` CLI |
+| Human feedback | Approve/reject only | **✅** `human_feedback` + `rate` CLI + `agent_accuracy_scores` |
+| Production auto-deploy | Not in original plan | **✅** `deploy` CLI + `deploy.yml` SEO integration |
+| PR SEO validation | Inline grep | **✅** `validate_public_seo.py` in `seo-pr-validation.yml` |
+| Content auto-apply | Manual only | **🔶** FAQ additions via `content_patcher.py`; sections manual |
+| SERP competitor analysis | H2s from top 3 only | **✅** Top 5 URLs, PAA, H1–H6 trees; Reddit **❌** (quota) |
+| Backlink strategy | Not in original plan | **📋** B.7 spec complete — code pending |
+| AI discovery channel | Not in original plan | **📋** B.8 spec complete — code pending |
+| Human feedback loop | Approve/reject CLI only | **📋** Part L — quality ratings, prompt retraining, agent accuracy scores |
+| Agent count | 5 workers | **✅** 5 workers live; **📋** +2 (Backlink, AI Visibility) in design |
+| LLM usage | Required for all agents | **🔶** Optional; ContentAgent + AIVisibility (Gemini); Manager is rule-based |
+
+### Bottom Line — Implementation Priority
+
+Ship in this order. Each row builds on the previous; skipping earlier rows leaves later agents with bad inputs.
+
+| Priority | Component | Status | Why now | Effort | Depends on |
+|----------|-----------|--------|---------|--------|------------|
+| **P0** | Prerender + SPA delta (Phase 0) | ✅ Done locally | Without it, every agent optimizes invisible HTML | 3–5 days | — |
+| **P0** | GSC + PSI + SerpAPI keys (Part F) | ✅ | OAuth + keys in `.env` and GitHub secrets | — | GCP project |
+| **P0** | Production prerender + SEO deploy | 🔶 Pending git push | CI wired; first push to `main` triggers full pipeline | 1 day | deploy.yml |
+| **P1** | Enhanced SERP structure (B.2.1) | 🔶 | PAA + heading trees done; Reddit skipped (quota) | — | SerpAPI |
+| **P1** | Human feedback loop (Part L) | ✅ | `rate` CLI + `human_feedback` table live | — | `007_human_feedback.sql` |
+| **P2** | Backlink Intelligence (B.7) | 📋 | High ROI for authority; monthly cadence | 4–5 days | SE Ranking or Ahrefs key |
+| **P2** | AI Visibility (B.8) | 🔶 | Gemini-only probes live; ChatGPT/Perplexity need paid keys | — | `GEMINI_API_KEY` |
+| **P3** | Prompt retraining from rejections (L.4) | 📋 | Needs ≥20 rated recommendations before useful | 3 days | Part L data |
+| **P3** | Hunter.io outreach enrichment (B.7) | 📋 | Nice-to-have; manual contact lookup works initially | 1 day | Hunter key |
+
+**Verdict:** Phases 0–5 core pipeline is **implemented and runnable**. The four v2 additions (enhanced SERP, backlinks, AI visibility, feedback loop) remain **designed but not coded** — they are the path from "working audit tool" to "production-competitive system."
 
 ---
 
@@ -1930,9 +2678,10 @@ Every external dependency the SEO system touches. **No agent calls an API withou
 
 | API / Service | Used by | Required? | Purpose | Free tier limits | Paid option | Env var(s) | Fallback when unavailable |
 |---------------|---------|-----------|---------|------------------|-------------|------------|---------------------------|
-| **Anthropic Claude** | Manager, Research, On-Page, Content, Analytics | **Yes** | Planning, clustering, gap analysis, copy proposals | Pay-per-token | Sonnet / Haiku tiers | `ANTHROPIC_API_KEY` | Run fails — no LLM substitute in v1 |
+| **Anthropic Claude** | Content Agent (optional copy) | Optional | FAQ/section drafting when key set | Pay-per-token | Sonnet / Haiku tiers | `ANTHROPIC_API_KEY` | Rule-based agents run without LLM |
+| **Google Gemini** | Content Agent (optional copy), AI Visibility (planned) | **Recommended** | Copy drafting; future mention probes | Free tier generous | Pay-per-token | `GEMINI_API_KEY`, `GEMINI_MODEL` | Anthropic or no LLM |
 | **Google PageSpeed Insights** | DataCollector Step 4, Technical Agent | **Yes** | LCP, CLS, INP, performance scores | ~25,000 req/day with API key | N/A (free) | `GOOGLE_PSI_API_KEY` | Use DB cache (TTL 6h); skip if no cache |
-| **Google Search Console API** | DataCollector Step 5, Research, Analytics | **Yes** | Impressions, clicks, CTR, position by query/page | Free (OAuth) | N/A | `GSC_SERVICE_ACCOUNT_JSON` (path or base64) | Use last successful GSC snapshot (max 7 days stale) |
+| **Google Search Console API** | DataCollector Step 5, Research, Analytics, deploy notify | **Yes** | Impressions, clicks, CTR, position; sitemap resubmit | Free (OAuth) | N/A | `GSC_AUTH_MODE=oauth`, `GSC_OAUTH_CLIENT_JSON`, `GSC_OAUTH_TOKEN_JSON` (or service account fallback) | Use `api_cache` GSC snapshot (max 24h stale) |
 | **SerpAPI** | DataCollector Step 6, Research Agent | **Yes** (or CSE fallback) | SERP positions, competitor URLs | 100 searches/month | Pro ~$50/mo (5,000/mo) | `SERPAPI_KEY` | Google Custom Search → cached SERP → skip SERP tasks |
 | **Google Custom Search JSON API** | DataCollector, Research (fallback) | **Recommended** | SERP when SerpAPI quota exhausted | 100 queries/day | $5 per 1,000 queries | `GOOGLE_CSE_API_KEY`, `GOOGLE_CSE_CX` | Cached SERP only; Research runs GSC-only mode |
 | **Playwright (Chromium)** | DataCollector Step 2 | **Yes** | Rendered DOM for SPA pages | Local compute | N/A | N/A (installed in CI) | Use raw HTTP only + flag `spa_risk_score=1.0` |
@@ -1943,6 +2692,13 @@ Every external dependency the SEO system touches. **No agent calls an API withou
 | **Slack Incoming Webhook** | `notifications/slack.py` | Optional | Post run summary + approval links | Free | N/A | `SLACK_WEBHOOK_URL` | Log to `outputs/<run_id>/summary.md` only |
 | **GitHub API** | `apply_recommendations.py`, CI | **Yes** (for apply flow) | Create branch, open PR | Free for public/private repos | N/A | `GITHUB_TOKEN` (Actions) / `gh` CLI locally | Manual branch creation |
 | **AWS S3 + CloudFront** | Existing `deploy.yml` | **Yes** (deploy) | Host prerendered `frontend/dist` | Existing JedMee infra | N/A | `AWS_*`, `FRONTEND_S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID` | N/A — deploy blocked until AWS creds valid |
+| **SE Ranking API** | Backlink Agent (B.7) | Optional (preferred for backlinks) | Referring domains, link gaps, DR | Trial available | From ~$44/mo | `SE_RANKING_API_KEY` | Ahrefs API → skip backlink tasks |
+| **Ahrefs API v3** | Backlink Agent (B.7) | Optional (fallback) | Site Explorer referring domains | No free tier | From ~$99/mo + API add-on | `AHREFS_API_KEY` | SE Ranking → skip backlink tasks |
+| **Hunter.io** | Backlink Agent (B.7) | Optional | Outreach contact email lookup | 25 searches/mo free | Paid tiers | `HUNTER_API_KEY` | Scrape /contact mailto: manually |
+| **Reddit JSON API** | Research Agent (B.2.1, optional) | Optional | Real user intent threads | Free (rate-limited) | N/A | `REDDIT_CLIENT_ID`, `REDDIT_CLIENT_SECRET` | SerpAPI `site:reddit.com` search |
+| **OpenAI API** | AI Visibility Agent (B.8) | Optional | ChatGPT mention probes | Pay-per-token | GPT-4o-mini ~$0.15/1M in | `OPENAI_API_KEY` | Skip ChatGPT platform; use 3 others |
+| **Perplexity API** | AI Visibility Agent (B.8) | Optional | Perplexity mention probes | Free tier limited | Sonar ~$5/1M tokens | `PERPLEXITY_API_KEY` | Skip Perplexity; report 3-platform coverage |
+| **Google Gemini API** | AI Visibility Agent (B.8), Content Agent | **Recommended** (if no Anthropic) | Gemini mention probes + copy | Free tier generous | Pay-per-token | `GEMINI_API_KEY` | Anthropic for same platforms |
 
 ### F.2 Per-API setup process
 
@@ -1958,7 +2714,9 @@ Every external dependency the SEO system touches. **No agent calls an API withou
 5. Budget guard: max_tokens per agent call capped in config (Manager: 8k, workers: 4k)
 ```
 
-**Quota per run (estimated):** Manager ×2 + 5 workers ≈ 15–25 LLM calls, ~80k–150k tokens/week.
+**Quota per run (implemented):** **0 LLM calls** if no API key — all agents except ContentAgent are rule-based. With `GEMINI_API_KEY` or `ANTHROPIC_API_KEY`: ContentAgent may use ~2–8 calls/run for FAQ/section drafting (~5k–20k tokens/week).
+
+**Quota per run (if LLM Manager were added — not implemented):** Manager ×2 + workers ≈ 15–25 LLM calls.
 
 #### F.2.2 Google PageSpeed Insights API
 
@@ -1972,17 +2730,29 @@ Every external dependency the SEO system touches. **No agent calls an API withou
 
 **Cache rule:** `page_speed_cache` table, TTL 6 hours. Same URL+strategy within TTL → no API call.
 
-#### F.2.3 Google Search Console API (OAuth service account)
+#### F.2.3 Google Search Console API (**✅ OAuth — implemented**)
+
+**Option A — OAuth (recommended, used in production):**
 
 ```
-1. GCP project (can reuse PSI project)
-2. Enable "Google Search Console API"
-3. IAM → Service Accounts → Create → download JSON key
-4. GSC UI → Settings → Users → Add service account email as FULL user
-5. Verify property https://jedmee.com/ is accessible
-6. Store JSON as GitHub secret GSC_SERVICE_ACCOUNT_JSON (base64-encoded)
-7. Run: python scripts/verify_gsc.py --property https://jedmee.com/
+1. GCP project → Enable "Google Search Console API"
+2. Credentials → OAuth client ID → Desktop app → download JSON
+3. Save as seo-agents/secrets/gsc-oauth-client.json
+4. python scripts/authorize_gsc_oauth.py   # browser login as GSC property owner
+5. Set in .env: GSC_AUTH_MODE=oauth, GSC_OAUTH_CLIENT_JSON, GSC_OAUTH_TOKEN_JSON
+6. GitHub secrets: GSC_OAUTH_CLIENT_JSON + GSC_OAUTH_TOKEN_JSON (base64-encoded JSON files)
+7. Test: python scripts/notify_gsc.py     # should print gsc_api: submitted
 ```
+
+**Option B — Service account (fallback if OAuth not possible):**
+
+```
+1. IAM → Service Accounts → Create → download JSON key
+2. GSC UI → Settings → Users → Add service account email as FULL user
+3. Set GSC_AUTH_MODE=service_account + GSC_SERVICE_ACCOUNT_JSON path
+```
+
+**Implementation:** `collectors/gsc_client.py` supports both modes. CI uses OAuth via `scripts/setup_ci_env.sh`.
 
 **Data pulled each run:**
 - `searchanalytics.query` — last 90 days, dimensions: `page`, `query`
@@ -2055,6 +2825,61 @@ playwright install chromium
 
 Use when GSC shows impressions but you need on-site engagement context.
 
+#### F.2.8 SE Ranking API (Backlink Agent — preferred)
+
+```
+1. Register at https://seranking.com → API access in account settings
+2. Copy API key → SE_RANKING_API_KEY
+3. Endpoint: GET /v1/backlinks/summary?target=jedmee.com
+4. Endpoint: GET /v1/backlinks/referring-domains?target={domain}&limit=1000
+5. QuotaManager: max 4 domains/run (JedMee + 3 competitors), 1 run/month
+6. Cache TTL: 30 days in backlink_snapshots.cache_expires_at
+```
+
+**Per-run budget:** 4 API calls (one summary + one referring-domains export per domain). Monthly only.
+
+#### F.2.9 Ahrefs API v3 (Backlink Agent — fallback)
+
+```
+1. Ahrefs account with API access (Enterprise or API add-on)
+2. Store: AHREFS_API_KEY
+3. Endpoint: GET /v3/site-explorer/refdomains?target=jedmee.com&limit=1000
+4. Same QuotaManager rules as SE Ranking — never call both APIs same run
+5. Prefer SE Ranking if both keys present (lower cost)
+```
+
+#### F.2.10 Hunter.io (Backlink outreach enrichment — optional)
+
+```
+1. Register at https://hunter.io → API key
+2. Store: HUNTER_API_KEY
+3. Called only for top 20 link_gap domains per backlink run
+4. Endpoint: GET /v2/domain-search?domain={gap_domain}&limit=3
+5. QuotaManager: max 20 calls/backlink run; skip if quota exhausted
+```
+
+#### F.2.11 AI Visibility LLM platforms (B.8 — uses existing keys)
+
+No new vendor required if `GEMINI_API_KEY` + `ANTHROPIC_API_KEY` already set:
+
+| Platform | API | Env var | Model default |
+|----------|-----|---------|---------------|
+| Gemini | Google Generative AI | `GEMINI_API_KEY` | `gemini-2.0-flash` |
+| Claude | Anthropic Messages | `ANTHROPIC_API_KEY` | `claude-sonnet-4-20250514` |
+| ChatGPT | OpenAI Chat Completions | `OPENAI_API_KEY` (optional) | `gpt-4o-mini` |
+| Perplexity | Perplexity Chat | `PERPLEXITY_API_KEY` (optional) | `sonar` |
+
+**Cost cap:** 5 prompts × 4 platforms = 20 calls max; cache in `ai_visibility_snapshots` 7 days.
+
+#### F.2.12 Reddit API (Research optional intent — B.2.1)
+
+```
+1. https://www.reddit.com/prefs/apps → create script app
+2. Store: REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT=JedMeeSEO/1.0
+3. Enable: REDDIT_ENABLED=true in config
+4. Max 5 query searches/run; fallback: SerpAPI site:reddit.com
+```
+
 ### F.3 API call budget per weekly run
 
 | Service | Calls/run | Calls/month (4 runs) | Within free tier? |
@@ -2066,21 +2891,52 @@ Use when GSC shows impressions but you need on-site engagement context.
 | Claude | ~20 LLM calls | ~80 | Pay-per-use (~$2–8/mo est.) |
 | Playwright | 4 page loads | 16 | Yes (compute only) |
 | Competitor HTTP | ~30–50 GETs | ~120–200 | Yes |
+| Reddit (optional) | ≤5 | ≤20 | Yes |
+| AI Visibility LLM | ≤20 (bi-weekly) | ≤40 | ~$0.20–1.00/mo |
+| Backlink API | 4 (monthly) | 4 | SE Ranking trial or paid |
+| Hunter.io | ≤20 (monthly) | ≤20 | Yes (free tier) |
+
+**Monthly-only run (Backlink Agent):** +4 SE Ranking/Ahrefs calls, +20 Hunter lookups — not counted in weekly budget.
 
 ### F.4 Environment file template
+
+**✅ Checked into repo:** `seo-agents/.env.example` (minimal — LLM, PSI, GSC, SerpAPI, CSE, site paths).
+
+**📋 Full template below** includes planned keys for B.7, B.8, B.2.1 (Reddit). Add these to `.env.example` when those features are implemented.
 
 ```bash
 # seo-agents/.env.example — copy to .env (never commit)
 
-# Required
+# Required (or GEMINI instead of Anthropic — see config.py LLM_PROVIDER)
 ANTHROPIC_API_KEY=sk-ant-...
+GEMINI_API_KEY=AIza...                    # alternative LLM provider
+LLM_PROVIDER=auto                         # auto | gemini | anthropic
 GOOGLE_PSI_API_KEY=AIza...
-GSC_SERVICE_ACCOUNT_JSON=./secrets/gsc-service-account.json
+GSC_AUTH_MODE=oauth
+GSC_PROPERTY_URL=https://jedmee.com/
+GSC_OAUTH_CLIENT_JSON=./secrets/gsc-oauth-client.json
+GSC_OAUTH_TOKEN_JSON=./secrets/gsc-oauth-token.json
+# Alternative: GSC_AUTH_MODE=service_account + GSC_SERVICE_ACCOUNT_JSON=./secrets/gsc-service-account.json
 SERPAPI_KEY=...
 
 # SerpAPI fallback (recommended)
 GOOGLE_CSE_API_KEY=AIza...
 GOOGLE_CSE_CX=...
+
+# Backlink Intelligence (B.7 — optional, monthly)
+SE_RANKING_API_KEY=                       # preferred
+AHREFS_API_KEY=                           # fallback if no SE Ranking
+HUNTER_API_KEY=                           # outreach email lookup
+
+# AI Visibility (B.8 — optional platforms)
+OPENAI_API_KEY=                           # ChatGPT probes
+PERPLEXITY_API_KEY=                       # Perplexity probes
+
+# Reddit intent (B.2.1 — optional)
+REDDIT_ENABLED=false
+REDDIT_CLIENT_ID=
+REDDIT_CLIENT_SECRET=
+REDDIT_USER_AGENT=JedMeeSEO/1.0
 
 # Target site
 SEO_SITE_URL=https://jedmee.com
@@ -2106,7 +2962,10 @@ When multiple APIs fail, the Manager still runs but task graph shrinks:
 | No SERP | Research produces GSC-only clusters; no competitor gaps | Technical, On-Page, Analytics |
 | No PSI | Technical skips CWV findings; uses last cache if any | All others |
 | No Playwright | Technical gets `spa_risk_score` from raw-only; **blocks Content expansion tasks** | Technical, On-Page, Research (GSC) |
-| No Claude | **Entire run aborts** | None |
+| No Claude/Gemini | **Run continues** — ContentAgent uses template copy | All rule-based agents |
+| No backlink API | Manager skips `BACKLINK_AUDIT`; last cache if <30 days | All weekly agents |
+| No AI Visibility keys | Skip `AI_VISIBILITY_PROBE`; run Gemini+Anthropic only if any LLM key | All others |
+| No Reddit | Research skips R4c; PAA + heading trees still run | All others |
 
 ---
 
@@ -2151,12 +3010,31 @@ flowchart TB
 
 ### G.2 Workflow files to create
 
-| File | Trigger | Purpose |
-|------|---------|---------|
-| `.github/workflows/seo-weekly-audit.yml` | `cron: '0 6 * * 1'` + `workflow_dispatch` | Full DataCollector + agents; upload artifacts; no frontend writes |
-| `.github/workflows/seo-pr-validation.yml` | PR paths: `frontend/src/pages/{Landing,About,Contact,Terms}*`, `frontend/public/*`, `frontend/src/utils/seo.js` | Run `validate_public_seo.py`; block merge on failure |
-| `.github/workflows/seo-apply-branch.yml` | `workflow_dispatch` with `run_id` input | Apply human-approved recs; open PR (never push to main) |
-| `.github/workflows/seo-gsc-health.yml` | `cron: '0 12 * * *'` (daily) | Lightweight GSC credential + property access check |
+| File | Status | Trigger | Purpose |
+|------|--------|---------|---------|
+| `.github/workflows/seo-weekly-audit.yml` | **✅** | `cron: '0 6 * * 1'` + `workflow_dispatch` | Full DataCollector + agents; upload artifacts; no frontend writes |
+| `.github/workflows/seo-pr-validation.yml` | **✅** | PR paths: `frontend/src/pages/{Landing,About,Contact,Terms}*`, `frontend/public/*`, `frontend/src/utils/seo.js` | Build + prerender; grep titles in `dist/` (inline checks, not `validate_public_seo.py`) |
+| `.github/workflows/seo-apply-branch.yml` | **✅** | `workflow_dispatch` with `run_id` input | `apply --no-git` → commit → open PR |
+| `.github/workflows/seo-gsc-health.yml` | **✅** | `cron: '0 12 * * *'` (daily) | `scripts/check_gsc_health.py` |
+| `.github/workflows/deploy.yml` (SEO steps) | **✅** | Push to `main` | Auto-optimize → build → GSC notify → `[seo-auto]` commit (see Implementation Status) |
+
+### G.2.1 `deploy.yml` SEO integration (**✅ implemented**)
+
+Inside the existing `deploy-frontend` job:
+
+```
+1. setup-python 3.11 + Playwright Chromium
+2. pip install seo-agents/requirements.txt
+3. ./scripts/setup_ci_env.sh          # writes .env + GSC OAuth JSON from secrets
+4. python main.py deploy --trigger ci --no-notify-gsc --skip-playwright
+   # audits LIVE jedmee.com, auto-approves ONPAGE recs, patches JSX
+   # skipped when commit message contains [seo-auto]
+5. [existing] npm run build + prerender → S3 + CloudFront
+6. python scripts/notify_gsc.py       # resubmit sitemap AFTER live deploy
+7. git commit frontend/src/pages/ if step 4 changed files → [seo-auto] push
+```
+
+**GitHub secrets required:** `GOOGLE_PSI_API_KEY`, `SERPAPI_KEY`, `GSC_OAUTH_CLIENT_JSON` (base64), `GSC_OAUTH_TOKEN_JSON` (base64). Optional: `GEMINI_API_KEY`.
 
 ### G.3 `seo-weekly-audit.yml` (full spec)
 
@@ -2203,27 +3081,21 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      - name: Write secrets to env
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+          chmod +x scripts/setup_ci_env.sh
+
+      - name: Write .env from secrets
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GOOGLE_PSI_API_KEY: ${{ secrets.GOOGLE_PSI_API_KEY }}
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
-          GOOGLE_CSE_API_KEY: ${{ secrets.GOOGLE_CSE_API_KEY }}
-          GOOGLE_CSE_CX: ${{ secrets.GOOGLE_CSE_CX }}
-          GSC_SA_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
-        run: |
-          echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" >> .env
-          echo "GOOGLE_PSI_API_KEY=$GOOGLE_PSI_API_KEY" >> .env
-          echo "SERPAPI_KEY=$SERPAPI_KEY" >> .env
-          echo "GOOGLE_CSE_API_KEY=$GOOGLE_CSE_API_KEY" >> .env
-          echo "GOOGLE_CSE_CX=$GOOGLE_CSE_CX" >> .env
-          echo "SEO_SITE_URL=https://jedmee.com" >> .env
-          echo "SEO_REPO_ROOT=${{ github.workspace }}" >> .env
-          echo "$GSC_SA_JSON" | base64 -d > secrets/gsc-sa.json
-          echo "GSC_SERVICE_ACCOUNT_JSON=./secrets/gsc-sa.json" >> .env
-
-      - name: Verify GSC access
-        run: python scripts/verify_gsc.py --property https://jedmee.com/
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GSC_OAUTH_CLIENT_B64: ${{ secrets.GSC_OAUTH_CLIENT_JSON }}
+          GSC_OAUTH_TOKEN_B64: ${{ secrets.GSC_OAUTH_TOKEN_JSON }}
+          SEO_REPO_ROOT: ${{ github.workspace }}
+        run: ./scripts/setup_ci_env.sh
 
       - name: Run full SEO cycle (no apply)
         run: python main.py run --trigger scheduled --goal "${{ inputs.goal }}"
@@ -2251,57 +3123,28 @@ jobs:
 
 **Important:** This job never writes to `frontend/`. Human approval happens offline; apply is a separate workflow.
 
-### G.4 `seo-pr-validation.yml` (merge gate)
+### G.4 `seo-pr-validation.yml` (**✅ implemented** — inline checks, not `validate_public_seo.py`)
 
 ```yaml
-name: Validate Public SEO
-
+# Actual workflow — no Python SEO validators; Node build + grep only
 on:
   pull_request:
     paths:
-      - 'frontend/src/pages/LandingPage.jsx'
-      - 'frontend/src/pages/AboutPage.jsx'
-      - 'frontend/src/pages/ContactPage.jsx'
-      - 'frontend/src/pages/TermsPage.jsx'
+      - 'frontend/src/pages/{Landing,About,Contact,Terms}Page.jsx'
       - 'frontend/src/utils/seo.js'
       - 'frontend/public/**'
       - 'frontend/index.html'
       - 'frontend/vite.config.js'
+      - 'frontend/scripts/prerender.mjs'
 
-jobs:
-  validate-seo:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install validators
-        run: pip install -r seo-agents/requirements-ci.txt
-
-      - name: Static SEO checks (repo source)
-        run: python seo-agents/scripts/validate_public_seo.py --mode static
-
-      - name: Build frontend (prerender if configured)
-        working-directory: frontend
-        run: |
-          npm ci
-          npm run build
-
-      - name: Serve dist and check rendered meta
-        run: |
-          npx serve frontend/dist -l 4173 &
-          sleep 3
-          python seo-agents/scripts/validate_public_seo.py --mode live --base-url http://localhost:4173
+steps:
+  - npm ci && npx playwright install chromium --with-deps
+  - npm run build                    # includes prerender.mjs
+  - for each dist/{index,about,contact,terms}/index.html:
+      test -f file && grep -q '<title>' file
 ```
+
+**✅ Uses `scripts/validate_public_seo.py`** — 7 static checks (E.3) + live prerender validation.
 
 ### G.5 `seo-apply-branch.yml` (human-approved changes only)
 
@@ -2349,84 +3192,65 @@ jobs:
 
 | Secret | Required for | How to obtain |
 |--------|--------------|---------------|
-| `ANTHROPIC_API_KEY` | Weekly audit | Anthropic console |
-| `GOOGLE_PSI_API_KEY` | Weekly audit | GCP API key |
-| `GSC_SERVICE_ACCOUNT_JSON` | Weekly audit | Base64-encoded service account JSON |
-| `SERPAPI_KEY` | Weekly audit | SerpAPI dashboard |
-| `GOOGLE_CSE_API_KEY` | Fallback SERP | GCP |
-| `GOOGLE_CSE_CX` | Fallback SERP | Programmable Search Engine |
-| `SLACK_WEBHOOK_URL` | Notifications | Slack app (optional) |
+| `GOOGLE_PSI_API_KEY` | Weekly audit + deploy | GCP API key |
+| `SERPAPI_KEY` | Weekly audit + deploy | SerpAPI dashboard |
+| `GSC_OAUTH_CLIENT_JSON` | Weekly audit + deploy | Base64-encoded OAuth client JSON |
+| `GSC_OAUTH_TOKEN_JSON` | Weekly audit + deploy | Base64-encoded OAuth token JSON (from `authorize_gsc_oauth.py`) |
+| `GEMINI_API_KEY` | ContentAgent LLM (optional) | Google AI Studio |
+| `ANTHROPIC_API_KEY` | ContentAgent LLM (optional) | Anthropic console |
+| `GOOGLE_CSE_API_KEY` | Fallback SERP (optional) | GCP |
+| `GOOGLE_CSE_CX` | Fallback SERP (optional) | Programmable Search Engine |
+| `SLACK_WEBHOOK_URL` | Notifications (optional) | Slack app — **📋 not wired** |
 | `AWS_ACCESS_KEY_ID` | Deploy (existing) | Already in deploy.yml |
 | `AWS_SECRET_ACCESS_KEY` | Deploy (existing) | Already in deploy.yml |
 | `FRONTEND_S3_BUCKET` | Deploy (existing) | Already in deploy.yml |
 | `CLOUDFRONT_DISTRIBUTION_ID` | Deploy (existing) | Already in deploy.yml |
 
-### G.7 End-to-end deploy process (SEO → production)
+### G.7 End-to-end deploy process (SEO → production) — **✅ two paths**
+
+**Path A — Automated (production default on push to `main`):**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ WEEKLY (automated)                                                       │
-│  1. seo-weekly-audit.yml runs Monday 06:00 UTC                         │
-│  2. DataCollector → Manager plan → 5 agents → Manager synthesize         │
-│  3. Recommendations saved as PENDING in SQLite artifact                  │
-│  4. Slack/email: "Review run <uuid>"                                     │
+│ deploy.yml (on push to main, skip if [seo-auto] in commit message)       │
+│  1. setup_ci_env.sh → write .env + GSC OAuth secrets                     │
+│  2. python main.py deploy --trigger ci --no-notify-gsc --skip-playwright │
+│     → audit LIVE jedmee.com → auto-approve ONPAGE → patch JSX            │
+│     → all steps logged to agent_activity table                           │
+│  3. npm run build (prerender) → S3 → CloudFront invalidation             │
+│  4. python scripts/notify_gsc.py → resubmit sitemap                      │
+│  5. If step 2 changed frontend/src/pages/: commit [seo-auto] + push      │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Path B — Human-gated (weekly audit + manual apply):**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│ WEEKLY (automated, read-only)                                            │
+│  1. seo-weekly-audit.yml — Monday 06:00 UTC                             │
+│  2. python main.py run → recommendations PENDING in SQLite artifact       │
+│  3. Human downloads artifact or runs review locally                        │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ HUMAN REVIEW (manual, local or GitHub artifact download)                 │
-│  5. python main.py review --run-id <uuid>                                │
-│  6. python main.py approve --run-id <uuid> --rec-id R001,R003            │
-│  7. python main.py reject --run-id <uuid> --rec-id R002 --reason "..."   │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│ APPLY (manual workflow_dispatch or local)                                │
-│  8. python main.py apply --run-id <uuid>  OR  seo-apply-branch.yml       │
-│  9. Creates branch seo/<run_id_short> with JSX/sitemap patches           │
-│ 10. Opens PR → seo-pr-validation.yml must pass                           │
-└─────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────┐
-│ MERGE + DEPLOY (existing pipeline)                                       │
-│ 11. Human merges PR to main                                              │
-│ 12. deploy.yml: npm run build (with prerender) → S3 → CloudFront         │
-│ 13. DataCollector next run verifies live site matches applied changes    │
+│ HUMAN REVIEW + APPLY (manual)                                            │
+│  4. python main.py review / approve / reject                             │
+│  5. python main.py apply --run-id <uuid> → branch seo/<short-id>         │
+│  6. Open PR → seo-pr-validation.yml → merge → deploy.yml                 │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### G.8 Integration with existing `deploy.yml`
+**View what happened:** `python main.py activity --run-id <uuid>`
 
-No changes required to deploy.yml for Phase 0. **Phase 1 addition** — insert a `validate-seo` job before `deploy-frontend`:
+### G.8 Integration with existing `deploy.yml` — **✅ implemented**
 
-```yaml
-# Add to deploy.yml (Phase 1)
-  validate-seo-on-main:
-    name: Validate SEO before deploy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: pip install -r seo-agents/requirements-ci.txt
-      - run: python seo-agents/scripts/validate_public_seo.py --mode static
+SEO auto-optimize is **embedded inside `deploy-frontend`** (not a separate job). See **G.2.1** for step-by-step.
 
-  deploy-frontend:
-    needs: [deploy-backend, validate-seo-on-main]  # add dependency
-```
-
-After prerender ships, add a post-deploy smoke step:
-
-```yaml
-      - name: Verify live meta tags
-        run: |
-          for path in "" about contact terms; do
-            URL="https://jedmee.com/${path}"
-            TITLE=$(curl -sL "$URL" | grep -oP '(?<=<title>)[^<]+' | head -1)
-            echo "$URL → title: $TITLE"
-            [ -n "$TITLE" ] || exit 1
-          done
-```
+**📋 Planned additions (not yet in deploy.yml):**
+- Pre-deploy `validate_public_seo.py` static checks
+- Post-deploy live title smoke test (curl jedmee.com pages)
 
 ---
 
@@ -2434,15 +3258,16 @@ After prerender ships, add a post-deploy smoke step:
 
 ### H.1 Phase summary
 
-| Phase | Duration | Goal | Exit criteria |
-|-------|----------|------|---------------|
-| **0 — Foundation** | Week 1–2 | Prerender + repo scaffold + GSC/PSI wired | `curl jedmee.com` returns `<title>` in raw HTML; `main.py collect` succeeds |
-| **1 — DataCollector** | Week 3 | Full 7-step pipeline, DB schema, no agents | `run_context.json` generated with all 7 steps |
-| **2 — Manager + Technical** | Week 4 | Planning + technical findings JSON | Manager produces task graph; Technical returns structured findings |
-| **3 — Research + On-Page** | Week 5 | SERP/GSC-driven opportunities + meta recs | Opportunity map from live data only; On-Page recs with file patches |
-| **4 — Content + Analytics** | Week 6 | Copy proposals + feedback signals | Content additions JSON; Analytics `manager_feedback.signals` |
-| **5 — Human loop + CI** | Week 7 | Approval CLI + GitHub workflows | PR opened from apply; validation blocks bad merges |
-| **6 — Production cadence** | Week 8+ | Weekly automated runs | 2 consecutive successful weekly runs; 1 merged SEO PR |
+| Phase | Duration | Goal | Exit criteria | Status |
+|-------|----------|------|---------------|--------|
+| **0 — Foundation** | Week 1–2 | Prerender + repo scaffold + GSC/PSI wired | `main.py collect` succeeds; prerender in build | **✅** code; **🔶** prod deploy |
+| **1 — DataCollector** | Week 3 | Full 7-step pipeline, DB schema, no agents | `run_context.json` with all 7 steps | **✅** |
+| **2 — Manager + Technical** | Week 4 | Planning + technical findings JSON | Task graph + structured findings | **✅** |
+| **3 — Research + On-Page** | Week 5 | SERP/GSC-driven opportunities + meta recs | Opportunity map from live data; ONPAGE patches | **✅** (basic SERP) |
+| **4 — Content + Analytics** | Week 6 | Copy proposals + feedback signals | Content JSON; Analytics signals | **✅** |
+| **5 — Human loop + CI** | Week 7 | Approval CLI + GitHub workflows | PR from apply; validation on PRs | **✅** CLI + pr-validation; apply-branch workflow 📋 |
+| **6 — Production cadence** | Week 8+ | Weekly automated runs + deploy auto-apply | 2 consecutive weekly runs; deploy.yml SEO on push | **✅** cron + deploy wired; pending first push |
+| **7 — v2 agents** | Month 2+ | B.2.1, B.7, B.8, Part L | PAA, backlinks, AI visibility, ratings | **📋** |
 
 ### H.2 Phase 0 — Foundation (detailed process)
 
@@ -2454,9 +3279,9 @@ After prerender ships, add a post-deploy smoke step:
 | 1 | Install prerender in `frontend/vite.config.js` | Dev | 4 routes prerendered in `dist/` |
 | 2 | Verify raw HTML has title, meta, JSON-LD | Dev | Screenshot + curl log |
 | 2 | Create `seo-agents/` package skeleton | Dev | `requirements.txt`, `main.py`, `config.py` |
-| 3 | GCP: PSI key + GSC service account | DevOps | Secrets in GitHub |
-| 3 | `scripts/verify_gsc.py` passes | Dev | CI-green check script |
-| 4 | SQLite schema migration `db/migrations/001_init.sql` | Dev | 8 tables created |
+| 3 | GCP: PSI key + GSC OAuth | DevOps | Secrets in GitHub |
+| 3 | GSC OAuth authorized | Dev | `python scripts/authorize_gsc_oauth.py` then test `notify_gsc.py` |
+| 4 | SQLite schema migrations | Dev | **✅** 001–008 applied (13 tables) |
 | 5 | Deploy prerender to production via existing deploy.yml | DevOps | Live site passes raw title check |
 
 **Week 2**
@@ -2475,7 +3300,7 @@ Each production week follows this **fixed process** (agents inside are dynamic; 
 
 ```
 Monday 06:00 UTC  → GitHub cron triggers seo-weekly-audit.yml
-Monday 07:00 UTC  → Artifacts available; Slack summary posted
+Monday 07:00 UTC  → Artifacts available + GitHub Step Summary + optional Slack
 Monday–Tuesday    → Human reviews PENDING recommendations
 Wednesday         → Approve/reject via CLI
 Wednesday         → apply → PR opened
@@ -2503,88 +3328,91 @@ Complete tree for `seo-agents/` plus CI scripts. **Every file listed with: role,
 
 ### I.1 Directory tree
 
+**✅ Implemented files (in repo today):**
+
 ```
 seo-agents/
-├── main.py                          # CLI entry: run | collect | review | approve | apply | reject
-├── config.py                        # Site URL, paths, model names, quota caps
-├── requirements.txt                 # crewai, anthropic, playwright, google-api-* , etc.
-├── requirements-ci.txt              # Minimal deps for validate scripts only
-├── .env.example                     # Template (see F.4)
+├── main.py                          # CLI: collect | run | deploy | review | approve | reject | apply | activity
+├── config.py                        # Site URL, paths, LLM provider, quota caps, GSC OAuth paths
+├── requirements.txt                 # requests, bs4, playwright, google APIs, gemini, anthropic
+├── .env.example                     # PSI, GSC OAuth, SerpAPI, site paths (see F.4)
+├── .gitignore                       # .env, secrets/, outputs/, db/runs.db, .venv/
 │
 ├── agents/
-│   ├── manager.py                   # plan_sprint() + synthesize() + stage_for_review()
-│   ├── research.py                  # Research Agent
-│   ├── technical.py                 # Technical SEO Agent
-│   ├── onpage.py                    # On-Page SEO Agent
-│   ├── content.py                   # Content Agent
-│   └── analytics.py                 # Analytics Agent
+│   ├── orchestrator.py              # run_full_cycle(): collect → agents → stage → report.md + activity log
+│   ├── manager.py                   # Rule-based plan_sprint + synthesize + stage_for_review
+│   ├── technical.py                 # SPA, CWV, schema, sitemap findings
+│   ├── research.py                  # GSC clusters + SERP v2 (PAA, heading trees, related searches)
+│   ├── onpage.py                    # Title/meta/keywords recommendations (blocked if severity≥5)
+│   ├── content.py                   # FAQ/section proposals; optional LLM drafting
+│   ├── analytics.py                 # GSC week-over-week + signals + gsc_baselines
+│   ├── ai_visibility.py             # Gemini-only AI mention probes (3 prompts)
+│   └── tasks.py                     # Task dataclass + task_graph JSON + priority_score
 │
 ├── collectors/
-│   ├── data_collector.py            # Orchestrates Steps 1–7 → run_context.json
-│   ├── http_crawler.py              # Step 1: raw HTTP
-│   ├── playwright_crawler.py        # Step 2: rendered DOM
-│   ├── repo_parser.py               # Step 3: JSX, sitemap, robots, llms.txt
+│   ├── data_collector.py            # Steps 1–7 → run_context.json + activity log per step
+│   ├── http_crawler.py              # Step 1: raw HTTP crawl
+│   ├── playwright_crawler.py        # Step 2: Playwright render
+│   ├── repo_parser.py               # Step 3: JSX/sitemap/robots/llms.txt parse
 │   ├── psi_client.py                # Step 4: PageSpeed Insights
-│   ├── gsc_client.py                # Step 5: Search Console
-│   ├── serp_client.py               # Step 6: SerpAPI + CSE + competitor fetch
-│   └── render_delta.py              # Step 7: SPA risk scoring
+│   ├── gsc_client.py                # Step 5: GSC Search Analytics (OAuth or service account)
+│   ├── serp_client.py               # Step 6: SerpAPI/CSE + PAA + top-5 competitors (H1–H6 trees)
+│   ├── render_delta.py              # Step 7: SPA risk scoring
+│   └── html_extract.py              # Shared HTML parsing (title, meta, H1–H6, JSON-LD, heading hierarchy)
 │
 ├── tools/
-│   ├── quota_manager.py             # API gates (see E.5)
-│   ├── db.py                        # SQLite ORM / queries
-│   ├── llm.py                       # Anthropic wrapper with JSON mode
-│   ├── jsx_patcher.py               # Safe SEO_CONFIG / useSeoMeta edits
-│   ├── markdown_report.py           # JSON → human-readable .md
-│   └── scoring.py                   # priority_score = severity × impact × (6-effort)
+│   ├── db.py                        # SQLite CRUD (13 tables), init_db(), migrations, human_feedback
+│   ├── activity_log.py              # log_ok/error/skip/warn → agent_activity table
+│   ├── quota_manager.py             # API gates + TTL cache (PSI 6h, GSC 24h, SerpAPI monthly)
+│   ├── llm.py                       # Gemini / Anthropic (ContentAgent + AIVisibility)
+│   ├── jsx_patcher.py               # Regex patch useSeoMeta fields in JSX
+│   ├── content_patcher.py           # Append FAQ entries to LandingPage SEO_CONFIG.faqs
+│   ├── apply_patches.py             # apply_approved_onpage + apply_approved_content
+│   ├── gsc_indexing.py              # GSC sitemap resubmit + Google ping
+│   └── scoring.py                   # priority_score(severity, impact, effort)
 │
-├── schemas/
-│   ├── run_context.schema.json      # DataCollector output contract
-│   ├── task_graph.schema.json       # Manager plan output
-│   ├── research_output.schema.json
-│   ├── technical_output.schema.json
-│   ├── onpage_output.schema.json
-│   ├── content_output.schema.json
-│   └── analytics_output.schema.json
+├── db/migrations/
+│   ├── 001_init.sql … 005_agent_activity.sql
+│   ├── 006_serp_v2_columns.sql      # PAA, related_searches, answer_box on serp_snapshots
+│   ├── 007_human_feedback.sql       # human_feedback, agent_accuracy_scores
+│   └── 008_ai_visibility.sql        # ai_visibility_snapshots
 │
 ├── scripts/
-│   ├── verify_gsc.py                # One-time + daily health check
-│   ├── validate_public_seo.py       # CI static + live checks (E.3)
-│   ├── apply_recommendations.py     # Patch frontend, git branch, optional PR
-│   ├── render_summary.py            # GitHub Step Summary markdown
-│   └── notify_slack.py              # Webhook notification
+│   ├── setup_ci_env.sh              # CI: write .env + decode GSC OAuth secrets
+│   ├── authorize_gsc_oauth.py       # One-time local OAuth for GSC
+│   ├── notify_gsc.py                # Post-deploy GSC sitemap resubmit
+│   ├── validate_public_seo.py       # PR CI: 7 static + live prerender checks
+│   ├── check_gsc_health.py          # Daily GSC credential check
+│   ├── render_summary.py            # GitHub Step Summary for weekly audit
+│   └── notify_slack.py              # Optional Slack webhook notification
 │
-├── db/
-│   ├── migrations/
-│   │   └── 001_init.sql             # 8 tables (Part C.2)
-│   └── runs.db                      # Gitignored; CI uploads as artifact
-│
-├── outputs/
-│   └── <run_id>/
-│       ├── run_context.json
-│       ├── task_graph.json
-│       ├── research.json
-│       ├── technical.json
-│       ├── onpage.json
-│       ├── content.json
-│       ├── analytics.json
-│       ├── executive_summary.json
-│       └── report.md                # Generated from JSON
-│
-└── secrets/                         # Gitignored
-    └── gsc-service-account.json
+├── outputs/<run_id>/                # gitignored — run_context.json, agent JSON, report.md
+├── db/runs.db                       # gitignored — SQLite (created on first run)
+└── secrets/                         # gitignored — gsc-oauth-client.json, gsc-oauth-token.json
+```
 
+**📋 Still planned (not in repo):**
+
+```
+agents/backlink.py, collectors/backlink_client.py
+db/migrations/009_backlink_snapshots.sql
+schemas/*.json
+Prompt retraining from human_feedback (Part L.4)
+```
+
+```
 .github/workflows/
-├── deploy.yml                       # EXISTING — backend + frontend deploy
-├── seo-weekly-audit.yml             # NEW — Part G.3
-├── seo-pr-validation.yml            # NEW — Part G.4
-├── seo-apply-branch.yml             # NEW — Part G.5
-└── seo-gsc-health.yml               # NEW — daily credential check
+├── deploy.yml                       # ✅ backend + frontend deploy + SEO auto-optimize
+├── seo-weekly-audit.yml             # ✅ weekly cron + workflow_dispatch
+├── seo-pr-validation.yml            # ✅ validate_public_seo.py + prerender build
+├── seo-apply-branch.yml             # ✅ manual apply → PR
+└── seo-gsc-health.yml               # ✅ daily GSC health
 
-frontend/  (targets — not owned by seo-agents, patched via apply)
-├── src/pages/LandingPage.jsx        # SEO_CONFIG, FAQs, pricing
-├── src/pages/AboutPage.jsx
-├── src/pages/ContactPage.jsx        # useSeoMeta; needs useJsonLd
-├── src/pages/TermsPage.jsx
+frontend/  (targets — patched by seo-agents apply/deploy)
+├── src/pages/LandingPage.jsx        # SEO_CONFIG, FAQs, pricing, useSeoMeta, useJsonLd
+├── src/pages/AboutPage.jsx          # useSeoMeta + useJsonLd
+├── src/pages/ContactPage.jsx        # useSeoMeta + useJsonLd (ContactPage schema) ✅
+├── src/pages/TermsPage.jsx          # useSeoMeta + useJsonLd (WebPage schema) ✅
 ├── src/utils/seo.js                 # useSeoMeta, useJsonLd hooks
 ├── public/sitemap.xml
 ├── public/robots.txt
@@ -2599,24 +3427,35 @@ frontend/  (targets — not owned by seo-agents, patched via apply)
 | Attribute | Detail |
 |-----------|--------|
 | **Role** | CLI orchestrator for the full system |
-| **Commands** | `run`, `collect`, `review`, `approve`, `reject`, `apply` |
+| **Commands** | `collect`, `run`, `deploy`, `review`, `approve`, `reject`, `rate`, `apply`, `activity` |
 | **Inputs** | CLI flags, `.env`, optional `--goal` string |
-| **Outputs** | Triggers full pipeline; writes to `outputs/<run_id>/` and `db/runs.db` |
-| **When** | Local dev, GitHub weekly cron, human apply |
+| **Outputs** | Triggers full pipeline; writes to `outputs/<run_id>/`, `db/runs.db`, `agent_activity` |
+| **When** | Local dev, GitHub weekly cron (`run`), GitHub deploy (`deploy`), human apply |
 
-**`run` command internal process:**
+| Command | File logic | What it does |
+|---------|------------|--------------|
+| `collect` | `cmd_collect` → `data_collector.collect()` | Steps 1–7 only; writes `run_context.json` |
+| `run` | `cmd_run` → `orchestrator.run_full_cycle()` | Full cycle; stages recs for human review |
+| `deploy` | `cmd_deploy` → `run_full_cycle()` + auto-approve ONPAGE + `apply_patches` + optional GSC | Production pipeline used by `deploy.yml` |
+| `review` | `cmd_review` → `db.list_recommendations()` | Print staged recommendations |
+| `approve` | `cmd_approve` → `db.approve_recommendations()` | Mark recs APPROVED |
+| `reject` | `cmd_reject` → `db.reject_recommendation()` | Mark rec REJECTED with reason |
+| `rate` | `cmd_rate` → `db.save_human_feedback()` + `compute_agent_accuracy()` | Score rec 1–5 stars |
+| `apply` | `cmd_apply` → `apply_all_approved()` | Patch ONPAGE meta + approved FAQ additions |
+| `activity` | `cmd_activity` → `db.list_agent_activity()` | View agent task audit log |
+
+**`run` / `deploy` internal process (matches `agents/orchestrator.py`):**
 ```
-1. Generate run_id (UUID)
-2. Insert runs table row (status=running, trigger=cli|scheduled)
-3. DataCollector.collect() → run_context.json
-4. Manager.plan_sprint(run_context) → task_graph.json
-5. For each task in task_graph (score order):
-     dispatch to agent module
-     save agent JSON to outputs/<run_id>/
-6. Manager.synthesize(all agent outputs) → executive_summary.json
-7. Manager.stage_for_review() → pending_recommendations table
-8. markdown_report.generate() → report.md
-9. Update runs.status=completed
+1. Generate run_id (UUID); db.create_run(status=running)
+2. DataCollector.collect() → run_context.json  (or --skip-collect reuses file)
+3. ManagerAgent.plan_sprint() → task_graph.json
+4. Run agents: Technical → Research → OnPage → Content → Analytics → AIVisibility
+5. ManagerAgent.synthesize() → executive_summary.json
+6. ManagerAgent.stage_for_review() → pending_recommendations
+7. orchestrator._write_report() → report.md
+8. [deploy only] auto-approve ONPAGE → apply_patches → notify_gsc (optional)
+9. db.complete_run(status=completed)
+— all steps logged to agent_activity
 ```
 
 #### `config.py`
@@ -2637,40 +3476,49 @@ frontend/  (targets — not owned by seo-agents, patched via apply)
 | `repo_parser.py` | 3 | `frontend/` paths | `repo_parse.*` | Regex/AST extract `SEO_CONFIG`, `useSeoMeta`, `useJsonLd`; read sitemap/robots/llms |
 | `psi_client.py` | 4 | URLs × mobile/desktop | `pagespeed[]` | PSI API with 6h cache via `quota_manager` |
 | `gsc_client.py` | 5 | GSC property | `gsc_by_page`, `gsc_queries` | 90-day query+page dimensions; top 20 queries per page |
-| `serp_client.py` | 6 | Top GSC queries | `serp_snapshots[]`, `competitor_pages[]` | SerpAPI/CSE → fetch top 5 competitor URLs with BS4 |
+| `serp_client.py` | 6 | Top GSC queries | `serp_snapshots[]` (+PAA, related), `competitor_pages[]` (+H1–H6 trees) | SerpAPI/CSE → top 5 competitor URLs with BS4 |
 | `render_delta.py` | 7 | raw + rendered per page | `pages[].spa_risk_score` | Diff title/meta/schema/word count; score 0.0–1.0 |
 
 ### I.4 Agent files
 
 | File | Input | Output file | Writes to frontend? |
 |------|-------|-------------|---------------------|
+| `orchestrator.py` | `run_context`, tasks | N/A (orchestrator) | Coordinates full agent cycle; writes all JSON + `report.md` | No |
 | `manager.py` | `run_context.json`, DB history | `task_graph.json`, `executive_summary.json` | No |
 | `research.py` | `run_context`, task slice | `research.json` | No |
 | `technical.py` | `run_context`, task slice | `technical.json` | No |
 | `onpage.py` | `run_context`, `research.json`, tasks | `onpage.json` | No (patches staged only) |
 | `content.py` | `run_context`, `research.json`, `onpage.json` | `content.json` | No |
 | `analytics.py` | All agent outputs + `run_context` | `analytics.json` | No |
+| `ai_visibility.py` | ctx, tasks | `ai_visibility.json` | No — Gemini probes only |
 
 ### I.5 Tool files
 
 | File | Used by | Function |
 |------|---------|----------|
-| `quota_manager.py` | All collectors, serp_client | `check_and_consume(api)` → True / CACHED / False |
-| `db.py` | All | CRUD for runs, snapshots, cache, pending_recommendations |
-| `llm.py` | All agents | `complete_json(prompt, schema)` → validated dict |
-| `jsx_patcher.py` | `apply_recommendations.py` | Apply `file_patch` objects to JSX safely |
-| `markdown_report.py` | `main.py run` | Render `report.md` from agent JSON |
-| `scoring.py` | Manager, agents | Unified priority formula |
+| `quota_manager.py` | Collectors (PSI, GSC, SerpAPI, CSE) | `check_and_consume(api)` → OK / CACHED / exhausted |
+| `db.py` | All | CRUD for 13 tables; `init_db()`; `human_feedback`; `agent_accuracy_scores` |
+| `activity_log.py` | data_collector, orchestrator, main.py | `log_ok/error/skip/warn` → `agent_activity` |
+| `apply_patches.py` | `main.py apply`, `main.py deploy` | `apply_all_approved()` — ONPAGE + FAQ content |
+| `content_patcher.py` | `apply_patches.py` | `append_faq_to_landing()` in `LandingPage.jsx` |
+| `gsc_indexing.py` | `main.py deploy`, `scripts/notify_gsc.py` | `notify_indexing_updated_pages()` |
+| `llm.py` | ContentAgent, AIVisibilityAgent | Gemini / Anthropic text completion |
+| `jsx_patcher.py` | `apply_patches.py` | `patch_use_seo_meta_field()` |
+| `scoring.py` | Manager, tasks | `priority_score(severity, impact, effort)` |
+
+**📋 Planned (not in repo):** `markdown_report.py` (report is inline in orchestrator today)
 
 ### I.6 Script files
 
-| File | Trigger | Checks / actions |
-|------|---------|------------------|
-| `verify_gsc.py` | Setup, daily cron | Service account can read jedmee.com property |
-| `validate_public_seo.py` | PR CI, pre-deploy | 8 checks from E.3 (static + optional live) |
-| `apply_recommendations.py` | Human `apply` command | Read approved rows → patch → `git checkout -b seo/<id>` → commit |
-| `render_summary.py` | Weekly CI summary step | Top 3 actions → Markdown for GitHub UI |
-| `notify_slack.py` | Weekly CI | Post run_id, blocker count, review command |
+| File | Status | Trigger | Checks / actions |
+|------|--------|---------|------------------|
+| `setup_ci_env.sh` | **✅** | `deploy.yml`, `seo-weekly-audit.yml` | Write `.env` + decode base64 GSC OAuth JSON to `secrets/` |
+| `notify_gsc.py` | **✅** | `deploy.yml` post-deploy | Resubmit sitemap via `tools/gsc_indexing.py` |
+| `authorize_gsc_oauth.py` | **✅** | One-time local setup | Browser OAuth flow; saves token to `secrets/gsc-oauth-token.json` |
+| `validate_public_seo.py` | **✅** | `seo-pr-validation.yml` | 7 static checks (E.3) + live prerender title checks |
+| `check_gsc_health.py` | **✅** | `seo-gsc-health.yml` | Daily GSC credential + property access |
+| `render_summary.py` | **✅** | `seo-weekly-audit.yml` | GitHub Step Summary markdown |
+| `notify_slack.py` | **✅** | `seo-weekly-audit.yml` | Optional Slack (`SLACK_WEBHOOK_URL`) |
 
 ### I.7 Frontend files (SEO targets — read by repo_parser, written by apply)
 
@@ -2678,8 +3526,8 @@ frontend/  (targets — not owned by seo-agents, patched via apply)
 |------|---------|------------|--------------|
 | `LandingPage.jsx` | repo_parser, On-Page, Content | apply (approved) | `SEO_CONFIG.title/description/keywords`, FAQ arrays, hero copy |
 | `AboutPage.jsx` | repo_parser, On-Page, Content | apply | `useSeoMeta` args, body sections |
-| `ContactPage.jsx` | repo_parser, Technical | apply | `useSeoMeta`, add `useJsonLd` ContactPage schema |
-| `TermsPage.jsx` | repo_parser | apply | `useSeoMeta`, `useJsonLd` |
+| `ContactPage.jsx` | repo_parser, Technical | apply | `useSeoMeta` + `useJsonLd` ContactPage schema ✅ |
+| `TermsPage.jsx` | repo_parser | apply | `useSeoMeta` + `useJsonLd` WebPage schema ✅ |
 | `seo.js` | repo_parser | Rarely (only if hook defaults change) | BASE_DESC, BASE_KEYWORDS |
 | `sitemap.xml` | repo_parser, apply | apply | `<lastmod>` dates after content change |
 | `robots.txt` | repo_parser, Technical | apply (rare) | Allow/Disallow fixes |
@@ -2816,6 +3664,25 @@ Step M-S7  stage_for_review() → INSERT pending_recommendations (status=PENDING
 
 ### J.4 Research Agent dynamic steps
 
+#### J.4.1 Implemented today (**✅** `agents/research.py`)
+
+```
+Step R1  Load gsc_queries + serp_snapshots + competitor_pages from run_context
+
+Step R2  Build opportunity clusters from GSC (impressions >= 10)
+          One cluster per page|query; score by impressions + position
+
+Step R3  Enrich clusters with SERP data
+          jedmee_serp_position, top_competitor (position 1–3)
+          content_gaps = competitor h2s (flat list, top 5 URLs per query)
+
+Step R4  Sort by opportunity_score; cap at 15 clusters
+
+Step R5  WRITE research.json { opportunity_map, new_query_discoveries, quota_used }
+```
+
+#### J.4.2 Planned v2 steps (**📋** B.2.1 — replaces shallow H2-only flow when implemented)
+
 ```
 Step R1  Load tasks where type IN (RESEARCH_*)
 
@@ -2827,26 +3694,67 @@ Step R2  [IF task RESEARCH_OPPORTUNITY_MAP]
 Step R3  [FOR each cluster, max 15]
           primary_query = highest impressions query in cluster
           IF serp_snapshot cached < 12h: use cache
-          ELIF quota OK: fetch SERP
+          ELIF quota OK: fetch SERP via SerpAPI
           ELSE: mark cluster serp_status=DEFERRED; CONTINUE with GSC data only
 
-Step R4  [FOR each cluster with SERP data]
-          jedmee_position = SERP result matching jedmee.com or None
-          top_competitor = position 1 result
-          IF competitor HTML in run_context.competitor_pages: parse H2s, word_count, FAQ
-          ELSE: fetch with requests (timeout 10s)
+Step R3b [SERP feature extraction — per fetched query]
+          From SerpAPI response extract and store in serp_snapshots:
+            - organic_results[1..10]
+            - related_questions → people_also_ask (JSON)
+            - related_searches
+            - answer_box (if present)
 
-Step R5  LLM gap analysis
-          Input: jedmee topics (rendered H2s) + competitor H2s + cluster intent
+Step R4  [FOR each cluster with SERP data — top 10, not top 3]
+          jedmee_position = SERP result matching jedmee.com or None
+          FOR position 1..10 in organic_results:
+            IF competitor HTML in run_context.competitor_pages: use cache
+            ELSE: fetch with requests (timeout 10s)
+            Parse full heading hierarchy H1–H6 → competitor_snapshots.heading_hierarchy
+            Store word_count, schema_types, faq_schema, video_embed
+
+Step R4b [People Also Ask aggregation]
+          FOR each PAA question across all queries this run:
+            Dedupe by normalized text
+            Map to target_page (same logic as keyword clusters)
+            IF PAA question NOT in JedMee FAQs AND NOT in rendered H2s/H3s:
+              → missing_topic candidate (evidence: "paa")
+
+Step R4c [Reddit intent scrape — OPTIONAL]
+          IF REDDIT_ENABLED=true AND quota OK (max 5 queries/run):
+            FOR top 5 GSC queries by impressions:
+              Search Reddit (API or SerpAPI site:reddit.com)
+              Extract thread title, top comment themes → reddit_intent_signals[]
+          ELSE: skip; note reddit_status=SKIPPED in research.json
+
+Step R5  Missing topics report (replaces simple H2-only gap list)
+          missing_topics = (
+            topics in top-5 competitor heading_hierarchies
+            UNION people_also_ask questions
+            UNION reddit_themes
+          ) MINUS (
+            jedmee rendered H2s + H3s + SEO_CONFIG.faqs
+          )
+          For each missing_topic: evidence_sources[], recommended_agent, priority_score
+
+Step R6  LLM gap analysis (uses missing_topics + cluster intent)
+          Input: jedmee topics + competitor heading trees + PAA + reddit signals
           Output: content_gaps[], recommended_action, recommended_agent
 
-Step R6  Score opportunities (formula in B.2)
+Step R7  Score opportunities (formula in B.2)
           Assign target_page (must be existing PUBLIC_PATH)
 
-Step R7  Detect new_query_discoveries (queries in GSC not in prior run's research.json)
+Step R8  Detect new_query_discoveries (queries in GSC not in prior run's research.json)
 
-Step R8  WRITE research.json with quota_used
+Step R9  WRITE research.json with:
+          - serp_structure[] (PAA, top10_heading_trees, missing_topics)
+          - reddit_intent_signals[] (if enabled)
+          - quota_used
 ```
+
+**Success gate before marking COMPLETE:**
+- ≥80% of fetched SERP URLs have heading_hierarchy stored
+- Every primary query with SerpAPI data has people_also_ask captured (may be empty array)
+- missing_topics[] has ≥1 evidence_source per entry
 
 ### J.5 Technical SEO Agent dynamic steps
 
@@ -2988,7 +3896,7 @@ Step A7  WRITE analytics.json
 | `TECH_SITEMAP_FIX` | Technical | T4 |
 | `TECH_CWV` | Technical | T5 |
 | `TECH_PERF` | Technical | T5 |
-| `RESEARCH_OPPORTUNITY_MAP` | Research | R2–R8 |
+| `RESEARCH_OPPORTUNITY_MAP` | Research | R2–R9 |
 | `RESEARCH_SERP_DEFERRED_NOTE` | Research | R2 (fallback mode) |
 | `ONPAGE_META_REWRITE` | On-Page | O4 |
 | `ONPAGE_H1_ALIGN` | On-Page | O5 |
@@ -2996,6 +3904,9 @@ Step A7  WRITE analytics.json
 | `CONTENT_FAQ_ADD` | Content | C3d, C4 |
 | `CONTENT_LLMS_UPDATE` | Content | C5 |
 | `ANALYTICS_WEEKLY` | Analytics | A1–A7 (always last) |
+| `BACKLINK_AUDIT` | Backlink | J.11 (monthly) |
+| `AI_VISIBILITY_PROBE` | AI Visibility | J.12 (bi-weekly) |
+| `RESEARCH_REDDIT_INTENT` | Research | R4c (optional sub-step) |
 
 ### J.10 Example: how one run differs from the next
 
@@ -3012,47 +3923,119 @@ Step A7  WRITE analytics.json
 → Content: 2 FAQ additions, 1 section expansion  
 → Analytics: signal `ONPAGE_CTR_OPPORTUNITY` → route_to_agent=OnPage next sprint if not approved  
 
+### J.11 Backlink Intelligence Agent dynamic steps (monthly — **📋 Planned**)
+
+```
+Step BL1  Load task BACKLINK_AUDIT (Manager creates only if days_since_last > 28)
+
+Step BL2  Build competitor set
+          FROM serp_snapshots: unique domains positions 1–5 across all queries
+          Top 3 by frequency + jedmee.com baseline
+
+Step BL3  [FOR each domain in set]
+          IF backlink_snapshots.cache_expires_at > NOW(): use cache
+          ELIF SE_RANKING_API_KEY set AND quota OK:
+            Fetch summary + referring domains → INSERT backlink_snapshots (source=se_ranking)
+          ELIF AHREFS_API_KEY set AND quota OK:
+            Fetch refdomains → INSERT backlink_snapshots (source=ahrefs)
+          ELSE: mark status=API_UNAVAILABLE; WRITE backlink.json with partial data
+
+Step BL4  Link gap analysis
+          link_gaps = UNION(referring_domains competitors) MINUS referring_domains(jedmee)
+          Filter: domain_rating > 20; sort by comp_count DESC
+
+Step BL5  Outreach enrichment (top 20 gaps)
+          IF HUNTER_API_KEY: domain-search → contact_email
+          ELSE: scrape /contact for mailto:
+          Classify: directory | blog | news | SaaS review | pharmacy association
+
+Step BL6  Score outreach_score; stage OUTREACH_TARGET recommendations (human approval — no auto-email)
+
+Step BL7  WRITE backlink.json; UPDATE cache_expires_at = NOW() + 30 days
+```
+
+### J.12 AI Visibility Agent dynamic steps (bi-weekly — **🔶 Gemini only implemented**)
+
+```
+Step AV1  Load task AI_VISIBILITY_PROBE (every other weekly sprint)
+
+Step AV2  Build prompt set (5 max)
+          Fixed templates 1–3 (pharmacy billing India, small shop, free trial)
+          + 2 dynamic from GSC top queries this run
+
+Step AV3  [FOR each prompt × platform in [gemini, claude, chatgpt, perplexity]]
+          IF platform key missing: skip platform; log skipped_platforms[]
+          IF ai_visibility_snapshots cache < 7 days for (platform, prompt): use cache
+          ELSE: LLM API call → parse response for "JedMee"/"jedmee.com" + competitor names
+          INSERT ai_visibility_snapshots row
+
+Step AV4  Compare vs prior run
+          Compute mention_rate, platforms_with_mention, vs_last_run delta
+          IF jedmee_mentioned=false on all platforms: signal → Content Agent (FAQ/copy gap)
+
+Step AV5  WRITE ai_visibility.json; stage recommendations if competitor cited but not JedMee
+```
+
 ---
 
 ## PART K — Architecture Diagrams
 
 ### K.1 Full system (weekly cycle)
 
+**Solid boxes = ✅ implemented.** Dashed = 📋 planned (B.7, B.8, Part L feedback).
+
 ```mermaid
 flowchart LR
-    subgraph collect [DataCollector]
+    subgraph collect [DataCollector ✅]
         S1[1 Raw HTTP]
         S2[2 Playwright]
         S3[3 Repo parse]
         S4[4 PSI]
         S5[5 GSC]
-        S6[6 SERP]
+        S6[6 SERP top-5 comp]
         S7[7 SPA delta]
         S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7
     end
 
     S7 --> RC[run_context.json]
 
-    RC --> MP[Manager plan_sprint]
+    RC --> MP[Manager ✅ rule-based]
     MP --> TG[task_graph.json]
 
-    TG --> R[Research]
-    TG --> T[Technical]
-    TG --> O[On-Page]
-    TG --> C[Content]
+    TG --> R[Research ✅]
+    TG --> T[Technical ✅]
+    TG --> O[On-Page ✅]
+    TG --> C[Content ✅]
+    TG -.-> BL[Backlink 📋]
+    TG -.-> AV[AI Visibility 📋]
 
     R --> SYN[Manager synthesize]
     T --> SYN
     O --> SYN
     C --> SYN
+    BL -.-> SYN
+    AV -.-> SYN
 
-    SYN --> A[Analytics]
+    SYN --> A[Analytics ✅]
     A --> ES[executive_summary.json]
-    ES --> HR{Human review}
-    HR -->|approve| AP[apply → PR]
-    HR -->|reject| DB[(feedback to DB)]
+    A -.-> ACC[agent_accuracy 📋]
+    ES --> HR{Human review ✅}
+    HR -->|approve/reject| PR[(pending_recommendations)]
+    HR -.->|rate| FB[(human_feedback 📋)]
+    HR -->|apply ONPAGE| AP[git branch seo/run-id]
     AP --> DEP[deploy.yml → CloudFront]
-    DEP --> collect
+    DEP --> GSC[notify_gsc.py]
+    GSC --> collect
+
+    S7 -.-> AL[(agent_activity ✅)]
+    MP -.-> AL
+    R -.-> AL
+    T -.-> AL
+    O -.-> AL
+    C -.-> AL
+    A -.-> AL
+    DEP -.->|auto ONPAGE| AP2[deploy: auto-apply]
+    AP2 -.-> AL
 ```
 
 ### K.2 Public pages scope
@@ -3135,7 +4118,203 @@ gantt
     CI workflows + approval CLI    :p5, after p4, 7d
     section Phase6
     Production weekly cadence      :p6, after p5, 14d
+    Production weekly cadence      :p6, after p5, 14d
 ```
+
+### K.6 Human trust & feedback loop (**✅** — see Part L; prompt retraining **📋**)
+
+```mermaid
+flowchart TD
+    RUN[Agent run completes] --> STAGE[pending_recommendations]
+    STAGE --> REV[Human: review CLI]
+    REV --> DEC{Decision}
+    DEC -->|approve| APP[approve → human_feedback.approved=true]
+    DEC -->|reject| REJ[reject → human_feedback.approved=false + reason]
+    DEC -->|rate| RATE[rate → human_feedback.quality_score 1-5]
+    APP --> APPLY[apply → PR]
+    REJ --> RETRAIN[prompt retraining queue L.4]
+    RATE --> RETRAIN
+    APP --> WEEKLY[Analytics: agent_accuracy_scores]
+    REJ --> WEEKLY
+    RATE --> WEEKLY
+    WEEKLY --> REPORT[Weekly accuracy report Slack/artifact]
+    RETRAIN --> PROMPT[Update agent prompt templates]
+    PROMPT --> RUN
+```
+
+---
+
+## PART L — Human Trust & Feedback Loop (**✅ Core implemented** · prompt retraining **📋**)
+
+> **Current code:** Human review uses `pending_recommendations` only (`approve` / `reject` update `approval_status`). No `human_feedback` table, no `rate` CLI, no `agent_accuracy_scores` rollup. Everything below is the **target design** for Phase 7.
+
+Every recommendation the system produces must be measurable. Without a feedback loop, you cannot tell which agents are trustworthy, which prompts need fixing, or whether approval rates are improving over time.
+
+### L.1 Design principles
+
+1. **Every recommendation is tracked** — approve, reject, and quality rating are separate actions (you can reject a bad title suggestion but still rate the agent's reasoning 4/5).
+2. **Feedback is in the database, not Slack threads** — `human_feedback` table is the source of truth (**✅ implemented**); `approve`/`reject`/`rate` all write to it.
+3. **Prompt versions are tagged** — each agent output records `prompt_version` so retraining can be traced to a specific template change.
+4. **Analytics closes the loop** — weekly `agent_accuracy_scores` rollup feeds back into Manager priority weighting.
+
+### L.2 Database schema
+
+See `human_feedback` and `agent_accuracy_scores` in Part C.2. Key fields:
+
+```sql
+-- Recorded on every approve/reject/rate action
+INSERT INTO human_feedback (
+    run_id, recommendation_id, approved, quality_score,
+    rejection_reason, rated_by, rated_at, agent_type, prompt_version
+) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), ?, ?);
+```
+
+**CLI integration (planned):** `approve` and `reject` will write to `human_feedback` in addition to `pending_recommendations`. **Today:** they only update `pending_recommendations.approval_status` and `rejection_reason`.
+
+### L.3 CLI commands
+
+```bash
+# Existing workflow
+python main.py review --run-id <uuid>
+python main.py approve --run-id <uuid> --rec-id R001,R002
+python main.py reject --run-id <uuid> --rec-id R003 --reason "Title too long for mobile SERP"
+
+# NEW — rate agent output quality (1–5 stars, independent of approve/reject)
+python main.py rate --run-id <uuid> --rec-id R001 --score 3
+python main.py rate --run-id <uuid> --rec-id R001 --score 5 --note "Great competitor evidence"
+
+# Optional: rate without prior approve/reject (logs approved=NULL)
+python main.py rate --run-id <uuid> --rec-id R004 --score 2 --agent-type research
+```
+
+**`main.py rate` implementation sketch:**
+
+```python
+# seo-agents/main.py (addition)
+@cli.command("rate")
+@click.option("--run-id", required=True)
+@click.option("--rec-id", required=True)
+@click.option("--score", type=click.IntRange(1, 5), required=True)
+@click.option("--note", default=None, help="Optional quality note")
+@click.option("--agent-type", default=None)
+def rate(run_id, rec_id, score, note, agent_type):
+    """Rate recommendation quality 1-5 (independent of approve/reject)."""
+    db.upsert_human_feedback(
+        run_id=run_id,
+        recommendation_id=rec_id,
+        quality_score=score,
+        rejection_reason=note,  # reused as quality_note if approved is null
+        agent_type=agent_type or db.infer_agent_type(rec_id),
+        rated_by=os.environ.get("GITHUB_ACTOR", "local"),
+    )
+    click.echo(f"Rated {rec_id} → {score}/5")
+```
+
+### L.4 Prompt retraining from rejections
+
+When enough rejection data accumulates, the system proposes prompt updates — **never auto-applies them**.
+
+```
+Trigger: ≥5 rejections for same agent_type within 30 days
+         OR approval_rate < 0.5 for agent_type over rolling 4 weeks
+
+Process:
+1. Analytics Agent queries human_feedback WHERE approved=false
+2. Cluster rejection_reason by agent_type (LLM summarization)
+3. Generate prompt_diff proposal → outputs/<run_id>/prompt_retrain/{agent_type}.md
+4. Human reviews diff → merges into agents/{agent_type}.py PROMPT_TEMPLATE
+5. Bump prompt_version semver (e.g. research v1.2.0 → v1.3.0)
+6. Next run tags outputs with new prompt_version
+```
+
+**Example rejection cluster → prompt fix:**
+
+| Agent | Common rejection | Prompt adjustment |
+|-------|------------------|-------------------|
+| On-Page | "Title too long" | Add hard constraint: "title MUST be ≤58 characters" |
+| Content | "FAQ answer too generic" | Require competitor evidence citation in every FAQ answer |
+| Research | "Wrong target page" | Strengthen PUBLIC_PATHS guard in cluster→page mapping |
+
+### L.5 Weekly accuracy report
+
+Analytics Agent Step A8 (add to J.8):
+
+```
+Step A8  Compute agent_accuracy_scores for week_start = Monday of current week
+         FOR each agent_type IN [technical, research, onpage, content, backlink, ai_visibility]:
+           total = COUNT human_feedback this week
+           approved = COUNT WHERE approved=true
+           rejected = COUNT WHERE approved=false
+           avg_quality = AVG(quality_score) WHERE quality_score IS NOT NULL
+           approval_rate = approved / (approved + rejected)
+           top_rejection_reasons = top 3 rejection_reason by frequency
+         INSERT agent_accuracy_scores rows
+         IF any agent approval_rate < 0.4: signal MANAGER_LOWER_AGENT_WEIGHT
+```
+
+**Report output (`analytics.json` addition):**
+
+```json
+{
+  "agent_accuracy_scores": [
+    {
+      "agent_type": "onpage",
+      "week_start": "2026-06-02",
+      "total_recommendations": 12,
+      "approved_count": 9,
+      "rejected_count": 3,
+      "avg_quality_score": 4.1,
+      "approval_rate": 0.75,
+      "top_rejection_reasons": [
+        {"reason": "Title too long", "count": 2},
+        {"reason": "Keyword stuffing", "count": 1}
+      ],
+      "status": "HEALTHY"
+    },
+    {
+      "agent_type": "content",
+      "week_start": "2026-06-02",
+      "total_recommendations": 8,
+      "approved_count": 2,
+      "rejected_count": 6,
+      "avg_quality_score": 2.8,
+      "approval_rate": 0.25,
+      "status": "UNDERPERFORMING",
+      "recommended_action": "Review prompt v1.1.0; trigger retraining"
+    }
+  ]
+}
+```
+
+**Slack summary line (optional):**
+
+```
+📊 Agent accuracy this week: On-Page 75% ✅ | Content 25% ⚠️ | Research 60% | Technical 90%
+```
+
+### L.6 Manager integration
+
+Manager reads `agent_accuracy_scores` from the prior week when computing task priorities:
+
+```python
+# agents/manager.py (addition)
+def adjust_priority(base_score: float, agent_type: str, db) -> float:
+    acc = db.get_latest_accuracy(agent_type)
+    if not acc:
+        return base_score
+    if acc.approval_rate < 0.4:
+        return base_score * 0.7   # deprioritize underperforming agent
+    if acc.approval_rate > 0.8 and acc.avg_quality_score >= 4.0:
+        return base_score * 1.1   # slight boost for trusted agents
+    return base_score
+```
+
+### L.7 Success criteria
+
+- Every run with staged recommendations has ≥1 human action (approve, reject, or rate) within 7 days
+- `agent_accuracy_scores` populated weekly after 4th run
+- Underperforming agents (`approval_rate < 0.4`) trigger Slack alert
+- Prompt retraining proposals generated when rejection cluster threshold met
 
 ---
 
@@ -3144,8 +4323,11 @@ gantt
 ```bash
 # One-time setup
 cd seo-agents && pip install -r requirements.txt && playwright install chromium
-cp .env.example .env   # fill keys from Part F
-python scripts/verify_gsc.py --property https://jedmee.com/
+cp .env.example .env   # fill PSI, SerpAPI keys from Part F
+# GSC OAuth (recommended):
+#   save OAuth client JSON → secrets/gsc-oauth-client.json
+python scripts/authorize_gsc_oauth.py
+# Test GSC: python scripts/notify_gsc.py
 
 # Data collection only (no agents)
 python main.py collect
@@ -3153,19 +4335,30 @@ python main.py collect
 # Full run (read-only, no frontend writes)
 python main.py run --goal "Weekly audit"
 
+# Production deploy pipeline (local test)
+python main.py deploy --skip-playwright --no-notify-gsc
+
+# View agent activity log
+python main.py activity --run-id <uuid>
+python main.py activity   # last 50 entries
+
 # Human review loop
 python main.py review --run-id <uuid>
 python main.py approve --run-id <uuid> --rec-id R001,R002
 python main.py reject --run-id <uuid> --rec-id R003 --reason "..."
-python main.py apply --run-id <uuid>   # creates branch seo/<short-id>
+python main.py rate --run-id <uuid> --rec-id R001 --score 4
+python main.py apply --run-id <uuid>   # ONPAGE meta + approved FAQ patches
 
-# CI validation locally
+# PR validation locally (same as seo-pr-validation.yml)
 python scripts/validate_public_seo.py --mode static
-cd ../frontend && npm run build && npx serve dist -l 4173
-python ../seo-agents/scripts/validate_public_seo.py --mode live --base-url http://localhost:4173
+cd ../frontend && npm run build
+python scripts/validate_public_seo.py --mode live
+
+# GSC health check
+python scripts/check_gsc_health.py
 ```
 
 ---
 
-*End of document. Parts A–E: original redesign. Parts F–K: expanded third-party APIs, GitHub pipeline, phased processes, file map, dynamic agent runbooks, and diagrams.*
+*End of document. **Part M** is the Cursor handoff guide. Parts A–L: architecture, APIs, GitHub, file map, runbooks. Last sync: **2026-06-06**. Backlink Agent and full multi-platform AI Visibility are **❌ not possible without paid APIs**.*
 ```

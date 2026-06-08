@@ -1,0 +1,40 @@
+name: SEO GSC Health Check
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gsc-health:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: seo-agents
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: seo-agents/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write .env from secrets
+        env:
+          GSC_OAUTH_CLIENT_B64: ${{ secrets.GSC_OAUTH_CLIENT_JSON }}
+          GSC_OAUTH_TOKEN_B64: ${{ secrets.GSC_OAUTH_TOKEN_JSON }}
+          SEO_REPO_ROOT: ${{ github.workspace }}
+        run: |
+          chmod +x scripts/setup_ci_env.sh
+          ./scripts/setup_ci_env.sh
+
+      - name: Check GSC access
+        run: python scripts/check_gsc_health.py

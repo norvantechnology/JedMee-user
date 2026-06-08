@@ -5,6 +5,13 @@ on:
     branches:
       - main
 
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
 jobs:
   # ── Backend ────────────────────────────────────────────────────────────────
   deploy-backend:
@@ -81,18 +88,60 @@ jobs:
 
   # ── Frontend ───────────────────────────────────────────────────────────────
   deploy-frontend:
-    name: Deploy Frontend (Vite → S3 + CloudFront)
+    name: Deploy Frontend (Vite → S3 + CloudFront + SEO)
     runs-on: ubuntu-latest
     environment: dev
     needs: deploy-backend
 
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python for SEO agents
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: seo-agents/requirements.txt
+
+      - uses: microsoft/playwright-python@v1
+        with:
+          browsers: chromium
+
+      - name: Install SEO agent dependencies
+        working-directory: seo-agents
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+          chmod +x scripts/setup_ci_env.sh
+
+      - name: Write SEO agents .env from secrets
+        working-directory: seo-agents
+        env:
+          GOOGLE_PSI_API_KEY: ${{ secrets.GOOGLE_PSI_API_KEY }}
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GSC_OAUTH_CLIENT_B64: ${{ secrets.GSC_OAUTH_CLIENT_JSON }}
+          GSC_OAUTH_TOKEN_B64: ${{ secrets.GSC_OAUTH_TOKEN_JSON }}
+          SEO_REPO_ROOT: ${{ github.workspace }}
+        run: ./scripts/setup_ci_env.sh
+
+      - name: SEO auto-optimize (audit live site + apply ONPAGE patches)
+        id: seo
+        if: ${{ !contains(github.event.head_commit.message, '[seo-auto]') }}
+        working-directory: seo-agents
+        run: |
+          python main.py deploy --trigger ci --no-notify-gsc --skip-playwright || true
+          if git -C "${{ github.workspace }}" diff --quiet frontend/src/pages/; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No ONPAGE patches applied"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "ONPAGE patches applied — will build and deploy updated JSX"
+            git -C "${{ github.workspace }}" diff --stat frontend/src/pages/
+          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -133,6 +182,7 @@ jobs:
           echo "Resolved BRAND_DISPLAY_NAME=$BRAND_DISPLAY_NAME"
 
       - name: Write .env for Vite build
+        working-directory: frontend
         run: |
           # API_BASE_URL: prefer stack output → fall back to secret → fail loud.
           BASE_URL="${API_BASE_URL:-${{ secrets.VITE_API_BASE_URL }}}"
@@ -152,6 +202,7 @@ jobs:
           sed 's/=.*/=***/' .env
 
       - name: Install dependencies
+        working-directory: frontend
         run: npm ci
 
       - name: Cache Playwright browsers
@@ -163,12 +214,15 @@ jobs:
             playwright-${{ runner.os }}-
 
       - name: Install Playwright Chromium (prerender step)
+        working-directory: frontend
         run: npx playwright install chromium --with-deps
 
       - name: Build frontend
+        working-directory: frontend
         run: npm run build
 
       - name: Ensure S3 bucket exists and is public
+        working-directory: frontend
         run: |
           BUCKET="${{ secrets.FRONTEND_S3_BUCKET }}"
           if [ -z "$BUCKET" ]; then
@@ -195,6 +249,7 @@ jobs:
             "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"PublicRead\",\"Effect\":\"Allow\",\"Principal\":\"*\",\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::${BUCKET}/*\"}]}"
 
       - name: Ensure CloudFront distribution exists
+        working-directory: frontend
         run: |
           BUCKET="${{ env.S3_BUCKET }}"
           DIST_ID="${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
@@ -268,6 +323,7 @@ jobs:
           echo "CF_DIST_ID=$DIST_ID" >> $GITHUB_ENV
 
       - name: Sync dist to S3
+        working-directory: frontend
         run: |
           BUCKET="${{ env.S3_BUCKET }}"
 
@@ -292,7 +348,21 @@ jobs:
           done
 
       - name: Invalidate CloudFront cache
+        working-directory: frontend
         run: |
           aws cloudfront create-invalidation \
             --distribution-id ${{ env.CF_DIST_ID }} \
             --paths "/*"
+
+      - name: Notify Google Search Console (resubmit sitemap)
+        working-directory: seo-agents
+        run: python scripts/notify_gsc.py
+
+      - name: Commit SEO patches to main
+        if: steps.seo.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/src/pages/
+          git commit -m "seo: auto-apply ONPAGE meta [seo-auto]"
+          git push
