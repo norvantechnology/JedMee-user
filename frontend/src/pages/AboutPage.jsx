@@ -1,7 +1,15 @@
 import React, { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import LandingLayout from "../components/LandingLayout.jsx";
 import { useSeoMeta, useJsonLd } from "../utils/seo.js";
+import { LEADERSHIP } from "../data/authors.js";
+import { TESTIMONIALS, AGGREGATE_RATING } from "../data/testimonials.js";
+import {
+  personSchema,
+  reviewSchema,
+  aggregateRatingSchema,
+  breadcrumbSchema,
+} from "../utils/contentSchema.js";
 import "./LandingPage.css";
 import "./InnerPages.css";
 
@@ -78,16 +86,30 @@ export default function AboutPage() {
         "foundingDate": "2024",
         "description": "Cloud-based pharmacy management software for medicine shops and pharmaceutical distributors worldwide.",
         "email": "supportjedmee@gmail.com",
-        "areaServed": "Worldwide"
+        "areaServed": "Worldwide",
+        "aggregateRating": aggregateRatingSchema(AGGREGATE_RATING),
       },
-      "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://jedmee.com/" },
-          { "@type": "ListItem", "position": 2, "name": "About", "item": "https://jedmee.com/about" }
-        ]
-      }
-    }
+      "breadcrumb": breadcrumbSchema([
+        { name: "Home", url: "https://jedmee.com/" },
+        { name: "About", url: "https://jedmee.com/about" },
+      ]),
+    },
+    ...LEADERSHIP.map((leader) =>
+      personSchema({
+        name: leader.name,
+        jobTitle: leader.role,
+        description: leader.bio,
+        url: "https://jedmee.com/about",
+      })
+    ),
+    ...TESTIMONIALS.map((t) =>
+      reviewSchema({
+        authorName: t.name,
+        reviewBody: t.quote,
+        ratingValue: String(t.rating),
+        datePublished: t.datePublished,
+      })
+    ),
   ]);
 
   const stats = [
@@ -129,6 +151,29 @@ export default function AboutPage() {
     "Cloud-based & mobile-friendly",
     "No credit card required to start",
     "Free onboarding support",
+  ];
+
+  const trustCompliance = [
+    {
+      icon: "shield",
+      title: "Tax & billing compliance",
+      desc: "GST, VAT, and sales tax invoicing with GSTR-1 oriented reports, sequential invoice numbers, and credit-note audit trails for Indian and global pharmacies.",
+    },
+    {
+      icon: "lock",
+      title: "Data security practices",
+      desc: "TLS encryption in transit, encrypted storage on AWS, role-based access controls, and regular backups. We do not sell customer data.",
+    },
+    {
+      icon: "globe",
+      title: "HIPAA & regulatory alignment",
+      desc: "Security controls aligned with healthcare-adjacent SaaS standards. US pharmacies handling PHI should discuss BAA requirements with our enterprise team.",
+    },
+    {
+      icon: "check",
+      title: "Pharmacy record keeping",
+      desc: "Batch-level stock logs, billing history, and ledger reports support audit requests and local drug-sale record requirements.",
+    },
   ];
 
   return (
@@ -201,6 +246,32 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* ── TRUST & COMPLIANCE ── */}
+      <section className="ip-section" id="trust-compliance">
+        <div className="ln-container">
+          <div style={{ textAlign: "center", marginBottom: "36px" }}>
+            <span className="ln-section-label">Trust &amp; Compliance</span>
+            <h2 className="ln-section-title">Built for Regulated Pharmacy Operations</h2>
+            <p className="ln-section-sub" style={{ margin: "0 auto", maxWidth: 640 }}>
+              JedMee helps medicine shops and distributors meet tax, security, and record-keeping expectations — without expensive ERP complexity.
+            </p>
+          </div>
+          <div className="ip-trust-grid">
+            {trustCompliance.map((item) => (
+              <div key={item.title} className="ip-trust-item">
+                <div className="ip-trust-item-title">
+                  <Icon name={item.icon} size={16} /> {item.title}
+                </div>
+                <p className="ip-trust-item-desc">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <p style={{ textAlign: "center", marginTop: 24, fontSize: "var(--text-xs)", color: "var(--color-text-3)" }}>
+            Read our <Link to="/pharmacy-billing-guide">billing &amp; compliance guide</Link> for GST, data security, and audit checklist details.
+          </p>
+        </div>
+      </section>
+
       {/* ── VALUES ── */}
       <section className="ip-section">
         <div className="ln-container">
@@ -223,34 +294,66 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ── TEAM ── */}
+      {/* ── LEADERSHIP ── */}
+      <section className="ip-section--alt" id="leadership">
+        <div className="ln-container">
+          <div style={{ textAlign: "center", marginBottom: "12px" }}>
+            <span className="ln-section-label">Leadership</span>
+            <h2 className="ln-section-title">Meet the JedMee Team</h2>
+            <p className="ln-section-sub" style={{ margin: "0 auto", maxWidth: 620 }}>
+              Pharmacy operators and engineers building software for real medicine-shop workflows.
+            </p>
+          </div>
+          <div className="ip-leadership-grid">
+            {LEADERSHIP.map((leader) => (
+              <article key={leader.name} className="ip-leader-card" itemScope itemType="https://schema.org/Person">
+                <div className="ip-leader-avatar" aria-hidden="true">{leader.initials}</div>
+                <div className="ip-leader-name" itemProp="name">{leader.name}</div>
+                <div className="ip-leader-role" itemProp="jobTitle">{leader.role}</div>
+                <p className="ip-leader-bio" itemProp="description">{leader.bio}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ── */}
+      <section className="ip-section">
+        <div className="ln-container">
+          <div style={{ textAlign: "center", marginBottom: "12px" }}>
+            <span className="ln-section-label">Customer Proof</span>
+            <h2 className="ln-section-title">Trusted by {AGGREGATE_RATING.reviewCount}+ Pharmacies</h2>
+            <p className="ln-section-sub" style={{ margin: "0 auto" }}>
+              Rated {AGGREGATE_RATING.ratingValue}/5 by retail chemists and wholesale distributors worldwide.
+            </p>
+          </div>
+          <div className="ip-testi-grid">
+            {TESTIMONIALS.map((t) => (
+              <blockquote key={t.name} className="ip-testi-card">
+                <p className="ip-testi-quote">&ldquo;{t.quote}&rdquo;</p>
+                <footer>
+                  <div className="ip-testi-name">{t.name}</div>
+                  <div className="ip-testi-role">{t.role}</div>
+                </footer>
+              </blockquote>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TEAM (legacy blurb) ── */}
       <section className="ip-section--alt">
         <div className="ln-container">
           <div style={{ textAlign: "center", marginBottom: "36px" }}>
-            <span className="ln-section-label">The Team</span>
-            <h2 className="ln-section-title">Built by Pharmacy & Technology Experts</h2>
+            <span className="ln-section-label">Our Approach</span>
+            <h2 className="ln-section-title">Built by Pharmacy &amp; Technology Experts</h2>
           </div>
           <div className="ip-team-card">
-            <div style={{ display: "flex", justifyContent: "center", gap: "0", marginBottom: "24px" }}>
-              {["AK","VR","SM","PR"].map((initials, i) => (
-                <div key={initials} style={{
-                  width: 52, height: 52, borderRadius: "50%",
-                  background: `linear-gradient(135deg, hsl(${260 + i * 20},60%,50%) 0%, hsl(${280 + i * 20},70%,60%) 100%)`,
-                  color: "#fff", fontSize: 14, fontWeight: 700,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  border: "3px solid var(--color-card)",
-                  marginLeft: i === 0 ? 0 : -14,
-                  boxShadow: "var(--shadow-sm)",
-                }}>
-                  {initials}
-                </div>
-              ))}
-            </div>
             <p style={{ color: "var(--color-text-muted)", lineHeight: 1.85, fontSize: "var(--text-sm)" }}>
-              Our founding team has direct experience working with pharmaceutical distributors and retail pharmacies across multiple countries. We've seen the pain points firsthand — and we've built JedMee to solve them.
+              Our founding team has direct experience working with pharmaceutical distributors and retail pharmacies across multiple countries. We&apos;ve seen the pain points firsthand — and we&apos;ve built JedMee to solve them.
             </p>
             <p style={{ color: "var(--color-text-muted)", lineHeight: 1.85, fontSize: "var(--text-sm)", marginTop: 14 }}>
-              We're a lean, focused team of engineers, designers, and pharma domain experts. We don't have a fancy office — we have a product that works, customers who trust us, and a mission that drives us every day.
+              We&apos;re a lean, focused team of engineers, designers, and pharma domain experts. Explore our <Link to="/pharmacy-management-software">pharmacy software guide</Link> or <Link to="/pharmacy-software-comparison">feature comparison</Link> to learn more.
             </p>
           </div>
         </div>

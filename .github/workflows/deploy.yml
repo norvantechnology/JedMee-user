@@ -284,6 +284,11 @@ jobs:
             --exclude "about/index.html" \
             --exclude "contact/index.html" \
             --exclude "terms/index.html" \
+            --exclude "pharmacy-management-software/index.html" \
+            --exclude "pharmacy-billing-guide/index.html" \
+            --exclude "pharmacy-inventory-guide/index.html" \
+            --exclude "pharmacy-software-comparison/index.html" \
+            --exclude "wholesale-pharmacy-software/index.html" \
             --cache-control "max-age=31536000,immutable" \
             --delete
 
@@ -291,7 +296,7 @@ jobs:
           aws s3 cp dist/index.html s3://${BUCKET}/index.html \
             --cache-control "no-cache" --content-type "text/html"
 
-          for PAGE in about contact terms; do
+          for PAGE in about contact terms pharmacy-management-software pharmacy-billing-guide pharmacy-inventory-guide pharmacy-software-comparison wholesale-pharmacy-software; do
             aws s3 cp dist/${PAGE}/index.html s3://${BUCKET}/${PAGE}/index.html \
               --cache-control "no-cache" --content-type "text/html"
             # Extensionless key so S3 REST + CloudFront serves /about without trailing slash

@@ -25,6 +25,11 @@ const PUBLIC_ROUTES = [
   { path: "/about", outFile: "about/index.html" },
   { path: "/contact", outFile: "contact/index.html" },
   { path: "/terms", outFile: "terms/index.html" },
+  { path: "/pharmacy-management-software", outFile: "pharmacy-management-software/index.html" },
+  { path: "/pharmacy-billing-guide", outFile: "pharmacy-billing-guide/index.html" },
+  { path: "/pharmacy-inventory-guide", outFile: "pharmacy-inventory-guide/index.html" },
+  { path: "/pharmacy-software-comparison", outFile: "pharmacy-software-comparison/index.html" },
+  { path: "/wholesale-pharmacy-software", outFile: "wholesale-pharmacy-software/index.html" },
 ];
 
 function findFreePort(startPort = 4173, maxAttempts = 30) {
@@ -136,7 +141,10 @@ async function startPreview(port) {
 async function writeRouteHtml(page, baseUrl, route) {
   const url = `${baseUrl}${route.path}`;
   await page.goto(url, { waitUntil: "networkidle", timeout: 60000 });
-  await page.waitForTimeout(1500);
+  await page
+    .waitForSelector('script[data-page-schema="true"]', { timeout: 15000 })
+    .catch(() => page.waitForTimeout(2500));
+  await page.waitForTimeout(300);
 
   const html = await page.content();
   const outPath = path.join(DIST_DIR, route.outFile);
@@ -196,9 +204,23 @@ async function main() {
     if (browser) await browser.close();
     await stopPreview(preview);
   }
+
+  // Validate JSON-LD in prerendered HTML (fails build on missing schema)
+  const { spawnSync } = await import("node:child_process");
+  const validate = spawnSync("node", ["scripts/validate-prerender-schema.mjs"], {
+    cwd: FRONTEND_DIR,
+    stdio: "inherit",
+  });
+  if (validate.status !== 0) {
+    process.exit(validate.status ?? 1);
+  }
 }
 
-main().catch((err) => {
+async function mainWrapper() {
+  await main();
+}
+
+mainWrapper().catch((err) => {
   console.error("Prerender failed:", err.message);
   process.exit(1);
 });

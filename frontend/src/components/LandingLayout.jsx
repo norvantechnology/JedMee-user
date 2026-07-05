@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { readAuth } from "../services/authStorage.js";
+import { GUIDE_LINKS } from "../data/resourceLinks.js";
+import ResourcesNav from "./content/ResourcesNav.jsx";
 import "../pages/LandingPage.css";
 
 /* ─────────────────────────────────────────────────────────────
@@ -59,7 +61,10 @@ function SharedNav({ isLanding = false }) {
       <nav className={`ln-nav${scrolled ? " ln-nav--solid" : ""}${open ? " ln-nav--open" : ""}`}>
         <div className="ln-nav-inner">
           <Link className="ln-nav-logo" to="/">
-            <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-nav-logo-img" />
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-nav-logo-img" width={120} height={34} decoding="async" />
+            </picture>
           </Link>
           <ul className="ln-nav-links">
             {links.map(l => (
@@ -70,6 +75,7 @@ function SharedNav({ isLanding = false }) {
                 }
               </li>
             ))}
+            <ResourcesNav />
           </ul>
           <div className="ln-nav-actions">
             {authed ? (
@@ -102,6 +108,12 @@ function SharedNav({ isLanding = false }) {
                 }
               </li>
             ))}
+            <li className="ln-mobile-menu-section">Resources</li>
+            {GUIDE_LINKS.map((g) => (
+              <li key={g.to}>
+                <Link to={g.to} className="ln-mobile-menu-link" onClick={() => setOpen(false)}>{g.label}</Link>
+              </li>
+            ))}
           </ul>
           <div className="ln-mobile-menu-auth">
             {authed ? (
@@ -132,7 +144,10 @@ function SharedFooter() {
       <div className="ln-container">
         <div className="ln-footer-top">
           <div className="ln-footer-brand">
-            <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-footer-logo" />
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-footer-logo" width={120} height={34} loading="lazy" decoding="async" />
+            </picture>
             <p className="ln-footer-tagline">Simple, powerful software for medicine shops and distributors across India.</p>
             <div className="ln-footer-badges">
               {[["shield","Tax Compliant"],["lock","Secure"],["globe","Cloud-Based"]].map(([icon, label]) => (
@@ -150,6 +165,16 @@ function SharedFooter() {
               <li><a href="/#workflow">How It Works</a></li>
               <li><a href="/#platform">Platform Preview</a></li>
               <li><a href="/#pricing">Pricing</a></li>
+            </ul>
+          </div>
+          <div className="ln-footer-col">
+            <div className="ln-footer-col-title">Resources</div>
+            <ul>
+              <li><Link to="/pharmacy-management-software">Pharmacy software guide</Link></li>
+              <li><Link to="/pharmacy-billing-guide">Billing &amp; compliance</Link></li>
+              <li><Link to="/pharmacy-inventory-guide">Inventory management</Link></li>
+              <li><Link to="/pharmacy-software-comparison">Software comparison</Link></li>
+              <li><Link to="/wholesale-pharmacy-software">Wholesale &amp; distribution</Link></li>
             </ul>
           </div>
           <div className="ln-footer-col">

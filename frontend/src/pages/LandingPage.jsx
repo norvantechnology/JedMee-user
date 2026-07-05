@@ -4,9 +4,15 @@ import { useNavigate, Link } from "react-router-dom";
 import { readAuth } from "../services/authStorage.js";
 import { getPublicPlans } from "../services/plansService.js";
 import { useSeoMeta, useJsonLd } from "../utils/seo.js";
+import { TESTIMONIALS } from "../data/testimonials.js";
+import { PRICING_PLANS } from "../data/pricingPlans.js";
+import { GUIDE_LINKS } from "../data/resourceLinks.js";
+import { reviewSchema, buildPricingSchemas, pricingAggregateOfferSchema } from "../utils/contentSchema.js";
+import ResourcesNav from "../components/content/ResourcesNav.jsx";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "./LandingPage.css";
+import "./InnerPages.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,12 +30,7 @@ const SEO_CONFIG = {
   reviewCount:    "500",
   pharmacyCount:  "500+",
   billsCreated:   "2M+",
-  plans: [
-    { name: "Starter",      price: "0",  priceCurrency: "USD", period: "free",    description: "Free 14-day trial for small medicine shops — no credit card required" },
-    { name: "Growth",       price: "9",  priceCurrency: "USD", period: "monthly", description: "For growing pharmacies and medicine shops needing full features" },
-    { name: "Professional", price: "19", priceCurrency: "USD", period: "monthly", description: "For established pharmacies and distributors" },
-    { name: "Enterprise",   price: "39", priceCurrency: "USD", period: "monthly", description: "For large pharmacy chains and wholesale distributors" },
-  ],
+  plans: PRICING_PLANS,
   /* Canonical FAQs — used in schema AND the visible FAQ section.
      Only ONE set exists — no duplication possible. */
   faqs: [
@@ -134,6 +135,26 @@ function Counter({ end, suffix = "", duration = 2000 }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   BRAND LOGO — WebP with PNG fallback, explicit dimensions (CLS)
+───────────────────────────────────────────────────────────── */
+function BrandLogo({ className, width = 140, height = 40, loading = "eager" }) {
+  return (
+    <picture>
+      <source srcSet="/logo.webp" type="image/webp" />
+      <img
+        src="/logo.png"
+        alt="JedMee pharmacy management software logo"
+        className={className}
+        width={width}
+        height={height}
+        loading={loading}
+        decoding="async"
+      />
+    </picture>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
    NAVIGATION
 ───────────────────────────────────────────────────────────── */
 function LandingNav({ navigate, authed }) {
@@ -160,7 +181,7 @@ function LandingNav({ navigate, authed }) {
       <nav className={`ln-nav${scrolled ? " ln-nav--solid" : ""}${open ? " ln-nav--open" : ""}`}>
         <div className="ln-nav-inner">
           <a className="ln-nav-logo" href="#top">
-            <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-nav-logo-img" />
+            <BrandLogo className="ln-nav-logo-img" width={120} height={34} />
           </a>
           <ul className="ln-nav-links">
             {links.map(l => (
@@ -171,6 +192,7 @@ function LandingNav({ navigate, authed }) {
                 }
               </li>
             ))}
+            <ResourcesNav onNavigate={() => setOpen(false)} />
           </ul>
           <div className="ln-nav-actions">
             {authed ? (
@@ -203,6 +225,12 @@ function LandingNav({ navigate, authed }) {
                 }
               </li>
             ))}
+            <li className="ln-mobile-menu-section">Resources</li>
+            {GUIDE_LINKS.map((g) => (
+              <li key={g.to}>
+                <Link to={g.to} className="ln-mobile-menu-link" onClick={() => setOpen(false)}>{g.label}</Link>
+              </li>
+            ))}
           </ul>
           <div className="ln-mobile-menu-auth">
             {authed ? (
@@ -221,6 +249,42 @@ function LandingNav({ navigate, authed }) {
         </div>
       )}
     </>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SEO INTRO — front-loaded facts for crawlers & AI extraction
+───────────────────────────────────────────────────────────── */
+function SeoIntroSection() {
+  const facts = [
+    "JedMee is pharmacy management software (SaaS) for retail chemists, medical stores, and pharmaceutical wholesalers — accessible from any browser without installing desktop programs.",
+    "Core modules: tax-compliant sales & purchase billing, batch-wise inventory with expiry tracking, customer and supplier ledgers, prescription notes, wholesale order catalogs, and GSTR-1 oriented tax reports.",
+    "Who it is for: independent medicine shops billing 30+ invoices per day, multi-staff pharmacies needing role-based access, and distributors supplying 20–500+ retail accounts.",
+    "Pricing: free 14-day trial (no credit card), then plans from $9/month. Setup typically takes one afternoon with CSV import for existing products and batches.",
+  ];
+  return (
+    <section className="ip-seo-intro" aria-labelledby="seo-intro-heading">
+      <div className="ln-container ip-seo-intro-inner">
+        <h2 id="seo-intro-heading">Pharmacy management software — what JedMee does</h2>
+        <p style={{ margin: 0, fontSize: "var(--text-sm)", color: "var(--color-text-muted)", lineHeight: 1.75 }}>
+          Short answers for pharmacy owners evaluating billing, inventory, and wholesale tools:
+        </p>
+        <div className="ip-seo-intro-facts">
+          {facts.map((f) => (
+            <p key={f} className="ip-seo-intro-fact">{f}</p>
+          ))}
+        </div>
+        <p style={{ marginTop: 16, fontSize: "var(--text-xs)", color: "var(--color-text-3)" }}>
+          <Link to="/pharmacy-management-software">What is pharmacy management software?</Link>
+          {" · "}
+          <Link to="/pharmacy-billing-guide">Billing &amp; compliance guide</Link>
+          {" · "}
+          <Link to="/pharmacy-inventory-guide">Inventory guide</Link>
+          {" · "}
+          <a href="#pricing">Pricing</a>
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -247,7 +311,7 @@ function HeroSection({ navigate }) {
             <span className="ln-hero-title-accent">Smarter. Faster.</span>
           </h1>
           <p className="ln-hero-sub">
-            JedMee helps medicine shops and distributors manage stock, billing, orders, and payments — all in one simple app.
+            JedMee is cloud pharmacy management software for medicine shops and wholesale distributors — tax billing (GST/VAT), batch inventory, expiry alerts, customer ledgers, and retailer order catalogs in one platform. 500+ pharmacies · 2M+ invoices processed · free 14-day trial.
           </p>
           <div className="ln-hero-ctas">
             <button className="ln-btn ln-btn--primary ln-btn--lg" onClick={() => navigate("/login")}>
@@ -313,7 +377,7 @@ function DashboardMockup() {
     <div className="ln-mock">
       <div className="ln-mock-side">
         <div className="ln-mock-logo">
-          <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-mock-logo-img" />
+          <img src="/logo.webp" alt="JedMee pharmacy management software logo" className="ln-mock-logo-img" width={80} height={24} loading="lazy" decoding="async" />
         </div>
         <div className="ln-mock-nav-group">MAIN</div>
         <div className="ln-mock-nav-item ln-mock-nav-item--active"><span className="ln-mock-dot" />Dashboard</div>
@@ -665,7 +729,7 @@ function PlatformSection() {
           </div>
           <div className="ln-plat-app">
             <div className="ln-plat-side">
-              <div className="ln-plat-side-logo"><img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-plat-side-logo-img" /></div>
+              <div className="ln-plat-side-logo"><img src="/logo.webp" alt="JedMee pharmacy management software logo" className="ln-plat-side-logo-img" width={72} height={22} loading="lazy" decoding="async" /></div>
               {["Dashboard", "Products", "Manufacturers", "Suppliers", "Customers", "Order Catalog",
                 "Purchases", "Sales & Billing", "My Orders", "Prescriptions", "Inventory Reports", "Day Book"].map((item, i) => (
                 <div key={i} className={`ln-plat-nav-item${item === tabs[activeTab].label ? " active" : ""}`}>
@@ -1563,7 +1627,7 @@ function Footer() {
       <div className="ln-container">
         <div className="ln-footer-top">
           <div className="ln-footer-brand">
-            <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-footer-logo" />
+            <BrandLogo className="ln-footer-logo" width={120} height={34} loading="lazy" />
             <p className="ln-footer-tagline">Simple, powerful software for pharmacies and distributors worldwide.</p>
             <div className="ln-footer-badges">
               {[["shield","Tax Compliant"],["lock","Secure"],["globe","Cloud-Based"]].map(([icon, label]) => (
@@ -1579,6 +1643,16 @@ function Footer() {
               <li><a href="#platform">Platform Preview</a></li>
               <li><a href="#pricing">Pricing</a></li>
               <li><a href="#download">Download App</a></li>
+            </ul>
+          </div>
+          <div className="ln-footer-col">
+            <div className="ln-footer-col-title">Resources</div>
+            <ul>
+              <li><Link to="/pharmacy-management-software">Pharmacy software guide</Link></li>
+              <li><Link to="/pharmacy-billing-guide">Billing &amp; compliance</Link></li>
+              <li><Link to="/pharmacy-inventory-guide">Inventory management</Link></li>
+              <li><Link to="/pharmacy-software-comparison">Software comparison</Link></li>
+              <li><Link to="/wholesale-pharmacy-software">Wholesale &amp; distribution</Link></li>
             </ul>
           </div>
           <div className="ln-footer-col">
@@ -1681,20 +1755,7 @@ export default function LandingPage() {
         "Division and manufacturer management",
         "CSV bulk import for products and batches",
       ],
-      "offers": {
-        "@type": "AggregateOffer",
-        "priceCurrency": "USD",
-        "lowPrice": "0",
-        "highPrice": SEO_CONFIG.plans[SEO_CONFIG.plans.length - 1].price,
-        "offerCount": String(SEO_CONFIG.plans.length),
-        "offers": SEO_CONFIG.plans.map(p => ({
-          "@type": "Offer",
-          "name": p.name,
-          "price": p.price,
-          "priceCurrency": p.priceCurrency,
-          "description": p.description,
-        })),
-      },
+      "offers": pricingAggregateOfferSchema(SEO_CONFIG.plans, { withContext: false }),
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": SEO_CONFIG.ratingValue,
@@ -1720,6 +1781,15 @@ export default function LandingPage() {
         "acceptedAnswer": { "@type": "Answer", "text": f.a },
       })),
     },
+    ...TESTIMONIALS.map((t) =>
+      reviewSchema({
+        authorName: t.name,
+        reviewBody: t.quote,
+        ratingValue: String(t.rating),
+        datePublished: t.datePublished,
+      })
+    ),
+    ...buildPricingSchemas(SEO_CONFIG.plans),
   ]);
 
   useEffect(() => {
@@ -1841,6 +1911,7 @@ export default function LandingPage() {
     <div className="ln-root">
       <LandingNav navigate={navigate} authed={authed} />
       <HeroSection navigate={navigate} />
+      <SeoIntroSection />
       <TrustedBySection />
       <StatsSection />
       <ProblemSection />

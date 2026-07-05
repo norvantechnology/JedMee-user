@@ -7,7 +7,17 @@ const BASE_URL = "https://jedmee.com";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/logo-400.png`;
 
 /** Public marketing pages that should be indexed. Everything else gets noindex. */
-export const PUBLIC_SEO_PATHS = new Set(["/", "/about", "/contact", "/terms"]);
+export const PUBLIC_SEO_PATHS = new Set([
+  "/",
+  "/about",
+  "/contact",
+  "/terms",
+  "/pharmacy-management-software",
+  "/pharmacy-billing-guide",
+  "/pharmacy-inventory-guide",
+  "/pharmacy-software-comparison",
+  "/wholesale-pharmacy-software",
+]);
 
 const INDEX_ROBOTS =
   "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";

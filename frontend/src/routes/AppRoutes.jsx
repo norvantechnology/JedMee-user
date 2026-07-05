@@ -4,6 +4,11 @@ import LandingPage from "../pages/LandingPage.jsx";
 import AboutPage from "../pages/AboutPage.jsx";
 import TermsPage from "../pages/TermsPage.jsx";
 import ContactPage from "../pages/ContactPage.jsx";
+import PharmacyManagementSoftwarePage from "../pages/guides/PharmacyManagementSoftwarePage.jsx";
+import PharmacyBillingGuidePage from "../pages/guides/PharmacyBillingGuidePage.jsx";
+import PharmacyInventoryGuidePage from "../pages/guides/PharmacyInventoryGuidePage.jsx";
+import PharmacySoftwareComparisonPage from "../pages/guides/PharmacySoftwareComparisonPage.jsx";
+import WholesalePharmacySoftwarePage from "../pages/guides/WholesalePharmacySoftwarePage.jsx";
 import AuthUnifiedPage from "../pages/AuthUnifiedPage.jsx";
 import DashboardPage from "../pages/DashboardPage.jsx";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage.jsx";
@@ -339,6 +344,11 @@ export function AppRoutes() {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/terms" element={<TermsPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/pharmacy-management-software" element={<PharmacyManagementSoftwarePage />} />
+      <Route path="/pharmacy-billing-guide" element={<PharmacyBillingGuidePage />} />
+      <Route path="/pharmacy-inventory-guide" element={<PharmacyInventoryGuidePage />} />
+      <Route path="/pharmacy-software-comparison" element={<PharmacySoftwareComparisonPage />} />
+      <Route path="/wholesale-pharmacy-software" element={<WholesalePharmacySoftwarePage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

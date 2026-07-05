@@ -8,7 +8,8 @@
     "build": "vite build && node scripts/prerender.mjs",
     "build:no-prerender": "vite build",
     "preview": "vite preview",
-    "prerender": "node scripts/prerender.mjs"
+    "prerender": "node scripts/prerender.mjs",
+    "validate:schema": "node scripts/validate-prerender-schema.mjs"
   },
   "dependencies": {
     "dompurify": "^3.4.0",
