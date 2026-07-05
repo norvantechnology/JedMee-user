@@ -99,9 +99,7 @@ export default function TermsPage() {
   useSeoMeta({
     title: "Terms of Service — JedMee Pharmacy Software",
     description:
-      "Read JedMee",
-    keywords:
-      "JedMee terms of service, pharmacy software terms, medicine shop software terms, pharmacy management terms, pharmacy billing terms",
+      "Read JedMee Terms of Service for pharmacy management software. Covers subscriptions, data ownership, tax compliance, acceptable use, and account policies.",
     canonical: "https://jedmee.com/terms",
   });
 
@@ -111,9 +109,17 @@ export default function TermsPage() {
       "@type": "WebPage",
       "name": "Terms of Service — JedMee Pharmacy Software",
       "url": "https://jedmee.com/terms",
-      "description": "JedMee Terms of Service for pharmacy management software.",
+      "description":
+        "JedMee Terms of Service for pharmacy management software — subscriptions, data ownership, and acceptable use.",
       "inLanguage": "en",
       "isPartOf": { "@type": "WebSite", "url": "https://jedmee.com" },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://jedmee.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Terms of Service", "item": "https://jedmee.com/terms" },
+        ],
+      },
     },
   ]);
 

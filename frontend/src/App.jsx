@@ -5,11 +5,14 @@ import "./styles/app.css";
 import "./styles/buttons-responsive.css";
 import "./styles/common.css";
 import { useEffect, useState } from "react";
-import { APP_DOCUMENT_TITLE } from "./constants/brand.js";
+import { useLocation } from "react-router-dom";
 import { bootstrapAuth, startTokenRefreshTimer, stopTokenRefreshTimer } from "./services/authBootstrap.js";
+import { useRouteIndexing } from "./utils/seo.js";
 
 export default function App() {
   const [authHydrated, setAuthHydrated] = useState(false);
+  const { pathname } = useLocation();
+  useRouteIndexing(pathname);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,10 +29,6 @@ export default function App() {
       cancelled = true;
       stopTokenRefreshTimer();
     };
-  }, []);
-
-  useEffect(() => {
-    document.title = APP_DOCUMENT_TITLE;
   }, []);
 
   if (!authHydrated) {

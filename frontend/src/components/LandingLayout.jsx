@@ -59,7 +59,7 @@ function SharedNav({ isLanding = false }) {
       <nav className={`ln-nav${scrolled ? " ln-nav--solid" : ""}${open ? " ln-nav--open" : ""}`}>
         <div className="ln-nav-inner">
           <Link className="ln-nav-logo" to="/">
-            <img src="/logo.png" alt="JedMee" className="ln-nav-logo-img" />
+            <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-nav-logo-img" />
           </Link>
           <ul className="ln-nav-links">
             {links.map(l => (
@@ -132,7 +132,7 @@ function SharedFooter() {
       <div className="ln-container">
         <div className="ln-footer-top">
           <div className="ln-footer-brand">
-            <img src="/logo.png" alt="JedMee" className="ln-footer-logo" />
+            <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-footer-logo" />
             <p className="ln-footer-tagline">Simple, powerful software for medicine shops and distributors across India.</p>
             <div className="ln-footer-badges">
               {[["shield","Tax Compliant"],["lock","Secure"],["globe","Cloud-Based"]].map(([icon, label]) => (

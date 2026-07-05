@@ -160,7 +160,7 @@ function LandingNav({ navigate, authed }) {
       <nav className={`ln-nav${scrolled ? " ln-nav--solid" : ""}${open ? " ln-nav--open" : ""}`}>
         <div className="ln-nav-inner">
           <a className="ln-nav-logo" href="#top">
-            <img src="/logo.png" alt="JedMee" className="ln-nav-logo-img" />
+            <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-nav-logo-img" />
           </a>
           <ul className="ln-nav-links">
             {links.map(l => (
@@ -313,7 +313,7 @@ function DashboardMockup() {
     <div className="ln-mock">
       <div className="ln-mock-side">
         <div className="ln-mock-logo">
-          <img src="/logo.png" alt="JedMee" className="ln-mock-logo-img" />
+          <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-mock-logo-img" />
         </div>
         <div className="ln-mock-nav-group">MAIN</div>
         <div className="ln-mock-nav-item ln-mock-nav-item--active"><span className="ln-mock-dot" />Dashboard</div>
@@ -665,7 +665,7 @@ function PlatformSection() {
           </div>
           <div className="ln-plat-app">
             <div className="ln-plat-side">
-              <div className="ln-plat-side-logo"><img src="/logo.png" alt="JedMee" className="ln-plat-side-logo-img" /></div>
+              <div className="ln-plat-side-logo"><img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-plat-side-logo-img" /></div>
               {["Dashboard", "Products", "Manufacturers", "Suppliers", "Customers", "Order Catalog",
                 "Purchases", "Sales & Billing", "My Orders", "Prescriptions", "Inventory Reports", "Day Book"].map((item, i) => (
                 <div key={i} className={`ln-plat-nav-item${item === tabs[activeTab].label ? " active" : ""}`}>
@@ -1563,7 +1563,7 @@ function Footer() {
       <div className="ln-container">
         <div className="ln-footer-top">
           <div className="ln-footer-brand">
-            <img src="/logo.png" alt="JedMee" className="ln-footer-logo" />
+            <img src="/logo.png" alt="JedMee pharmacy management software logo" className="ln-footer-logo" />
             <p className="ln-footer-tagline">Simple, powerful software for pharmacies and distributors worldwide.</p>
             <div className="ln-footer-badges">
               {[["shield","Tax Compliant"],["lock","Secure"],["globe","Cloud-Based"]].map(([icon, label]) => (
@@ -1612,8 +1612,6 @@ export default function LandingPage() {
     title: "Pharmacy Management Software | Free Trial",
     description:
       "JedMee is pharmacy software for medicine shops and distributors. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial, no credit card needed.",
-    keywords:
-      "pharmacy management software, pharmacy software, pharmacy billing software, pharmacy management system, medical store software, medicine shop software, free pharmacy software, cloud pharmacy software, pharmacy inventory management, pharmacy stock management, pharmacy POS, drug store software, chemist software, pharmacy invoicing software, wholesale pharmacy software",
     canonical: `${SEO_CONFIG.siteUrl}/`,
   });
 
@@ -1657,7 +1655,7 @@ export default function LandingPage() {
       "name": SEO_CONFIG.siteName,
       "url": SEO_CONFIG.siteUrl,
       "logo": `${SEO_CONFIG.siteUrl}/logo.png`,
-      "image": `${SEO_CONFIG.siteUrl}/og-image.png`,
+      "image": `${SEO_CONFIG.siteUrl}/logo-400.png`,
       "applicationCategory": "BusinessApplication",
       "applicationSubCategory": "Pharmacy Management Software",
       "operatingSystem": "Web, Android, iOS",

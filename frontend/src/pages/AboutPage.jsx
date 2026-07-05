@@ -59,8 +59,6 @@ export default function AboutPage() {
     title: "About JedMee — Pharmacy Management Software",
     description:
       "JedMee helps medicine shops and distributors worldwide manage billing, inventory, and orders. Simple, affordable pharmacy software built for real pharmacy workflows.",
-    keywords:
-      "about JedMee, pharmacy software company, medicine shop management, pharmacy management platform, pharmaceutical software, pharmacy billing, inventory management pharmacy, chemist software",
     canonical: "https://jedmee.com/about",
   });
 

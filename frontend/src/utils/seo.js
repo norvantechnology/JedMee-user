@@ -3,16 +3,51 @@ import { useEffect } from "react";
 const BASE_TITLE = "JedMee";
 const BASE_DESC =
   "JedMee is pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial, no credit card required.";
-const BASE_KEYWORDS =
-  "pharmacy management software, medicine shop software, pharmacy billing software, medical store management software, pharmacy inventory software, drug store software, pharmacy POS software, medicine distributor software, pharmacy management system, pharmacy stock management";
 const BASE_URL = "https://jedmee.com";
+const DEFAULT_OG_IMAGE = `${BASE_URL}/logo-400.png`;
+
+/** Public marketing pages that should be indexed. Everything else gets noindex. */
+export const PUBLIC_SEO_PATHS = new Set(["/", "/about", "/contact", "/terms"]);
+
+const INDEX_ROBOTS =
+  "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1";
+const NOINDEX_ROBOTS = "noindex, nofollow";
+
+function upsertMeta(name, content, { property = false } = {}) {
+  const selector = property
+    ? `meta[property="${name}"]`
+    : `meta[name="${name}"]`;
+  let el = document.querySelector(selector);
+  if (!el) {
+    el = document.createElement("meta");
+    if (property) el.setAttribute("property", name);
+    else el.setAttribute("name", name);
+    document.head.appendChild(el);
+  }
+  const prev = el.getAttribute("content") || "";
+  el.setAttribute("content", content);
+  return () => {
+    el.setAttribute("content", prev);
+  };
+}
+
+function upsertLink(rel, href) {
+  let el = document.querySelector(`link[rel="${rel}"]`);
+  if (!el) {
+    el = document.createElement("link");
+    el.setAttribute("rel", rel);
+    document.head.appendChild(el);
+  }
+  const prev = el.getAttribute("href") || "";
+  el.setAttribute("href", href);
+  return () => {
+    el.setAttribute("href", prev);
+  };
+}
 
 /**
  * injectJsonLd — inject a page-specific JSON-LD <script> block into <head>
- * and remove it on unmount. Call inside a useEffect or use the useJsonLd hook.
- *
- * @param {object|object[]} schema  — one or more schema.org objects
- * @returns {() => void}            — cleanup function that removes the tag
+ * and remove it on unmount.
  */
 export function injectJsonLd(schema) {
   const el = document.createElement("script");
@@ -20,23 +55,11 @@ export function injectJsonLd(schema) {
   el.setAttribute("data-page-schema", "true");
   el.textContent = JSON.stringify(Array.isArray(schema) ? schema : [schema]);
   document.head.appendChild(el);
-  return () => { if (el.parentNode) el.parentNode.removeChild(el); };
+  return () => {
+    if (el.parentNode) el.parentNode.removeChild(el);
+  };
 }
 
-/**
- * useJsonLd — React hook that injects page-specific JSON-LD on mount
- * and removes it on unmount.
- *
- * @param {object|object[]} schema — one or more schema.org objects
- *
- * @example
- *   useJsonLd({
- *     "@context": "https://schema.org",
- *     "@type": "WebPage",
- *     "name": "About JedMee",
- *     "url": "https://jedmee.com/about"
- *   });
- */
 export function useJsonLd(schema) {
   useEffect(() => {
     if (!schema) return;
@@ -46,132 +69,59 @@ export function useJsonLd(schema) {
 }
 
 /**
- * useSeoMeta — comprehensive SEO hook (no react-helmet dependency).
- *
- * Updates document.title, meta description, meta keywords, canonical,
- * og:title, og:description, og:url, twitter:title, twitter:description
- * for the current page, then restores previous values on unmount.
- *
- * @param {object} [options]
- * @param {string} [options.title]       Page-specific title segment.
- *   Final title: "<title> — JedMee" or fallback.
- * @param {string} [options.description] Page-specific meta description.
- * @param {string} [options.keywords]    Page-specific keywords (appended to base).
- * @param {string} [options.canonical]   Full canonical URL for this page.
- * @param {string} [options.ogImage]     Full URL to OG image (defaults to /og-image.png).
- *
- * @example
- *   useSeoMeta({
- *     title: "Pharmacy Management Software — Free Trial",
- *     description: "JedMee helps medicine shops...",
- *     keywords: "pharmacy billing, tax invoice pharmacy",
- *     canonical: "https://jedmee.com/",
- *   });
+ * Sets robots noindex on app/auth pages; index on public marketing pages.
+ * Call once at the app shell level (see App.jsx).
  */
-export function useSeoMeta({ title, description, keywords, canonical, ogImage } = {}) {
+export function useRouteIndexing(pathname) {
+  useEffect(() => {
+    const robots = PUBLIC_SEO_PATHS.has(pathname) ? INDEX_ROBOTS : NOINDEX_ROBOTS;
+    return upsertMeta("robots", robots);
+  }, [pathname]);
+}
+
+/**
+ * useSeoMeta — page-level title, description, canonical, and social tags.
+ *
+ * Google uses title + description for search snippets. Meta keywords are omitted
+ * (Google Search does not use the keywords meta tag).
+ */
+export function useSeoMeta({
+  title,
+  description,
+  canonical,
+  ogImage,
+  noIndex,
+} = {}) {
   const fullTitle = title
     ? `${title} — ${BASE_TITLE}`
     : `${BASE_TITLE} — Pharmacy Management Software for Medicine Shops`;
   const fullDesc = description || BASE_DESC;
-  const fullKeywords = keywords
-    ? `${keywords}, ${BASE_KEYWORDS}`
-    : BASE_KEYWORDS;
   const canonicalUrl = canonical || BASE_URL;
-  const ogImg = ogImage || `${BASE_URL}/og-image.png`;
+  const ogImg = ogImage || DEFAULT_OG_IMAGE;
+  const robots = noIndex ? NOINDEX_ROBOTS : undefined;
 
-  // ── document.title ──────────────────────────────────────────────────────
   useEffect(() => {
     const prev = document.title;
     document.title = fullTitle;
-    return () => { document.title = prev; };
+    return () => {
+      document.title = prev;
+    };
   }, [fullTitle]);
 
-  // ── <meta name="description"> ────────────────────────────────────────────
-  useEffect(() => {
-    const el = document.querySelector('meta[name="description"]');
-    if (!el) return;
-    const prev = el.getAttribute("content") || "";
-    el.setAttribute("content", fullDesc);
-    return () => { el.setAttribute("content", prev); };
-  }, [fullDesc]);
+  useEffect(() => upsertMeta("description", fullDesc), [fullDesc]);
 
-  // ── <meta name="keywords"> ───────────────────────────────────────────────
   useEffect(() => {
-    let el = document.querySelector('meta[name="keywords"]');
-    if (!el) {
-      el = document.createElement("meta");
-      el.setAttribute("name", "keywords");
-      document.head.appendChild(el);
-    }
-    const prev = el.getAttribute("content") || "";
-    el.setAttribute("content", fullKeywords);
-    return () => { el.setAttribute("content", prev); };
-  }, [fullKeywords]);
+    if (!robots) return;
+    return upsertMeta("robots", robots);
+  }, [robots]);
 
-  // ── <link rel="canonical"> ───────────────────────────────────────────────
-  useEffect(() => {
-    let el = document.querySelector('link[rel="canonical"]');
-    if (!el) {
-      el = document.createElement("link");
-      el.setAttribute("rel", "canonical");
-      document.head.appendChild(el);
-    }
-    const prev = el.getAttribute("href") || "";
-    el.setAttribute("href", canonicalUrl);
-    return () => { el.setAttribute("href", prev); };
-  }, [canonicalUrl]);
+  useEffect(() => upsertLink("canonical", canonicalUrl), [canonicalUrl]);
 
-  // ── og:title ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const el = document.querySelector('meta[property="og:title"]');
-    if (!el) return;
-    const prev = el.getAttribute("content") || "";
-    el.setAttribute("content", fullTitle);
-    return () => { el.setAttribute("content", prev); };
-  }, [fullTitle]);
-
-  // ── og:description ───────────────────────────────────────────────────────
-  useEffect(() => {
-    const el = document.querySelector('meta[property="og:description"]');
-    if (!el) return;
-    const prev = el.getAttribute("content") || "";
-    el.setAttribute("content", fullDesc);
-    return () => { el.setAttribute("content", prev); };
-  }, [fullDesc]);
-
-  // ── og:url ───────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const el = document.querySelector('meta[property="og:url"]');
-    if (!el) return;
-    const prev = el.getAttribute("content") || "";
-    el.setAttribute("content", canonicalUrl);
-    return () => { el.setAttribute("content", prev); };
-  }, [canonicalUrl]);
-
-  // ── og:image ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const el = document.querySelector('meta[property="og:image"]');
-    if (!el) return;
-    const prev = el.getAttribute("content") || "";
-    el.setAttribute("content", ogImg);
-    return () => { el.setAttribute("content", prev); };
-  }, [ogImg]);
-
-  // ── twitter:title ────────────────────────────────────────────────────────
-  useEffect(() => {
-    const el = document.querySelector('meta[name="twitter:title"]');
-    if (!el) return;
-    const prev = el.getAttribute("content") || "";
-    el.setAttribute("content", fullTitle);
-    return () => { el.setAttribute("content", prev); };
-  }, [fullTitle]);
-
-  // ── twitter:description ──────────────────────────────────────────────────
-  useEffect(() => {
-    const el = document.querySelector('meta[name="twitter:description"]');
-    if (!el) return;
-    const prev = el.getAttribute("content") || "";
-    el.setAttribute("content", fullDesc);
-    return () => { el.setAttribute("content", prev); };
-  }, [fullDesc]);
+  useEffect(() => upsertMeta("og:title", fullTitle, { property: true }), [fullTitle]);
+  useEffect(() => upsertMeta("og:description", fullDesc, { property: true }), [fullDesc]);
+  useEffect(() => upsertMeta("og:url", canonicalUrl, { property: true }), [canonicalUrl]);
+  useEffect(() => upsertMeta("og:image", ogImg, { property: true }), [ogImg]);
+  useEffect(() => upsertMeta("twitter:title", fullTitle), [fullTitle]);
+  useEffect(() => upsertMeta("twitter:description", fullDesc), [fullDesc]);
+  useEffect(() => upsertMeta("twitter:image", ogImg), [ogImg]);
 }

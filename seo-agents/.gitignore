@@ -1,8 +1,0 @@
-.env
-secrets/
-outputs/
-db/runs.db
-__pycache__/
-*.pyc
-.venv/
-venv/

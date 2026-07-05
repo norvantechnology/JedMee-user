@@ -36,8 +36,6 @@ export default function ContactPage() {
     title: "Contact JedMee — Pharmacy Software Support & Sales",
     description:
       "Contact JedMee for pharmacy software support, pricing, or a free demo. We help medicine shops and distributors worldwide with billing and inventory management.",
-    keywords:
-      "contact JedMee, pharmacy software support, pharmacy software demo, medicine shop software help, JedMee support, pharmacy management contact, pharmacy billing demo",
     canonical: "https://jedmee.com/contact",
   });
 
@@ -51,6 +49,25 @@ export default function ContactPage() {
         "Contact JedMee for pharmacy software support, pricing, or a free demo.",
       "inLanguage": "en",
       "isPartOf": { "@type": "WebSite", "url": "https://jedmee.com" },
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://jedmee.com/" },
+          { "@type": "ListItem", "position": 2, "name": "Contact", "item": "https://jedmee.com/contact" },
+        ],
+      },
+      "mainEntity": {
+        "@type": "Organization",
+        "name": "JedMee",
+        "url": "https://jedmee.com",
+        "email": "supportjedmee@gmail.com",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "email": "supportjedmee@gmail.com",
+          "availableLanguage": "English",
+        },
+      },
     },
   ]);
 
