@@ -1725,6 +1725,7 @@ export default function LandingPage() {
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
+      "@id": `${SEO_CONFIG.siteUrl}/#software`,
       "name": SEO_CONFIG.siteName,
       "url": SEO_CONFIG.siteUrl,
       "logo": `${SEO_CONFIG.siteUrl}/logo.png`,

@@ -186,7 +186,7 @@ export function reviewSchema({ authorName, reviewBody, ratingValue = "5", datePu
     },
     datePublished,
     itemReviewed: {
-      "@type": "SoftwareApplication",
+      "@type": "Organization",
       name: "JedMee",
       url: SITE_URL,
     },
@@ -224,7 +224,6 @@ export function buildGuidePageSchema({
       image,
     }),
     breadcrumbSchema(breadcrumbs),
-    softwareApplicationSchema({ description }),
   ];
   if (faqs?.length) schemas.push(faqPageSchema(faqs));
   if (howTo?.steps?.length) {
@@ -286,6 +285,12 @@ export function productPlanSchema(plan, { pricingUrl }) {
     "@type": "Product",
     name: `JedMee ${plan.name}`,
     description: plan.description,
+    image: {
+      "@type": "ImageObject",
+      url: `${SITE_URL}/og-image.png`,
+      width: OG_IMAGE_WIDTH,
+      height: OG_IMAGE_HEIGHT,
+    },
     brand: { "@type": "Brand", name: "JedMee" },
     category: "Pharmacy Management Software",
     url,
