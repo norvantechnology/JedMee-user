@@ -64,7 +64,7 @@ export default function AboutPage() {
   const navigate = useNavigate();
 
   useSeoMeta({
-    title: "About JedMee — Pharmacy Management Software",
+    title: "About JedMee - Pharmacy Management Software",
     description:
       "JedMee helps medicine shops and distributors worldwide manage billing, inventory, and orders. Simple, affordable pharmacy software built for real pharmacy workflows.",
     canonical: "https://jedmee.com/about",
@@ -74,7 +74,7 @@ export default function AboutPage() {
     {
       "@context": "https://schema.org",
       "@type": "AboutPage",
-      "name": "About JedMee — Pharmacy Management Software",
+      "name": "About JedMee - Pharmacy Management Software",
       "url": "https://jedmee.com/about",
       "description": "JedMee helps medicine shops and distributors worldwide manage billing, inventory, and orders. Simple, affordable pharmacy software built for real pharmacy workflows.",
       "inLanguage": "en",
@@ -123,7 +123,7 @@ export default function AboutPage() {
     {
       icon: <Icon name="globe" size={24} />,
       title: "Pharmacy-First Design",
-      desc: "Every feature is built around real pharmacy workflows — tax invoicing, compliance support, multi-currency billing, and easy stock management.",
+      desc: "Every feature is built around real pharmacy workflows - tax invoicing, compliance support, multi-currency billing, and easy stock management.",
       vc: "#0ea5e9",
     },
     {
@@ -141,7 +141,7 @@ export default function AboutPage() {
     {
       icon: <Icon name="heart" size={24} />,
       title: "Customer Success",
-      desc: "We succeed only when you succeed. Our support team is available in English and we offer free onboarding help for every new account — at no extra charge.",
+      desc: "We succeed only when you succeed. Our support team is available in English and we offer free onboarding help for every new account - at no extra charge.",
       vc: "#16a34a",
     },
   ];
@@ -194,7 +194,7 @@ export default function AboutPage() {
               <span className="ip-hero-title-accent">Global Pharmacy Ecosystem</span>
             </h1>
             <p className="ip-hero-sub">
-              JedMee was founded with one goal: make running a medicine shop or pharmaceutical distribution business as simple as possible — without expensive consultants, complex ERP systems, or hours of training.
+              JedMee was founded with one goal: make running a medicine shop or pharmaceutical distribution business as simple as possible - without expensive consultants, complex ERP systems, or hours of training.
             </p>
             <div className="ip-hero-ctas">
               <button className="ln-btn ln-btn--primary ln-btn--lg" onClick={() => navigate("/register")}>
@@ -229,7 +229,7 @@ export default function AboutPage() {
                 There are millions of registered pharmacies and thousands of pharmaceutical distributors worldwide. Most of them still rely on paper registers, disconnected spreadsheets, or outdated desktop software that hasn't been updated in years.
               </p>
               <p>
-                JedMee changes that. We bring cloud-based, tax-compliant, mobile-friendly pharmacy management to every pharmacy — from a single-counter medicine shop to a large multi-branch distributor.
+                JedMee changes that. We bring cloud-based, tax-compliant, mobile-friendly pharmacy management to every pharmacy - from a single-counter medicine shop to a large multi-branch distributor.
               </p>
             </div>
             <div className="ip-stats-grid">
@@ -253,7 +253,7 @@ export default function AboutPage() {
             <span className="ln-section-label">Trust &amp; Compliance</span>
             <h2 className="ln-section-title">Built for Regulated Pharmacy Operations</h2>
             <p className="ln-section-sub" style={{ margin: "0 auto", maxWidth: 640 }}>
-              JedMee helps medicine shops and distributors meet tax, security, and record-keeping expectations — without expensive ERP complexity.
+              JedMee helps medicine shops and distributors meet tax, security, and record-keeping expectations - without expensive ERP complexity.
             </p>
           </div>
           <div className="ip-trust-grid">
@@ -350,7 +350,7 @@ export default function AboutPage() {
           </div>
           <div className="ip-team-card">
             <p style={{ color: "var(--color-text-muted)", lineHeight: 1.85, fontSize: "var(--text-sm)" }}>
-              Our founding team has direct experience working with pharmaceutical distributors and retail pharmacies across multiple countries. We&apos;ve seen the pain points firsthand — and we&apos;ve built JedMee to solve them.
+              Our founding team has direct experience working with pharmaceutical distributors and retail pharmacies across multiple countries. We&apos;ve seen the pain points firsthand - and we&apos;ve built JedMee to solve them.
             </p>
             <p style={{ color: "var(--color-text-muted)", lineHeight: 1.85, fontSize: "var(--text-sm)", marginTop: 14 }}>
               We&apos;re a lean, focused team of engineers, designers, and pharma domain experts. Explore our <Link to="/pharmacy-management-software">pharmacy software guide</Link> or <Link to="/pharmacy-software-comparison">feature comparison</Link> to learn more.
@@ -365,7 +365,7 @@ export default function AboutPage() {
           <div className="ip-cta-inner">
             <h2 className="ip-cta-title">Ready to Modernise Your Pharmacy?</h2>
             <p className="ip-cta-sub">
-              Join thousands of pharmacies and distributors worldwide already using JedMee. Start free — no credit card required.
+              Join thousands of pharmacies and distributors worldwide already using JedMee. Start free - no credit card required.
             </p>
             <div className="ip-cta-btns">
               <button className="ln-btn ln-btn--white ln-btn--lg" onClick={() => navigate("/register")}>

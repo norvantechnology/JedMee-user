@@ -1,5 +1,5 @@
 /**
- * Purchase invoice PDF — matches the browser print view layout.
+ * Purchase invoice PDF - matches the browser print view layout.
  * Uses PDFKit (no Chromium/Puppeteer) for Lambda compatibility.
  */
 const { pdfToBuffer } = require('./pdfBuffer');
@@ -90,7 +90,7 @@ async function buildPurchaseInvoicePdfAttachment(doc) {
 
     const itemRows = items.map((it, idx) => [
       String(idx + 1),
-      safeStr(it.product_name || it.drug_name || '—', 55),
+      safeStr(it.product_name || it.drug_name || '-', 55),
       safeStr(it.batch_no || '', 14),
       ymd(it.expiry_date),
       n(it.qty).toString(),

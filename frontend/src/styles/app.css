@@ -144,7 +144,7 @@
   border-width: var(--modal-field-border-width, var(--control-border-width, 2px)) !important;
 }
 
-/* Default ↑ uses !important — without :focus/:focus-within restatement, focused fields stay slate (sales/purchase modals, etc.) */
+/* Default ↑ uses !important - without :focus/:focus-within restatement, focused fields stay slate (sales/purchase modals, etc.) */
 .mcm .raField .raInput:focus,
 .mcm .raField .raInput:focus-visible,
 .mcm .raField select.raInput:focus,
@@ -181,7 +181,7 @@
 }
 
 /* Rest depth on modal fields (border wins from rules above; shadow is non-layout).
-   Omit .csf here — CommonSelectField carries its own elevation chrome. */
+   Omit .csf here - CommonSelectField carries its own elevation chrome. */
 .mcm .raField .raInput:not(:focus):not(:focus-visible):not(:disabled),
 .mcm .raField select.raInput:not(:focus):not(:focus-visible):not(:disabled),
 .mcm .raField textarea.raInput:not(:focus):not(:focus-visible):not(:disabled),
@@ -261,7 +261,7 @@
   border-width: 1px !important;
 }
 
-/* Profile settings — .psPage uses .form-field / .form-input (not .raField) */
+/* Profile settings - .psPage uses .form-field / .form-input (not .raField) */
 .psPage .form-field .form-input:not(.status-ok):not([readonly]),
 .psPage .form-field .form-select:not([readonly]),
 .psPage .form-field .form-textarea:not([readonly]) {
@@ -269,7 +269,7 @@
   border-width: 1px !important;
 }
 
-/* Orders (CommonModal): accept/receive rows use mfzInput without .mfzField — nth-child matches markup */
+/* Orders (CommonModal): accept/receive rows use mfzInput without .mfzField - nth-child matches markup */
 .mcm .ordAcceptBox .ordOverrideRow > input.mfzInput:nth-child(2) {
   border-color: var(--color-primary) !important;
   border-width: var(--modal-field-border-width, var(--control-border-width, 2px)) !important;
@@ -340,7 +340,7 @@
 /* ── Small screens: repeat default field borders after page responsive CSS ─── */
 
 @media (max-width: 720px) {
-  /* .raField — modal/page responsive CSS loads later */
+  /* .raField - modal/page responsive CSS loads later */
   .raField .raInput,
   .raField select.raInput,
   .raField textarea.raInput,
@@ -427,7 +427,7 @@
     border-width: 1px !important;
   }
 
-  /* Master modals — mobile grid reflow */
+  /* Master modals - mobile grid reflow */
   .mfzField .mfzInput,
   .mfzField select.mfzInput,
   .mfzField textarea.mfzTextarea,

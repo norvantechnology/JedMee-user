@@ -38,7 +38,7 @@ async function cancelSalesInvoiceTx(q, { accountId, actorId, invoiceId, cancelRe
         message: MSG.CANNOT_CANCEL_WITH_PAYMENTS
       };
     }
-    // All payments are auto-settled — delete them so the cancel can proceed
+    // All payments are auto-settled - delete them so the cancel can proceed
     await q(
       `DELETE FROM customer_payments WHERE account_id = $1 AND sales_invoice_id = $2`,
       [accountId, invoiceId]

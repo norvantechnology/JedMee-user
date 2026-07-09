@@ -217,7 +217,7 @@ export function CustomerLedgerReportContent({ embedded = false } = {}) {
                     <tr key={`${e.date}-${i}`} className={isDr ? "vlRowDr" : isCr ? "vlRowCr" : ""}>
                       <td>{fmtDateIndian(e.date)}</td>
                       <td className="vlTypeCell">{e.type_label || String(e.type || "").replace(/_/g, " ")}</td>
-                      <td className="vlRefCell">{e.reference || "—"}</td>
+                      <td className="vlRefCell">{e.reference || "-"}</td>
                       <td className="rptNum vlDrCell">{isDr ? fmtMoney(e.debit)  : ""}</td>
                       <td className="rptNum vlCrCell">{isCr ? fmtMoney(e.credit) : ""}</td>
                       <td className="rptNum vlBalCell">{fmtMoney(e.balance || 0)}</td>

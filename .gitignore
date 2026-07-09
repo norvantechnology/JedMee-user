@@ -10,11 +10,6 @@ jedmee-db.pem
 
 # ─── Environment / Secrets ────────────────────────────────────────────────────
 # Keep .env.example committed; never commit real .env files
-.env
-.env.local
-.env.development
-.env.production
-.env.staging
 !.env.example
 
 # ─── Frontend Build Output ────────────────────────────────────────────────────
@@ -45,7 +40,6 @@ Thumbs.db
 desktop.ini
 
 # ─── Editor / IDE ─────────────────────────────────────────────────────────────
-.vscode/
 !.vscode/extensions.json
 .idea/
 *.suo
@@ -68,3 +62,4 @@ tmp/
 temp/
 mobile/
 *firebase-adminsdk*.json
+config.bat

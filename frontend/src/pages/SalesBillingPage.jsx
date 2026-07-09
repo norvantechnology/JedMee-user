@@ -327,11 +327,11 @@ function autoFreeQtyForScheme(it, qtyValue) {
 }
 
 const RATE_TYPES = [
-  { key: "MRP", label: "MRP", title: "Maximum Retail Price — default for patients" },
-  { key: "PURCHASE_RATE", label: "Purchase", title: "Purchase Rate — your cost price (institutional)" },
-  { key: "SPECIAL_RATE_1", label: "Special 1", title: "Special Rate 1 — custom negotiated rate" },
+  { key: "MRP", label: "MRP", title: "Maximum Retail Price - default for patients" },
+  { key: "PURCHASE_RATE", label: "Purchase", title: "Purchase Rate - your cost price (institutional)" },
+  { key: "SPECIAL_RATE_1", label: "Special 1", title: "Special Rate 1 - custom negotiated rate" },
   { key: "SPECIAL_RATE_2", label: "Special 2", title: "Special Rate 2 / Salesman Rate" },
-  { key: "SALES_RATE", label: "Sales Rt", title: "Sales Rate — your standard wholesale rate" }
+  { key: "SALES_RATE", label: "Sales Rt", title: "Sales Rate - your standard wholesale rate" }
 ];
 
 const BILL_TYPES = [
@@ -1608,7 +1608,7 @@ export default function SalesBillingPage() {
             refreshKey={ongoingRefreshKey}
             onSelect={(bill) => {
               if (!bill) {
-                // "+ New" — open a fresh draft via the existing primary action.
+                // "+ New" - open a fresh draft via the existing primary action.
                 salesInvoiceLoadGenRef.current += 1;
                 setEditing(null);
                 setIsAddMode(true);
@@ -1813,7 +1813,7 @@ export default function SalesBillingPage() {
                 header: "Pay mode",
                 sortable: false,
                 render: (r) => {
-                  if (r.status === "CANCELLED") return "—";
+                  if (r.status === "CANCELLED") return "-";
                   const mode = r.payment_mode || (r.payment_status === "PAID" ? "CASH" : "CREDIT");
                   return <span style={{ fontWeight: 600 }}>{formatPaymentModeLabel(mode)}</span>;
                 },
@@ -2000,7 +2000,7 @@ export default function SalesBillingPage() {
         size={1600}
         footer={
           <div className="sfmModalFooter">
-            {/* Low-priority: send email — far left, steps back */}
+            {/* Low-priority: send email - far left, steps back */}
             {!isAddMode && canView && String(editing?.status || "").toUpperCase() !== "CANCELLED" && clean(form.customerId) ? (
               <button
                 className="sfmBtnGhost sbmFooterSendBtn"
@@ -2027,7 +2027,7 @@ export default function SalesBillingPage() {
             >
               {busy ? <InlineButtonProgress label="Working..." /> : isAddMode ? "Save Draft" : "Save Changes"}
             </button>
-            {/* Primary actions — dominant */}
+            {/* Primary actions - dominant */}
             {(isAddMode || isDraftModalEdit) && canUpdate ? (
               <button
                 className="sfmBtnPrimary sbmBtnCreateConfirm"
@@ -2138,7 +2138,7 @@ export default function SalesBillingPage() {
                 </div>
               </div>
 
-              {/* Row 2: compact — patient fields + rate controls (retailer)
+              {/* Row 2: compact - patient fields + rate controls (retailer)
                           OR division + notes (non-retailer) */}
               {isRetailer ? (
                 <div className="sbmHeaderSecondary" role="group" aria-label="Patient details and bill settings">
@@ -2174,7 +2174,7 @@ export default function SalesBillingPage() {
                       autoComplete="off"
                     />
                   </div>
-                  {/* Rate controls group — no-wrap so Disc% never orphans on its own row */}
+                  {/* Rate controls group - no-wrap so Disc% never orphans on its own row */}
                   <div className="sbmRateControls">
                     <div className="sbmRateBarLeft">
                       <span className="sbmRateBarLabel">Rate</span>
@@ -2342,7 +2342,7 @@ export default function SalesBillingPage() {
                 }));
                 emitToast({
                   type: "success",
-                  message: `${batch.product_name || "Product"} selected — enter qty`
+                  message: `${batch.product_name || "Product"} selected - enter qty`
                 });
               }}
             />
@@ -2458,7 +2458,7 @@ export default function SalesBillingPage() {
                           </div>
                         </td>
 
-                        {/* Stock — shows strip stock + loose stock chip when packaging exists */}
+                        {/* Stock - shows strip stock + loose stock chip when packaging exists */}
                         <td>
                           {it.batchId ? (() => {
                             const whStock = batchWarehouseStock(form.items, it.batchId);
@@ -2477,9 +2477,9 @@ export default function SalesBillingPage() {
                             if (stripsBreaking > 0) tipParts.push(`${stripsBreaking} strip(s) will be opened`);
                             return (
                               <div className="sbmStockCell" title={tipParts.join(" · ")}>
-                                {/* Strip stock chip — colored by after-sale level */}
+                                {/* Strip stock chip - colored by after-sale level */}
                                 <span className={stockChipClass(afterStock ?? 0)}>{whStock}</span>
-                                {/* Loose stock chip — only when packaging exists */}
+                                {/* Loose stock chip - only when packaging exists */}
                                 {hasPackaging && (
                                   <span className={`sbmLooseStockChip${looseStock > 0 ? "" : " sbmLooseStockChip_zero"}`}
                                     title={`Loose in stock: ${looseStock} ${String(it.looseUnitName || "TAB").toUpperCase()}`}>
@@ -2533,7 +2533,7 @@ export default function SalesBillingPage() {
                           />
                         </td>
 
-                        {/* Loose Qty — only shown when packaging exists (packingUnits > 1) and not in UNIT mode */}
+                        {/* Loose Qty - only shown when packaging exists (packingUnits > 1) and not in UNIT mode */}
                         <td>
                           {it.salesUnitMode !== "UNIT" && Number(it.packingUnits || 1) > 1 ? (
                             <input
@@ -2553,7 +2553,7 @@ export default function SalesBillingPage() {
                           ) : null}
                         </td>
 
-                        {/* Unit toggle — STRIP/UNIT mode switcher; static label when no packaging */}
+                        {/* Unit toggle - STRIP/UNIT mode switcher; static label when no packaging */}
                         <td>
                           {Number(it.packingUnits || 1) > 1 ? (
                             <button
@@ -2567,7 +2567,7 @@ export default function SalesBillingPage() {
                                 : "STRIP"}
                             </button>
                           ) : (
-                            <span className="sbmUnitLabel" title="No packaging — selling individual units">
+                            <span className="sbmUnitLabel" title="No packaging - selling individual units">
                               {String(it.looseUnitName || "UNIT").toUpperCase()}
                             </span>
                           )}

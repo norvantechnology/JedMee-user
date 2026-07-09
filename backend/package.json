@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "commonjs",
   "scripts": {
-    "dev": "STAGE=local PORT=4000 node local-server.js",
-    "dev:dev": "STAGE=dev PORT=4000 node local-server.js",
-    "dev:prod": "STAGE=prod PORT=4000 node local-server.js",
+    "dev": "node init && STAGE=local PORT=4000 node local-server.js",
+    "dev:dev": "node init && STAGE=dev PORT=4000 node local-server.js",
+    "dev:prod": "node init && STAGE=prod PORT=4000 node local-server.js",
     "layer:install": "cd lib/nodejs-light/nodejs && npm install",
     "migrate": "node migrate.js",
     "migrate:local": "node migrate.js local",

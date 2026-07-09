@@ -1,4 +1,4 @@
-# robots.txt — JedMee (https://jedmee.com)
+# robots.txt - JedMee (https://jedmee.com)
 # Public marketing pages are indexable; app and auth routes are blocked.
 
 User-agent: *

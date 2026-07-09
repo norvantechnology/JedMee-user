@@ -29,7 +29,7 @@ async function handler(event) {
   const body = parseJsonBody(event);
   const customerId  = String(body?.customer_id  || '').trim();
   const invoiceIds  = Array.isArray(body?.invoice_ids) ? body.invoice_ids.map(String) : [];
-  const reason      = String(body?.reason || '').trim() || 'GSTIN updated — re-tagged by user';
+  const reason      = String(body?.reason || '').trim() || 'GSTIN updated - re-tagged by user';
 
   if (!customerId)       return fail(400, 'VALIDATION_ERROR', 'customer_id is required');
   if (!invoiceIds.length) return fail(400, 'VALIDATION_ERROR', 'invoice_ids must be a non-empty array');

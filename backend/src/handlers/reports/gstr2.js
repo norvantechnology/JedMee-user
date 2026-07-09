@@ -215,7 +215,7 @@ async function buildGstr2Data(accountId, year, month, fromDate, toDate) {
       [accountId, fromDate, toDate]
     ),
 
-    // 5. Blocked / Ineligible ITC — includes CGST/SGST/IGST breakdown from line items
+    // 5. Blocked / Ineligible ITC - includes CGST/SGST/IGST breakdown from line items
     // supply_type included so fallback can correctly split CGST/SGST vs IGST
     query(
       `SELECT
@@ -231,8 +231,8 @@ async function buildGstr2Data(accountId, year, month, fromDate, toDate) {
          COALESCE(v.gst_number,'') AS vendor_gstin,
          COALESCE(v.is_composition_dealer,false) AS is_composition_dealer,
          CASE
-           WHEN COALESCE(v.is_composition_dealer,false) THEN 'Composition Dealer — cannot issue tax invoice'
-           WHEN COALESCE(v.gst_number,'')='' THEN 'Unregistered Supplier — no GSTIN'
+           WHEN COALESCE(v.is_composition_dealer,false) THEN 'Composition Dealer - cannot issue tax invoice'
+           WHEN COALESCE(v.gst_number,'')='' THEN 'Unregistered Supplier - no GSTIN'
            ELSE 'Other'
          END AS reason_blocked,
          COALESCE(pii_agg.cgst_sum,0) AS cgst_paid,
@@ -460,7 +460,7 @@ async function buildGstr2Data(accountId, year, month, fromDate, toDate) {
       cess_reversed:           0,
       total_reversed:          n(n(row.cgst_reversed) + n(row.sgst_reversed) + n(row.igst_reversed)),
       total_return_amount:     n(row.total_return_amount),
-      reason:                  'Purchase return — ITC reversed proportionally on returned items',
+      reason:                  'Purchase return - ITC reversed proportionally on returned items',
     })),
 
     blocked_itc: blockedInvoices.map(row => {
@@ -515,7 +515,7 @@ async function buildGstr2Data(accountId, year, month, fromDate, toDate) {
       'ITC can only be claimed from GST-registered suppliers with valid GSTIN.',
       'ITC must be reversed if supplier invoice is unpaid beyond 180 days.',
       'Purchase returns automatically reverse ITC on returned quantities.',
-      'RCM purchases may allow ITC — consult your CA for specific goods.',
+      'RCM purchases may allow ITC - consult your CA for specific goods.',
       'This report is system-generated. Cross-check with purchase register before sharing with CA.',
       'IGST ITC can be used to pay IGST, then CGST, then SGST in that order.',
     ],

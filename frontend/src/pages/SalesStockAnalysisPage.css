@@ -1,7 +1,7 @@
 /* ============================================================
    SalesStockAnalysisPage.css
    Only adds what isn't already in ReportUi.css.
-   All colors from theme variables only — no hardcoded values.
+   All colors from theme variables only - no hardcoded values.
    ============================================================ */
 
 /* ── Stat cards row ── */
@@ -234,7 +234,7 @@
   font-weight: 700;
 }
 
-/* ── SSA table wrapper — visible outer border ── */
+/* ── SSA table wrapper - visible outer border ── */
 .ssaTableWrap {
   border: 1.5px solid var(--color-border-strong);
   border-radius: 12px;
@@ -294,7 +294,7 @@
   color: var(--color-success-dark) !important;
 }
 
-/* Column header row — override rptBatchTable defaults */
+/* Column header row - override rptBatchTable defaults */
 .ssaTable thead tr:not(.ssaGroupRow) th {
   padding: 9px 14px !important;
   font-size: 11px !important;
@@ -306,7 +306,7 @@
   white-space: nowrap;
 }
 
-/* Table body cells — override rptBatchTable defaults */
+/* Table body cells - override rptBatchTable defaults */
 .ssaTable tbody td {
   padding: 9px 14px !important;
   font-size: 13px !important;
@@ -393,7 +393,7 @@
   max-width: 220px;
 }
 
-/* ── Product code pill — must not stretch full width ── */
+/* ── Product code pill - must not stretch full width ── */
 .ssaCodePill {
   display: inline-block !important;
   width: fit-content !important;
@@ -412,7 +412,7 @@
   white-space: nowrap;
 }
 
-/* ── Stock badge override — compact but clear ── */
+/* ── Stock badge override - compact but clear ── */
 .ssaTable .rptExpiryChip {
   padding: 3px 11px !important;
   font-size: 12.5px !important;
@@ -544,7 +544,7 @@
     justify-content: center;
   }
 
-  /* Hide group header row on mobile — too narrow */
+  /* Hide group header row on mobile - too narrow */
   .ssaGroupRow {
     display: none;
   }

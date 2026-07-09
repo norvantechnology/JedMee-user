@@ -13,7 +13,7 @@ function td(v, cls, bold, color) {
   return `<td${cls ? ` class="${cls}"` : ""}${style}>${v}</td>`;
 }
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 
@@ -38,7 +38,7 @@ export function printGstReport({ data, year, month, taxLabel = "GST", taxIdLabel
   const yr = year  || period.year;
   const periodLabel = mo && yr ? `${MONTH_NAMES[mo] || ""} ${yr}` : `${period.from_date || ""} to ${period.to_date || ""}`;
 
-  // Generated on — human readable, no seconds
+  // Generated on - human readable, no seconds
   const generatedOn = new Date().toLocaleString("en-IN", {
     day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit"
   });
@@ -47,12 +47,12 @@ export function printGstReport({ data, year, month, taxLabel = "GST", taxIdLabel
   const headerHtml = `
     <div class="prHead">
       <div class="prHeadLeft">
-        <h1 class="prTitle">GSTR-1 — ${esc(taxLabel)} Summary Report</h1>
+        <h1 class="prTitle">GSTR-1 - ${esc(taxLabel)} Summary Report</h1>
         <p class="prSub">Outward Supply Summary &nbsp;|&nbsp; For CA Filing</p>
       </div>
       <div class="prHeadRight">
         <table class="prMetaTable">
-          <tr><td class="prMetaLabel">Legal / Trade Name</td><td class="prMetaVal">${esc(biz.firm_name || "—")}</td></tr>
+          <tr><td class="prMetaLabel">Legal / Trade Name</td><td class="prMetaVal">${esc(biz.firm_name || "-")}</td></tr>
           <tr><td class="prMetaLabel">GSTIN</td><td class="prMetaVal prMono">${esc(biz.gst_number || "Not set")}${biz.gst_number && !biz.gstin_valid ? ' <span style="color:#dc2626;font-size:10px;font-weight:700">⚠ Invalid format</span>' : ""}</td></tr>
           <tr><td class="prMetaLabel">Return Period</td><td class="prMetaVal">${esc(periodLabel)}</td></tr>
           ${fy ? `<tr><td class="prMetaLabel">Financial Year</td><td class="prMetaVal">${esc(fy)}</td></tr>` : ""}
@@ -89,13 +89,13 @@ export function printGstReport({ data, year, month, taxLabel = "GST", taxIdLabel
   // ── HSN warning ──────────────────────────────────────────────────────────────
   const hsnWarnHtml = s.missing_hsn_count > 0 ? `
     <div class="prWarnBox" style="background:#fee2e2;border-color:#ef4444;color:#991b1b">
-      <strong>⚠ Action Required:</strong> ${s.missing_hsn_count} sales line item(s) missing HSN codes — mandatory for GSTR-1 filing. Update before sharing with CA.
+      <strong>⚠ Action Required:</strong> ${s.missing_hsn_count} sales line item(s) missing HSN codes - mandatory for GSTR-1 filing. Update before sharing with CA.
     </div>` : "";
 
   // ── GSTIN issues warning ─────────────────────────────────────────────────────
   const gstinWarnHtml = s.gstin_issue_count > 0 ? `
     <div class="prWarnBox">
-      <strong>⚠ ${s.gstin_issue_count} B2B Invoice(s) with GSTIN Issues — Resolve Before Filing</strong>
+      <strong>⚠ ${s.gstin_issue_count} B2B Invoice(s) with GSTIN Issues - Resolve Before Filing</strong>
     </div>` : "";
 
   // ── HSN-wise Summary ─────────────────────────────────────────────────────────
@@ -125,10 +125,10 @@ export function printGstReport({ data, year, month, taxLabel = "GST", taxIdLabel
       </table>`}
     </div>`;
 
-  // ── B2B Invoices — individual rows ───────────────────────────────────────────
+  // ── B2B Invoices - individual rows ───────────────────────────────────────────
   const b2bHtml = `
     <div class="prSection prPageBreak">
-      <h3>B2B Invoices — ${b2bInvs.length} invoice(s) — Report Individually in GSTR-1 (Table 4)</h3>
+      <h3>B2B Invoices - ${b2bInvs.length} invoice(s) - Report Individually in GSTR-1 (Table 4)</h3>
       ${b2bInvs.length === 0 ? '<p class="prNote">No B2B invoices for this period.</p>' : `
       <table class="prTable">
         <thead><tr>
@@ -143,8 +143,8 @@ export function printGstReport({ data, year, month, taxLabel = "GST", taxIdLabel
             ${td(esc(r.invoice_number || ""))}
             ${td(fmtDate(r.invoice_date))}
             ${td(esc(r.customer_name || ""))}
-            ${td(`<span class="prMono">${esc(r.customer_gstin || "—")}</span>${r.gstin_issue ? ' <span style="color:#b91c1c;font-size:9px">⚠</span>' : ''}`)}
-            ${td(esc(r.place_of_supply || "—"))}
+            ${td(`<span class="prMono">${esc(r.customer_gstin || "-")}</span>${r.gstin_issue ? ' <span style="color:#b91c1c;font-size:9px">⚠</span>' : ''}`)}
+            ${td(esc(r.place_of_supply || "-"))}
             ${td(amt(r.taxable_value),"prNum")}
             ${td(amt(r.cgst),"prNum")}
             ${td(amt(r.sgst),"prNum")}
@@ -159,7 +159,7 @@ export function printGstReport({ data, year, month, taxLabel = "GST", taxIdLabel
   // ── B2C Summary by GST Rate ──────────────────────────────────────────────────
   const b2cHtml = `
     <div class="prSection prPageBreak">
-      <h3>B2C Summary — Grouped by ${esc(taxLabel)} Rate (Table 5/7)</h3>
+      <h3>B2C Summary - Grouped by ${esc(taxLabel)} Rate (Table 5/7)</h3>
       <p class="prNote">Enter these totals in the B2C summary section of GSTR-1 on the GST portal. Only rows with non-zero values need to be entered.</p>
       <table class="prTable">
         <thead><tr>
@@ -195,7 +195,7 @@ export function printGstReport({ data, year, month, taxLabel = "GST", taxIdLabel
   // ── Large B2C ────────────────────────────────────────────────────────────────
   const largeB2cHtml = largeB2c.length > 0 ? `
     <div class="prSection">
-      <h3>⚠ Large B2C Invoices (&gt;₹2.5 Lakh) — Report Individually in GSTR-1</h3>
+      <h3>⚠ Large B2C Invoices (&gt;₹2.5 Lakh) - Report Individually in GSTR-1</h3>
       <p class="prNote prNoteWarn">These invoices exceed ₹2.5 lakh and must be reported individually in GSTR-1, not in the B2C summary.</p>
       <table class="prTable">
         <thead><tr>
@@ -226,14 +226,14 @@ export function printGstReport({ data, year, month, taxLabel = "GST", taxIdLabel
       <h3>Important Notes &amp; Disclaimer for CA</h3>
       <ol style="margin:0 0 12px;padding-left:20px;line-height:1.8;font-size:12px">
         <li>B2B invoices are reported individually in GSTR-1. Ensure all customer GSTINs are valid before filing.</li>
-        <li>B2C invoices above ₹2.5 lakh must be reported individually — they appear in the Large B2C section above.</li>
+        <li>B2C invoices above ₹2.5 lakh must be reported individually - they appear in the Large B2C section above.</li>
         <li>Place of Supply determines whether CGST+SGST or IGST applies. Verify customer state in their profile.</li>
         <li>HSN codes are mandatory for businesses above certain turnover. Update missing HSN codes before filing.</li>
         <li>This report is system-generated from your invoices. Cross-check with your books before sharing with CA.</li>
       </ol>
       <hr style="border:none;border-top:1px solid #e5e7eb;margin:12px 0"/>
       <div class="prWarnBox" style="background:#fef3c7;border-color:#f59e0b;color:#92400e">
-        <strong style="color:#92400e">Legal Disclaimer:</strong> GSTR-1 cannot be easily revised after filing. Verify all GSTIN values, invoice amounts, and HSN codes carefully before submission to the GST portal. This is a system-generated report — verify before filing.
+        <strong style="color:#92400e">Legal Disclaimer:</strong> GSTR-1 cannot be easily revised after filing. Verify all GSTIN values, invoice amounts, and HSN codes carefully before submission to the GST portal. This is a system-generated report - verify before filing.
       </div>
       <p style="font-size:12px;color:#9ca3af;margin-top:12px;text-align:center">
         Generated: ${generatedOn} &nbsp;|&nbsp; ${esc(biz.firm_name || "")} &nbsp;|&nbsp; GSTIN: ${esc(biz.gst_number || "Not set")} &nbsp;|&nbsp; Period: ${esc(periodLabel)}${fy ? ` &nbsp;|&nbsp; FY: ${esc(fy)}` : ""}
@@ -253,7 +253,7 @@ export function printGstReport({ data, year, month, taxLabel = "GST", taxIdLabel
       ${notesHtml}
       <div class="prFooter">
         <span>GSTR-1 Summary &bull; ${esc(periodLabel)}</span>
-        <span>System-generated — verify before filing</span>
+        <span>System-generated - verify before filing</span>
       </div>
     </div>
 

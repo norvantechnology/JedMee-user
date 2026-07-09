@@ -4,7 +4,7 @@ const CANONICAL = "https://jedmee.com/pharmacy-software-comparison";
 
 export const PHARMACY_SOFTWARE_COMPARISON_GUIDE = {
   pageTitle: "JedMee vs Other Pharmacy Software",
-  metaTitle: "JedMee vs Pharmacy Software — Feature Comparison",
+  metaTitle: "JedMee vs Pharmacy Software - Feature Comparison",
   description:
     "Compare JedMee with Marg, Tally, generic POS, and legacy desktop pharmacy software for billing, inventory, expiry tracking, wholesale orders, and pricing.",
   canonical: CANONICAL,
@@ -40,7 +40,7 @@ export const PHARMACY_SOFTWARE_COMPARISON_GUIDE = {
     { name: "Pharmacy Software Comparison", url: CANONICAL },
   ],
   introFacts: [
-    "Choosing pharmacy software comes down to billing compliance, batch inventory, expiry control, wholesale workflows, and total cost — not just invoice printing.",
+    "Choosing pharmacy software comes down to billing compliance, batch inventory, expiry control, wholesale workflows, and total cost - not just invoice printing.",
     "JedMee is a cloud pharmacy platform with free trial, GST/VAT billing, batch expiry alerts, retailer order catalogs for wholesalers, and plans from $0 (trial) to $39/month. This page compares common alternatives on features that matter to medicine shops and distributors.",
   ],
   sections: [
@@ -64,7 +64,7 @@ export const PHARMACY_SOFTWARE_COMPARISON_GUIDE = {
     {
       heading: "JedMee vs spreadsheet + register",
       paragraphs: [
-        "Registers and Excel work until roughly 150–200 SKUs or multiple staff members — then errors compound: wrong expiry sold, missing tax lines, no audit trail. Migration to JedMee typically takes one afternoon with CSV import.",
+        "Registers and Excel work until roughly 150–200 SKUs or multiple staff members - then errors compound: wrong expiry sold, missing tax lines, no audit trail. Migration to JedMee typically takes one afternoon with CSV import.",
       ],
       bullets: [
         "Registers: no real-time stock, no expiry alerts",
@@ -87,19 +87,19 @@ export const PHARMACY_SOFTWARE_COMPARISON_GUIDE = {
     {
       heading: "Feature comparison at a glance",
       bullets: [
-        "Tax-compliant pharmacy billing — JedMee: Yes | Generic POS: Partial",
-        "Batch & expiry tracking — JedMee: Yes | Spreadsheets: Manual",
-        "Customer & vendor ledgers — JedMee: Yes | Basic POS: Rare",
-        "Wholesale order catalog — JedMee: Yes | Most retail tools: No",
-        "Free trial without credit card — JedMee: 14 days | Varies by vendor",
-        "CSV product import — JedMee: Yes | Legacy: Sometimes",
-        "Role-based staff access — JedMee: Yes | Registers: No",
+        "Tax-compliant pharmacy billing - JedMee: Yes | Generic POS: Partial",
+        "Batch & expiry tracking - JedMee: Yes | Spreadsheets: Manual",
+        "Customer & vendor ledgers - JedMee: Yes | Basic POS: Rare",
+        "Wholesale order catalog - JedMee: Yes | Most retail tools: No",
+        "Free trial without credit card - JedMee: 14 days | Varies by vendor",
+        "CSV product import - JedMee: Yes | Legacy: Sometimes",
+        "Role-based staff access - JedMee: Yes | Registers: No",
       ],
     },
     {
       heading: "Customer management & billing depth",
       paragraphs: [
-        "JedMee tracks customer credit limits, payment history, advance allocation, and outstanding balances — critical for pharmacies that sell to hospitals and local clinics on credit. Billing ties every invoice to batch and tax for clean audits.",
+        "JedMee tracks customer credit limits, payment history, advance allocation, and outstanding balances - critical for pharmacies that sell to hospitals and local clinics on credit. Billing ties every invoice to batch and tax for clean audits.",
         "Prescription notes can be attached on retail sales where shops record Rx details. Combined with payment reminders from ledger reports, owners spend less time chasing dues.",
       ],
     },
@@ -112,7 +112,7 @@ export const PHARMACY_SOFTWARE_COMPARISON_GUIDE = {
         "Shop outgrew Excel but does not need heavy ERP complexity",
       ],
       paragraphs: [
-        "Start a free trial from the homepage or view live pricing — no credit card required for the 14-day evaluation.",
+        "Start a free trial from the homepage or view live pricing - no credit card required for the 14-day evaluation.",
       ],
     },
   ],
@@ -131,7 +131,7 @@ export const PHARMACY_SOFTWARE_COMPARISON_GUIDE = {
     },
     {
       q: "How much does JedMee cost compared to desktop software?",
-      a: "Paid plans start at $9/month with no large upfront license — see homepage pricing for current tiers.",
+      a: "Paid plans start at $9/month with no large upfront license - see homepage pricing for current tiers.",
     },
   ],
 };

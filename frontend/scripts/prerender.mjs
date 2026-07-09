@@ -34,7 +34,7 @@ const PUBLIC_ROUTES = [
   { path: "/multi-user-pharmacy-software", outFile: "multi-user-pharmacy-software/index.html" },
   { path: "/retail-wholesale-pharmacy", outFile: "retail-wholesale-pharmacy/index.html" },
   { path: "/pharmacy-financial-management", outFile: "pharmacy-financial-management/index.html" },
-  // Homepage last — vite preview serves dist/index.html as the SPA shell for all routes.
+  // Homepage last - vite preview serves dist/index.html as the SPA shell for all routes.
   // Prerendering / first would bake homepage JSON-LD into that shell and pollute other pages.
   { path: "/", outFile: "index.html" },
 ];
@@ -90,7 +90,7 @@ async function ensureDistExists() {
   try {
     await fs.access(path.join(DIST_DIR, "index.html"));
   } catch {
-    throw new Error("dist/index.html not found — run vite build first");
+    throw new Error("dist/index.html not found - run vite build first");
   }
 }
 
@@ -120,7 +120,7 @@ async function startPreview(port) {
       const text = d.toString();
       process.stderr.write(d);
       if (/already in use|EADDRINUSE/i.test(text)) {
-        fail(`Port ${port} is already in use — stop other preview servers (e.g. npm run preview) and retry`);
+        fail(`Port ${port} is already in use - stop other preview servers (e.g. npm run preview) and retry`);
       }
     });
 

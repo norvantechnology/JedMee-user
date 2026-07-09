@@ -202,7 +202,7 @@ export default function VendorMasterModal({
                   />
                 </ModalFormField>
 
-                {/* Credit days first — business-critical; Code + Short name are optional */}
+                {/* Credit days first - business-critical; Code + Short name are optional */}
                 <ModalFormField span={4} label="Credit days">
                   <input
                     className="mfzInput"

@@ -24,7 +24,7 @@ export const FINANCIAL_MANAGEMENT_GUIDE = {
   ],
   officialSources: [TAX_SOURCES.gstIndia, TAX_SOURCES.cbicIndia, TAX_SOURCES.hmrcVat],
   introFacts: [
-    "JedMee links every sales and purchase invoice to customer and vendor ledgers and the day book — so totals update automatically without duplicate spreadsheet entry.",
+    "JedMee links every sales and purchase invoice to customer and vendor ledgers and the day book - so totals update automatically without duplicate spreadsheet entry.",
     "Owners reconcile cash and credit daily using the day book report, review outstanding balances on ledger screens, and use GST-oriented reports for filing preparation (India) or VAT/sales tax records in other regions.",
   ],
   service: {
@@ -44,7 +44,7 @@ export const FINANCIAL_MANAGEMENT_GUIDE = {
       },
       {
         name: "Post all sales and purchase invoices",
-        text: "Ensure every counter sale and supplier delivery is invoiced the same day — unposted stock breaks valuation and tax reports.",
+        text: "Ensure every counter sale and supplier delivery is invoiced the same day - unposted stock breaks valuation and tax reports.",
       },
       {
         name: "Record customer and vendor payments",
@@ -64,7 +64,7 @@ export const FINANCIAL_MANAGEMENT_GUIDE = {
     {
       heading: "How does automated billing reduce manual errors?",
       paragraphs: [
-        "Tax rates pull from the product master at billing time — staff do not re-type percentages. Batch selection links each line to inventory. Invoice numbers are sequential; corrections use credit notes to preserve an audit trail.",
+        "Tax rates pull from the product master at billing time - staff do not re-type percentages. Batch selection links each line to inventory. Invoice numbers are sequential; corrections use credit notes to preserve an audit trail.",
       ],
       bullets: [
         "Auto-calculate line tax, discounts, and round-off",
@@ -115,7 +115,7 @@ export const FINANCIAL_MANAGEMENT_GUIDE = {
     },
     {
       q: "Is there a trial for financial reporting features?",
-      a: "Yes — day book, ledgers, and GST reports are available during the 14-day free trial.",
+      a: "Yes - day book, ledgers, and GST reports are available during the 14-day free trial.",
     },
   ],
 };

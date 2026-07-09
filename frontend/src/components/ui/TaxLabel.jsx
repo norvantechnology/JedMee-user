@@ -4,10 +4,10 @@
  * Reads from LocaleContext so it automatically updates when the country changes.
  *
  * Props:
- *   suffix    {string}  — text appended after the label (e.g. " Amount", " %", " Report")
- *   prefix    {string}  — text prepended before the label
- *   className {string}  — extra CSS class for the wrapping <span>
- *   as        {string}  — HTML element to render (default: "span")
+ *   suffix    {string}  - text appended after the label (e.g. " Amount", " %", " Report")
+ *   prefix    {string}  - text prepended before the label
+ *   className {string}  - extra CSS class for the wrapping <span>
+ *   as        {string}  - HTML element to render (default: "span")
  *
  * Examples:
  *   <TaxLabel />                    → "GST"  (India) / "VAT"  (UK)

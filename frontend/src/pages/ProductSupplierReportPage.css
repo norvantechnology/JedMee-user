@@ -1173,7 +1173,7 @@
   position: relative;
 }
 
-/* Global fetch indicator — uses CommonLoading bar (theme token strip). */
+/* Global fetch indicator - uses CommonLoading bar (theme token strip). */
 .psrBusyStrip {
   position: sticky;
   top: 0;
@@ -2174,7 +2174,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MODAL — premium improvements + full mobile responsive
+   MODAL - premium improvements + full mobile responsive
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Supplier cards: softer borders, better spacing ── */
@@ -2341,7 +2341,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   MODAL — full-screen on mobile + comprehensive element fixes
+   MODAL - full-screen on mobile + comprehensive element fixes
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 699px) {
@@ -2578,7 +2578,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PSR TABLE — new common-component table layout (matches Sales & Stock style)
+   PSR TABLE - new common-component table layout (matches Sales & Stock style)
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Clickable table rows */

@@ -37,7 +37,7 @@ export function purchaseItemsReadyForAutoSave(items) {
  * @param {boolean} opts.enabled       Editor open and draft-eligible
  * @param {boolean} opts.ready         Minimum fields/lines present for save
  * @param {boolean} opts.loading       Skip while modal/screen is loading data
- * @param {*}       opts.watchValue    Form snapshot — typically JSON.stringify(form)
+ * @param {*}       opts.watchValue    Form snapshot - typically JSON.stringify(form)
  * @param {() => Promise<void>} opts.onSave  Silent save callback
  * @param {number}  [opts.delay=800]    Debounce ms
  */

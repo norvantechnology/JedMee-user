@@ -31,7 +31,7 @@ function DeltaBadge({ pct, comparable, prevValue }) {
   if (comparable === false || prev <= 0.0001) {
     return (
       <span className="dbDelta dbDelta_flat">
-        No cash comparison — yesterday had no money received
+        No cash comparison - yesterday had no money received
       </span>
     );
   }
@@ -39,7 +39,7 @@ function DeltaBadge({ pct, comparable, prevValue }) {
   const up = pct > 0;
   const flat = pct === 0;
   const cls = flat ? "dbDelta_flat" : up ? "dbDelta_up" : "dbDelta_down";
-  const arrow = flat ? "—" : up ? "▲" : "▼";
+  const arrow = flat ? "-" : up ? "▲" : "▼";
   return (
     <span className={`dbDelta ${cls}`}>
       {arrow} {Math.abs(pct).toFixed(1)}% vs yesterday
@@ -202,7 +202,7 @@ export default function DayBookReportPage() {
               <div className={`dbSummaryCard${closingNeg ? " dbSummaryCard_warn" : ""}`}>
                 <p className="dbStory">{story}</p>
                 <p className="dbStoryNote">
-                  Cash totals are money actually received or paid today — not the same as sales invoice totals on the Sales tab.
+                  Cash totals are money actually received or paid today - not the same as sales invoice totals on the Sales tab.
                   Credit not yet collected is shown separately.
                 </p>
                 <div className="dbSummaryClosing">
@@ -326,22 +326,22 @@ export default function DayBookReportPage() {
                         <strong>How these numbers relate</strong>
                         <ul>
                           <li>
-                            <span className="dbMetricsLabel">Total sales</span> {money(totalSales)} — invoice total{" "}
+                            <span className="dbMetricsLabel">Total sales</span> {money(totalSales)} - invoice total{" "}
                             <em>(incl. {taxLabel})</em>.
                           </li>
                           <li>
-                            <span className="dbMetricsLabel">Gross profit</span> {money(gross)} — sales value ex-{taxLabel} minus cost of
+                            <span className="dbMetricsLabel">Gross profit</span> {money(gross)} - sales value ex-{taxLabel} minus cost of
                             goods sold (see breakdown below).
                           </li>
                           {canPurchases && purchTotal > 0.01 && (
                             <li>
-                              <span className="dbMetricsLabel">Sales − purchases</span> {money(netBills)} — bill totals only;{" "}
+                              <span className="dbMetricsLabel">Sales − purchases</span> {money(netBills)} - bill totals only;{" "}
                               <strong>not</strong> gross profit.
                             </li>
                           )}
                           {gstApprox > 0.01 && (
                             <li>
-                              <span className="dbMetricsLabel">{taxLabel} on sales</span> {money(gstApprox)} — in invoice total, not in
+                              <span className="dbMetricsLabel">{taxLabel} on sales</span> {money(gstApprox)} - in invoice total, not in
                               profit margin.
                             </li>
                           )}

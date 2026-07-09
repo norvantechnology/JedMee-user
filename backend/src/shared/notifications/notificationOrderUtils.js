@@ -1,5 +1,5 @@
 /**
- * Order-linked notification helpers — action buttons only for pending orders.
+ * Order-linked notification helpers - action buttons only for pending orders.
  */
 
 const ORDER_ACTION_TYPES = new Set(["NEW_ORDER"]);
@@ -37,7 +37,7 @@ function orderStatusFromNotification(row, liveStatusByOrderId) {
   return "";
 }
 
-/** Wholesaler Accept / Cancel — only while order is still PENDING. */
+/** Wholesaler Accept / Cancel - only while order is still PENDING. */
 function notificationSupportsOrderActions(row, liveStatusByOrderId = null) {
   const type = String(row?.type || "").toUpperCase();
   if (!ORDER_ACTION_TYPES.has(type)) return false;

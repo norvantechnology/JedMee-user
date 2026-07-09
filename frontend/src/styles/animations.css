@@ -59,7 +59,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* Arc spinner — rotates the whole SVG so the partial-dash arc travels the track. */
+/* Arc spinner - rotates the whole SVG so the partial-dash arc travels the track. */
 @keyframes clArcSpin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }

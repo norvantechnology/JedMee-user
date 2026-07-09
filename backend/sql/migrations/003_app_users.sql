@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS app_users (
   CONSTRAINT app_users_status_check CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED'))
 );
 
--- Self-references (created_by_user_id) — idempotent guard
+-- Self-references (created_by_user_id) - idempotent guard
 DO $$
 BEGIN
   IF NOT EXISTS (

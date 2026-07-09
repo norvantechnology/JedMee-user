@@ -48,7 +48,7 @@ export async function bootstrapAuth() {
   const r = await tryRefreshSession();
   if (r.ok) return { ok: true };
 
-  // Only clear session when refresh token is invalid — keep session on network/server errors.
+  // Only clear session when refresh token is invalid - keep session on network/server errors.
   if (r.reason === "invalid_refresh" || r.reason === "no_session") {
     clearAuth();
     return { ok: false };

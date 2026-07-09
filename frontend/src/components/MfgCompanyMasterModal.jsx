@@ -284,7 +284,7 @@ export default function MfgCompanyMasterModal({
                     if (data.code?.exists) newSubmitErrors.code = `Code "${codeVal.toUpperCase()}" is already used.`;
                     if (data.name?.exists) newSubmitErrors.name = `Name "${nameVal}" is already used.`;
                   }
-                } catch { /* ignore — let backend handle */ }
+                } catch { /* ignore - let backend handle */ }
                 finally { setChecking(false); }
                 setSubmitErrors(newSubmitErrors);
                 if (Object.keys(newSubmitErrors).length > 0) return;
@@ -360,7 +360,7 @@ function MfgCompanyFormV2({
           </ModalFormPanelHead>
           <ModalFormPanelBody>
             <ModalFormGrid>
-              {/* Name first — required, primary, wide */}
+              {/* Name first - required, primary, wide */}
               <ModalFormField span={8} label="Name" required error={errors.name || null}>
                 <input
                   className="mfzInput"
@@ -378,7 +378,7 @@ function MfgCompanyFormV2({
                 />
               </ModalFormField>
 
-              {/* Short name + Rack — fill the full row evenly */}
+              {/* Short name + Rack - fill the full row evenly */}
               <ModalFormField span={6} label="Short name">
                 <input className="mfzInput" value={form.shortName} onChange={(e) => setField("shortName", e.target.value)} placeholder="Optional label" />
               </ModalFormField>
@@ -386,7 +386,7 @@ function MfgCompanyFormV2({
                 <input className="mfzInput" value={form.rackNo} onChange={(e) => setField("rackNo", e.target.value)} placeholder="Storage location" />
               </ModalFormField>
 
-              {/* Main company — optional grouping, narrower than full width */}
+              {/* Main company - optional grouping, narrower than full width */}
               <ModalFormField
                 span={8}
                 label="Main company (group)"

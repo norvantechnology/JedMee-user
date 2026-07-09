@@ -201,7 +201,7 @@ async function handler(event) {
         { order_id: order.id, status: "PENDING", order_status: "PENDING" },
         `/orders/${order.id}`,
         "View order",
-        // Extra FCM data — action buttons only when orderStatus is PENDING
+        // Extra FCM data - action buttons only when orderStatus is PENDING
         {
           orderId: order.id,
           orderNumber: order.order_number,

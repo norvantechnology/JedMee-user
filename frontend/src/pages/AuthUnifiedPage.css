@@ -330,7 +330,7 @@
   .auRight::before { display: none; }
 }
 
-/* Mobile logo — full-width purple header */
+/* Mobile logo - full-width purple header */
 .auMobileLogo {
   display: none;
 }

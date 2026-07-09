@@ -2,7 +2,7 @@ const { pdfToBuffer } = require("./pdfBuffer");
 const { n, inr, safeFilePart } = require("./money");
 
 /**
- * @param {object} ledgerDoc — { vendor, entries, summary, seller }
+ * @param {object} ledgerDoc - { vendor, entries, summary, seller }
  * @returns {Promise<{ buffer: Buffer; filename: string }>}
  */
 async function buildVendorLedgerPdfAttachment(ledgerDoc) {

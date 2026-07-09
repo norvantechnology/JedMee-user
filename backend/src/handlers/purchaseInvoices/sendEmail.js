@@ -52,7 +52,7 @@ function buildPurchaseInvoiceEmailHtml({ inv, doc }) {
         const bg = i % 2 === 0 ? C.bgCard : C.bgAlt;
         return [
           `<tr style="background:${bg};">`,
-          `  <td style="padding:10px 14px;font-size:13px;color:${C.textDark};border-bottom:1px solid ${C.border};">${E(l.product_name || l.product_code || "—")}</td>`,
+          `  <td style="padding:10px 14px;font-size:13px;color:${C.textDark};border-bottom:1px solid ${C.border};">${E(l.product_name || l.product_code || "-")}</td>`,
           `  <td style="padding:10px 14px;font-size:13px;color:${C.textMid};text-align:center;border-bottom:1px solid ${C.border};">${n(l.qty)}</td>`,
           `  <td style="padding:10px 14px;font-size:13px;color:${C.textDark};text-align:right;border-bottom:1px solid ${C.border};font-weight:600;">${fmt(l.line_total)}</td>`,
           `</tr>`,
@@ -103,9 +103,9 @@ function buildPurchaseInvoiceEmailHtml({ inv, doc }) {
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${C.bgAlt};border:1px solid ${C.border};border-radius:10px;margin-bottom:24px;">`,
     `  <tr><td style="padding:16px 20px;">`,
     `    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">`,
-    `      <tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};width:40%;">Invoice No.</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};font-weight:700;">${invNo || "—"}</td></tr>`,
-    `      <tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};">Date</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(invDate) || "—"}</td></tr>`,
-    `      <tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};">Status</td><td style="padding:6px 0;">${statusBadge || "—"}</td></tr>`,
+    `      <tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};width:40%;">Invoice No.</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};font-weight:700;">${invNo || "-"}</td></tr>`,
+    `      <tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};">Date</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(invDate) || "-"}</td></tr>`,
+    `      <tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};">Status</td><td style="padding:6px 0;">${statusBadge || "-"}</td></tr>`,
     sellerName ? `      <tr><td style="padding:4px 0;font-size:12px;color:${C.textMuted};">From</td><td style="padding:4px 0;font-size:13px;color:${C.textDark};">${sellerName}</td></tr>` : "",
     `    </table>`,
     `  </td></tr>`,
@@ -118,7 +118,7 @@ function buildPurchaseInvoiceEmailHtml({ inv, doc }) {
   ].filter(Boolean).join("\n");
 
   return emailBase({
-    preheader: `Purchase invoice ${invNo} — Total ${fmt(total)}`,
+    preheader: `Purchase invoice ${invNo} - Total ${fmt(total)}`,
     headerLabel: "Purchase Invoice",
     headerTitle: invNo ? `Invoice #${invNo}` : "Purchase Invoice",
     headerSub: vendorName || undefined,
@@ -185,7 +185,7 @@ async function handler(event) {
       // eslint-disable-next-line no-continue
       continue;
     }
-    const subject = `Purchase Invoice ${inv.invoice_number || ""} — ${partyName(inv) || "Supplier"}`.trim();
+    const subject = `Purchase Invoice ${inv.invoice_number || ""} - ${partyName(inv) || "Supplier"}`.trim();
     let attachment;
     try {
       attachment = await buildPurchaseInvoicePdfAttachment(doc);
@@ -194,7 +194,7 @@ async function handler(event) {
       // eslint-disable-next-line no-continue
       continue;
     }
-    const text = `Please find your purchase invoice ${inv.invoice_number || ""} attached as a PDF.\n\n— ${doc.seller?.firm_name || doc.seller?.full_name || ""}`;
+    const text = `Please find your purchase invoice ${inv.invoice_number || ""} attached as a PDF.\n\n- ${doc.seller?.firm_name || doc.seller?.full_name || ""}`;
     const html = buildPurchaseInvoiceEmailHtml({ inv, doc });
     const m = await sendMail({
       to,

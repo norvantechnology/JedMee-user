@@ -1,5 +1,5 @@
 /* ============================================================
-   CommonModal.css — Refined Modal System (Enhanced)
+   CommonModal.css - Refined Modal System (Enhanced)
    Design goals:
    • Comfortable width + inner padding; clear section & field rhythm
    • Strong hierarchy: section rail → labels → values → hints/errors
@@ -26,7 +26,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   ROOT — type scale, colour tokens, control metrics
+   ROOT - type scale, colour tokens, control metrics
    ════════════════════════════════════════════════════════════ */
 .mcm {
   position: fixed;
@@ -56,7 +56,7 @@
   --mcm-surface: var(--color-surface);
   --mcm-card:    var(--color-card);
   --mcm-border:  var(--color-border-strong);
-  /* Chrome border — clearly visible, used for section card edges and inner separators */
+  /* Chrome border - clearly visible, used for section card edges and inner separators */
   --mcm-chrome-border: 1.5px solid var(--color-border-strong, var(--color-border));
 
   /* ── Field colour tokens ── */
@@ -223,7 +223,7 @@
 .mcmPanel_lg { --mcm-w: 1000px; }
 
 /* ════════════════════════════════════════════════════════════
-   HEADER — refined with subtle gradient and better hierarchy
+   HEADER - refined with subtle gradient and better hierarchy
    ════════════════════════════════════════════════════════════ */
 .mcmHead {
   position: relative;
@@ -269,7 +269,7 @@
   .mcmClose { order: 2; margin-left: auto; }
 }
 
-/* ── Icon mark — more polished ── */
+/* ── Icon mark - more polished ── */
 .mcmMark {
   flex: 0 0 auto;
   width: clamp(34px, 5.5vw, 40px);
@@ -295,7 +295,7 @@
   height: clamp(15px, 2.4vw, 17px);
 }
 
-/* ── Titles — better weight + spacing ── */
+/* ── Titles - better weight + spacing ── */
 .mcmTitles {
   min-width: 0;
   flex: 1;
@@ -322,7 +322,7 @@
   font-weight: 400;
 }
 
-/* ── Close button — refined ── */
+/* ── Close button - refined ── */
 .mcmClose {
   flex: 0 0 auto;
   width: 32px;
@@ -350,7 +350,7 @@
 .mcmClose:active { transform: scale(0.9); }
 
 /* ════════════════════════════════════════════════════════════
-   BODY — clean, well-spaced, with subtle background
+   BODY - clean, well-spaced, with subtle background
    ════════════════════════════════════════════════════════════ */
 .mcmBody {
   padding: clamp(14px, 2.2vw, 20px) clamp(16px, 2.6vw, 22px);
@@ -380,7 +380,7 @@
 .mcm *::-webkit-scrollbar-corner { background: transparent; }
 
 /* ════════════════════════════════════════════════════════════
-   SECTION CARDS — clearly visible borders + depth shadow
+   SECTION CARDS - clearly visible borders + depth shadow
    ════════════════════════════════════════════════════════════ */
 .mcmBody .sfmSection,
 .mcmBody .piSection,
@@ -388,7 +388,7 @@
 .mcmBody .cliSection,
 .mcmBody .mfzPanel {
   background: var(--color-card);
-  /* Solid visible border — not mixed with transparent */
+  /* Solid visible border - not mixed with transparent */
   border: 1.5px solid color-mix(in srgb, var(--color-border) 100%, var(--color-text-4) 0%);
   border-radius: 12px;
   overflow: hidden;
@@ -398,7 +398,7 @@
     0 4px 16px color-mix(in srgb, var(--color-text) 7%, transparent);
 }
 
-/* Section heads — clean tinted band, monospaced kicker */
+/* Section heads - clean tinted band, monospaced kicker */
 .mcmBody .sfmSectionHead,
 .mcmBody .piSectionHead,
 .mcmBody .sbmSecHd,
@@ -415,7 +415,7 @@
   min-height: 0;
 }
 
-/* Kicker — uppercase, tracked, primary color */
+/* Kicker - uppercase, tracked, primary color */
 .mcmBody .sfmSectionHead .sfmTitle,
 .mcmBody .sfmSectionTitle,
 .mcmBody .piSectionTitle,
@@ -626,7 +626,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   FIELD LABEL SYSTEM — smaller, lighter, cleaner
+   FIELD LABEL SYSTEM - smaller, lighter, cleaner
    ════════════════════════════════════════════════════════════ */
 .mcmBody .raField > label,
 .mcmBody .piHeadField label,
@@ -668,7 +668,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   INPUT / SELECT / TEXTAREA — polished, consistent
+   INPUT / SELECT / TEXTAREA - polished, consistent
    ════════════════════════════════════════════════════════════ */
 .mcmBody input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .mcmBody select,
@@ -736,7 +736,7 @@
   background: var(--mcm-field-bg-hover);
 }
 
-/* ── Focus — clean, unmissable ── */
+/* ── Focus - clean, unmissable ── */
 .mcmBody input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus,
 .mcmBody input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):focus-visible,
 .mcmBody select:focus,
@@ -932,7 +932,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   FOOTER — clean, well-weighted CTAs
+   FOOTER - clean, well-weighted CTAs
    ════════════════════════════════════════════════════════════ */
 .mcmFooter {
   padding: 12px clamp(16px, 2.4vw, 22px);
@@ -1076,7 +1076,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   MOBILE — bottom sheet ≤720px
+   MOBILE - bottom sheet ≤720px
    ════════════════════════════════════════════════════════════ */
 @media (max-width: 720px) {
   .mcm {
@@ -1225,7 +1225,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════
-   Shared Invoice Modal — piSection, piHeaderTop, credit line
+   Shared Invoice Modal - piSection, piHeaderTop, credit line
    ════════════════════════════════════════════════════════════ */
 .piSection {
   border: 1.5px solid var(--color-border-strong, var(--color-border));
@@ -1318,7 +1318,7 @@
 }
 .mcmBody .piHeadField .cdpInput { padding-right: var(--mcm-ctrl-icon-gap); }
 
-/* ── Responsive: tablet (≤1100px) — party spans full width, dates side-by-side ── */
+/* ── Responsive: tablet (≤1100px) - party spans full width, dates side-by-side ── */
 @media (max-width: 1100px) {
   .piHeaderTop {
     grid-template-columns: 1fr 1fr;
@@ -1328,7 +1328,7 @@
   }
 }
 
-/* ── Responsive: mobile (≤640px) — single column stack ── */
+/* ── Responsive: mobile (≤640px) - single column stack ── */
 @media (max-width: 640px) {
   .piHeaderTop {
     grid-template-columns: 1fr;
@@ -1430,7 +1430,7 @@
   gap: var(--mcm-section-gap, 16px);
 }
 
-/* Panel card — clearly visible border + depth shadow */
+/* Panel card - clearly visible border + depth shadow */
 .mfzPanel {
   border-radius: 12px;
   border: 1.5px solid var(--color-border-strong, var(--color-border));
@@ -1441,7 +1441,7 @@
   overflow: hidden;
 }
 
-/* Panel head — tight, readable kicker */
+/* Panel head - tight, readable kicker */
 .mfzPanelHead {
   display: flex;
   align-items: flex-start;
@@ -1454,7 +1454,7 @@
   border-bottom: 1.5px solid var(--color-border-strong, var(--color-border));
 }
 
-/* Kicker — mono, tracked, primary */
+/* Kicker - mono, tracked, primary */
 .mfzHeadKicker {
   font-family: var(--font-mono, monospace);
   font-size: clamp(10px, 1.6vw, 11px);
@@ -1521,7 +1521,7 @@
 .mfzRot90 { transform: rotate(90deg); }
 .mfzTop12 { margin-top: 10px; }
 
-/* Panel body — clean grid */
+/* Panel body - clean grid */
 .mfzPanelBody {
   padding: 14px 16px;
   display: grid;
@@ -1529,7 +1529,7 @@
   background: var(--modal-panel-body-bg, var(--color-card));
 }
 
-/* Stack variant — hairline separators */
+/* Stack variant - hairline separators */
 .mcmBody .mfzPanelBody.mfzPanelBody_stack {
   display: flex;
   flex-direction: column;
@@ -1573,7 +1573,7 @@
 .mfzField > select.mfzInput,
 .mfzField > textarea.mfzInput { margin-top: 0; }
 
-/* Label — smaller, clean, secondary color */
+/* Label - smaller, clean, secondary color */
 .mfzLabel {
   font-size: var(--mcm-fs-label);
   font-weight: 600;
@@ -1590,7 +1590,7 @@
 }
 .mfzLabel::before { content: none; display: none; }
 
-/* Input / textarea — polished */
+/* Input / textarea - polished */
 .mfzInput,
 .mfzTextarea {
   width: 100%;
@@ -1692,7 +1692,7 @@
   font-weight: 700;
 }
 
-/* Checkboxes — clean, compact grid */
+/* Checkboxes - clean, compact grid */
 .mfzChecks {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(10.5rem, 1fr));

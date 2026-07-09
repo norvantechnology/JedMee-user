@@ -3,16 +3,16 @@
  * Reusable dropdown for selecting a country from the COUNTRY_LIST catalogue.
  *
  * Props:
- *   value       {string}   — currently selected country code (e.g. "IN")
- *   onChange    {function} — called with the new country code string
- *   className   {string}   — extra CSS class for the <select> element
- *   showFlag    {boolean}  — prefix each option with the flag emoji (default: true)
- *   showPhone   {boolean}  — suffix each option with the phone code (default: false)
- *   placeholder {string}   — first disabled option text (default: "Select country")
- *   id          {string}   — id attribute for the <select>
- *   name        {string}   — name attribute for the <select>
- *   disabled    {boolean}  — disable the selector
- *   required    {boolean}  — mark as required
+ *   value       {string}   - currently selected country code (e.g. "IN")
+ *   onChange    {function} - called with the new country code string
+ *   className   {string}   - extra CSS class for the <select> element
+ *   showFlag    {boolean}  - prefix each option with the flag emoji (default: true)
+ *   showPhone   {boolean}  - suffix each option with the phone code (default: false)
+ *   placeholder {string}   - first disabled option text (default: "Select country")
+ *   id          {string}   - id attribute for the <select>
+ *   name        {string}   - name attribute for the <select>
+ *   disabled    {boolean}  - disable the selector
+ *   required    {boolean}  - mark as required
  */
 
 import { COUNTRY_LIST } from "../../utils/locale.js";

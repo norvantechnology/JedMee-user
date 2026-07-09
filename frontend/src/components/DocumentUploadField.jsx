@@ -214,7 +214,7 @@ export default function DocumentUploadField({ label, docType, url, onUrlChange, 
         onDrop={handleBoxDrop}
         role="button"
         tabIndex={isDisabled ? -1 : 0}
-        aria-label={`${label} — click or drag a file here`}
+        aria-label={`${label} - click or drag a file here`}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleBoxClick(e); } }}
       >
         <div className="dufBoxTop">

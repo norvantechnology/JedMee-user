@@ -31,7 +31,7 @@ export {
  * Use fmtCurrency() when you need the symbol prefix.
  *
  * fmtMoney(1234.5)   → "1,234.50"    (USD/EUR active)
- * fmtMoney(100000)   → "1,00,000.00" (INR active — Indian grouping)
+ * fmtMoney(100000)   → "1,00,000.00" (INR active - Indian grouping)
  */
 export function fmtMoney(value) {
   const n = Number(value);
@@ -41,7 +41,7 @@ export function fmtMoney(value) {
 
 /**
  * @deprecated Use fmtCurrency() instead.
- * Kept for backward compatibility — delegates to fmtCurrency() so it now
+ * Kept for backward compatibility - delegates to fmtCurrency() so it now
  * respects the active currency rather than always prepending "₹".
  */
 export { fmtCurrency as fmtMoneyINR } from "./currency.js";

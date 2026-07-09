@@ -42,7 +42,7 @@
   padding: 12px 0 0;
 }
 
-/* Ghost / back button — same design as .sfmBtnGhost / .cmBtn_ghost */
+/* Ghost / back button - same design as .sfmBtnGhost / .cmBtn_ghost */
 .regNavBtn {
   display: inline-flex;
   align-items: center;
@@ -76,7 +76,7 @@
   transform: none;
 }
 
-/* Primary / next button — same design as .sfmBtnPrimary / .cmBtn_primary */
+/* Primary / next button - same design as .sfmBtnPrimary / .cmBtn_primary */
 .regNavPrimary {
   display: inline-flex;
   align-items: center;

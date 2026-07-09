@@ -144,7 +144,7 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
     if (lineQtyInt === 0 && looseQtySold > 0) {
       const storedGst = Number(item.gst_amount || 0);
       // Always split GST into CGST/SGST/IGST for ALL bill types (CASH_MEMO and TAX_INVOICE).
-      // GSTR-3B requires the split regardless of bill type — the bill_type only affects
+      // GSTR-3B requires the split regardless of bill type - the bill_type only affects
       // whether the tax breakdown is printed on the invoice, not whether GST is owed.
       const isInterState = String(invoice.supply_type || "INTRA_STATE").toUpperCase() === "INTER_STATE";
       const cgstAmt  = !isInterState ? Number((storedGst / 2).toFixed(4)) : 0;
@@ -257,7 +257,7 @@ async function runConfirmSalesInvoiceInTx(q, ctx, invoiceId) {
 
     const splitGst = Number(final.gstAmount || 0);
     // Always split GST into CGST/SGST/IGST for ALL bill types (CASH_MEMO and TAX_INVOICE).
-    // GSTR-3B requires the split regardless of bill type — the bill_type only affects
+    // GSTR-3B requires the split regardless of bill type - the bill_type only affects
     // whether the tax breakdown is printed on the invoice, not whether GST is owed.
     const isInterState = String(invoice.supply_type || "INTRA_STATE").toUpperCase() === "INTER_STATE";
     const cgstAmount = !isInterState ? Number((splitGst / 2).toFixed(4)) : 0;

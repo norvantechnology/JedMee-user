@@ -340,7 +340,7 @@ export default function ProductMasterModal({
                   </ModalFormField>
                 ) : null}
 
-                {/* Both roles: Product name — required, full width, hero */}
+                {/* Both roles: Product name - required, full width, hero */}
                 <ModalFormField span={12} label="Product name" required error={nameError || displayErrors.name || null}>
                   <input
                     className={`mfzInput pmmInputHero${nameError || displayErrors.name ? " mfzInput_err" : ""}`}
@@ -383,7 +383,7 @@ export default function ProductMasterModal({
                   </ModalFormField>
                 ) : null}
 
-                {/* Wholesaler: HSN (4) + Rack (4) + Supplier (4) — all optional, narrow */}
+                {/* Wholesaler: HSN (4) + Rack (4) + Supplier (4) - all optional, narrow */}
                 {!isRetailer ? (
                   <ModalFormField span={4} label="HSN / Tax Code" hint="Tax classification.">
                     <input className="mfzInput" value={form.hsnCode} readOnly={readOnly} onChange={(e) => setField("hsnCode", e.target.value)} placeholder="e.g. 3004" />
@@ -395,9 +395,9 @@ export default function ProductMasterModal({
                   </ModalFormField>
                 ) : null}
                 {!isRetailer && hasVendors ? (
-                  <ModalFormField span={4} label="Supplier" hint="Optional — can differ from division.">
+                  <ModalFormField span={4} label="Supplier" hint="Optional - can differ from division.">
                     <select className="mfzInput" value={form.supplierId} disabled={busy || readOnly} onChange={(e) => setField("supplierId", e.target.value)}>
-                      <option value="">— No supplier —</option>
+                      <option value="">- No supplier -</option>
                       {(vendorOptions || []).map((v) => (
                         <option key={v.id} value={String(v.id)}>
                           {v.name || v.short_name || String(v.id)}{v.short_name && v.name && v.short_name !== v.name ? ` (${v.short_name})` : ""}
@@ -527,7 +527,7 @@ export default function ProductMasterModal({
                   </ModalFormCheckGroup>
               </ModalFormGrid>
 
-              {/* Low stock alert + threshold — aligned row; dims threshold when alert is off */}
+              {/* Low stock alert + threshold - aligned row; dims threshold when alert is off */}
               <div className={`pmmLowStockRow${form.lowStockAlertEnabled ? "" : " pmmLowStockRow_off"}`}>
                 <label className="mfzCheck pmmLowStockToggle">
                   <input

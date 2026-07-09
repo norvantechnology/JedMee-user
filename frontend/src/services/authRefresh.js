@@ -3,7 +3,7 @@ import { readAuth, saveAuth } from "./authStorage.js";
 
 /** @typedef {{ ok: true } | { ok: false, reason: 'no_session' | 'invalid_refresh' | 'transient', status?: number }} RefreshResult */
 
-/** Single in-flight refresh — prevents parallel refresh races across tabs/calls. */
+/** Single in-flight refresh - prevents parallel refresh races across tabs/calls. */
 let _refreshFlight = null;
 
 /**

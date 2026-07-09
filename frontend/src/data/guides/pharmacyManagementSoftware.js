@@ -28,7 +28,7 @@ export const PHARMACY_MANAGEMENT_SOFTWARE_GUIDE = {
     serviceType: "Pharmacy management software",
   },
   introFacts: [
-    "JedMee supports GST/VAT billing, batch-level stock control, expiry alerts, and retailer-to-wholesaler ordering in one cloud platform — with a 14-day free trial and paid plans from $9/month.",
+    "JedMee supports GST/VAT billing, batch-level stock control, expiry alerts, and retailer-to-wholesaler ordering in one cloud platform - with a 14-day free trial and paid plans from $9/month.",
     "Pharmacy management software helps medicine shops and distributors replace paper registers with billing, inventory, purchases, sales, customer ledgers, and tax invoices in one system.",
   ],
   sections: [
@@ -54,7 +54,7 @@ export const PHARMACY_MANAGEMENT_SOFTWARE_GUIDE = {
         },
         {
           q: "Batch-wise inventory and expiry tracking",
-          a: "Medicines are tracked by batch and expiry date — not just product name. Alerts before expiry reduce write-offs; FIFO/FEFO picking is supported at billing time.",
+          a: "Medicines are tracked by batch and expiry date - not just product name. Alerts before expiry reduce write-offs; FIFO/FEFO picking is supported at billing time.",
         },
         {
           q: "Purchase and supplier management",
@@ -85,7 +85,7 @@ export const PHARMACY_MANAGEMENT_SOFTWARE_GUIDE = {
         "Check multi-user roles (owner, cashier, warehouse staff)",
         "Test mobile access if staff bill away from the counter",
         "Compare onboarding support and data import (CSV for products/batches)",
-        "Start with a free trial — JedMee offers 14 days without a credit card",
+        "Start with a free trial - JedMee offers 14 days without a credit card",
       ],
       paragraphs: [
         "See our pharmacy software comparison for a feature-by-feature look at billing, inventory, and wholesale tools, or explore JedMee pricing on the homepage.",

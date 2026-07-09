@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 const BASE_TITLE = "JedMee";
 const BASE_DESC =
-  "JedMee is pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial, no credit card required.";
+  "JedMee is pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, and invoicing - free trial, no credit card required.";
 const BASE_URL = "https://jedmee.com";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/logo-400.png`;
 
@@ -61,7 +61,7 @@ function upsertLink(rel, href) {
 }
 
 /**
- * injectJsonLd — inject a page-specific JSON-LD <script> block into <head>
+ * injectJsonLd - inject a page-specific JSON-LD <script> block into <head>
  * and remove it on unmount.
  */
 export function injectJsonLd(schema) {
@@ -95,7 +95,7 @@ export function useRouteIndexing(pathname) {
 }
 
 /**
- * useSeoMeta — page-level title, description, canonical, and social tags.
+ * useSeoMeta - page-level title, description, canonical, and social tags.
  *
  * Google uses title + description for search snippets. Meta keywords are omitted
  * (Google Search does not use the keywords meta tag).
@@ -108,8 +108,8 @@ export function useSeoMeta({
   noIndex,
 } = {}) {
   const fullTitle = title
-    ? `${title} — ${BASE_TITLE}`
-    : `${BASE_TITLE} — Pharmacy Management Software for Medicine Shops`;
+    ? `${title} - ${BASE_TITLE}`
+    : `${BASE_TITLE} - Pharmacy Management Software for Medicine Shops`;
   const fullDesc = description || BASE_DESC;
   const canonicalUrl = canonical || BASE_URL;
   const ogImg = ogImage || DEFAULT_OG_IMAGE;

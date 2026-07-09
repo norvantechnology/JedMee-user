@@ -11,7 +11,7 @@
 --   DB-11  purchase_return_items batch/invoice reference check constraint
 --   DB-13  Drop unused purchase_return_reason enum
 --   DB-14  purchase_invoices purchase_source consistency constraint
---   DB-15  ON_ACCOUNT vendor payments — index for allocation refresh
+--   DB-15  ON_ACCOUNT vendor payments - index for allocation refresh
 --   DB-16  sales_invoices invoice_number unique index as partial (soft-delete safe)
 --   DB-17  customer_payments allocation constraint relaxed for post-hoc allocation
 --   DB-18  wholesaler_catalog tenant-safe FK
@@ -20,7 +20,7 @@
 --   DB-21  product_gst_history table for GST rate change audit
 
 ------------------------------------------------------------------------
--- DB-01: products.mfg_company_id — add the column that was never explicitly
+-- DB-01: products.mfg_company_id - add the column that was never explicitly
 --        defined in any migration but is referenced by indexes and queries.
 ------------------------------------------------------------------------
 ALTER TABLE products
@@ -64,13 +64,13 @@ ALTER TABLE mfg_companies
 -- (already enforced by ON DELETE RESTRICT FKs; this comment documents the intent)
 
 ------------------------------------------------------------------------
--- DB-06: vendors — compound index for active + soft-delete list queries
+-- DB-06: vendors - compound index for active + soft-delete list queries
 ------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_vendors_account_active_deleted
   ON vendors(account_id, is_active, deleted_at);
 
 ------------------------------------------------------------------------
--- DB-08: products.division_id — attempt NOT NULL enforcement
+-- DB-08: products.division_id - attempt NOT NULL enforcement
 -- Only applies if all active products already have a division_id set.
 ------------------------------------------------------------------------
 DO $$
@@ -96,7 +96,7 @@ BEGIN
 END $$;
 
 ------------------------------------------------------------------------
--- DB-11: purchase_return_items — at least one of batch_id or
+-- DB-11: purchase_return_items - at least one of batch_id or
 --        purchase_invoice_item_id must be non-null
 ------------------------------------------------------------------------
 ALTER TABLE purchase_return_items
@@ -117,7 +117,7 @@ EXCEPTION WHEN others THEN
 END $$;
 
 ------------------------------------------------------------------------
--- DB-14: purchase_invoices — purchase_source must match the party column
+-- DB-14: purchase_invoices - purchase_source must match the party column
 ------------------------------------------------------------------------
 ALTER TABLE purchase_invoices
   DROP CONSTRAINT IF EXISTS purchase_invoices_source_party_chk;
@@ -131,14 +131,14 @@ ALTER TABLE purchase_invoices
   );
 
 ------------------------------------------------------------------------
--- DB-15: ON_ACCOUNT vendor payments — index to find unallocated advances
+-- DB-15: ON_ACCOUNT vendor payments - index to find unallocated advances
 ------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_vendor_payments_on_account
   ON vendor_payments(account_id, vendor_id, allocation_type)
   WHERE allocation_type = 'ON_ACCOUNT' AND purchase_invoice_id IS NULL;
 
 ------------------------------------------------------------------------
--- DB-16: sales_invoices — make invoice_number unique index soft-delete safe
+-- DB-16: sales_invoices - make invoice_number unique index soft-delete safe
 ------------------------------------------------------------------------
 DROP INDEX IF EXISTS sales_invoices_number_unique;
 
@@ -147,7 +147,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS sales_invoices_number_unique
   WHERE deleted_at IS NULL;
 
 ------------------------------------------------------------------------
--- DB-17: customer_payments — relax allocation constraint to allow
+-- DB-17: customer_payments - relax allocation constraint to allow
 --        post-hoc allocation (ON_ACCOUNT payment linked to invoice later)
 ------------------------------------------------------------------------
 ALTER TABLE customer_payments
@@ -162,7 +162,7 @@ ALTER TABLE customer_payments
   );
 
 ------------------------------------------------------------------------
--- DB-18: wholesaler_catalog — add tenant-safe composite FK
+-- DB-18: wholesaler_catalog - add tenant-safe composite FK
 ------------------------------------------------------------------------
 -- First ensure the composite unique index exists on products
 CREATE UNIQUE INDEX IF NOT EXISTS products_account_id_unique
@@ -182,14 +182,14 @@ ALTER TABLE wholesaler_catalog
   ON DELETE RESTRICT;
 
 ------------------------------------------------------------------------
--- DB-19: order_items — index clarifying which account_id is stored
+-- DB-19: order_items - index clarifying which account_id is stored
 --        (wholesaler_account_id = the account that owns the catalog item)
 ------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_order_items_account_order
   ON order_items(account_id, order_id);
 
 ------------------------------------------------------------------------
--- DB-21: product_gst_history — audit trail for GST rate changes
+-- DB-21: product_gst_history - audit trail for GST rate changes
 ------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS product_gst_history (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -212,28 +212,28 @@ CREATE INDEX IF NOT EXISTS idx_product_gst_history_account
   ON product_gst_history(account_id, created_at DESC);
 
 ------------------------------------------------------------------------
--- Additional: purchase_return_items — index for freehand items (no invoice item link)
+-- Additional: purchase_return_items - index for freehand items (no invoice item link)
 ------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_purchase_return_items_freehand
   ON purchase_return_items(purchase_return_id)
   WHERE purchase_invoice_item_id IS NULL;
 
 ------------------------------------------------------------------------
--- Additional: mfg_companies — add is_active index for list queries
+-- Additional: mfg_companies - add is_active index for list queries
 ------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_mfg_companies_account_active
   ON mfg_companies(account_id, is_active)
   WHERE deleted_at IS NULL;
 
 ------------------------------------------------------------------------
--- Additional: products — index for mfg_company_id lookups
+-- Additional: products - index for mfg_company_id lookups
 ------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_products_mfg_company
   ON products(account_id, mfg_company_id)
   WHERE deleted_at IS NULL AND mfg_company_id IS NOT NULL;
 
 ------------------------------------------------------------------------
--- Additional: sales_returns — add deleted_at if missing (soft-delete parity)
+-- Additional: sales_returns - add deleted_at if missing (soft-delete parity)
 ------------------------------------------------------------------------
 ALTER TABLE sales_returns
   ADD COLUMN IF NOT EXISTS deleted_at timestamptz;
@@ -248,7 +248,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS sales_returns_number_unique
   WHERE deleted_at IS NULL;
 
 ------------------------------------------------------------------------
--- Additional: purchase_return_items — add GST breakdown columns (BE-09)
+-- Additional: purchase_return_items - add GST breakdown columns (BE-09)
 ------------------------------------------------------------------------
 ALTER TABLE purchase_return_items
   ADD COLUMN IF NOT EXISTS hsn_code text,
@@ -280,7 +280,7 @@ SET
 WHERE cgst_amount = 0 AND sgst_amount = 0 AND gst_amount > 0;
 
 ------------------------------------------------------------------------
--- Additional: sales_invoice_items — add is_interstate flag for IGST (BE-07)
+-- Additional: sales_invoice_items - add is_interstate flag for IGST (BE-07)
 ------------------------------------------------------------------------
 ALTER TABLE sales_invoices
   ADD COLUMN IF NOT EXISTS is_interstate boolean NOT NULL DEFAULT false,
@@ -293,7 +293,7 @@ CREATE INDEX IF NOT EXISTS idx_sales_invoices_interstate
   WHERE is_interstate = true;
 
 ------------------------------------------------------------------------
--- Additional: account_settings — add loose_unit_factor and enable_loose_sale
+-- Additional: account_settings - add loose_unit_factor and enable_loose_sale
 -- (referenced in runConfirmSalesCore.js but may be missing from schema)
 ------------------------------------------------------------------------
 ALTER TABLE account_settings

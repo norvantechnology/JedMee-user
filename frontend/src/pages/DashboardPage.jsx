@@ -686,24 +686,24 @@ export default function DashboardPage() {
                       <strong>How these numbers relate</strong>
                       <ul>
                         <li>
-                          <span className="dash-metrics-label">Period sales</span> {fmtCurrency(salesTotal)} — confirmed
+                          <span className="dash-metrics-label">Period sales</span> {fmtCurrency(salesTotal)} - confirmed
                           sales invoice total <em>(incl. GST)</em>.
                         </li>
                         {revenue > 0 && (
                           <li>
-                            <span className="dash-metrics-label">Gross profit</span> {fmtCurrency(data.kpis.gross_profit.value)} — margin on
+                            <span className="dash-metrics-label">Gross profit</span> {fmtCurrency(data.kpis.gross_profit.value)} - margin on
                             goods sold: sales value ex-GST minus cost of goods sold (COGS).
                           </li>
                         )}
                         {canPurchases && purchTotal > 0 && (
                           <li>
-                            <span className="dash-metrics-label">Sales − purchases</span> {fmtCurrency(netBills)} — bill totals only;{" "}
+                            <span className="dash-metrics-label">Sales − purchases</span> {fmtCurrency(netBills)} - bill totals only;{" "}
                             <strong>not</strong> the same as gross profit.
                           </li>
                         )}
                         {gstApprox > 0.01 && (
                           <li>
-                            <span className="dash-metrics-label">GST in sales</span> ≈ {fmtCurrency(gstApprox)} — included in period sales,
+                            <span className="dash-metrics-label">GST in sales</span> ≈ {fmtCurrency(gstApprox)} - included in period sales,
                             excluded from profit margin. See Day Book for output/input GST.
                           </li>
                         )}

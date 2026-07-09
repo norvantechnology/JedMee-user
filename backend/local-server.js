@@ -150,7 +150,7 @@ for (const [logicalId, resource] of Object.entries(tpl.Resources)) {
       .replace(/\/?\{proxy\+\}$/g, "/*splat")
       .replace(/\{([^}]+)\}/g, ":$1");
     const rawMethod = String(evt.Properties.Method || "").toLowerCase();
-    // SAM `Method: ANY` means "all HTTP verbs" — Express uses `app.all()`.
+    // SAM `Method: ANY` means "all HTTP verbs" - Express uses `app.all()`.
     const method = rawMethod === "any" ? "all" : rawMethod;
     const idx = handlerStr.lastIndexOf(".");
     const modulePath = path.join(codeUri, handlerStr.substring(0, idx));

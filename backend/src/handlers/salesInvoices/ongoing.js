@@ -10,16 +10,16 @@ const { clean } = require("../../shared/sales");
  * Used by the parallel-billing UI: shop staff keep multiple in-progress bills
  * open at the counter and switch between them with a quick chip rail.
  *
- * Returns a compact payload — enough to render a chip (customer/walk-in name,
+ * Returns a compact payload - enough to render a chip (customer/walk-in name,
  * bill number, item count, total, who started it, last update). The full
  * invoice + line items are loaded only when the user opens a specific bill.
  *
  * Query params:
  *   scope=mine|shared (optional)
- *     mine   — only drafts created by the current user
- *     shared — drafts created by other staff (so they can be picked up)
- *     omit   — all account drafts (default; pharmacy counter is shared)
- *   q (optional) — fuzzy match on customer or bill number
+ *     mine   - only drafts created by the current user
+ *     shared - drafts created by other staff (so they can be picked up)
+ *     omit   - all account drafts (default; pharmacy counter is shared)
+ *   q (optional) - fuzzy match on customer or bill number
  *   limit (optional, default 30, max 100)
  */
 async function handler(event) {

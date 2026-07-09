@@ -82,7 +82,7 @@ async function runConfirmSalesReturnInTx(q, ctx, returnId) {
         [
           accountId, item.batch_id,
           "SALE_RETURN_ITEM", item.id,
-          `Loose return: ${returnLooseQty} unit(s) — Sales return ${ret.return_number}`, actorId
+          `Loose return: ${returnLooseQty} unit(s) - Sales return ${ret.return_number}`, actorId
         ]
       );
     }

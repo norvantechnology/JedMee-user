@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build && node scripts/prerender.mjs",
-    "build:no-prerender": "vite build",
+    "dev": "node init && vite",
+    "build": "node init && vite build && node scripts/prerender.mjs",
+    "build:no-prerender": "node init && vite build",
     "preview": "vite preview",
     "prerender": "node scripts/prerender.mjs",
     "validate:schema": "node scripts/validate-prerender-schema.mjs"

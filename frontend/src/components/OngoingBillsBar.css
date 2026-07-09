@@ -1,4 +1,4 @@
-/* Parallel-billing rail — drop-in component above sales / purchase pages. */
+/* Parallel-billing rail - drop-in component above sales / purchase pages. */
 .ongoingBills {
   display: flex;
   flex-wrap: nowrap;
@@ -16,7 +16,7 @@
   justify-content: flex-start;
 }
 
-/* When rendered inside a modal body — slightly inset styling */
+/* When rendered inside a modal body - slightly inset styling */
 .ongoingBills.compact {
   border-radius: 8px;
   margin-bottom: 16px;

@@ -26,7 +26,7 @@ function getMessaging() {
   const privateKey  = (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
 
   if (!projectId || !clientEmail || !privateKey) {
-    console.warn("[fcm] Firebase env vars not set — push notifications disabled.");
+    console.warn("[fcm] Firebase env vars not set - push notifications disabled.");
     return null;
   }
 
@@ -110,7 +110,7 @@ function dataPriorityFallback(type) {
 
 async function sendPushNotification({ userIds, title, body, data = {}, type = "", actionPath = "", dataOnly = false }) {
   const messaging = getMessaging();
-  if (!messaging) return; // Firebase not configured — skip silently.
+  if (!messaging) return; // Firebase not configured - skip silently.
 
   const priority = data.priority || dataPriorityFallback(type);
   const channelId = channelForPriority(priority, type, data);
@@ -127,7 +127,7 @@ async function sendPushNotification({ userIds, title, body, data = {}, type = ""
 
   const tokens = tokenRows.map((r) => r.token);
 
-  // Build the data payload — all values must be strings for FCM.
+  // Build the data payload - all values must be strings for FCM.
   const dataPayload = {
     type: String(type || ""),
     actionPath: String(actionPath || ""),
@@ -155,7 +155,7 @@ async function sendPushNotification({ userIds, title, body, data = {}, type = ""
             data: dataPayload,
             android: {
               priority: "high",
-              // data-only: no notification block — prevents FCM auto-display
+              // data-only: no notification block - prevents FCM auto-display
             },
             apns: {
               headers: { "apns-priority": "10" },

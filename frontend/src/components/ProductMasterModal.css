@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    ProductMasterModal.css
    Scoped to `.mcmBody .mfz.pmmForm`.
-   Layout: single ModalFormGrid per panel — no stacked separators needed.
+   Layout: single ModalFormGrid per panel - no stacked separators needed.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Tighten section-to-section gap inside this modal */
@@ -9,12 +9,12 @@
   gap: 12px;
 }
 
-/* Single grid per panel — consistent gap throughout */
+/* Single grid per panel - consistent gap throughout */
 .mcmBody .mfz.pmmForm .pmmGrid {
   gap: 10px clamp(8px, 1.2vw, 14px);
 }
 
-/* ── Hero input: product name — larger, bolder ── */
+/* ── Hero input: product name - larger, bolder ── */
 .mcmBody .mfz.pmmForm .pmmInputHero {
   min-height: 44px;
   font-size: clamp(14px, 0.95rem + 0.25vw, 15.5px);
@@ -23,7 +23,7 @@
   color: var(--color-text);
 }
 
-/* ── Secondary input: generic/drug name — lighter weight ── */
+/* ── Secondary input: generic/drug name - lighter weight ── */
 .mcmBody .mfz.pmmForm .pmmInputSecondary {
   font-size: clamp(13px, 0.87rem, 13.5px);
   font-weight: 450;
@@ -39,7 +39,7 @@
   box-shadow: none !important;
 }
 
-/* ── Policy checkboxes: compact tile grid — top-aligned so wrapping labels don't skew row ── */
+/* ── Policy checkboxes: compact tile grid - top-aligned so wrapping labels don't skew row ── */
 .mcmBody .mfz.pmmForm .pmmChecks.mfzChecks {
   grid-template-columns: repeat(auto-fill, minmax(clamp(9rem, 22%, 14rem), 1fr));
   align-items: start;
@@ -88,7 +88,7 @@
   transition: opacity 0.15s ease;
 }
 
-/* Clicking the dimmed threshold auto-enables the alert — keep pointer active */
+/* Clicking the dimmed threshold auto-enables the alert - keep pointer active */
 .mcmBody .mfz.pmmForm .pmmLowStockRow_off .pmmLowStockField .mfzInput {
   cursor: pointer;
 }

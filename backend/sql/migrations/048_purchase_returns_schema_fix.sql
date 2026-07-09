@@ -1,4 +1,4 @@
--- Migration 048: Fix purchase_returns schema — add columns missing from migration 020
+-- Migration 048: Fix purchase_returns schema - add columns missing from migration 020
 --
 -- Context: migration 047 (backend/migrations/047_purchase_returns_gst_alerts.sql) was
 -- placed outside the sql/migrations runner directory and was never applied.  The

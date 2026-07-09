@@ -64,7 +64,7 @@ async function handler(event) {
       // eslint-disable-next-line no-continue
       continue;
     }
-    const text = `Please find your sales invoice ${inv.invoice_number || ""} attached as a PDF.\n\n— ${doc.seller?.firm_name || doc.seller?.full_name || ""}`;
+    const text = `Please find your sales invoice ${inv.invoice_number || ""} attached as a PDF.\n\n- ${doc.seller?.firm_name || doc.seller?.full_name || ""}`;
     const m = await sendMail({
       to,
       subject,

@@ -1,5 +1,5 @@
 /**
- * Order detail modal — facts column + retailer fulfillment block.
+ * Order detail modal - facts column + retailer fulfillment block.
  */
 import { fmtCurrency } from "../../utils/format.js";
 export function OrderDetailFacts({ detail, isRetailer }) {
@@ -12,12 +12,12 @@ export function OrderDetailFacts({ detail, isRetailer }) {
         <div className="ordFactRow">
           <span className="ordFactLabel">Placed</span>
           <span className="ordFactValue ordFactValueMono">
-            {detail?.order?.placed_at ? new Date(detail.order.placed_at).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
+            {detail?.order?.placed_at ? new Date(detail.order.placed_at).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-"}
           </span>
         </div>
         <div className="ordFactRow">
           <span className="ordFactLabel">{partyLabel}</span>
-          <span className="ordFactValue">{partyName || "—"}</span>
+          <span className="ordFactValue">{partyName || "-"}</span>
         </div>
         <div className="ordFactRow ordFactRow--total">
           <span className="ordFactLabel">Total</span>

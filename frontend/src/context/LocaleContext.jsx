@@ -1,12 +1,12 @@
 /**
- * LocaleContext — React context for the active country and its tax/locale config.
+ * LocaleContext - React context for the active country and its tax/locale config.
  *
  * - Reads initial value from localStorage (key: "jedmee_country").
  * - Calls setActiveCountry() from locale.js to keep the module-level store in
  *   sync so non-React utilities (print templates, CSV exports) also use the
  *   correct tax label.
  * - When the country changes, auto-suggests the matching currency via
- *   setCurrency() from CurrencyContext — the user can still override currency
+ *   setCurrency() from CurrencyContext - the user can still override currency
  *   independently afterwards.
  * - Exposes useLocale() hook for components that need tax labels, invoice
  *   terminology, or the country setter.
@@ -52,7 +52,7 @@ function writeStoredCountry(code) {
 const LocaleContext = createContext(null);
 
 export function LocaleProvider({ children }) {
-  // CurrencyContext must be an ancestor — LocaleProvider is wrapped inside it.
+  // CurrencyContext must be an ancestor - LocaleProvider is wrapped inside it.
   const { setCurrency } = useCurrency();
 
   const [countryCode, setCountryCode] = useState(() => {
@@ -64,8 +64,8 @@ export function LocaleProvider({ children }) {
 
   /**
    * Change the active country.
-   * @param {string} newCode          — ISO 3166-1 alpha-2 (e.g. "GB")
-   * @param {boolean} autoSetCurrency — if true (default), also update currency
+   * @param {string} newCode          - ISO 3166-1 alpha-2 (e.g. "GB")
+   * @param {boolean} autoSetCurrency - if true (default), also update currency
    *                                    to the country's default currency code.
    */
   const setCountry = useCallback(

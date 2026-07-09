@@ -33,7 +33,7 @@ function isValidGstin(g) {
 
 /** Format date as "20th June 2026" */
 function fmtDueDate(dateStr) {
-  if (!dateStr) return "—";
+  if (!dateStr) return "-";
   const d = new Date(dateStr);
   const day = d.getDate();
   const suffix = [, "st", "nd", "rd"][day] || "th";
@@ -84,19 +84,19 @@ function exportCsv(data, year, month) {
     ["Total ITC Available", n2(s.total_itc_available)],
     ["Net GST Payable", n2(s.net_gst_payable)],
     [],
-    ["SECTION 3.1 — OUTWARD SUPPLIES", "Total Value", "CGST", "SGST", "IGST", "Cess"],
+    ["SECTION 3.1 - OUTWARD SUPPLIES", "Total Value", "CGST", "SGST", "IGST", "Cess"],
     ["Taxable Sales", n2(os.taxable?.total_value), n2(os.taxable?.cgst), n2(os.taxable?.sgst), n2(os.taxable?.igst), "0.00"],
     ["Nil Rated / Exempt Sales", n2(os.nil_rated?.total_value), "0.00", "0.00", "0.00", "0.00"],
     ["TOTAL", n2(os.totals?.total_value), n2(os.totals?.cgst), n2(os.totals?.sgst), n2(os.totals?.igst), "0.00"],
     [],
-    ["SECTION 4 — ITC FROM PURCHASES", "Total Value", "CGST", "SGST", "IGST", "Cess"],
+    ["SECTION 4 - ITC FROM PURCHASES", "Total Value", "CGST", "SGST", "IGST", "Cess"],
     ["Eligible Purchases (Supplier has GSTIN)", n2(itc.eligible?.taxable_value), n2(itc.eligible?.cgst), n2(itc.eligible?.sgst), n2(itc.eligible?.igst), "0.00"],
     ["Imports (if any)", "0.00", "0.00", "0.00", "0.00", "0.00"],
     ["Ineligible Purchases (No GSTIN)", n2(itc.ineligible?.taxable_value), n2(itc.ineligible?.cgst), n2(itc.ineligible?.sgst), n2(itc.ineligible?.igst), "0.00"],
     ["Purchase Returns Reversed", n2(itc.reversals?.total_amount), n2(itc.reversals?.cgst), n2(itc.reversals?.sgst), n2(itc.reversals?.igst), "0.00"],
     ["Net ITC Available", "", n2(itc.net_itc?.cgst), n2(itc.net_itc?.sgst), n2(itc.net_itc?.igst), "0.00"],
     [],
-    ["SECTION 6 — NET TAX PAYABLE", "GST Collected", "ITC Available", "Net Payable", "Interest", "Late Fee"],
+    ["SECTION 6 - NET TAX PAYABLE", "GST Collected", "ITC Available", "Net Payable", "Interest", "Late Fee"],
     ["CGST", n2(tp.cgst?.gst_collected), n2(tp.cgst?.itc_available), n2(tp.cgst?.net_payable), "0.00", "0.00"],
     ["SGST", n2(tp.sgst?.gst_collected), n2(tp.sgst?.itc_available), n2(tp.sgst?.net_payable), "0.00", "0.00"],
     ["IGST", n2(tp.igst?.gst_collected), n2(tp.igst?.itc_available), n2(tp.igst?.net_payable), "0.00", "0.00"],
@@ -121,7 +121,7 @@ function AmtCell({ v, bold, highlight, success, muted }) {
   if (highlight) cls += " tHighlight";
   if (success)   cls += " tSuccess";
   if (muted)     cls += " tMuted";
-  return <td className={cls}>{muted ? "—" : `₹${n2(v)}`}</td>;
+  return <td className={cls}>{muted ? "-" : `₹${n2(v)}`}</td>;
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -186,8 +186,8 @@ export default function Gstr3bPage() {
     <ReportShell>
       <div className="pageWrap">
         <ReportPageIntro
-          title="GSTR-3B — Monthly Summary Report"
-          subtitle={`Monthly ${taxLabel} summary for your CA — outward supplies, ITC, and net ${taxLabel} payable`}
+          title="GSTR-3B - Monthly Summary Report"
+          subtitle={`Monthly ${taxLabel} summary for your CA - outward supplies, ITC, and net ${taxLabel} payable`}
         />
 
         <ReportCard>
@@ -250,7 +250,7 @@ export default function Gstr3bPage() {
               <div className="g3bEmptyIcon"><BarChart3 size={32} /></div>
               <div className="g3bEmptyTitle">Select month and year, then click Generate Report</div>
               <div className="g3bEmptySub">
-                GSTR-3B shows your monthly {taxLabel} summary — outward supplies, ITC from purchases, and net {taxLabel} payable. Share this with your CA for filing.
+                GSTR-3B shows your monthly {taxLabel} summary - outward supplies, ITC from purchases, and net {taxLabel} payable. Share this with your CA for filing.
               </div>
             </div>
           )}
@@ -258,12 +258,12 @@ export default function Gstr3bPage() {
           {/* ── Report ── */}
           {!loading && fetched && data && (
             <>
-              {/* Critical HSN warning — top of report, red for mandatory compliance */}
+              {/* Critical HSN warning - top of report, red for mandatory compliance */}
               {notes.missing_hsn_count > 0 && (
                 <div className="g3bHsnWarn">
                   <AlertTriangle size={16} />
                   <div>
-                    <strong>Action Required — {notes.missing_hsn_count} Line Item(s) Missing HSN Codes</strong>
+                    <strong>Action Required - {notes.missing_hsn_count} Line Item(s) Missing HSN Codes</strong>
                     <div style={{ fontSize: 12, marginTop: 2 }}>HSN codes are mandatory for GSTR-1 filing. Update these items before sharing with your CA. Filing without HSN codes may result in rejection.</div>
                   </div>
                 </div>
@@ -274,8 +274,8 @@ export default function Gstr3bPage() {
                 <div className={`g3bDueNotice${overdue ? " overdue" : ""}`}>
                   <AlertTriangle size={15} />
                   {overdue
-                    ? `OVERDUE — Due date was ${fmtDueDate(dueDate)}. Please share with your CA immediately.`
-                    : `Due soon — Filing due by ${fmtDueDate(dueDate)}. ${Math.ceil((new Date(dueDate) - new Date()) / (1000 * 60 * 60 * 24))} days remaining.`
+                    ? `OVERDUE - Due date was ${fmtDueDate(dueDate)}. Please share with your CA immediately.`
+                    : `Due soon - Filing due by ${fmtDueDate(dueDate)}. ${Math.ceil((new Date(dueDate) - new Date()) / (1000 * 60 * 60 * 24))} days remaining.`
                   }
                 </div>
               )}
@@ -290,12 +290,12 @@ export default function Gstr3bPage() {
                       <div className="g3bBizGstin">GSTIN: <strong>{biz.gst_number}</strong></div>
                       {!isValidGstin(biz.gst_number) && (
                         <div className="g3bGstinInvalid">
-                          <AlertTriangle size={11} /> Invalid GSTIN format — must be 15 characters (e.g. 29ABCDE1234F1Z5)
+                          <AlertTriangle size={11} /> Invalid GSTIN format - must be 15 characters (e.g. 29ABCDE1234F1Z5)
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className="g3bBizGstin g3bGstinMissing"><AlertTriangle size={12} /> GSTIN not set — add it in your profile</div>
+                    <div className="g3bBizGstin g3bGstinMissing"><AlertTriangle size={12} /> GSTIN not set - add it in your profile</div>
                   )}
                 </div>
                 <div className="g3bBizRight">
@@ -307,8 +307,8 @@ export default function Gstr3bPage() {
               {/* Generated-at timestamp with stale data prompt */}
               {generatedAt && (
                 <div className="g3bGeneratedBar">
-                  <span>Generated: {generatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} — {generatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
-                  <span className="g3bGeneratedNote">New invoices added after this time won't appear — click <strong>Refresh</strong> to recalculate.</span>
+                  <span>Generated: {generatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {generatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  <span className="g3bGeneratedNote">New invoices added after this time won't appear - click <strong>Refresh</strong> to recalculate.</span>
                 </div>
               )}
 
@@ -324,7 +324,7 @@ export default function Gstr3bPage() {
                   <div className="g3bStatLabel">Total {taxLabel} Collected</div>
                   <div className="g3bStatValue">{fmtCurrency(s.total_gst_collected)}</div>
                   {s.all_sales_nil_rated && (
-                    <div className="g3bStatNote">All sales are nil-rated / exempt — ₹0 GST is correct</div>
+                    <div className="g3bStatNote">All sales are nil-rated / exempt - ₹0 GST is correct</div>
                   )}
                 </div>
                 <div className="g3bStatCard">
@@ -349,17 +349,17 @@ export default function Gstr3bPage() {
                 </div>
               </div>
 
-              {/* Section 3.1 — Outward Supplies */}
+              {/* Section 3.1 - Outward Supplies */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">Section 3.1 — Outward Supplies</span>
+                  <span className="g3bSectionTitle">Section 3.1 - Outward Supplies</span>
                   <span className="g3bSectionBadge">{osTot.invoice_count || 0} invoices</span>
                 </div>
                 {/* Data quality warning: items with GST rate set but zero actual amounts */}
                 {s.gst_rate_mismatch_count > 0 && (
                   <div className="g3bNoteRow g3bNoteWarn" style={{ margin: "8px 18px 0", borderRadius: 8 }}>
                     <AlertTriangle size={14} />
-                    <span><strong>{s.gst_rate_mismatch_count} line item(s)</strong> have a GST rate set but ₹0 GST collected — reclassified as Nil Rated. Verify these items have the correct GST rate in your product master.</span>
+                    <span><strong>{s.gst_rate_mismatch_count} line item(s)</strong> have a GST rate set but ₹0 GST collected - reclassified as Nil Rated. Verify these items have the correct GST rate in your product master.</span>
                   </div>
                 )}
                 <div className="g3bTableScroll">
@@ -408,15 +408,15 @@ export default function Gstr3bPage() {
                 </div>
               </div>
 
-              {/* Section 3.2 — Inter-state supplies */}
+              {/* Section 3.2 - Inter-state supplies */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">Section 3.2 — Inter-state Supplies</span>
+                  <span className="g3bSectionTitle">Section 3.2 - Inter-state Supplies</span>
                   <span className="g3bSectionBadge g3bBadgeInfo" style={{ fontSize: 12, padding: "3px 10px" }}>⟳ Auto-populated from GSTR-1</span>
                 </div>
                 <div className="g3bNoteRow g3bNoteInfo" style={{ margin: "6px 18px 0", borderRadius: 6, padding: "5px 10px" }}>
                   <Info size={13} />
-                  <span style={{ fontSize: 12 }}>Inter-state supplies only — intra-state not shown here. Auto-populated from GSTR-1 from July 2025.</span>
+                  <span style={{ fontSize: 12 }}>Inter-state supplies only - intra-state not shown here. Auto-populated from GSTR-1 from July 2025.</span>
                 </div>
                 <div className="g3bTableScroll">
                   <table className="g3bTable">
@@ -437,10 +437,10 @@ export default function Gstr3bPage() {
                 </div>
               </div>
 
-              {/* Section 4 — ITC from Purchases */}
+              {/* Section 4 - ITC from Purchases */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">Section 4 — Input Tax Credit (ITC)</span>
+                  <span className="g3bSectionTitle">Section 4 - Input Tax Credit (ITC)</span>
                   <span className="g3bSectionBadge">{itcElig.invoice_count || 0} eligible invoices</span>
                 </div>
                 <div className="g3bTableScroll">
@@ -476,7 +476,7 @@ export default function Gstr3bPage() {
                         <td className="tR">0</td>
                       </tr>
                       <tr className="g3bInfoRow">
-                        <td>(C) Ineligible — No GSTIN <span className="g3bInelNote">(reference only, not claimable)</span></td>
+                        <td>(C) Ineligible - No GSTIN <span className="g3bInelNote">(reference only, not claimable)</span></td>
                         <AmtCell v={itcInel.taxable_value} />
                         <AmtCell v={itcInel.cgst} />
                         <AmtCell v={itcInel.sgst} />
@@ -485,7 +485,7 @@ export default function Gstr3bPage() {
                         <td className="tR">{itcInel.invoice_count || 0}</td>
                       </tr>
                       <tr className="g3bInfoRow">
-                        <td>(D) ITC Reversed — Purchase Returns</td>
+                        <td>(D) ITC Reversed - Purchase Returns</td>
                         <AmtCell v={itcRev.total_amount} />
                         <AmtCell v={itcRev.cgst} />
                         <AmtCell v={itcRev.sgst} />
@@ -509,21 +509,21 @@ export default function Gstr3bPage() {
                   <div className="g3bNoteRow g3bNoteWarn" style={{ margin: "8px 18px 12px", borderRadius: 8 }}>
                     <AlertTriangle size={14} />
                     <span>
-                      <strong>RCM Alert:</strong> {itcInel.invoice_count} purchase(s) from unregistered suppliers — GST paid (₹{n2(s.ineligible_itc_cost)}) is an <strong>additional cost to your business</strong>, not claimable as ITC.
-                      Reverse Charge Mechanism (RCM) may apply on specific notified goods/services — consult your CA.
+                      <strong>RCM Alert:</strong> {itcInel.invoice_count} purchase(s) from unregistered suppliers - GST paid (₹{n2(s.ineligible_itc_cost)}) is an <strong>additional cost to your business</strong>, not claimable as ITC.
+                      Reverse Charge Mechanism (RCM) may apply on specific notified goods/services - consult your CA.
                     </span>
                   </div>
                 )}
               </div>
 
-              {/* Section 5 — Nil-rated inward supplies */}
+              {/* Section 5 - Nil-rated inward supplies */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">Section 5 — Exempt, Nil-rated & Non-GST Inward Supplies</span>
+                  <span className="g3bSectionTitle">Section 5 - Exempt, Nil-rated & Non-GST Inward Supplies</span>
                 </div>
                 <div className="g3bNoteRow g3bNoteInfo" style={{ margin: "8px 18px 0", borderRadius: 8 }}>
                   <Info size={14} />
-                  <span>No tax is applicable on these supplies — CGST/SGST/IGST columns are absent per the official GSTR-3B form.</span>
+                  <span>No tax is applicable on these supplies - CGST/SGST/IGST columns are absent per the official GSTR-3B form.</span>
                 </div>
                 <div className="g3bTableScroll">
                   <table className="g3bTable">
@@ -555,10 +555,10 @@ export default function Gstr3bPage() {
                 </div>
               </div>
 
-              {/* Section 6 — Net Tax Payable */}
+              {/* Section 6 - Net Tax Payable */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">Section 6 — Payment of Tax</span>
+                  <span className="g3bSectionTitle">Section 6 - Payment of Tax</span>
                 </div>
                 <div className="g3bNoteRow g3bNoteInfo" style={{ margin: "8px 18px 0", borderRadius: 8 }}>
                   <Info size={14} />
@@ -608,7 +608,7 @@ export default function Gstr3bPage() {
                 </div>
               </div>
 
-              {/* Month history — exclude current month being viewed */}
+              {/* Month history - exclude current month being viewed */}
               {(() => {
                 const pastHistory = mh.filter(r => !(r.year === year && r.month === month));
                 return pastHistory.length > 0 ? (
@@ -659,11 +659,11 @@ export default function Gstr3bPage() {
                   <span className="g3bSectionTitle">Important Notes &amp; Disclaimer for CA</span>
                 </div>
                 <div style={{ padding: "12px 18px", display: "flex", flexDirection: "column", gap: 8 }}>
-                  {/* HSN warning already shown at top — not repeated here */}
+                  {/* HSN warning already shown at top - not repeated here */}
                   {notes.missing_gstin_count > 0 && (
                     <div className="g3bNoteRow g3bNoteWarn">
                       <AlertTriangle size={14} />
-                      <span><strong>{notes.missing_gstin_count} purchase invoice(s)</strong> from suppliers without GSTIN — GST paid is a cost, not claimable as ITC. RCM may apply — consult your CA.</span>
+                      <span><strong>{notes.missing_gstin_count} purchase invoice(s)</strong> from suppliers without GSTIN - GST paid is a cost, not claimable as ITC. RCM may apply - consult your CA.</span>
                     </div>
                   )}
                   {/* Info notes */}

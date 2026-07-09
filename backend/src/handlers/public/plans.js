@@ -8,7 +8,7 @@ const CURRENCY_SYMBOLS = {
 };
 
 /** Format numeric price + period into display strings for the landing page.
- *  Uses currency_code from the DB row — defaults to USD if absent. */
+ *  Uses currency_code from the DB row - defaults to USD if absent. */
 function formatPlan(row) {
   const price       = parseFloat(row.price);
   const isFree      = row.period === "free" || price === 0;
@@ -43,7 +43,7 @@ function formatPlan(row) {
 
 /**
  * GET /public/plans
- * No authentication required — returns active pricing plans for the landing page.
+ * No authentication required - returns active pricing plans for the landing page.
  */
 async function handler(_event) {
   try {

@@ -1,4 +1,4 @@
-/* ── MasterSelectWithCreate — select + attached + button ── */
+/* ── MasterSelectWithCreate - select + attached + button ── */
 .msw {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -35,7 +35,7 @@
   padding: 0 !important;
 }
 
-/* Modal context (mfzInput layout) — slightly taller fields */
+/* Modal context (mfzInput layout) - slightly taller fields */
 .msw_mfz {
   align-items: stretch;
   gap: 0;

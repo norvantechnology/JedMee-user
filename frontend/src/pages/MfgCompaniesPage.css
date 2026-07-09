@@ -1,5 +1,5 @@
 /* MfgCompaniesPage.css
-   Page-specific layout only — shared input/button styles come from
+   Page-specific layout only - shared input/button styles come from
    styles/common.css and components/ui/AppButton.css */
 
 .mcTop {
@@ -75,7 +75,7 @@
   color: var(--color-danger);
 }
 
-/* .mcTextarea removed — use .cmTextarea or .raInput (textarea) from styles/common.css */
+/* .mcTextarea removed - use .cmTextarea or .raInput (textarea) from styles/common.css */
 
 .mcChecks {
   display: grid;
@@ -135,4 +135,4 @@
   }
 }
 
-/* Mobile: no page-specific overrides needed — common.css handles raInput/cmTextarea font-size */
+/* Mobile: no page-specific overrides needed - common.css handles raInput/cmTextarea font-size */

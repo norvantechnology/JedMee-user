@@ -146,7 +146,7 @@ const cmFocusMemory = (() => {
 })();
 
 /**
- * CommonModal — single shell for every dialog/drawer in the app.
+ * CommonModal - single shell for every dialog/drawer in the app.
  * Styles: `./CommonModal.css` (`.mcm*`, modal body field tokens, `.mfz*`,
  * merged per-modal bundles: shortcuts, orders wizard, batch modal, etc.).
  *
@@ -161,9 +161,9 @@ const cmFocusMemory = (() => {
  * **Section titles:** `ModalFormSectionTitle` replaces the repeated kicker (+ optional hint) block inside
  * `ModalFormPanelHead`.
  *
- * **Checkbox rows:** `ModalFormCheckGroup` is one full-width grid cell (`mfzField mfz12 mfzChecks`) — no nested wrapper.
+ * **Checkbox rows:** `ModalFormCheckGroup` is one full-width grid cell (`mfzField mfz12 mfzChecks`) - no nested wrapper.
  *
- * **Customer add/edit:** `useCustomerModalForm`, `CustomerModalFormBody`, `CustomerModalFooter` — same `.mcm*` / `.mfz*`
+ * **Customer add/edit:** `useCustomerModalForm`, `CustomerModalFormBody`, `CustomerModalFooter` - same `.mcm*` / `.mfz*`
  * CSS; used from CustomersPage and QuickCreateMasterModal (no separate customer modal stylesheet).
  *
  * **Header:** `title` is rendered as `<h2>`; dialog `aria-labelledby` points at it when a title is present.
@@ -184,7 +184,7 @@ export default function CommonModal({
   onClose,
   /**
    * Called when the user clicks the backdrop overlay.
-   * If provided, overlay click calls onOverlayClose instead of onClose —
+   * If provided, overlay click calls onOverlayClose instead of onClose -
    * allowing the parent to preserve draft form state while still closing.
    * If omitted, overlay click falls back to onClose (existing behaviour).
    */
@@ -246,7 +246,7 @@ export default function CommonModal({
     };
   }, [open]);
 
-  // Panel width + portal z-index (can change while staying open — no stack teardown).
+  // Panel width + portal z-index (can change while staying open - no stack teardown).
   useLayoutEffect(() => {
     if (!open) return;
     const root = rootRef.current;
@@ -750,9 +750,9 @@ export function ModalFormGrid({ className = "", children, ...rest }) {
 
 /**
  * One grid cell: optional label row, control slot, optional error + hint.
- * @param {3|4|6|8|9|12} [span=12] — column span (`mfz3` … `mfz12`).
- * @param {import("react").ReactNode} [label] — pass `false`/`null` to omit the label row (rare).
- * @param {boolean} [required] — kept for API compatibility; does not change the label UI.
+ * @param {3|4|6|8|9|12} [span=12] - column span (`mfz3` … `mfz12`).
+ * @param {import("react").ReactNode} [label] - pass `false`/`null` to omit the label row (rare).
+ * @param {boolean} [required] - kept for API compatibility; does not change the label UI.
  */
 export function ModalFormField({ span = 12, label, required: _required = false, error, hint, className = "", children }) {
   const gridClass = span === 12 || span === 9 || span === 8 || span === 6 || span === 4 || span === 3 ? `mfz${span}` : "mfz12";
@@ -791,7 +791,7 @@ export function ModalFormSectionTitle({ kicker, hint = null }) {
   );
 }
 
-/** One full-width row of `.mfzCheck` options (policy flags, active, …). Single grid cell — no extra inner wrapper. */
+/** One full-width row of `.mfzCheck` options (policy flags, active, …). Single grid cell - no extra inner wrapper. */
 export function ModalFormCheckGroup({ className = "", children }) {
   return <div className={["mfzField", "mfz12", "mfzChecks", className].filter(Boolean).join(" ")}>{children}</div>;
 }

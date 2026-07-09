@@ -21,11 +21,11 @@ export const TAX_SOURCES = {
 
 export const PHARMACY_REG_SOURCES = {
   cdscoIndia: {
-    label: "CDSCO — Drugs regulation (India)",
+    label: "CDSCO - Drugs regulation (India)",
     url: "https://cdsco.gov.in/",
   },
   fdaDrugs: {
-    label: "FDA — Drug supply chain (US)",
+    label: "FDA - Drug supply chain (US)",
     url: "https://www.fda.gov/drugs",
   },
 };

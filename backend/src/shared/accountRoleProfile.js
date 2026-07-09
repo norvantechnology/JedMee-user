@@ -8,12 +8,12 @@ function normalizeRoleCode(v) {
 function roleVisibility(roleCode) {
   const role = normalizeRoleCode(roleCode);
   // Resources that only wholesalers have (retailers never see these).
-  // NOTE: MANUFACTURERS is intentionally NOT here — both wholesalers and retailers
+  // NOTE: MANUFACTURERS is intentionally NOT here - both wholesalers and retailers
   // need to manage manufacturers (retailers track which company made each product).
   // The sidebar already shows /mfg-companies for both roles without a role guard.
   const wholesalerOnly = new Set(["DIVISIONS", "DIVISION_PAYMENTS"]);
   // Resources that only retailers have (wholesalers never see these).
-  // NOTE: VENDORS is intentionally NOT here — both wholesalers and retailers
+  // NOTE: VENDORS is intentionally NOT here - both wholesalers and retailers
   // use the vendors/suppliers module (wholesalers buy from vendors too).
   const retailerOnly = new Set(["PRESCRIPTIONS"]);
   return {

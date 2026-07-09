@@ -25,7 +25,7 @@ ALTER TABLE purchase_invoice_items
   ADD COLUMN IF NOT EXISTS igst_amount NUMERIC(14,2) NOT NULL DEFAULT 0;
 
 -- Backfill existing rows: split gst_amount equally into cgst/sgst
--- (intra-state assumption — igst stays 0 for local pharmacy purchases).
+-- (intra-state assumption - igst stays 0 for local pharmacy purchases).
 UPDATE purchase_invoice_items
 SET    cgst_amount = ROUND(COALESCE(gst_amount, 0) / 2, 2),
        sgst_amount = ROUND(COALESCE(gst_amount, 0) / 2, 2)

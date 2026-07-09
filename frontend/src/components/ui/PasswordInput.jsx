@@ -3,7 +3,7 @@ import { IconAuthEye } from "./AppIcons.jsx";
 import "./PasswordInput.css";
 
 /**
- * PasswordInput — reusable password field with show/hide eye toggle.
+ * PasswordInput - reusable password field with show/hide eye toggle.
  *
  * Usage:
  *   <PasswordInput

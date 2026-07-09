@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════
-   OrdersPage — complete redesign
+   OrdersPage - complete redesign
    All tokens use var(--color-*) from theme.css
 ══════════════════════════════════════════════════════════════ */
 
@@ -52,7 +52,7 @@
 .opNewOrderBtn_empty { margin-top: 16px; }
 
 /* ══════════════════════════════════════════════════════════════
-   STAT PILLS — Total dominant + smaller pill-style filters
+   STAT PILLS - Total dominant + smaller pill-style filters
 ══════════════════════════════════════════════════════════════ */
 .opStatsRow {
   display: flex;
@@ -62,7 +62,7 @@
   min-width: 0;
 }
 
-/* ── Total card — dominant ── */
+/* ── Total card - dominant ── */
 .opStatTotal {
   display: flex;
   align-items: center;
@@ -115,7 +115,7 @@
   white-space: nowrap;
 }
 
-/* ── Status pills — scrollable row ── */
+/* ── Status pills - scrollable row ── */
 .opStatPills {
   display: flex;
   gap: 6px;
@@ -151,14 +151,14 @@
   background: color-mix(in srgb, var(--color-primary) 8%, var(--color-card));
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 12%, transparent);
 }
-/* Zero-count pills — muted */
+/* Zero-count pills - muted */
 .opStatPill_zero {
   opacity: 0.45;
   pointer-events: auto;
 }
 .opStatPill_zero:hover { opacity: 0.7; }
 
-/* Icon inside pill — consistent 24×24 */
+/* Icon inside pill - consistent 24×24 */
 .opStatPillIc {
   width: 24px;
   height: 24px;
@@ -208,7 +208,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   TOOLBAR — unified search + date range + filters
+   TOOLBAR - unified search + date range + filters
 ══════════════════════════════════════════════════════════════ */
 .opToolbar {
   display: flex;
@@ -311,7 +311,7 @@
 .opStatusSel:focus { border-color: var(--color-primary); }
 
 /* ══════════════════════════════════════════════════════════════
-   RESULT META — count badge + sort control + clear
+   RESULT META - count badge + sort control + clear
 ══════════════════════════════════════════════════════════════ */
 .opMeta {
   display: flex;
@@ -423,7 +423,7 @@
   color: var(--color-text-3);
 }
 
-/* ── Status badge — full pill with background ── */
+/* ── Status badge - full pill with background ── */
 .opBadge {
   display: inline-flex;
   align-items: center;
@@ -571,7 +571,7 @@
 }
 .opBtn svg { width: 14px !important; height: 14px !important; stroke-width: 2; flex-shrink: 0; }
 
-/* View Details — primary style, prominent */
+/* View Details - primary style, prominent */
 .opBtn_view {
   background: var(--color-primary);
   border-color: var(--color-primary);
@@ -584,7 +584,7 @@
   box-shadow: 0 4px 14px color-mix(in srgb, var(--color-primary) 35%, transparent);
 }
 
-/* Confirm Delivery — success style */
+/* Confirm Delivery - success style */
 .opBtn_confirm {
   background: var(--color-success-light);
   border-color: color-mix(in srgb, var(--color-success) 35%, var(--color-border));
@@ -597,7 +597,7 @@
 }
 .opBtn_confirm:disabled { opacity: 0.55; cursor: not-allowed; }
 
-/* Cancel — danger style */
+/* Cancel - danger style */
 .opBtn_cancel {
   background: var(--color-danger-light);
   border-color: color-mix(in srgb, var(--color-danger) 30%, var(--color-border));
@@ -609,7 +609,7 @@
   color: #fff;
 }
 
-/* Dispatch — action style */
+/* Dispatch - action style */
 .opBtn_action {
   background: var(--color-primary);
   border-color: var(--color-primary);
@@ -839,7 +839,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   REDESIGNED DETAIL MODAL — section-based layout
+   REDESIGNED DETAIL MODAL - section-based layout
 ══════════════════════════════════════════════════════════════ */
 .opDetail_sectioned {
   gap: 0;
@@ -1233,7 +1233,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   PRINT INVOICE — hidden on screen, shown only when printing
+   PRINT INVOICE - hidden on screen, shown only when printing
 ═══════════════════════════════════════════════════════════════ */
 .opPrintInvoice { display: none; }
 

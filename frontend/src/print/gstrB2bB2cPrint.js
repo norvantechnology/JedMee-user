@@ -25,7 +25,7 @@ function td(v, cls, bold, color) {
 }
 
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   const dt = new Date(d);
   return dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
@@ -56,12 +56,12 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
   const headerHtml = `
     <div class="prHead">
       <div class="prHeadLeft">
-        <h1 class="prTitle">GSTR-1 — B2B vs B2C Segregation Report</h1>
-        <p class="prSub">For CA filing — B2B invoices listed individually, B2C grouped by ${esc(taxLabel)} rate</p>
+        <h1 class="prTitle">GSTR-1 - B2B vs B2C Segregation Report</h1>
+        <p class="prSub">For CA filing - B2B invoices listed individually, B2C grouped by ${esc(taxLabel)} rate</p>
       </div>
       <div class="prHeadRight">
         <table class="prMetaTable">
-          <tr><td class="prMetaLabel">Business</td><td class="prMetaVal">${esc(biz.firm_name || "—")}</td></tr>
+          <tr><td class="prMetaLabel">Business</td><td class="prMetaVal">${esc(biz.firm_name || "-")}</td></tr>
           <tr><td class="prMetaLabel">GSTIN</td><td class="prMetaVal prMono">${esc(biz.gst_number || "Not set")}${!biz.gstin_valid ? ' <span style="color:#b91c1c;font-size:10px">(invalid format)</span>' : ''}</td></tr>
           <tr><td class="prMetaLabel">Period</td><td class="prMetaVal">${esc(period.from_date || "")} to ${esc(period.to_date || "")}</td></tr>
           <tr><td class="prMetaLabel">Generated On</td><td class="prMetaVal" style="color:#6b7280;font-weight:400">${generatedOn}</td></tr>
@@ -96,7 +96,7 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
   // ── GSTIN issues warning ─────────────────────────────────────────────────────
   const issuesHtml = issues.length > 0 ? `
     <div class="prWarnBox" style="margin-bottom:10px">
-      <strong>⚠ ${issues.length} B2B Invoice(s) with GSTIN Issues — Resolve Before Filing</strong>
+      <strong>⚠ ${issues.length} B2B Invoice(s) with GSTIN Issues - Resolve Before Filing</strong>
       <table class="prTable" style="margin-top:6px">
         <thead><tr>
           ${th("Invoice No")}${th("Customer")}${th("GSTIN")}${th("Issue")}
@@ -105,10 +105,10 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
           ${issues.map(r => `<tr>
             ${td(esc(r.invoice_number || ""))}
             ${td(esc(r.customer_name || ""))}
-            ${td(`<span class="prMono">${esc(r.customer_gstin || "—")}</span>`)}
+            ${td(`<span class="prMono">${esc(r.customer_gstin || "-")}</span>`)}
             ${td(r.gstin_issue === "MISSING" ? "Missing GSTIN"
               : r.gstin_issue === "INVALID_FORMAT" ? "Invalid format"
-              : "Suspicious — verify with CA", null, false, "#b91c1c")}
+              : "Suspicious - verify with CA", null, false, "#b91c1c")}
           </tr>`).join("")}
         </tbody>
       </table>
@@ -117,7 +117,7 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
   // ── B2B invoices table ───────────────────────────────────────────────────────
   const b2bHtml = `
     <div class="prSection">
-      <h3>B2B Invoices — ${b2bList.length} invoice(s) — Report individually in GSTR-1</h3>
+      <h3>B2B Invoices - ${b2bList.length} invoice(s) - Report individually in GSTR-1</h3>
       ${b2bList.length === 0 ? '<p class="prNote">No B2B invoices for this period.</p>' : `
       <table class="prTable">
         <thead><tr>
@@ -140,8 +140,8 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
             ${td(esc(r.invoice_number || ""))}
             ${td(fmtDate(r.invoice_date))}
             ${td(esc(r.customer_name || ""))}
-            ${td(`<span class="prMono">${esc(r.customer_gstin || "—")}</span>${r.gstin_issue ? ' ⚠' : ''}`)}
-            ${td(esc(r.place_of_supply || "—"))}
+            ${td(`<span class="prMono">${esc(r.customer_gstin || "-")}</span>${r.gstin_issue ? ' ⚠' : ''}`)}
+            ${td(esc(r.place_of_supply || "-"))}
             ${td(amt(r.taxable_value), "prNum")}
             ${td(amt(r.cgst), "prNum")}
             ${td(amt(r.sgst), "prNum")}
@@ -167,7 +167,7 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
 
   const b2cHtml = `
     <div class="prSection">
-      <h3>B2C Summary — Grouped by ${esc(taxLabel)} Rate</h3>
+      <h3>B2C Summary - Grouped by ${esc(taxLabel)} Rate</h3>
       <p class="prNote">Enter these totals in the B2C summary section of GSTR-1 on the GST portal.</p>
       <table class="prTable">
         <thead><tr>
@@ -199,7 +199,7 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
   // ── Large B2C section ────────────────────────────────────────────────────────
   const largeB2cHtml = largeB2c.length > 0 ? `
     <div class="prSection">
-      <h3>⚠ Large B2C Invoices (>₹2.5 Lakh) — Report Individually in GSTR-1</h3>
+      <h3>⚠ Large B2C Invoices (>₹2.5 Lakh) - Report Individually in GSTR-1</h3>
       <p class="prNote prNoteWarn">These invoices exceed ₹2.5 lakh and must be reported individually in GSTR-1, not in the B2C summary.</p>
       <table class="prTable">
         <thead><tr>
@@ -228,7 +228,7 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
   // ── Credit notes / returns ────────────────────────────────────────────────
   const b2bReturnsHtml = b2bReturns.length > 0 ? `
     <div class="prSection">
-      <h3>B2B Credit Notes / Returns (CDNR) — ${b2bReturns.length} return(s)</h3>
+      <h3>B2B Credit Notes / Returns (CDNR) - ${b2bReturns.length} return(s)</h3>
       <p class="prNote">These must be reported in the CDNR section of GSTR-1 (Credit/Debit Notes for Registered persons).</p>
       <table class="prTable">
         <thead><tr>
@@ -241,8 +241,8 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
             ${td(esc(r.return_number || ""))}
             ${td(fmtDate(r.return_date))}
             ${td(esc(r.customer_name || ""))}
-            ${td(`<span class="prMono">${esc(r.customer_gstin || "—")}</span>`)}
-            ${td(esc(r.linked_invoice_number || "—"))}
+            ${td(`<span class="prMono">${esc(r.customer_gstin || "-")}</span>`)}
+            ${td(esc(r.linked_invoice_number || "-"))}
             ${td(amt(r.return_amount), "prNum", true)}
           </tr>`).join("")}
         </tbody>
@@ -251,7 +251,7 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
 
   const b2cReturnsHtml = b2cReturns.length > 0 ? `
     <div class="prSection">
-      <h3>B2C Credit Notes / Returns (CDNUR) — ${b2cReturns.length} return(s)</h3>
+      <h3>B2C Credit Notes / Returns (CDNUR) - ${b2cReturns.length} return(s)</h3>
       <p class="prNote">These must be reported in the CDNUR section of GSTR-1 (Credit/Debit Notes for Unregistered persons).</p>
       <table class="prTable">
         <thead><tr>
@@ -264,7 +264,7 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
             ${td(esc(r.return_number || ""))}
             ${td(fmtDate(r.return_date))}
             ${td(esc(r.customer_name || ""))}
-            ${td(esc(r.linked_invoice_number || "—"))}
+            ${td(esc(r.linked_invoice_number || "-"))}
             ${td(amt(r.return_amount), "prNum", true)}
           </tr>`).join("")}
         </tbody>
@@ -277,7 +277,7 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
       <h3>Important Notes &amp; Disclaimer for CA</h3>
       <ul>
         <li>B2B invoices are reported individually in GSTR-1. Ensure all customer GSTINs are valid before filing.</li>
-        <li>B2C invoices above ₹2.5 lakh must be reported individually — they appear in the Large B2C section above.</li>
+        <li>B2C invoices above ₹2.5 lakh must be reported individually - they appear in the Large B2C section above.</li>
         <li>Place of Supply determines whether CGST+SGST or IGST applies. Verify customer state in their profile.</li>
         <li>This report is system-generated from your invoices. Cross-check with your books before sharing with CA.</li>
         ${issues.length > 0 ? `<li class="prNoteWarnLi"><strong>${issues.length} B2B invoice(s) have GSTIN issues.</strong> Resolve these before sharing with CA.</li>` : ""}
@@ -299,7 +299,7 @@ export function printGstrB2bB2cReport({ data, taxLabel }) {
       ${notesHtml}
       <div class="prFooter">
         <span>GSTR-1 B2B/B2C Report &bull; ${esc(period.from_date || "")} to ${esc(period.to_date || "")}</span>
-        <span>System-generated — verify before filing</span>
+        <span>System-generated - verify before filing</span>
       </div>
     </div>
 

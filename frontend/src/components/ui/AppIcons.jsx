@@ -1881,7 +1881,7 @@ export function IconMfgStockist(p) {
 }
 /**
  * IconSalesStock  sales & stock analysis report icon.
- * Bar chart with an upward trend arrow and a stock box below — sold vs. in-hand.
+ * Bar chart with an upward trend arrow and a stock box below - sold vs. in-hand.
  * Used in: InventoryReportsPage.jsx "Sales & Stock" tab.
  */
 export function IconSalesStock(p) {
@@ -2023,7 +2023,7 @@ export function IconOpCancelled(p) {
 
 /**
  * IconMcTotal  "Total Products" stat pill icon.
- * Clipboard with list lines — catalog count affordance.
+ * Clipboard with list lines - catalog count affordance.
  */
 export function IconMcTotal(p) {
   return (
@@ -2039,7 +2039,7 @@ export function IconMcTotal(p) {
 
 /**
  * IconMcVisible  "Visible to retailers" stat pill / toggle icon.
- * Eye with iris — product is shown in retailer catalog.
+ * Eye with iris - product is shown in retailer catalog.
  */
 export function IconMcVisible(p) {
   return (
@@ -2053,7 +2053,7 @@ export function IconMcVisible(p) {
 
 /**
  * IconMcHidden  "Hidden from retailers" stat pill / toggle icon.
- * Eye-off with diagonal slash — product is hidden in retailer catalog.
+ * Eye-off with diagonal slash - product is hidden in retailer catalog.
  */
 export function IconMcHidden(p) {
   return (
@@ -2069,7 +2069,7 @@ export function IconMcHidden(p) {
 
 /**
  * IconMcOos  "Out of Stock" stat pill icon.
- * Alert circle with exclamation — zero-stock warning.
+ * Alert circle with exclamation - zero-stock warning.
  */
 export function IconMcOos(p) {
   return (
@@ -2084,7 +2084,7 @@ export function IconMcOos(p) {
 
 /**
  * IconMcProduct  product card header icon.
- * Pill/medicine box — individual catalog product affordance.
+ * Pill/medicine box - individual catalog product affordance.
  */
 export function IconMcProduct(p) {
   return (

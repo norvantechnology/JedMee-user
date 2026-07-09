@@ -56,7 +56,7 @@ function parsePharmacyDateToYmd(dateStr) {
     [/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, (m) => new Date(Date.UTC(+m[3], +m[2] - 1, +m[1]))],
     // DD-MM-YYYY
     [/^(\d{1,2})-(\d{1,2})-(\d{4})$/, (m) => new Date(Date.UTC(+m[3], +m[2] - 1, +m[1]))],
-    // MM/YYYY  (expiry month/year — use 1st of month)
+    // MM/YYYY  (expiry month/year - use 1st of month)
     [/^(\d{1,2})\/(\d{4})$/, (m) => new Date(Date.UTC(+m[2], +m[1] - 1, 1))],
     // MM-YYYY
     [/^(\d{1,2})-(\d{4})$/, (m) => new Date(Date.UTC(+m[2], +m[1] - 1, 1))],
@@ -86,7 +86,7 @@ function parsePharmacyDateToYmd(dateStr) {
       const mo = MONTH_ABBR[m[1].toLowerCase()];
       return mo !== undefined ? new Date(Date.UTC(+m[2], mo, 1)) : null;
     }],
-    // MMM-YY  (e.g. Jun-29) — very common in Marg ERP exports
+    // MMM-YY  (e.g. Jun-29) - very common in Marg ERP exports
     [/^([A-Za-z]{3})-(\d{2})$/, (m) => {
       const mo = MONTH_ABBR[m[1].toLowerCase()];
       return mo !== undefined ? new Date(Date.UTC(y2(+m[2]), mo, 1)) : null;

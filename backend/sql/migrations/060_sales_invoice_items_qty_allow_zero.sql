@@ -2,7 +2,7 @@
 -- Allow qty=0 on sales_invoice_items when loose_qty > 0.
 --
 -- Previously qty had CHECK (qty > 0) which blocked selling individual units
--- without a full strip (qty=0, loose_qty=N — the "unit mode" / loose-only sale).
+-- without a full strip (qty=0, loose_qty=N - the "unit mode" / loose-only sale).
 --
 -- New rules:
 --   qty >= 0                          (non-negative)

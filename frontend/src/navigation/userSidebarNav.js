@@ -4,12 +4,12 @@
  * F1 = first visible link, F2 = second, … up to F24 (matches services/navShortcuts.js).
  *
  * 6 groups (in order):
- *   1. (no label)         — Dashboard
- *   2. MASTER DATA        — Products, Manufacturers, Divisions, Suppliers, Customers
- *   3. CATALOG            — My Catalog
- *   4. TRANSACTIONS       — Sales & Billing, Purchases, Sales Returns, Purchase Returns, Orders
- *   5. REPORTS & ACCOUNTS — Inventory Report, Day Book, GST reports, Ledger, Payments
- *   6. TEAM               — Users, Roles & Access
+ *   1. (no label)         - Dashboard
+ *   2. MASTER DATA        - Products, Manufacturers, Divisions, Suppliers, Customers
+ *   3. CATALOG            - My Catalog
+ *   4. TRANSACTIONS       - Sales & Billing, Purchases, Sales Returns, Purchase Returns, Orders
+ *   5. REPORTS & ACCOUNTS - Inventory Report, Day Book, GST reports, Ledger, Payments
+ *   6. TEAM               - Users, Roles & Access
  */
 
 const MAX_SIDEBAR_FN = 24;
@@ -51,7 +51,7 @@ export function buildUserSidebarSections(ctx) {
   const canPrescriptions = isOwner || Boolean(perms?.PRESCRIPTIONS?.VIEW);
   const canOrders    = isOwner || Boolean(perms?.PURCHASE_ORDERS?.VIEW);
 
-  // ── GROUP 1: no label — Dashboard only ──────────────────────────────────
+  // ── GROUP 1: no label - Dashboard only ──────────────────────────────────
   const out = [
     { title: "", items: [withFn({ to: "/dashboard", label: "Dashboard" })] }
   ];
@@ -77,7 +77,7 @@ export function buildUserSidebarSections(ctx) {
   ];
   if (catalogItems.length) out.push({ title: "CATALOG", items: catalogItems });
 
-  // ── GROUP 4: TRANSACTIONS — Sales first, then Purchases, then Returns ────
+  // ── GROUP 4: TRANSACTIONS - Sales first, then Purchases, then Returns ────
   const txnItems = [
     ...(canSales
       ? [withFn({ to: "/sales-billing", label: "Sales & Billing" })]

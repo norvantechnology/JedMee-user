@@ -1,4 +1,4 @@
-/** Customer testimonials — used on Home, About, and Review schema */
+/** Customer testimonials - used on Home, About, and Review schema */
 
 export const TESTIMONIALS = [
   {

@@ -1,20 +1,20 @@
 /**
  * locale.js
  * Static country catalogue for the JedMee locale/tax system.
- * Mirrors the `countries` DB table — used client-side without an API call
+ * Mirrors the `countries` DB table - used client-side without an API call
  * so the UI is instantly responsive on first render.
  *
  * Each entry defines:
- *   code          — ISO 3166-1 alpha-2
- *   name          — Display name
- *   flag          — Emoji flag
- *   currencyCode  — ISO 4217 default currency
- *   locale        — BCP 47 locale for Intl formatting
- *   taxSystem     — 'GST' | 'VAT' | 'SALES_TAX' | 'NONE'
- *   taxLabel      — Short label shown in UI ("GST", "VAT", "Sales Tax")
- *   taxIdLabel    — Field label for tax registration number
- *   invoiceLabel  — Invoice document title
- *   phoneCode     — International dialling prefix
+ *   code          - ISO 3166-1 alpha-2
+ *   name          - Display name
+ *   flag          - Emoji flag
+ *   currencyCode  - ISO 4217 default currency
+ *   locale        - BCP 47 locale for Intl formatting
+ *   taxSystem     - 'GST' | 'VAT' | 'SALES_TAX' | 'NONE'
+ *   taxLabel      - Short label shown in UI ("GST", "VAT", "Sales Tax")
+ *   taxIdLabel    - Field label for tax registration number
+ *   invoiceLabel  - Invoice document title
+ *   phoneCode     - International dialling prefix
  */
 
 export const COUNTRIES = {

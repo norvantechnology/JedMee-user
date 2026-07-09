@@ -1,5 +1,5 @@
 /* ============================================================
-   CommonTable — Professional SaaS data table
+   CommonTable - Professional SaaS data table
    - Theme tokens only, zero hardcoded colors
    - Mobile-first: rows become cards on small screens
    - All class names preserved for JSX compatibility
@@ -792,7 +792,7 @@
 /* ── Rows ──────────────────────────────────────────────────── */
 .tblRow { transition: background 90ms ease; }
 
-/* Subtle alternating rows — improves scanability without distraction */
+/* Subtle alternating rows - improves scanability without distraction */
 .tblRow:nth-child(even) td {
   background: var(--tbl-row-alt);
 }

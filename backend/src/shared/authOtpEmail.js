@@ -33,7 +33,7 @@ function buildOtpMail({ otp, purpose, ttlMinutes }) {
     ? `Your password reset code is ${otp}. It expires in ${ttlMinutes} minutes. If you did not request a reset, you can ignore this email.`
     : `Your email verification code is ${otp}. It expires in ${ttlMinutes} minutes. If you did not create an account, you can ignore this email.`;
 
-  // ── OTP digit boxes — clean black border, white background ───────────────
+  // ── OTP digit boxes - clean black border, white background ───────────────
   const digits = String(otp || '').split('');
   const digitBoxes = digits.length > 0
     ? digits.map(d =>
@@ -96,8 +96,8 @@ function buildOtpMail({ otp, purpose, ttlMinutes }) {
 
   const html = emailBase({
     preheader: isReset
-      ? `Your password reset code is ${otp} — expires in ${ttlMinutes} minutes`
-      : `Your verification code is ${otp} — expires in ${ttlMinutes} minutes`,
+      ? `Your password reset code is ${otp} - expires in ${ttlMinutes} minutes`
+      : `Your verification code is ${otp} - expires in ${ttlMinutes} minutes`,
     headerLabel: isReset ? 'Password Reset' : 'Email Verification',
     headerTitle: isReset ? 'Reset Your Password' : 'Verify Your Email',
     body,

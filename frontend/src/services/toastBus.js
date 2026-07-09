@@ -11,7 +11,7 @@ function toastKey(t) {
   // Normalise: use title if present, otherwise message.
   // This deduplicates the common pattern where apiClient emits
   // { title: "X", message: "sub" } and page code emits { message: "X" }
-  // for the same underlying error — both collapse to the same key.
+  // for the same underlying error - both collapse to the same key.
   const primary = String(t?.title || t?.message || "");
   return `${type}::${primary}`;
 }

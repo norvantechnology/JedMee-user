@@ -12,7 +12,7 @@
  *   qty          in STRIPS  (e.g. purchase_invoice_items.qty)
  *   purchase_rate per STRIP (e.g. product_batches.purchase_rate)
  *   sales_rate   per STRIP  (e.g. product_batches.sales_rate / mrp)
- *   loose_qty    in UNITS   (individual tablets — sales_invoice_items.loose_qty)
+ *   loose_qty    in UNITS   (individual tablets - sales_invoice_items.loose_qty)
  *
  * These helpers convert between display units and the stored strip-based values.
  */

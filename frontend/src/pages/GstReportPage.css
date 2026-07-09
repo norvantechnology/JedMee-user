@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   GstReportPage.css  —  GSTR-1 Summary Report
+   GstReportPage.css  -  GSTR-1 Summary Report
    All classes are prefixed "gst" to avoid collisions with global styles.
    --color-info / --color-info-dark / --color-info-light are defined globally
    in styles/theme.css.
@@ -67,7 +67,7 @@
   margin-bottom: 16px;
 }
 @media (max-width: 900px) { .gstStatRow { grid-template-columns: repeat(2, 1fr); } }
-/* Always 2-per-row on phones — never collapse to 1 column */
+/* Always 2-per-row on phones - never collapse to 1 column */
 @media (max-width: 480px) { .gstStatRow { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
 
 .gstStatCard {
@@ -85,7 +85,7 @@
   .gstStatValue { font-size: 18px; }
 }
 
-/* Icon badge — color driven by CSS custom property --ic set inline */
+/* Icon badge - color driven by CSS custom property --ic set inline */
 .gstStatIcon {
   display: inline-flex;
   align-items: center;

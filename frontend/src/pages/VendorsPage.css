@@ -6,5 +6,5 @@
    - components/StructuredForm.css (.sfmBtnPrimary, .sfmBtnGhost, .sfmModalFooter, etc.)
    - components/CommonModal.css (.mcm*, .mfz*, .vm*, merged per-modal bundles)
 
-   No page-specific CSS needed here — the VendorMasterModal uses its own CSS files.
+   No page-specific CSS needed here - the VendorMasterModal uses its own CSS files.
 */

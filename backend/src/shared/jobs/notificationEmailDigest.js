@@ -57,7 +57,7 @@ async function runNotificationEmailDigest() {
     const lines = items
       .map((n) => {
         const meta = getNotificationMeta(n.type);
-        return `• [${n.priority || meta.priority}] ${n.title}${n.body ? ` — ${n.body}` : ""}`;
+        return `• [${n.priority || meta.priority}] ${n.title}${n.body ? ` - ${n.body}` : ""}`;
       })
       .join("\n");
 
@@ -66,7 +66,7 @@ async function runNotificationEmailDigest() {
     const text =
       `Hi ${name},\n\n` +
       `Here is your daily pharmacy alert summary:\n\n${lines}\n\n` +
-      `Open the JedMee app for full details.\n\n— JedMee`;
+      `Open the JedMee app for full details.\n\n- JedMee`;
 
     try {
       await sendMail({

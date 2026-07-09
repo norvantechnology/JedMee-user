@@ -7,13 +7,13 @@ const { resolveClientTimeZone } = require('../../shared/dateFilters');
 const { monthStartYmd, monthEndYmd } = require('../../shared/timezone');
 
 /**
- * GSTR-3B Monthly Summary Report — Complete rewrite.
+ * GSTR-3B Monthly Summary Report - Complete rewrite.
  *
  * Covers all GST conditions:
  *  - CASH_MEMO and TAX_INVOICE bill types (both contribute to GST liability)
  *  - Intra-state (CGST+SGST) and inter-state (IGST) supply types
- *  - Free-qty lines (taxable_amount=0, gst_amount=0 — excluded from both taxable and nil-rated)
- *  - Loose-qty lines (have their own taxable_amount and gst_amount — included correctly)
+ *  - Free-qty lines (taxable_amount=0, gst_amount=0 - excluded from both taxable and nil-rated)
+ *  - Loose-qty lines (have their own taxable_amount and gst_amount - included correctly)
  *  - Nil-rated / zero-GST items (gst_amount=0 but taxable_amount>0)
  *  - Sales returns (credit notes) reduce outward supply totals
  *  - Purchase returns reverse ITC proportionally
@@ -79,7 +79,7 @@ async function handler(event) {
 }
 
 /**
- * Core calculation — shared by GET handler and file/lock handler.
+ * Core calculation - shared by GET handler and file/lock handler.
  * All queries run in parallel for minimum latency.
  */
 async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate) {
@@ -105,9 +105,9 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       [accountId]
     ),
 
-    // ── 1. Taxable outward supplies (gst_amount > 0) — Section 3.1 ───────────
+    // ── 1. Taxable outward supplies (gst_amount > 0) - Section 3.1 ───────────
     // Covers: CASH_MEMO + TAX_INVOICE, intra + inter-state, strip + loose qty.
-    // Free-qty lines have taxable_amount=0 and gst_amount=0 — excluded by filter.
+    // Free-qty lines have taxable_amount=0 and gst_amount=0 - excluded by filter.
     // CGST/SGST/IGST: use stored split if available, else derive from gst_amount.
     query(
       `SELECT
@@ -170,7 +170,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       [accountId, fromDate, toDate]
     ),
 
-    // ── 3. Sales returns adjustment — reduces outward supply totals ───────────
+    // ── 3. Sales returns adjustment - reduces outward supply totals ───────────
     // Confirmed sales returns in the period reduce the outward GST liability.
     // Uses same CGST/SGST/IGST derivation as outward supplies.
     // return_amount on sales_return_items is the net return value (taxable + gst).
@@ -187,7 +187,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       [accountId, fromDate, toDate]
     ),
 
-    // ── 4. ITC eligible — supplier has GSTIN — Section 4A ────────────────────
+    // ── 4. ITC eligible - supplier has GSTIN - Section 4A ────────────────────
     // Uses stored cgst/sgst/igst from purchase_invoice_items.
     // purchase_invoice_items always have the split stored (purchase confirm sets them).
     query(
@@ -210,7 +210,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       [accountId, fromDate, toDate]
     ),
 
-    // ── 5. ITC ineligible — supplier has no GSTIN — Section 4C ───────────────
+    // ── 5. ITC ineligible - supplier has no GSTIN - Section 4C ───────────────
     // GST paid to unregistered suppliers is a cost, not claimable as ITC.
     query(
       `SELECT
@@ -231,7 +231,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       [accountId, fromDate, toDate]
     ),
 
-    // ── 6. ITC reversal from confirmed purchase returns — Section 4B2 ─────────
+    // ── 6. ITC reversal from confirmed purchase returns - Section 4B2 ─────────
     // Proportional reversal: return_amount / original_line_amount * gst_amount.
     // Uses line_amount (taxable + gst) as the denominator for correct proportion.
     query(
@@ -302,7 +302,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       [accountId]
     ),
 
-    // ── 10. Section 5 — Nil-rated inward supplies (purchase items, gst=0) ─────
+    // ── 10. Section 5 - Nil-rated inward supplies (purchase items, gst=0) ─────
     // Purchases where no GST was charged (gst_percent=0 or gst_amount=0).
     query(
       `SELECT
@@ -346,7 +346,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
     address:    biz.address    || '',
   };
 
-  // ── Section 3.1 — Outward Supplies ─────────────────────────────────────────
+  // ── Section 3.1 - Outward Supplies ─────────────────────────────────────────
   const taxRow = outTaxableR.rows?.[0] || {};
   const nilRow = outNilR.rows?.[0]     || {};
   const retRow = salesReturnAdjR.rows?.[0] || {};
@@ -379,7 +379,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
   const totalOutValue   = n(taxable.total_value   + nil_rated.total_value);
   const totalOutGst     = n(totalOutCgst + totalOutSgst + totalOutIgst);
 
-  // ── Section 4 — ITC ─────────────────────────────────────────────────────────
+  // ── Section 4 - ITC ─────────────────────────────────────────────────────────
   const eligRow = itcEligR.rows?.[0] || {};
   const inelRow = itcInelR.rows?.[0] || {};
   const revRow  = itcRevR.rows?.[0]  || {};
@@ -401,7 +401,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
   const netItcSgst = n(Math.max(0, eligSgst + cfPrevSgst - revSgst));
   const netItcIgst = n(Math.max(0, eligIgst + cfPrevIgst - revIgst));
 
-  // ── Section 6 — Net Tax Payable ─────────────────────────────────────────────
+  // ── Section 6 - Net Tax Payable ─────────────────────────────────────────────
   const netPayCgst  = n(Math.max(0, totalOutCgst - netItcCgst));
   const netPaySgst  = n(Math.max(0, totalOutSgst - netItcSgst));
   const netPayIgst  = n(Math.max(0, totalOutIgst - netItcIgst));
@@ -413,7 +413,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
   const cfIgst  = n(Math.max(0, netItcIgst - totalOutIgst));
   const totalCf = n(cfCgst + cfSgst + cfIgst);
 
-  // ── Section 5 — Nil-rated inward supplies ───────────────────────────────────
+  // ── Section 5 - Nil-rated inward supplies ───────────────────────────────────
   const sec5Row = nilInwardR.rows?.[0] || {};
 
   return {
@@ -438,7 +438,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       sales_returns_value:     sales_returns_adj.total_return_value,
     },
 
-    // Section 3.1 — Outward Supplies
+    // Section 3.1 - Outward Supplies
     outward_supplies: {
       taxable,
       nil_rated,
@@ -454,7 +454,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       },
     },
 
-    // Section 3.2 — Inter-state supplies (auto-populated from GSTR-1 on portal from July 2025)
+    // Section 3.2 - Inter-state supplies (auto-populated from GSTR-1 on portal from July 2025)
     section_3_2: {
       note: 'From July 2025, Table 3.2 values are auto-populated from GSTR-1 data on the GST portal and cannot be manually edited. These values will be pre-filled when you file GSTR-3B online.',
       unregistered: { taxable_value: 0, igst: 0, cess: 0 },
@@ -462,7 +462,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       uin_holders:  { taxable_value: 0, igst: 0, cess: 0 },
     },
 
-    // Section 4 — ITC from Purchases
+    // Section 4 - ITC from Purchases
     itc: {
       eligible: {
         taxable_value: n(eligRow.taxable_value),
@@ -482,7 +482,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
         cess:          0,
         total:         n(inelRow.total_gst),
         invoice_count: int(inelRow.invoice_count),
-        note: 'Purchases from unregistered suppliers. GST paid is a cost — not claimable as ITC. Reverse Charge Mechanism (RCM) may apply on specific notified goods/services — consult your CA.',
+        note: 'Purchases from unregistered suppliers. GST paid is a cost - not claimable as ITC. Reverse Charge Mechanism (RCM) may apply on specific notified goods/services - consult your CA.',
       },
       reversals: {
         cgst:         revCgst,
@@ -508,7 +508,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       },
     },
 
-    // Section 5 — Exempt, nil-rated, and non-GST inward supplies
+    // Section 5 - Exempt, nil-rated, and non-GST inward supplies
     section_5: {
       nil_rated_inward: {
         taxable_value: n(sec5Row.taxable_value),
@@ -518,7 +518,7 @@ async function buildGstr3bData(accountId, year, month, fromDate, toDate, dueDate
       non_gst_inward: { taxable_value: 0 },
     },
 
-    // Section 6 — Net Tax Payable
+    // Section 6 - Net Tax Payable
     tax_payable: {
       cgst: { gst_collected: n(totalOutCgst), itc_available: netItcCgst, net_payable: netPayCgst, interest: 0, late_fee: 0, carry_forward: cfCgst },
       sgst: { gst_collected: n(totalOutSgst), itc_available: netItcSgst, net_payable: netPaySgst, interest: 0, late_fee: 0, carry_forward: cfSgst },

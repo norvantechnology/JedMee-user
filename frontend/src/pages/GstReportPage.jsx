@@ -21,7 +21,7 @@ function n2(v) { const x = Number(v); return isNaN(x) ? "0.00" : x.toFixed(2); }
 function fmtAmt(v) { return `₹${n2(v)}`; }
 function isValidGstin(g) { return g && GSTIN_REGEX.test(g.trim().toUpperCase()); }
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 function buildYearOptions() {
@@ -35,7 +35,7 @@ function buildMonthOptions() {
 }
 
 function GstinChip({ gstin, issue }) {
-  if (!gstin) return <span style={{ color: "#ef4444", fontSize: 12 }}>—</span>;
+  if (!gstin) return <span style={{ color: "#ef4444", fontSize: 12 }}>-</span>;
   return <span className={`gstCode${issue ? " gstCodeInvalid" : ""}`}>{gstin}</span>;
 }
 
@@ -65,7 +65,7 @@ function exportCsv(data, year, month) {
     [],
     ["=== B2B INVOICES ==="],
     ["#", "Invoice No", "Date", "Customer", "GSTIN", "Place of Supply", "Taxable Value", "CGST", "SGST", "IGST", "CESS", "Total Value"],
-    ...(data.b2b_invoices || []).map((r, i) => [i+1, r.invoice_number, fmtDate(r.invoice_date), r.customer_name, r.customer_gstin||"—", r.place_of_supply||"—", n2(r.taxable_value), n2(r.cgst), n2(r.sgst), n2(r.igst), "0.00", n2(r.total_value)]),
+    ...(data.b2b_invoices || []).map((r, i) => [i+1, r.invoice_number, fmtDate(r.invoice_date), r.customer_name, r.customer_gstin||"-", r.place_of_supply||"-", n2(r.taxable_value), n2(r.cgst), n2(r.sgst), n2(r.igst), "0.00", n2(r.total_value)]),
     [],
     ["=== B2C SUMMARY BY GST RATE ==="],
     ["GST Rate", "Invoices", "Taxable Value", "CGST", "SGST", "IGST", "CESS", "Total Value"],
@@ -113,12 +113,12 @@ export default function GstReportPage() {
     <ReportShell>
       <div className="pageWrap">
         <ReportPageIntro
-          title="GSTR-1 — GST Summary Report"
-          subtitle="Monthly outward supply summary — HSN-wise, B2B and B2C breakup for GSTR-1 filing. Share with your CA."
+          title="GSTR-1 - GST Summary Report"
+          subtitle="Monthly outward supply summary - HSN-wise, B2B and B2C breakup for GSTR-1 filing. Share with your CA."
         />
 
         <ReportCard busy={loading}>
-          {/* Filter bar — Month/Year picker (consistent with GSTR-2 and GSTR-3B) */}
+          {/* Filter bar - Month/Year picker (consistent with GSTR-2 and GSTR-3B) */}
           <div className="g3bFilterBar">
             <div className="g3bFilterRow">
               <div className="g3bFilterField">
@@ -158,18 +158,18 @@ export default function GstReportPage() {
             <div className="g3bEmpty">
               <div className="g3bEmptyIcon"><BarChart3 size={32}/></div>
               <div className="g3bEmptyTitle">Select month and year, then click Generate Report</div>
-              <div className="g3bEmptySub">GSTR-1 shows your monthly outward supplies — HSN-wise summary, B2B invoices, and B2C breakup for filing. Share with your CA.</div>
+              <div className="g3bEmptySub">GSTR-1 shows your monthly outward supplies - HSN-wise summary, B2B invoices, and B2C breakup for filing. Share with your CA.</div>
             </div>
           )}
 
           {!loading && fetched && data && (
             <>
-              {/* HSN missing warning banner — mandatory compliance */}
+              {/* HSN missing warning banner - mandatory compliance */}
               {s.missing_hsn_count > 0 && (
                 <div className="g2bCriticalBanner">
                   <AlertTriangle size={16}/>
                   <div>
-                    <strong>Action Required — {s.missing_hsn_count} Sales Line Item{s.missing_hsn_count !== 1 ? "s" : ""} Missing HSN Code{s.missing_hsn_count !== 1 ? "s" : ""}</strong>
+                    <strong>Action Required - {s.missing_hsn_count} Sales Line Item{s.missing_hsn_count !== 1 ? "s" : ""} Missing HSN Code{s.missing_hsn_count !== 1 ? "s" : ""}</strong>
                     <div style={{ fontSize: 12, marginTop: 2 }}>HSN codes are mandatory for GSTR-1 filing above certain turnover. Update these items in your sales invoices before sharing with CA.</div>
                   </div>
                 </div>
@@ -179,7 +179,7 @@ export default function GstReportPage() {
                 <div className="g2bWarnBanner">
                   <AlertTriangle size={16}/>
                   <div>
-                    <strong>{s.gstin_issue_count} B2B Invoice{s.gstin_issue_count !== 1 ? "s" : ""} with GSTIN Issues — Resolve Before Filing</strong>
+                    <strong>{s.gstin_issue_count} B2B Invoice{s.gstin_issue_count !== 1 ? "s" : ""} with GSTIN Issues - Resolve Before Filing</strong>
                     <div style={{ fontSize: 12, marginTop: 2 }}>Update customer GSTIN in their profile, then regenerate this report.</div>
                   </div>
                 </div>
@@ -195,13 +195,13 @@ export default function GstReportPage() {
                       <div className="g3bBizGstin">
                         GSTIN: <strong>{biz.gst_number}</strong>
                         {gstinValid === false && (
-                          <span className="g2bGstinInvalidBadge" title="GSTIN does not match standard 15-character format — verify with your CA">
+                          <span className="g2bGstinInvalidBadge" title="GSTIN does not match standard 15-character format - verify with your CA">
                             <AlertTriangle size={11}/> Invalid format
                           </span>
                         )}
                       </div>
                     )
-                    : <div className="g3bBizGstin g3bGstinMissing"><AlertTriangle size={12}/> GSTIN not set — add it in your profile</div>}
+                    : <div className="g3bBizGstin g3bGstinMissing"><AlertTriangle size={12}/> GSTIN not set - add it in your profile</div>}
                   {data.financial_year && <div style={{ fontSize: 11, color: "var(--color-text-4)", marginTop: 2 }}>Financial Year: {data.financial_year}</div>}
                 </div>
                 <div className="g3bBizRight">
@@ -212,12 +212,12 @@ export default function GstReportPage() {
               {/* Generated-at bar */}
               {generatedAt && (
                 <div className="g3bGeneratedBar">
-                  <span>Generated: {generatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} — {generatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  <span>Generated: {generatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {generatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
                   <span className="g3bGeneratedNote">Click <strong>Refresh</strong> to recalculate with latest data.</span>
                 </div>
               )}
 
-              {/* Summary cards — consistent icon/color system */}
+              {/* Summary cards - consistent icon/color system */}
               <div className="gstStatRow" style={{ padding: "16px 20px" }}>
                 <div className="gstStatCard">
                   <div className="gstStatIcon" style={{ "--ic": "var(--color-primary)" }}><Receipt size={18}/></div>
@@ -254,7 +254,7 @@ export default function GstReportPage() {
                 {s.missing_hsn_count > 0 && (
                   <div className="g3bNoteRow g3bNoteWarn g2bNoteAccent" style={{ margin: "8px 18px 4px", borderRadius: 8 }}>
                     <Info size={14}/>
-                    <span>{s.missing_hsn_count} line item{s.missing_hsn_count !== 1 ? "s" : ""} show as <strong>N/A</strong> — HSN code missing. Update in sales invoices before filing.</span>
+                    <span>{s.missing_hsn_count} line item{s.missing_hsn_count !== 1 ? "s" : ""} show as <strong>N/A</strong> - HSN code missing. Update in sales invoices before filing.</span>
                   </div>
                 )}
                 {!(data.hsn_summary || []).length ? (
@@ -299,16 +299,16 @@ export default function GstReportPage() {
                 )}
               </div>
 
-              {/* B2B Invoices — individual rows with all columns */}
+              {/* B2B Invoices - individual rows with all columns */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">B2B Supplies — Report Individually in GSTR-1 (Table 4)</span>
+                  <span className="g3bSectionTitle">B2B Supplies - Report Individually in GSTR-1 (Table 4)</span>
                   <span className="g3bSectionBadge">{(data.b2b_invoices || []).length} invoice{(data.b2b_invoices || []).length !== 1 ? "s" : ""}</span>
                 </div>
                 {s.gstin_issue_count > 0 && (
                   <div className="g3bNoteRow g3bNoteWarn g2bNoteAccent" style={{ margin: "8px 18px 4px", borderRadius: 8 }}>
                     <AlertTriangle size={14}/>
-                    <span><strong>{s.gstin_issue_count} invoice{s.gstin_issue_count !== 1 ? "s" : ""} have GSTIN issues</strong> — resolve before sharing with CA.</span>
+                    <span><strong>{s.gstin_issue_count} invoice{s.gstin_issue_count !== 1 ? "s" : ""} have GSTIN issues</strong> - resolve before sharing with CA.</span>
                   </div>
                 )}
                 {!(data.b2b_invoices || []).length ? (
@@ -343,7 +343,7 @@ export default function GstReportPage() {
                               <GstinChip gstin={r.customer_gstin} issue={r.gstin_issue}/>
                               {r.gstin_issue && <div style={{ marginTop: 2 }}><IssueBadge issue={r.gstin_issue}/></div>}
                             </td>
-                            <td style={{ fontSize: 12, color: "var(--color-text-3)" }}>{r.place_of_supply || "—"}</td>
+                            <td style={{ fontSize: 12, color: "var(--color-text-3)" }}>{r.place_of_supply || "-"}</td>
                             <td className="tR">{fmtAmt(r.taxable_value)}</td>
                             <td className="tR">{fmtAmt(r.cgst)}</td>
                             <td className="tR">{fmtAmt(r.sgst)}</td>
@@ -358,10 +358,10 @@ export default function GstReportPage() {
                 )}
               </div>
 
-              {/* B2C Summary — GST-rate wise breakup */}
+              {/* B2C Summary - GST-rate wise breakup */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">B2C Summary — Grouped by GST Rate (Table 5/7)</span>
+                  <span className="g3bSectionTitle">B2C Summary - Grouped by GST Rate (Table 5/7)</span>
                   <span className="g3bSectionBadge">{data.b2c_total?.invoice_count || 0} invoice{(data.b2c_total?.invoice_count || 0) !== 1 ? "s" : ""}</span>
                 </div>
                 <div className="g3bNoteRow g3bNoteInfo" style={{ margin: "8px 18px 4px", borderRadius: 8 }}>
@@ -414,12 +414,12 @@ export default function GstReportPage() {
               {(data.large_b2c || []).length > 0 && (
                 <div className="g3bSection" style={{ borderColor: "color-mix(in srgb, #ef4444 40%, transparent)" }}>
                   <div className="g3bSectionHead">
-                    <span className="g3bSectionTitle">Large B2C Invoices (&gt;₹2.5 Lakh) — Report Individually</span>
+                    <span className="g3bSectionTitle">Large B2C Invoices (&gt;₹2.5 Lakh) - Report Individually</span>
                     <span className="g3bSectionBadge" style={{ background: "#fee2e2", color: "#991b1b" }}>{data.large_b2c.length} invoice{data.large_b2c.length !== 1 ? "s" : ""}</span>
                   </div>
                   <div className="g3bNoteRow g3bNoteWarn g2bNoteAccent" style={{ margin: "8px 18px 4px", borderRadius: 8 }}>
                     <AlertTriangle size={14}/>
-                    <span>These invoices exceed ₹2.5 lakh and must be reported individually in GSTR-1 — not in the B2C summary section.</span>
+                    <span>These invoices exceed ₹2.5 lakh and must be reported individually in GSTR-1 - not in the B2C summary section.</span>
                   </div>
                   <div className="g3bTableScroll">
                     <table className="g3bTable">
@@ -460,7 +460,7 @@ export default function GstReportPage() {
                 <div style={{ padding: "12px 18px 4px" }}>
                   <ol style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 8 }}>
                     <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>B2B invoices must be reported individually in GSTR-1. Ensure all customer GSTINs are valid before filing.</li>
-                    <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>B2C invoices above ₹2.5 lakh must be reported individually — they appear in the Large B2C section above.</li>
+                    <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>B2C invoices above ₹2.5 lakh must be reported individually - they appear in the Large B2C section above.</li>
                     <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>Place of Supply determines whether CGST+SGST or IGST applies. Verify customer state in their profile.</li>
                     <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>HSN codes are mandatory for businesses above certain turnover. Update missing HSN codes before filing.</li>
                     <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>This report is system-generated from your invoices. Cross-check with your books before sharing with CA.</li>

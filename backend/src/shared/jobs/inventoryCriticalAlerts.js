@@ -151,7 +151,7 @@ async function runInventoryCriticalAlertsForAccount(accountId) {
     created += 1;
   }
 
-  // ── Overdue payables (P2) — purchase invoices ──────────────────────────────
+  // ── Overdue payables (P2) - purchase invoices ──────────────────────────────
   const payR = await query(
     `
     SELECT pi.id, pi.invoice_number, pi.due_date, pi.balance_due,
@@ -204,7 +204,7 @@ async function runInventoryCriticalAlertsForAccount(accountId) {
     });
   }
 
-  // ── Overdue receivables (P2) — sales invoices ──────────────────────────────
+  // ── Overdue receivables (P2) - sales invoices ──────────────────────────────
   const recvR = await query(
     `
     SELECT si.id, si.invoice_number, si.due_date, si.balance_due,

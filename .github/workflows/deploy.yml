@@ -217,7 +217,7 @@ jobs:
           fi
 
           if [ -z "$DIST_ID" ]; then
-            echo "No CloudFront distribution found — creating one..."
+            echo "No CloudFront distribution found - creating one..."
             BUCKET_ORIGIN="${BUCKET}.s3.eu-north-1.amazonaws.com"
             CALLER_REF="jedmee-$(date +%s)"
 
@@ -297,7 +297,7 @@ jobs:
             --cache-control "max-age=31536000,immutable" \
             --delete
 
-          # Prerendered public pages (no-cache — content may change independently of hashed assets)
+          # Prerendered public pages (no-cache - content may change independently of hashed assets)
           aws s3 cp dist/index.html s3://${BUCKET}/index.html \
             --cache-control "no-cache" --content-type "text/html"
 

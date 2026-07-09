@@ -1,5 +1,5 @@
 /**
- * CurrencyContext — React context for the active currency.
+ * CurrencyContext - React context for the active currency.
  *
  * - Reads initial value from localStorage (key: "jedmee_currency").
  * - Calls setActiveCurrency() from currency.js to keep the module-level

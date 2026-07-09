@@ -8,7 +8,7 @@ const { resolveClientTimeZone } = require('../../shared/dateFilters');
 const { monthStartYmd, monthEndYmd } = require('../../shared/timezone');
 
 /**
- * GSTR3B File/Lock handler — POST /reports/gstr3b/{year}/{month}/file
+ * GSTR3B File/Lock handler - POST /reports/gstr3b/{year}/{month}/file
  *
  * Marks the month as FILED and freezes the snapshot_data.
  * Once filed, the GET handler returns the frozen data unchanged.
@@ -41,7 +41,7 @@ async function handler(event) {
     const raw = typeof event.body === 'string' ? JSON.parse(event.body || '{}') : (event.body || {});
     bodySnapshotData = raw.snapshot_data || null;
   } catch {
-    // ignore parse errors — we'll re-calculate
+    // ignore parse errors - we'll re-calculate
   }
 
   const qs = event.queryStringParameters || {};

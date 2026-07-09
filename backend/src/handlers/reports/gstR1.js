@@ -57,7 +57,7 @@ async function handler(event) {
         [ctx.accountId]
       ),
 
-      // HSN-wise summary (B2B + B2C combined) — uses line-item taxable_amount for accuracy
+      // HSN-wise summary (B2B + B2C combined) - uses line-item taxable_amount for accuracy
       query(
         `SELECT
            COALESCE(sii.hsn_code, 'N/A')                          AS hsn_code,
@@ -93,7 +93,7 @@ async function handler(event) {
         [ctx.accountId, fromDate, toDate]
       ),
 
-      // B2B invoices — individual rows with all columns for GSTR-1 Table 4
+      // B2B invoices - individual rows with all columns for GSTR-1 Table 4
       query(
         `SELECT
            si.id,
@@ -163,7 +163,7 @@ async function handler(event) {
         [ctx.accountId, fromDate, toDate]
       ),
 
-      // Large B2C invoices (> ₹2.5 lakh) — reported individually in GSTR-1
+      // Large B2C invoices (> ₹2.5 lakh) - reported individually in GSTR-1
       query(
         `SELECT
            si.id,
@@ -188,7 +188,7 @@ async function handler(event) {
         [ctx.accountId, fromDate, toDate, LARGE_B2C_THRESHOLD]
       ),
 
-      // Overall totals — use line-item taxable_amount for accuracy (fixes taxable value mismatch)
+      // Overall totals - use line-item taxable_amount for accuracy (fixes taxable value mismatch)
       query(
         `SELECT
            COUNT(DISTINCT si.id)                                AS total_invoices,

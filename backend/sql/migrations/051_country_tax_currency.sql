@@ -137,11 +137,11 @@ ON CONFLICT (code) DO UPDATE SET
 --   US  removed misleading 8.5% federal placeholder; 'No Tax' is default
 --   CA  default changed HST 15%→GST 5% (only truly national rate)
 --   FR  added missing 2.1% and 10% reduced rates
---   JP  added 消費税 8% (reduced) and 10% (standard) — was entirely missing
---   CN  added 增值税 6%/9%/13% — was entirely missing
+--   JP  added 消費税 8% (reduced) and 10% (standard) - was entirely missing
+--   CN  added 增值税 6%/9%/13% - was entirely missing
 --   MY  labels corrected to SST rates (Sales Tax 5%/10%, Service Tax 6%/8%)
---   NZ  added GST 0%/15% — was entirely missing
---   ZA  added VAT 0%/15% — was entirely missing
+--   NZ  added GST 0%/15% - was entirely missing
+--   ZA  added VAT 0%/15% - was entirely missing
 -- ─────────────────────────────────────────────────────────────────────────────
 INSERT INTO tax_configs (
   country_code, name, rate, tax_type, is_inclusive,
@@ -242,7 +242,7 @@ INSERT INTO currency_configs (code, name, symbol, locale, decimals, sort_order) 
   ('ZAR', 'South African Rand',  'R',    'en-ZA',  2, 14)
 ON CONFLICT (code) DO NOTHING;
 
--- ── Seed: US State Sales Tax — all 50 states + DC ────────────────────────────
+-- ── Seed: US State Sales Tax - all 50 states + DC ────────────────────────────
 -- Rates = state-level base rates (pre-local surcharges), Tax Foundation 2024
 -- Corrections vs v1: NY 8.00%→4.00% (state base rate); 42 new states added
 -- AK, MT, NH, OR, DE = 0% (five states with no statewide sales tax)

@@ -6,7 +6,7 @@ export const MULTI_USER_GUIDE = {
   pageTitle: "Multi-User Pharmacy Software & Role Permissions",
   metaTitle: "Role-Based Access for Pharmacy Staff & Wholesalers",
   description:
-    "JedMee supports account owners, custom permission roles, and wholesaler vs retailer account types — control who can bill, edit masters, view reports, or place B2B orders.",
+    "JedMee supports account owners, custom permission roles, and wholesaler vs retailer account types - control who can bill, edit masters, view reports, or place B2B orders.",
   canonical: CANONICAL,
   label: "Multi-User & Roles",
   datePublished: "2026-06-01",
@@ -22,7 +22,7 @@ export const MULTI_USER_GUIDE = {
     { name: "Multi-User Access", url: CANONICAL },
   ],
   introFacts: [
-    "JedMee accounts have one account owner plus additional users — each user is assigned a custom role that controls which modules they can view, add, update, or delete.",
+    "JedMee accounts have one account owner plus additional users - each user is assigned a custom role that controls which modules they can view, add, update, or delete.",
     "At registration you choose a wholesaler or retailer account type; within your account, owners manage users and roles so billing staff, warehouse staff, and managers see only the screens they need.",
   ],
   service: {
@@ -37,11 +37,11 @@ export const MULTI_USER_GUIDE = {
       comparisonTable: {
         headers: ["Concept", "What it means in JedMee"],
         rows: [
-          ["Account owner", "Full control — users, roles, billing, inventory, reports"],
+          ["Account owner", "Full control - users, roles, billing, inventory, reports"],
           ["Custom roles", "You define role names and tick permissions per module (sales, purchases, masters, reports, users)"],
           ["Sub-users", "Staff logins assigned one custom role; permissions come from that role"],
-          ["Wholesaler account", "Distributor workflow — retailer order catalog, dispatch, supplier ledgers"],
-          ["Retailer account", "Shop workflow — counter billing, stock, customer ledger, orders to wholesalers"],
+          ["Wholesaler account", "Distributor workflow - retailer order catalog, dispatch, supplier ledgers"],
+          ["Retailer account", "Shop workflow - counter billing, stock, customer ledger, orders to wholesalers"],
         ],
       },
     },
@@ -52,7 +52,7 @@ export const MULTI_USER_GUIDE = {
       ],
       bullets: [
         "Posted invoices are corrected with credit notes, not silent deletion",
-        "Separate login per staff member — avoid shared passwords",
+        "Separate login per staff member - avoid shared passwords",
         "New users can be required to change password on first login",
         "Owners configure who can access Users and Roles & Access screens",
       ],
@@ -60,7 +60,7 @@ export const MULTI_USER_GUIDE = {
     {
       heading: "How do I add users to my pharmacy?",
       paragraphs: [
-        "The account owner opens the Users screen inside the JedMee app, creates a user, and assigns a custom role. Define roles under Roles & Access — for example a billing-only role with sales permissions but without product master edits.",
+        "The account owner opens the Users screen inside the JedMee app, creates a user, and assigns a custom role. Define roles under Roles & Access - for example a billing-only role with sales permissions but without product master edits.",
       ],
     },
     {

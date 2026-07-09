@@ -242,7 +242,7 @@ async function handler(event) {
         : Promise.resolve({ rows: [] })
     );
 
-    // Payment modes — previous calendar month (for share trend vs current period)
+    // Payment modes - previous calendar month (for share trend vs current period)
     calls.push(
       canSales
         ? query(
@@ -563,7 +563,7 @@ async function handler(event) {
         : Promise.resolve({ rows: [] })
     );
 
-    // Total outstanding receivables (all-time, not date-filtered) — balance sheet item
+    // Total outstanding receivables (all-time, not date-filtered) - balance sheet item
     calls.push(
       canSales
         ? query(
@@ -581,7 +581,7 @@ async function handler(event) {
         : Promise.resolve({ rows: [{ amount: 0, invoices: 0 }] })
     );
 
-    // Total outstanding payables (all-time, not date-filtered) — balance sheet item
+    // Total outstanding payables (all-time, not date-filtered) - balance sheet item
     calls.push(
       canPurchases
         ? query(
@@ -874,7 +874,7 @@ async function handler(event) {
         : Promise.resolve({ rows: [] })
     );
 
-    // Range gross profit — taxable revenue − COGS − sales returns (matches Day Book).
+    // Range gross profit - taxable revenue − COGS − sales returns (matches Day Book).
     // COGS uses batch purchase_rate of the items actually sold, NOT period purchases,
     // so this reconciles with the Day Book "profit" figure for the same period.
     calls.push(
@@ -976,7 +976,7 @@ async function handler(event) {
         ? Math.round((grossProfit / profitNetRevenue) * 1000) / 10
         : null;
 
-    // Total outstanding receivables and payables (balance sheet items — not date-filtered)
+    // Total outstanding receivables and payables (balance sheet items - not date-filtered)
     const totalRecvRow = totalRecv.rows?.[0] || { amount: 0, invoices: 0 };
     const totalPayRow  = totalPay.rows?.[0]  || { amount: 0, invoices: 0 };
 

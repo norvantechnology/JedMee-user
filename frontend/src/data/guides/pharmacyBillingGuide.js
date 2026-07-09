@@ -26,7 +26,7 @@ export const PHARMACY_BILLING_GUIDE = {
     steps: [
       {
         name: "Map every product to the correct tax rate",
-        text: "Configure GST, VAT, or sales tax % on each product or category before staff begin billing — refer to official tax authority guidance for your region.",
+        text: "Configure GST, VAT, or sales tax % on each product or category before staff begin billing - refer to official tax authority guidance for your region.",
       },
       {
         name: "Train staff to select batch at billing",
@@ -57,7 +57,7 @@ export const PHARMACY_BILLING_GUIDE = {
     { name: "Pharmacy Billing Guide", url: CANONICAL },
   ],
   introFacts: [
-    "JedMee generates GST-ready invoices (India), supports VAT and sales tax configurations, and stores immutable invoice numbers with batch references on every line — errors lead to tax penalties, audit issues, and customer disputes if billing is manual.",
+    "JedMee generates GST-ready invoices (India), supports VAT and sales tax configurations, and stores immutable invoice numbers with batch references on every line - errors lead to tax penalties, audit issues, and customer disputes if billing is manual.",
     "Pharmacy billing software must produce accurate, auditable tax invoices for every sale and purchase with correct tax rates per medicine, customer details, and role-based access. Data is encrypted in transit (TLS) and at rest on AWS infrastructure.",
   ],
   sections: [
@@ -72,7 +72,7 @@ export const PHARMACY_BILLING_GUIDE = {
         "Exportable tax reports (e.g. GSTR-1 summary for India)",
       ],
       paragraphs: [
-        "Your software should never allow silent deletion of posted invoices — corrections happen through credit notes or approved adjustments with an audit trail.",
+        "Your software should never allow silent deletion of posted invoices - corrections happen through credit notes or approved adjustments with an audit trail.",
       ],
     },
     {
@@ -92,7 +92,7 @@ export const PHARMACY_BILLING_GUIDE = {
       heading: "Data security and privacy for pharmacy records",
       paragraphs: [
         "Pharmacy systems store patient-linked sales, prescription metadata, and financial data. While JedMee is not a covered entity under US HIPAA by default, we follow security practices aligned with healthcare-adjacent SaaS: encryption, access controls, audit logs, and regular backups.",
-        "For US pharmacies handling PHI, you should execute a Business Associate Agreement (BAA) with your vendor if required — contact JedMee sales to discuss enterprise compliance needs. Indian pharmacies should align with local drug record-keeping rules and IT Act data protection expectations.",
+        "For US pharmacies handling PHI, you should execute a Business Associate Agreement (BAA) with your vendor if required - contact JedMee sales to discuss enterprise compliance needs. Indian pharmacies should align with local drug record-keeping rules and IT Act data protection expectations.",
       ],
       bullets: [
         "Role-based access: cashiers cannot change master data or delete invoices",
@@ -104,7 +104,7 @@ export const PHARMACY_BILLING_GUIDE = {
     {
       heading: "DEA-controlled substances and local regulations",
       paragraphs: [
-        "DEA Schedule II–V tracking in the United States requires specialized workflows and often state board integration — features vary by vendor and jurisdiction. JedMee focuses on general pharmaceutical retail and wholesale billing; verify your local controlled-substance rules before go-live.",
+        "DEA Schedule II–V tracking in the United States requires specialized workflows and often state board integration - features vary by vendor and jurisdiction. JedMee focuses on general pharmaceutical retail and wholesale billing; verify your local controlled-substance rules before go-live.",
         "Always consult your accountant or compliance officer for tax filing and record retention periods in your state or country.",
       ],
     },
@@ -126,7 +126,7 @@ export const PHARMACY_BILLING_GUIDE = {
     },
     {
       q: "Is JedMee HIPAA compliant?",
-      a: "JedMee uses enterprise-grade security controls. HIPAA compliance for US PHI requires specific contractual and technical measures — contact us for enterprise requirements.",
+      a: "JedMee uses enterprise-grade security controls. HIPAA compliance for US PHI requires specific contractual and technical measures - contact us for enterprise requirements.",
     },
     {
       q: "Can I reprint or email tax invoices to customers?",
@@ -134,7 +134,7 @@ export const PHARMACY_BILLING_GUIDE = {
     },
     {
       q: "What happens if I enter the wrong tax rate?",
-      a: "Correct the product master rate, then issue a credit note for incorrect invoices and rebill — preserving a clear audit trail.",
+      a: "Correct the product master rate, then issue a credit note for incorrect invoices and rebill - preserving a clear audit trail.",
     },
   ],
 };

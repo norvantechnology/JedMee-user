@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   THEME — Warm slate neutrals + one indigo accent + 3 semantic hues
+   THEME - Warm slate neutrals + one indigo accent + 3 semantic hues
    (success / danger / warning). Modal chrome is a light tint + neutral
    section bands; primary stays for actions and focus. Components consume var(--*) only.
    ═══════════════════════════════════════════════════════════════════ */
@@ -7,7 +7,7 @@
 :root {
 
   /* ─────────────────────────────────────────
-     PRIMARY — Indigo (actions, links, focus)
+     PRIMARY - Indigo (actions, links, focus)
      ───────────────────────────────────────── */
   --primary:       #4F46E5;
   --primary-dark:  #4338CA;
@@ -29,7 +29,7 @@
   --warning-light: #FFFBEB;
 
   /* ─────────────────────────────────────────
-     SURFACES — soft canvas, not stark white everywhere
+     SURFACES - soft canvas, not stark white everywhere
      ───────────────────────────────────────── */
   --bg:        #F8FAFC;
   --modal-bg : #f0f4f7;
@@ -45,7 +45,7 @@
   --border-focus:  var(--primary);
 
   /* ─────────────────────────────────────────
-     TEXT — slate scale (no pure black)
+     TEXT - slate scale (no pure black)
      ───────────────────────────────────────── */
   --text:       #0F172A;
   --text-2:     #1E293B;
@@ -61,7 +61,7 @@
   --on-danger:  #FFFFFF;
 
   /* ─────────────────────────────────────────
-     SIDEBAR — deep slate (same family as text, darker)
+     SIDEBAR - deep slate (same family as text, darker)
      ───────────────────────────────────────── */
   --sidebar-bg:            #17223d;
   --sidebar-border:        #1E293B;
@@ -72,7 +72,7 @@
   --sidebar-section-label: #64748B;
 
   /* ─────────────────────────────────────────
-     MODAL — calm shell (light indigo wash + slate text); primary on icon & CTA only
+     MODAL - calm shell (light indigo wash + slate text); primary on icon & CTA only
      ───────────────────────────────────────── */
   --modal-head-bg:               color-mix(in srgb, var(--primary) 7%, var(--card));
   --modal-head-bg-low:           color-mix(in srgb, var(--surface) 40%, var(--card));
@@ -85,14 +85,14 @@
   --modal-head-close-bg:         transparent;
   --modal-head-close-hover:      color-mix(in srgb, var(--primary) 7%, var(--surface));
 
-  /* Inner master-form section rails (e.g. DIVISION DETAILS) — neutral band, not a second primary bar */
+  /* Inner master-form section rails (e.g. DIVISION DETAILS) - neutral band, not a second primary bar */
   --modal-panel-head-bg:         color-mix(in srgb, var(--surface) 36%, var(--card));
   --modal-panel-head-border:     var(--border);
 
   /* Scrollable body behind stacked panels */
   --modal-form-bg:               var(--modal-bg);
 
-  /* Inside each .mfzPanel — sits under section rail; lighter than fields so controls read as “cards” */
+  /* Inside each .mfzPanel - sits under section rail; lighter than fields so controls read as “cards” */
   --modal-panel-body-bg:         color-mix(in srgb, var(--surface) 14%, var(--card));
 
   /* Inputs: white fill on tinted panel + borders a touch darker than global controls */
@@ -125,7 +125,7 @@
 
   /* ─────────────────────────────────────────
      MODAL / DIALOG ELEVATION & FOCUS (neutral + brand)
-     Used by CommonModal.css and shared overlays — no raw hex in components.
+     Used by CommonModal.css and shared overlays - no raw hex in components.
      ───────────────────────────────────────── */
   --modal-card-shadow:
     0 12px 36px color-mix(in srgb, var(--text) 5.5%, transparent),
@@ -143,7 +143,7 @@
     0 5px 16px -2px color-mix(in srgb, var(--primary) 32%, transparent);
   --shadow-btn-danger: 0 3px 10px -1px color-mix(in srgb, var(--danger) 26%, transparent);
   --field-focus-ring: 0 0 0 2.5px color-mix(in srgb, var(--primary) 13%, transparent);
-  /* Soft depth (slate) + light primary wash — not a harsh black drop shadow */
+  /* Soft depth (slate) + light primary wash - not a harsh black drop shadow */
   --field-rest-shadow:
     0 1px 2px color-mix(in srgb, var(--text) 3.5%, transparent),
     0 0 1px color-mix(in srgb, var(--text) 2.5%, transparent);
@@ -198,7 +198,7 @@
   --statusbar-h:    32px;
 
   /* ═══════════════════════════════════════════
-     ALIASES — every --color-* used in existing
+     ALIASES - every --color-* used in existing
      class names points to one canonical token.
      ═══════════════════════════════════════════ */
 
@@ -230,7 +230,7 @@
   --color-warning-subtle:  color-mix(in srgb, var(--warning) 14%, var(--card));
   --color-warning-strong:  var(--warning);
 
-  /* info = primary — no separate hue */
+  /* info = primary - no separate hue */
   --color-info:            var(--primary);
   --color-info-dark:       var(--primary-dark);
   --color-info-light:      var(--primary-light);
@@ -266,7 +266,7 @@
   --color-on-danger:       var(--on-danger);
 
   /* ─────────────────────────────────────────
-     BADGE TOKENS — derived from semantic roots
+     BADGE TOKENS - derived from semantic roots
      ───────────────────────────────────────── */
 
   --badge-live-bg:        var(--success-light);
@@ -293,7 +293,7 @@
   --badge-none-text:      var(--warning-dark);
   --badge-none-border:    color-mix(in srgb, var(--warning) 22%, var(--border));
 
-  /* Rx / OTC / flags — same primary family (fewer distinct hues) */
+  /* Rx / OTC / flags - same primary family (fewer distinct hues) */
   --badge-rx-bg:          var(--primary-light);
   --badge-rx-text:        var(--primary-dark);
   --badge-rx-border:      color-mix(in srgb, var(--primary) 24%, var(--border));
@@ -312,7 +312,7 @@
 }
 
 /* ═══════════════════════════════════════════
-   RESPONSIVE — Tighten on smaller screens
+   RESPONSIVE - Tighten on smaller screens
    ═══════════════════════════════════════════ */
 @media (max-width: 720px) {
   :root {
@@ -501,7 +501,7 @@ button::-moz-focus-inner                           { border: 0; }
 .stat-card.accent-red   { border-top: 3px solid var(--color-danger); }
 
 /* ═══════════════════════════════════════════
-   FULL-PAGE FORM — SECTION NAVIGATOR
+   FULL-PAGE FORM - SECTION NAVIGATOR
    ═══════════════════════════════════════════ */
 .section-nav {
   width: 200px;

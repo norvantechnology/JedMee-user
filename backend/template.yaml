@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: JedMee User Backend (StageConfig holds DB, JWT, Smtp*, OTP TTL — treat like secrets in prod)
+Description: JedMee User Backend (StageConfig holds DB, JWT, Smtp*, OTP TTL - treat like secrets in prod)
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
@@ -222,11 +222,11 @@ Resources:
         AllowHeaders: "'Content-Type,Authorization'"
         AllowMethods: "'GET,POST,PUT,DELETE,PATCH,OPTIONS'"
 
-  # ── Single router function — handles ALL API routes ─────────────────────────
+  # ── Single router function - handles ALL API routes ─────────────────────────
   # Wired with one ANY /{proxy+} catch-all (plus ANY / for the root) instead of
   # one Api event per route. Each Api event creates an AWS::Lambda::Permission,
   # and Lambda's resource-based policy is hard-capped at 20 KB. With ~150
-  # routes that limit was being breached during deploy — the proxy approach
+  # routes that limit was being breached during deploy - the proxy approach
   # keeps the policy at a constant ~2 statements regardless of route count.
   #
   # Internal dispatch happens in src/handlers/router/index.js, which matches
@@ -243,7 +243,7 @@ Resources:
       Handler: handlers/router/index.handler
       Timeout: 300
       Role: !GetAtt LambdaExecutionRole.Arn
-      Description: "Single API router — internally dispatches every route in handlers/router/index.js"
+      Description: "Single API router - internally dispatches every route in handlers/router/index.js"
       Events:
         ApiRoot:
           Type: Api
@@ -258,7 +258,7 @@ Resources:
             Path: /{proxy+}
             Method: ANY
 
-  # ── Scheduled: daily low-stock digest (kept separate — Schedule event) ──────
+  # ── Scheduled: daily low-stock digest (kept separate - Schedule event) ──────
   NotificationsDailyDigestFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -280,7 +280,7 @@ Resources:
 #   aws cloudformation describe-stacks --stack-name medico-user-backend-${Stage} \
 #       --region eu-north-1 --query 'Stacks[0].Outputs'
 # Anything that is a SECRET (DB password, JWT secret, SMTP password, etc.) is
-# intentionally NOT exported here — CloudFormation Outputs are readable by
+# intentionally NOT exported here - CloudFormation Outputs are readable by
 # anyone with `cloudformation:DescribeStacks`, so they must remain non-sensitive.
 Outputs:
   Stage:
@@ -374,7 +374,7 @@ Outputs:
     Description: Region of the uploads S3 bucket
     Value: !FindInMap [StageConfig, !Ref Stage, S3Region]
 
-  # ── Database (host/port only — credentials are NOT exported) ──────────────
+  # ── Database (host/port only - credentials are NOT exported) ──────────────
   DbHost:
     Description: Database host (non-secret)
     Value: !FindInMap [StageConfig, !Ref Stage, DbHost]
@@ -391,7 +391,7 @@ Outputs:
     Description: Database SSL mode (require / disable)
     Value: !FindInMap [StageConfig, !Ref Stage, DbSsl]
 
-  # ── SMTP (host / port / from-address only — password NOT exported) ────────
+  # ── SMTP (host / port / from-address only - password NOT exported) ────────
   SmtpHost:
     Description: SMTP host
     Value: !FindInMap [StageConfig, !Ref Stage, SmtpHost]

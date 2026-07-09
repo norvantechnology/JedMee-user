@@ -3,7 +3,7 @@
 -- All additions use IF NOT EXISTS so the migration is safe to re-run.
 --
 -- NOTE: sales_invoices already has total_gst (from migration 021) and
--- subtotal / total_discount for taxable value — no new columns needed there.
+-- subtotal / total_discount for taxable value - no new columns needed there.
 
 -- ── sales_invoice_items ───────────────────────────────────────────────────────
 

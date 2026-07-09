@@ -67,7 +67,7 @@ async function handler(event) {
         [ctx.accountId]
       ),
 
-      // B2B invoices — one row per invoice, all columns for GSTR-1 table.
+      // B2B invoices - one row per invoice, all columns for GSTR-1 table.
       // CGST/SGST/IGST: use stored split if available (post-migration), else derive
       // from total_gst + supply_type (handles pre-migration CASH_MEMO invoices).
       query(
@@ -142,7 +142,7 @@ async function handler(event) {
         [ctx.accountId, fromDate, toDate]
       ),
 
-      // Large B2C invoices (> ₹2.5 lakh) — reported individually in GSTR-1
+      // Large B2C invoices (> ₹2.5 lakh) - reported individually in GSTR-1
       query(
         `SELECT
            si.id,
@@ -199,7 +199,7 @@ async function handler(event) {
         [ctx.accountId, fromDate, toDate]
       ),
 
-      // B2B sales returns (credit notes for registered customers) — CDNR in GSTR-1
+      // B2B sales returns (credit notes for registered customers) - CDNR in GSTR-1
       query(
         `SELECT
            sr.id,
@@ -230,7 +230,7 @@ async function handler(event) {
           : [ctx.accountId, fromDate, toDate]
       ),
 
-      // B2C sales returns (credit notes for unregistered customers) — CDNUR in GSTR-1
+      // B2C sales returns (credit notes for unregistered customers) - CDNUR in GSTR-1
       query(
         `SELECT
            sr.id,
@@ -337,7 +337,7 @@ async function handler(event) {
       large_b2c:          largeB2cR.rows || [],
       gstin_issues:       gstinIssues,
       large_b2c_threshold: LARGE_B2C_THRESHOLD,
-      // Credit notes / returns — reflected in correct group per GSTR-1 CDNR/CDNUR
+      // Credit notes / returns - reflected in correct group per GSTR-1 CDNR/CDNUR
       b2b_returns:        b2bReturnsList,
       b2c_returns:        b2cReturnsList,
     });

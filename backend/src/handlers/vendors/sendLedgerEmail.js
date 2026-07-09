@@ -177,8 +177,8 @@ async function handler(event) {
   const balanceType = doc.summary.net_balance_type || "NIL";
   const balanceColor = netBal > 0 ? C.danger : netBal < 0 ? C.success : C.neutral;
 
-  const subject = `Supplier Ledger Statement — ${vendor.name || "Supplier"}`.trim();
-  const text    = `Dear ${vendor.name || "Supplier"},\n\nPlease find your supplier ledger statement attached as a PDF.\n\nNet Balance: Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}\n\n— ${sellerName}`;
+  const subject = `Supplier Ledger Statement - ${vendor.name || "Supplier"}`.trim();
+  const text    = `Dear ${vendor.name || "Supplier"},\n\nPlease find your supplier ledger statement attached as a PDF.\n\nNet Balance: Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}\n\n- ${sellerName}`;
 
   // ── Contact / detail rows ────────────────────────────────────────────────
   const contactRows = [
@@ -229,7 +229,7 @@ async function handler(event) {
   ].filter(Boolean).join("\n");
 
   const html = emailBase({
-    preheader: `Your supplier ledger — Balance Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}`,
+    preheader: `Your supplier ledger - Balance Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}`,
     headerLabel: "Supplier Ledger Statement",
     headerTitle: E(vendor.name || "Supplier"),
     headerSub: vendor.code ? `Code: ${E(vendor.code)}` : undefined,

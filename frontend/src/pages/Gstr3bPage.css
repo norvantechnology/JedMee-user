@@ -1,5 +1,5 @@
 /* ─────────────────────────────────────────────────────────────────────────────
-   Gstr3bPage.css  —  GSTR-3B Monthly Summary Return
+   Gstr3bPage.css  -  GSTR-3B Monthly Summary Return
    All classes prefixed "g3b" to avoid collisions with global styles.
 ───────────────────────────────────────────────────────────────────────────── */
 
@@ -390,7 +390,7 @@
   color: var(--color-danger, #ef4444);
 }
 
-/* ── HSN warning (red — mandatory compliance) ────────────────────────────── */
+/* ── HSN warning (red - mandatory compliance) ────────────────────────────── */
 .g3bHsnWarn {
   display: flex;
   align-items: flex-start;
@@ -502,7 +502,7 @@
   background: color-mix(in srgb, var(--color-primary) 16%, transparent);
 }
 
-/* g3bStatValueLg base — color set by g3bPayZero / g3bPayDue */
+/* g3bStatValueLg base - color set by g3bPayZero / g3bPayDue */
 .g3bStatValueLg {
   font-size: 26px;
   font-weight: 800;
@@ -515,7 +515,7 @@
   margin-top: 4px;
 }
 
-/* ── Summary row — align-items start so primary card can be taller ────────── */
+/* ── Summary row - align-items start so primary card can be taller ────────── */
 .g3bSummaryRow {
   align-items: start;
 }

@@ -52,7 +52,7 @@ export const WHOLESALE_PHARMACY_GUIDE = {
         },
         {
           q: "Supplier payments",
-          a: "Track payables, schedule payments, and view vendor ledger with aging — know what you owe each supplier this week.",
+          a: "Track payables, schedule payments, and view vendor ledger with aging - know what you owe each supplier this week.",
         },
       ],
     },
@@ -72,7 +72,7 @@ export const WHOLESALE_PHARMACY_GUIDE = {
     {
       heading: "Inventory at wholesale scale",
       paragraphs: [
-        "Batch tracking remains essential — a pallet of the same brand may contain three expiry dates. JedMee's near-expiry and non-moving reports help wholesalers rotate stock before write-offs and negotiate returns with suppliers.",
+        "Batch tracking remains essential - a pallet of the same brand may contain three expiry dates. JedMee's near-expiry and non-moving reports help wholesalers rotate stock before write-offs and negotiate returns with suppliers.",
         "Division-wise stock analysis shows which manufacturer lines earn margin vs sit in warehouse.",
       ],
     },

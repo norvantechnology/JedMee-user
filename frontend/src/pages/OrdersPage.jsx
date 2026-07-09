@@ -57,7 +57,7 @@ const STATUS_CFG = {
   CANCELLED:  { label: "Cancelled",  cls: "opSt_cancelled" },
 };
 
-/* ── Status badge — full pill with background ─────────────── */
+/* ── Status badge - full pill with background ─────────────── */
 function StatusBadge({ status }) {
   const cfg = STATUS_CFG[status] || { label: status, cls: "" };
   return <span className={`opBadge ${cfg.cls}`}>{cfg.label}</span>;
@@ -373,7 +373,7 @@ export default function OrdersPage() {
 
         {/* ── Stat pills ── */}
         <div className="opStatsRow" aria-label="Order status summary">
-          {/* Total — dominant card */}
+          {/* Total - dominant card */}
           <button
             type="button"
             className={`opStatTotal${!statusFilter ? " opStatTotal_active" : ""}`}
@@ -381,12 +381,12 @@ export default function OrdersPage() {
           >
             <div className="opStatTotalIc"><IconOpCart /></div>
             <div className="opStatTotalBody">
-              <div className="opStatTotalN">{loading ? "—" : statCounts.ALL}</div>
+              <div className="opStatTotalN">{loading ? "-" : statCounts.ALL}</div>
               <div className="opStatTotalL">Total Orders</div>
             </div>
           </button>
 
-          {/* Status pills — scrollable row */}
+          {/* Status pills - scrollable row */}
           <div className="opStatPills">
             {STAT_DEFS.slice(1).map((def) => {
               const cnt = statCounts[def.key] || 0;
@@ -401,7 +401,7 @@ export default function OrdersPage() {
                 >
                   <div className={`opStatPillIc ${def.iconCls}`}>{def.svg}</div>
                   <span className="opStatPillL">{def.label}</span>
-                  <span className="opStatPillN">{loading ? "—" : cnt}</span>
+                  <span className="opStatPillN">{loading ? "-" : cnt}</span>
                 </button>
               );
             })}
@@ -502,7 +502,7 @@ export default function OrdersPage() {
         ) : (
           <div className="opList">
             {filteredRows.map((row) => {
-              const party = row[partyKey] || "—";
+              const party = row[partyKey] || "-";
               const itemCount = row.item_count ?? row.total_items ?? row.items?.length ?? null;
               const placedAt = row.placed_at || row.created_at;
               const dateStr = fmtDateTime(placedAt);
@@ -540,7 +540,7 @@ export default function OrdersPage() {
                         <div className="opCardInfoV">
                           {itemCount !== null
                             ? `${itemCount} item${itemCount !== 1 ? "s" : ""}`
-                            : "—"}
+                            : "-"}
                         </div>
                       </div>
                       <div className="opCardDiv" aria-hidden="true" />
@@ -573,7 +573,7 @@ export default function OrdersPage() {
                       <div className="opCardProducts">
                         {row.items.slice(0, 3).map((it, i) => (
                           <span key={i} className="opCardProductPill">
-                            {it.product_name || "—"}
+                            {it.product_name || "-"}
                           </span>
                         ))}
                         {row.items.length > 3 && (
@@ -766,7 +766,7 @@ export default function OrdersPage() {
                 </div>
                 <div className="opPartyBody">
                   <div className="opPartyName">
-                    {(isRetailer ? detail.order?.wholesaler_firm_name : detail.order?.retailer_firm_name) || "—"}
+                    {(isRetailer ? detail.order?.wholesaler_firm_name : detail.order?.retailer_firm_name) || "-"}
                   </div>
                   <div className="opPartyMeta">
                     {!isRetailer && detail.order?.delivery_phone && (
@@ -822,7 +822,7 @@ export default function OrdersPage() {
                   return (
                     <div key={it.id} className="opItemRow">
                       <div className="opItemLeft">
-                        <div className="opItemName">{it.product_name || "—"}</div>
+                        <div className="opItemName">{it.product_name || "-"}</div>
                         <div className="opItemMeta">
                           {it.packing && <span className="opPill opPill_pack">Pack {it.packing}</span>}
                           <span className="opPill opPill_ord">Ordered: {orderedQty}</span>
@@ -1043,7 +1043,7 @@ export default function OrdersPage() {
             <div className="opPrintBillRow">
               <div className="opPrintBillTo">
                 <div className="opPrintBillLabel">BILL TO</div>
-                <div className="opPrintBillName">{detail.order?.retailer_firm_name || "—"}</div>
+                <div className="opPrintBillName">{detail.order?.retailer_firm_name || "-"}</div>
                 {detail.order?.delivery_phone && (
                   <div className="opPrintBillLine">
                     <span className="opPrintBillKey">Ph:</span> {detail.order.delivery_phone}
@@ -1072,17 +1072,17 @@ export default function OrdersPage() {
                 <div className="opPrintBillLabel">INVOICE DETAILS</div>
                 <div className="opPrintInvoiceRow">
                   <span className="opPrintInvoiceKey">Order No</span>
-                  <span className="opPrintInvoiceVal">{detail.order?.order_number || "—"}</span>
+                  <span className="opPrintInvoiceVal">{detail.order?.order_number || "-"}</span>
                 </div>
                 <div className="opPrintInvoiceRow">
                   <span className="opPrintInvoiceKey">Date</span>
                   <span className="opPrintInvoiceVal">
-                    {detail.order?.placed_at ? new Date(detail.order.placed_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
+                    {detail.order?.placed_at ? new Date(detail.order.placed_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "-"}
                   </span>
                 </div>
                 <div className="opPrintInvoiceRow">
                   <span className="opPrintInvoiceKey">Status</span>
-                  <span className="opPrintInvoiceVal opPrintInvoiceVal_status">{detail.order?.status || "—"}</span>
+                  <span className="opPrintInvoiceVal opPrintInvoiceVal_status">{detail.order?.status || "-"}</span>
                 </div>
               </div>
             </div>
