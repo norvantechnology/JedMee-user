@@ -5,4 +5,9 @@ export const GUIDE_LINKS = [
   { label: "Inventory management", to: "/pharmacy-inventory-guide" },
   { label: "Software comparison", to: "/pharmacy-software-comparison" },
   { label: "Wholesale & distribution", to: "/wholesale-pharmacy-software" },
+  { label: "Mobile app access", to: "/pharmacy-mobile-app" },
+  { label: "Free trial", to: "/free-trial" },
+  { label: "Multi-user roles", to: "/multi-user-pharmacy-software" },
+  { label: "Retail + wholesale", to: "/retail-wholesale-pharmacy" },
+  { label: "Financial management", to: "/pharmacy-financial-management" },
 ];

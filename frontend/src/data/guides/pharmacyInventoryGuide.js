@@ -10,7 +10,40 @@ export const PHARMACY_INVENTORY_GUIDE = {
   canonical: CANONICAL,
   label: "Inventory & Stock Control",
   datePublished: "2026-04-01",
-  lastUpdated: "2026-07-05",
+  lastUpdated: "2026-07-09",
+  service: {
+    name: "JedMee pharmacy inventory management",
+    description:
+      "Batch-level stock control, expiry alerts, low-stock warnings, and non-moving reports for retail pharmacies.",
+    serviceType: "Pharmacy inventory management software",
+  },
+  howTo: {
+    name: "Purchase-to-sale inventory workflow",
+    heading: "How to run batch inventory from purchase to sale",
+    intro: "This closed loop keeps stock valuation aligned with physical shelves.",
+    steps: [
+      {
+        name: "Create purchase invoice",
+        text: "Enter supplier invoice with batch number, expiry date, and quantity — stock is added to the batch record.",
+      },
+      {
+        name: "Bill retail sales against batch",
+        text: "Select batch at billing so quantity decrements from the correct expiry lot (FEFO).",
+      },
+      {
+        name: "Process purchase returns",
+        text: "Return goods to supplier with stock removed and supplier credit recorded.",
+      },
+      {
+        name: "Handle sales returns",
+        text: "Add resaleable stock back to the batch when customers return medicines.",
+      },
+      {
+        name: "Post physical count adjustments",
+        text: "Enter adjustment with reason code when monthly count differs from system quantity.",
+      },
+    ],
+  },
   relatedGuides: [
     { label: "Pharmacy billing & tax compliance guide", to: "/pharmacy-billing-guide" },
     { label: "Wholesale & distribution guide", to: "/wholesale-pharmacy-software" },
@@ -22,15 +55,14 @@ export const PHARMACY_INVENTORY_GUIDE = {
     { name: "Pharmacy Inventory Guide", url: CANONICAL },
   ],
   introFacts: [
-    "Pharmacy inventory management tracks every medicine by product, batch, quantity, expiry date, and location — so you know what is on shelf, what is expiring soon, and what to reorder.",
-    "JedMee alerts pharmacies before batches expire (typically 30–60 days ahead), supports loose-unit sales (individual tablets or ml), flags low stock against minimum levels, and reports non-moving items so capital is not tied up in dead stock.",
+    "JedMee alerts pharmacies before batches expire (typically 30–60 days ahead), supports loose-unit sales, flags low stock against minimum levels, and reports non-moving items — two cartons of the same medicine may have different expiry dates and must be tracked separately.",
+    "Pharmacy inventory management tracks every medicine by product, batch, quantity, expiry date, and location so you know what is on shelf, what is expiring soon, and what to reorder.",
   ],
   sections: [
     {
       heading: "Why batch-level tracking matters",
       paragraphs: [
         "Two cartons of the same medicine may have different expiry dates and purchase costs. Billing the wrong batch affects margins and compliance. Pharmacy software forces batch selection at sale and purchase so stock always reconciles.",
-        "Average pharmacies reduce expiry write-offs by 40–70% within six months of switching from manual registers to automated expiry alerts, based on JedMee customer feedback.",
       ],
     },
     {

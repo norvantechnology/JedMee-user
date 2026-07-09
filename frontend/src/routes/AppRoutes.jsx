@@ -9,6 +9,11 @@ import PharmacyBillingGuidePage from "../pages/guides/PharmacyBillingGuidePage.j
 import PharmacyInventoryGuidePage from "../pages/guides/PharmacyInventoryGuidePage.jsx";
 import PharmacySoftwareComparisonPage from "../pages/guides/PharmacySoftwareComparisonPage.jsx";
 import WholesalePharmacySoftwarePage from "../pages/guides/WholesalePharmacySoftwarePage.jsx";
+import PharmacyMobileAppPage from "../pages/guides/PharmacyMobileAppPage.jsx";
+import FreeTrialPage from "../pages/guides/FreeTrialPage.jsx";
+import MultiUserPharmacyPage from "../pages/guides/MultiUserPharmacyPage.jsx";
+import RetailWholesalePharmacyPage from "../pages/guides/RetailWholesalePharmacyPage.jsx";
+import PharmacyFinancialManagementPage from "../pages/guides/PharmacyFinancialManagementPage.jsx";
 import AuthUnifiedPage from "../pages/AuthUnifiedPage.jsx";
 import DashboardPage from "../pages/DashboardPage.jsx";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage.jsx";
@@ -349,6 +354,11 @@ export function AppRoutes() {
       <Route path="/pharmacy-inventory-guide" element={<PharmacyInventoryGuidePage />} />
       <Route path="/pharmacy-software-comparison" element={<PharmacySoftwareComparisonPage />} />
       <Route path="/wholesale-pharmacy-software" element={<WholesalePharmacySoftwarePage />} />
+      <Route path="/pharmacy-mobile-app" element={<PharmacyMobileAppPage />} />
+      <Route path="/free-trial" element={<FreeTrialPage />} />
+      <Route path="/multi-user-pharmacy-software" element={<MultiUserPharmacyPage />} />
+      <Route path="/retail-wholesale-pharmacy" element={<RetailWholesalePharmacyPage />} />
+      <Route path="/pharmacy-financial-management" element={<PharmacyFinancialManagementPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

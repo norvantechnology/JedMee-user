@@ -17,6 +17,11 @@ export const PUBLIC_SEO_PATHS = new Set([
   "/pharmacy-inventory-guide",
   "/pharmacy-software-comparison",
   "/wholesale-pharmacy-software",
+  "/pharmacy-mobile-app",
+  "/free-trial",
+  "/multi-user-pharmacy-software",
+  "/retail-wholesale-pharmacy",
+  "/pharmacy-financial-management",
 ]);
 
 const INDEX_ROBOTS =

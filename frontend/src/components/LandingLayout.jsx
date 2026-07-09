@@ -170,11 +170,9 @@ function SharedFooter() {
           <div className="ln-footer-col">
             <div className="ln-footer-col-title">Resources</div>
             <ul>
-              <li><Link to="/pharmacy-management-software">Pharmacy software guide</Link></li>
-              <li><Link to="/pharmacy-billing-guide">Billing &amp; compliance</Link></li>
-              <li><Link to="/pharmacy-inventory-guide">Inventory management</Link></li>
-              <li><Link to="/pharmacy-software-comparison">Software comparison</Link></li>
-              <li><Link to="/wholesale-pharmacy-software">Wholesale &amp; distribution</Link></li>
+              {GUIDE_LINKS.map((g) => (
+                <li key={g.to}><Link to={g.to}>{g.label}</Link></li>
+              ))}
             </ul>
           </div>
           <div className="ln-footer-col">

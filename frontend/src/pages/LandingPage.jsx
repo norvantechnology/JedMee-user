@@ -149,6 +149,7 @@ function BrandLogo({ className, width = 140, height = 40, loading = "eager" }) {
         height={height}
         loading={loading}
         decoding="async"
+        fetchPriority={loading === "eager" ? "high" : "auto"}
       />
     </picture>
   );
@@ -1648,11 +1649,9 @@ function Footer() {
           <div className="ln-footer-col">
             <div className="ln-footer-col-title">Resources</div>
             <ul>
-              <li><Link to="/pharmacy-management-software">Pharmacy software guide</Link></li>
-              <li><Link to="/pharmacy-billing-guide">Billing &amp; compliance</Link></li>
-              <li><Link to="/pharmacy-inventory-guide">Inventory management</Link></li>
-              <li><Link to="/pharmacy-software-comparison">Software comparison</Link></li>
-              <li><Link to="/wholesale-pharmacy-software">Wholesale &amp; distribution</Link></li>
+              {GUIDE_LINKS.map((g) => (
+                <li key={g.to}><Link to={g.to}>{g.label}</Link></li>
+              ))}
             </ul>
           </div>
           <div className="ln-footer-col">
@@ -1729,7 +1728,7 @@ export default function LandingPage() {
       "name": SEO_CONFIG.siteName,
       "url": SEO_CONFIG.siteUrl,
       "logo": `${SEO_CONFIG.siteUrl}/logo.png`,
-      "image": `${SEO_CONFIG.siteUrl}/logo-400.png`,
+      "image": `${SEO_CONFIG.siteUrl}/og-image.png`,
       "applicationCategory": "BusinessApplication",
       "applicationSubCategory": "Pharmacy Management Software",
       "operatingSystem": "Web, Android, iOS",

@@ -26,6 +26,66 @@ function GuideFaqBlock({ faqs }) {
   );
 }
 
+function ComparisonTable({ table }) {
+  if (!table?.headers?.length) return null;
+  return (
+    <div className="ip-table-wrap">
+      <table className="ip-compare-table">
+        <thead>
+          <tr>
+            {table.headers.map((h) => (
+              <th key={h} scope="col">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {table.rows.map((row, i) => (
+            <tr key={i}>
+              {row.map((cell, j) => (
+                <td key={j}>{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function HowToSteps({ howTo }) {
+  if (!howTo?.steps?.length) return null;
+  return (
+    <section className="ip-howto" aria-labelledby="guide-howto-heading">
+      <h2 id="guide-howto-heading">{howTo.heading || howTo.name || "Step-by-step guide"}</h2>
+      {howTo.intro && <p>{howTo.intro}</p>}
+      <ol className="ip-howto-steps">
+        {howTo.steps.map((step) => (
+          <li key={step.name}>
+            <strong>{step.name}</strong>
+            <p>{step.text}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function OfficialSources({ sources }) {
+  if (!sources?.length) return null;
+  return (
+    <aside className="ip-sources" aria-label="Official references">
+      <h3>Official references</h3>
+      <ul>
+        {sources.map((s) => (
+          <li key={s.url}>
+            <a href={s.url} rel="noopener noreferrer" target="_blank">{s.label}</a>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  );
+}
+
 function GuideRelatedLinks({ relatedGuides }) {
   const topical = relatedGuides?.length ? relatedGuides : [];
   return (
@@ -43,12 +103,17 @@ function GuideRelatedLinks({ relatedGuides }) {
       <div className="ip-related-title" style={{ marginTop: topical.length ? 20 : 0 }}>Explore JedMee</div>
       <ul>
         <li><Link to="/">Home — pharmacy management software</Link></li>
-        <li><a href="/#pricing">Pricing &amp; free trial</a></li>
+        <li><Link to="/free-trial">Free 14-day trial</Link></li>
+        <li><a href="/#pricing">Pricing plans</a></li>
+        <li><Link to="/pharmacy-mobile-app">Mobile pharmacy access</Link></li>
         <li><Link to="/pharmacy-management-software">What is pharmacy management software?</Link></li>
         <li><Link to="/pharmacy-billing-guide">Pharmacy billing &amp; tax guide</Link></li>
         <li><Link to="/pharmacy-inventory-guide">Inventory management guide</Link></li>
         <li><Link to="/pharmacy-software-comparison">Software comparison</Link></li>
         <li><Link to="/wholesale-pharmacy-software">Wholesale &amp; distribution</Link></li>
+        <li><Link to="/retail-wholesale-pharmacy">Retail + wholesale workflows</Link></li>
+        <li><Link to="/multi-user-pharmacy-software">Multi-user roles</Link></li>
+        <li><Link to="/pharmacy-financial-management">Financial management</Link></li>
         <li><Link to="/contact">Contact sales</Link></li>
       </ul>
     </nav>
@@ -68,9 +133,6 @@ function formatDisplayDate(iso) {
   }
 }
 
-/**
- * Shared layout for TOFU/MOFU guide and comparison pages.
- */
 export default function ContentGuidePage({
   pageTitle,
   metaTitle,
@@ -85,6 +147,11 @@ export default function ContentGuidePage({
   datePublished,
   lastUpdated,
   relatedGuides,
+  howTo,
+  service,
+  comparisonTable,
+  officialSources,
+  discoverImage,
 }) {
   const crumbs = breadcrumbs || [
     { name: "Home", url: "https://jedmee.com/" },
@@ -95,6 +162,7 @@ export default function ContentGuidePage({
     title: metaTitle || pageTitle,
     description,
     canonical,
+    ogImage: discoverImage,
   });
 
   useJsonLd(
@@ -107,6 +175,9 @@ export default function ContentGuidePage({
       author,
       datePublished,
       dateModified: lastUpdated || datePublished,
+      image: discoverImage,
+      howTo,
+      service,
     })
   );
 
@@ -149,6 +220,7 @@ export default function ContentGuidePage({
                   ))}
                 </ul>
               )}
+              {sec.comparisonTable && <ComparisonTable table={sec.comparisonTable} />}
               {sec.qa?.map((item) => (
                 <div key={item.q} className="ip-qa-block">
                   <h3>{item.q}</h3>
@@ -157,6 +229,9 @@ export default function ContentGuidePage({
               ))}
             </section>
           ))}
+          {howTo && <HowToSteps howTo={howTo} />}
+          {comparisonTable && <ComparisonTable table={comparisonTable} />}
+          <OfficialSources sources={officialSources} />
           <AuthorBio author={author} />
           <GuideRelatedLinks relatedGuides={relatedGuides} />
         </div>
@@ -173,6 +248,7 @@ export default function ContentGuidePage({
             </p>
             <div className="ip-cta-btns">
               <Link to="/register" className="ln-btn ln-btn--white ln-btn--lg">Start free trial</Link>
+              <Link to="/free-trial" className="ln-btn ln-btn--outline-white ln-btn--lg">Free trial details</Link>
               <a href="/#pricing" className="ln-btn ln-btn--outline-white ln-btn--lg">View pricing</a>
             </div>
           </div>

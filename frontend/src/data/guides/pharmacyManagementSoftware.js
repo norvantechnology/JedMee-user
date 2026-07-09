@@ -10,7 +10,7 @@ export const PHARMACY_MANAGEMENT_SOFTWARE_GUIDE = {
   canonical: CANONICAL,
   label: "Pharmacy Software Fundamentals",
   datePublished: "2026-03-01",
-  lastUpdated: "2026-07-05",
+  lastUpdated: "2026-07-09",
   relatedGuides: [
     { label: "Pharmacy billing & tax compliance guide", to: "/pharmacy-billing-guide" },
     { label: "Pharmacy inventory management guide", to: "/pharmacy-inventory-guide" },
@@ -21,9 +21,15 @@ export const PHARMACY_MANAGEMENT_SOFTWARE_GUIDE = {
     { name: "Home", url: "https://jedmee.com/" },
     { name: "What Is Pharmacy Management Software?", url: CANONICAL },
   ],
+  service: {
+    name: "JedMee pharmacy management software",
+    description:
+      "Cloud pharmacy platform for retail and wholesale billing, batch inventory, expiry tracking, and multi-user access.",
+    serviceType: "Pharmacy management software",
+  },
   introFacts: [
-    "Pharmacy management software is a cloud or desktop system that helps medicine shops and pharmaceutical distributors manage billing, inventory, purchases, sales, expiry dates, customer ledgers, and regulatory tax invoices in one place — replacing paper registers and disconnected spreadsheets.",
-    "JedMee is built for retail pharmacies (chemists, medical stores) and wholesale distributors. Over 500 pharmacies use it for GST/VAT billing, batch-level stock control, expiry alerts, and retailer-to-wholesaler ordering. Plans start with a free 14-day trial; paid tiers from $9/month.",
+    "JedMee supports GST/VAT billing, batch-level stock control, expiry alerts, and retailer-to-wholesaler ordering in one cloud platform — with a 14-day free trial and paid plans from $9/month.",
+    "Pharmacy management software helps medicine shops and distributors replace paper registers with billing, inventory, purchases, sales, customer ledgers, and tax invoices in one system.",
   ],
   sections: [
     {

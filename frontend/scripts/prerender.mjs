@@ -21,7 +21,6 @@ const DIST_DIR = path.resolve(__dirname, "../dist");
 const FRONTEND_DIR = path.resolve(__dirname, "..");
 
 const PUBLIC_ROUTES = [
-  { path: "/", outFile: "index.html" },
   { path: "/about", outFile: "about/index.html" },
   { path: "/contact", outFile: "contact/index.html" },
   { path: "/terms", outFile: "terms/index.html" },
@@ -30,6 +29,14 @@ const PUBLIC_ROUTES = [
   { path: "/pharmacy-inventory-guide", outFile: "pharmacy-inventory-guide/index.html" },
   { path: "/pharmacy-software-comparison", outFile: "pharmacy-software-comparison/index.html" },
   { path: "/wholesale-pharmacy-software", outFile: "wholesale-pharmacy-software/index.html" },
+  { path: "/pharmacy-mobile-app", outFile: "pharmacy-mobile-app/index.html" },
+  { path: "/free-trial", outFile: "free-trial/index.html" },
+  { path: "/multi-user-pharmacy-software", outFile: "multi-user-pharmacy-software/index.html" },
+  { path: "/retail-wholesale-pharmacy", outFile: "retail-wholesale-pharmacy/index.html" },
+  { path: "/pharmacy-financial-management", outFile: "pharmacy-financial-management/index.html" },
+  // Homepage last — vite preview serves dist/index.html as the SPA shell for all routes.
+  // Prerendering / first would bake homepage JSON-LD into that shell and pollute other pages.
+  { path: "/", outFile: "index.html" },
 ];
 
 function findFreePort(startPort = 4173, maxAttempts = 30) {
@@ -140,11 +147,25 @@ async function startPreview(port) {
 
 async function writeRouteHtml(page, baseUrl, route) {
   const url = `${baseUrl}${route.path}`;
+  const canonical = route.path === "/" ? `${baseUrl}/` : `${baseUrl}${route.path}`;
+
   await page.goto(url, { waitUntil: "networkidle", timeout: 60000 });
+
   await page
-    .waitForSelector('script[data-page-schema="true"]', { timeout: 15000 })
+    .waitForFunction(
+      (expected) => {
+        const link = document.querySelector('link[rel="canonical"]');
+        return link && link.href === expected;
+      },
+      canonical,
+      { timeout: 20000 }
+    )
+    .catch(() => {});
+
+  await page
+    .waitForSelector('script[data-page-schema="true"]', { timeout: 20000 })
     .catch(() => page.waitForTimeout(2500));
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(400);
 
   const html = await page.content();
   const outPath = path.join(DIST_DIR, route.outFile);
@@ -187,16 +208,28 @@ async function main() {
   console.log("Prerendering public routes...");
   await ensureDistExists();
 
+  // Keep a clean SPA shell (no route-specific JSON-LD) for preview while prerendering subpages.
+  const shellPath = path.join(DIST_DIR, "index.html");
+  const cleanShellHtml = await fs.readFile(shellPath, "utf8");
+
   const port = await findFreePort();
   const { child: preview, baseUrl } = await startPreview(port);
   let browser;
 
   try {
     browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage();
 
     for (const route of PUBLIC_ROUTES) {
-      await writeRouteHtml(page, baseUrl, route);
+      if (route.path !== "/") {
+        await fs.writeFile(shellPath, cleanShellHtml, "utf8");
+      }
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      try {
+        await writeRouteHtml(page, baseUrl, route);
+      } finally {
+        await context.close();
+      }
     }
 
     console.log("Prerender complete.");

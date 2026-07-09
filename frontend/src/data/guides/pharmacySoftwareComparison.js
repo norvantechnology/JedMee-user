@@ -10,7 +10,25 @@ export const PHARMACY_SOFTWARE_COMPARISON_GUIDE = {
   canonical: CANONICAL,
   label: "Software Comparison",
   datePublished: "2026-04-15",
-  lastUpdated: "2026-07-05",
+  lastUpdated: "2026-07-09",
+  service: {
+    name: "JedMee pharmacy software evaluation",
+    description:
+      "Compare JedMee with generic POS, spreadsheets, and legacy desktop tools on billing, inventory, expiry, and wholesale features.",
+    serviceType: "Pharmacy software comparison",
+  },
+  comparisonTable: {
+    headers: ["Feature", "JedMee", "Generic POS", "Spreadsheets", "Legacy desktop"],
+    rows: [
+      ["Tax-compliant pharmacy billing", "Yes", "Partial", "Manual", "Often yes"],
+      ["Batch & expiry tracking", "Yes", "No", "Manual", "Often yes"],
+      ["Customer & vendor ledgers", "Yes", "Rare", "Manual", "Yes"],
+      ["Wholesale order catalog", "Yes", "No", "No", "Sometimes"],
+      ["Free trial, no credit card", "14 days", "Varies", "N/A", "Rare"],
+      ["Cloud / mobile access", "Yes", "Limited", "No", "Usually no"],
+      ["Role-based staff access", "Yes", "No", "No", "Sometimes"],
+    ],
+  },
   relatedGuides: [
     { label: "What is pharmacy management software?", to: "/pharmacy-management-software" },
     { label: "Pharmacy billing guide", to: "/pharmacy-billing-guide" },

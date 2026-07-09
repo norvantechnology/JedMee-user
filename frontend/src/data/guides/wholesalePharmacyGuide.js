@@ -10,7 +10,7 @@ export const WHOLESALE_PHARMACY_GUIDE = {
   canonical: CANONICAL,
   label: "Wholesale & Distribution",
   datePublished: "2026-05-01",
-  lastUpdated: "2026-07-05",
+  lastUpdated: "2026-07-09",
   relatedGuides: [
     { label: "Pharmacy inventory management guide", to: "/pharmacy-inventory-guide" },
     { label: "Pharmacy billing guide", to: "/pharmacy-billing-guide" },
@@ -21,9 +21,15 @@ export const WHOLESALE_PHARMACY_GUIDE = {
     { name: "Home", url: "https://jedmee.com/" },
     { name: "Wholesale Pharmacy Software", url: CANONICAL },
   ],
+  service: {
+    name: "JedMee wholesale pharmacy distribution",
+    description:
+      "Wholesale purchase, retailer order catalogs, dispatch billing, and division-wise inventory for pharmaceutical distributors.",
+    serviceType: "Wholesale pharmacy management software",
+  },
   introFacts: [
     "Wholesale pharmacy management software helps distributors buy from manufacturers, organize stock by division and company, sell to retailers on credit, and let retailers place orders through an online catalog instead of phone calls.",
-    "JedMee supports bulk purchase invoices, supplier ledgers, division-based product masters, retailer-facing order catalogs, order confirmation, and dispatch tracking — used by distributors supplying 20–500+ retail pharmacies.",
+    "JedMee supports bulk purchase invoices, supplier ledgers, division-based product masters, retailer-facing order catalogs, order confirmation, and dispatch tracking for pharmaceutical distributors.",
   ],
   sections: [
     {

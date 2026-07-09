@@ -1,10 +1,23 @@
 import React from "react";
+import { useJsonLd } from "../../utils/seo.js";
+import { personSchema } from "../../utils/contentSchema.js";
 
 /**
  * Author bio block for E-E-A-T on content / guide pages.
- * Uses existing inner-page card styles — no new layout system.
+ * Emits Person JSON-LD for the author.
  */
 export default function AuthorBio({ author }) {
+  useJsonLd(
+    author
+      ? personSchema({
+          name: author.name,
+          jobTitle: author.title,
+          description: author.bio,
+          credentials: author.credentials,
+        })
+      : null
+  );
+
   if (!author) return null;
   return (
     <aside className="ip-author" aria-label="About the author">

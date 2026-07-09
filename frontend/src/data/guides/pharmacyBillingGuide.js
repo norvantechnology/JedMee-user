@@ -1,4 +1,5 @@
 import { COMPLIANCE_AUTHOR } from "../authors.js";
+import { TAX_SOURCES } from "../officialSources.js";
 
 const CANONICAL = "https://jedmee.com/pharmacy-billing-guide";
 
@@ -10,7 +11,41 @@ export const PHARMACY_BILLING_GUIDE = {
   canonical: CANONICAL,
   label: "Compliance & Billing",
   datePublished: "2026-03-15",
-  lastUpdated: "2026-07-05",
+  lastUpdated: "2026-07-09",
+  officialSources: [TAX_SOURCES.gstIndia, TAX_SOURCES.cbicIndia, TAX_SOURCES.hmrcVat],
+  service: {
+    name: "JedMee pharmacy billing & tax compliance",
+    description:
+      "GST, VAT, and sales tax invoicing with batch references, credit notes, and exportable tax summaries for pharmacies.",
+    serviceType: "Pharmacy billing software",
+  },
+  howTo: {
+    name: "Pharmacy billing compliance workflow",
+    heading: "How to set up compliant pharmacy billing in JedMee",
+    intro: "Follow these steps before and after go-live to keep tax invoices auditable.",
+    steps: [
+      {
+        name: "Map every product to the correct tax rate",
+        text: "Configure GST, VAT, or sales tax % on each product or category before staff begin billing — refer to official tax authority guidance for your region.",
+      },
+      {
+        name: "Train staff to select batch at billing",
+        text: "Require batch selection on every sale so invoice lines match inventory and expiry records.",
+      },
+      {
+        name: "Reconcile daily sales with the day book",
+        text: "Compare day book totals to cash drawer and card receipts each evening.",
+      },
+      {
+        name: "Review credit customer outstanding weekly",
+        text: "Use customer ledger reports to chase balances before extending further credit.",
+      },
+      {
+        name: "Export monthly tax summary before filing",
+        text: "Run GSTR-1 oriented or VAT summaries and share with your accountant before statutory deadlines.",
+      },
+    ],
+  },
   relatedGuides: [
     { label: "Pharmacy inventory management guide", to: "/pharmacy-inventory-guide" },
     { label: "What is pharmacy management software?", to: "/pharmacy-management-software" },
@@ -22,8 +57,8 @@ export const PHARMACY_BILLING_GUIDE = {
     { name: "Pharmacy Billing Guide", url: CANONICAL },
   ],
   introFacts: [
-    "Pharmacy billing software must produce accurate, auditable tax invoices for every sale and purchase — with correct tax rates per medicine, batch references, and customer details. Errors lead to tax penalties, audit issues, and customer disputes.",
-    "JedMee generates GST-ready invoices (India), supports VAT and sales tax configurations, maintains immutable invoice numbers, and stores complete billing history with role-based access. Data is encrypted in transit (TLS) and at rest on AWS infrastructure.",
+    "JedMee generates GST-ready invoices (India), supports VAT and sales tax configurations, and stores immutable invoice numbers with batch references on every line — errors lead to tax penalties, audit issues, and customer disputes if billing is manual.",
+    "Pharmacy billing software must produce accurate, auditable tax invoices for every sale and purchase with correct tax rates per medicine, customer details, and role-based access. Data is encrypted in transit (TLS) and at rest on AWS infrastructure.",
   ],
   sections: [
     {
@@ -41,7 +76,7 @@ export const PHARMACY_BILLING_GUIDE = {
       ],
     },
     {
-      heading: "GST and multi-tax billing (India and global)",
+      heading: "How does JedMee handle GST billing in India?",
       qa: [
         {
           q: "How does JedMee handle GST billing?",
@@ -95,7 +130,7 @@ export const PHARMACY_BILLING_GUIDE = {
     },
     {
       q: "Can I reprint or email tax invoices to customers?",
-      a: "Yes. JedMee stores invoice PDFs and supports reprint from sales history.",
+      a: "Yes. Reprint from sales history anytime. Email is available when the customer has an email address on file.",
     },
     {
       q: "What happens if I enter the wrong tax rate?",

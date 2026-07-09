@@ -1,46 +1,34 @@
-/** E-E-A-T author profiles for public content pages */
+/** Content author attributions for public guide pages (factual team labels, not fabricated individuals). */
 
 export const PRIMARY_AUTHOR = {
-  name: "Ananya Krishnan",
-  title: "Head of Pharmacy Product, JedMee",
-  credentials: "B.Pharm · 10+ years retail & wholesale pharmacy operations",
+  name: "JedMee Product Team",
+  title: "Pharmacy software guides",
+  credentials: "Billing, inventory, and wholesale workflows",
   bio:
-    "Ananya leads pharmacy product at JedMee. She previously managed inventory, billing, and compliance workflows for multi-branch medicine shops and distributors across India and Southeast Asia. She writes JedMee guides to help pharmacy owners evaluate software and run compliant day-to-day operations.",
-  initials: "AK",
+    "Guides on this site are written and reviewed by the JedMee team to reflect how the product works today — billing, inventory, orders, and reports for medicine shops and distributors.",
+  initials: "JM",
 };
 
 export const COMPLIANCE_AUTHOR = {
-  name: "Vikram Reddy",
-  title: "Compliance & Tax Specialist, JedMee",
-  credentials: "CA · GST & pharmacy billing compliance",
+  name: "JedMee Compliance Team",
+  title: "Tax & billing documentation",
+  credentials: "GST, VAT, and pharmacy invoicing practices",
   bio:
-    "Vikram advises JedMee customers on tax-compliant invoicing, audit trails, and data security practices. He has implemented billing and ledger systems for 200+ pharmacies and wholesale distributors.",
-  initials: "VR",
+    "Compliance-focused guides explain how JedMee supports tax invoices, ledgers, and record-keeping. Always confirm filing requirements with your accountant and local tax authority.",
+  initials: "JC",
 };
 
 export const LEADERSHIP = [
   {
-    name: "Ananya Krishnan",
-    role: "Co-founder & CEO",
-    bio: "Former pharmacy operations manager; built JedMee's billing, inventory, and order workflows from real shop-floor experience.",
-    initials: "AK",
+    name: "JedMee Founders",
+    role: "Product & engineering",
+    bio: "Built JedMee for retail pharmacies and wholesale distributors — billing, inventory, expiry tracking, and B2B ordering in one cloud platform.",
+    initials: "JF",
   },
   {
-    name: "Vikram Reddy",
-    role: "Co-founder & CTO",
-    bio: "Full-stack engineer focused on secure cloud infrastructure, role-based access, and reliable billing at pharmacy scale.",
-    initials: "VR",
-  },
-  {
-    name: "Meera Shah",
-    role: "Head of Customer Success",
-    bio: "Onboards pharmacies and distributors worldwide; trains staff on billing, stock, and wholesale catalog workflows.",
-    initials: "MS",
-  },
-  {
-    name: "Priya Nair",
-    role: "Lead Pharmacy Domain Expert",
-    bio: "Registered pharmacist with 8 years in retail; validates product features against real dispensing and stock-control needs.",
-    initials: "PN",
+    name: "JedMee Customer Success",
+    role: "Onboarding & support",
+    bio: "Helps pharmacies import data, configure tax settings, and train staff on billing and stock workflows.",
+    initials: "CS",
   },
 ];

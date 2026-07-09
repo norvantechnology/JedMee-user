@@ -2,8 +2,28 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LandingLayout from "../components/LandingLayout.jsx";
 import { useSeoMeta, useJsonLd } from "../utils/seo.js";
+import { faqPageSchema } from "../utils/contentSchema.js";
 import "./LandingPage.css";
 import "./InnerPages.css";
+
+const CONTACT_FAQS = [
+  {
+    q: "How long does onboarding take?",
+    a: "Most pharmacies are fully set up within a single afternoon. Our onboarding team guides you through CSV import, tax configuration, and staff training.",
+  },
+  {
+    q: "Do you offer a free trial?",
+    a: "Yes — JedMee offers a 14-day free trial on all plans with no credit card required. After the trial, paid plans start at $9/month.",
+  },
+  {
+    q: "Can I migrate data from my existing software?",
+    a: "Yes. We support data import from Excel/CSV files and can assist with migration from common pharmacy software. Contact our team for a migration consultation.",
+  },
+  {
+    q: "Does JedMee support tax compliance in my country?",
+    a: "Yes. JedMee supports GST, VAT, sales tax, and other tax systems. You set the correct tax rates for your country and JedMee generates compliant invoices automatically.",
+  },
+];
 
 /* ── SVG Icon ── */
 function Icon({ name, size = 20 }) {
@@ -69,6 +89,7 @@ export default function ContactPage() {
         },
       },
     },
+    faqPageSchema(CONTACT_FAQS),
   ]);
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -116,24 +137,7 @@ export default function ContactPage() {
     { icon: <Icon name="mail" size={16} />, text: "Email us anytime at supportjedmee@gmail.com" },
   ];
 
-  const faqs = [
-    {
-      q: "How long does onboarding take?",
-      a: "Most pharmacies are fully set up within a single afternoon. Our onboarding team will guide you through importing your inventory, setting up your tax details, and training your staff.",
-    },
-    {
-      q: "Do you offer a free trial?",
-      a: "Yes — our Starter plan is completely free with no time limit. You can upgrade to a paid plan whenever you need more features or higher limits.",
-    },
-    {
-      q: "Can I migrate data from my existing software?",
-      a: "Yes. We support data import from Excel/CSV files and can assist with migration from common pharmacy software. Contact our team for a migration consultation.",
-    },
-    {
-      q: "Does JedMee support tax compliance in my country?",
-      a: "Yes. JedMee supports GST, VAT, Sales Tax, and other tax systems. You can set the correct tax rates for your country and JedMee will generate compliant invoices automatically.",
-    },
-  ];
+  const faqs = CONTACT_FAQS;
 
   return (
     <LandingLayout>

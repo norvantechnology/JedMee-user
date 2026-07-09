@@ -1,6 +1,8 @@
 /** JSON-LD builders for public content / GEO pages */
 
 export const SITE_URL = "https://jedmee.com";
+export const OG_IMAGE_WIDTH = 1280;
+export const OG_IMAGE_HEIGHT = 720;
 
 export function breadcrumbSchema(items) {
   return {
@@ -27,15 +29,16 @@ export function faqPageSchema(faqs) {
   };
 }
 
-export function personSchema({ name, jobTitle, description, url, image }) {
+export function personSchema({ name, jobTitle, description, url, image, title, credentials, bio }) {
   return {
     "@context": "https://schema.org",
     "@type": "Person",
     name,
-    jobTitle,
-    description,
+    jobTitle: jobTitle || title,
+    description: description || bio,
     url: url || `${SITE_URL}/about`,
     ...(image ? { image } : {}),
+    ...(credentials ? { knowsAbout: credentials } : {}),
     worksFor: {
       "@type": "Organization",
       name: "JedMee",
@@ -51,7 +54,9 @@ export function articleSchema({
   datePublished,
   dateModified,
   author,
+  image,
 }) {
+  const imageUrl = image || `${SITE_URL}/og-image.png`;
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -61,6 +66,12 @@ export function articleSchema({
     datePublished,
     dateModified: dateModified || datePublished,
     author: personSchema(author),
+    image: {
+      "@type": "ImageObject",
+      url: imageUrl,
+      width: OG_IMAGE_WIDTH,
+      height: OG_IMAGE_HEIGHT,
+    },
     publisher: {
       "@type": "Organization",
       name: "JedMee",
@@ -72,7 +83,7 @@ export function articleSchema({
   };
 }
 
-export function webPageSchema({ name, description, url, breadcrumbs }) {
+export function webPageSchema({ name, description, url, breadcrumbs, dateModified }) {
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -80,8 +91,48 @@ export function webPageSchema({ name, description, url, breadcrumbs }) {
     description,
     url,
     inLanguage: "en",
+    ...(dateModified ? { dateModified } : {}),
     isPartOf: { "@type": "WebSite", url: SITE_URL },
     breadcrumb: breadcrumbSchema(breadcrumbs),
+  };
+}
+
+export function howToSchema({ name, description, url, steps, dateModified }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name,
+    description,
+    url,
+    ...(dateModified ? { dateModified } : {}),
+    step: steps.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+    })),
+  };
+}
+
+export function serviceSchema({
+  name,
+  description,
+  url,
+  serviceType = "Pharmacy management software",
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name,
+    description,
+    url,
+    serviceType,
+    provider: {
+      "@type": "Organization",
+      name: "JedMee",
+      url: SITE_URL,
+    },
+    areaServed: "Worldwide",
   };
 }
 
@@ -100,7 +151,7 @@ export function softwareApplicationSchema({
     applicationSubCategory: "Pharmacy Management Software",
     operatingSystem: "Web, Android, iOS",
     description,
-    image: `${SITE_URL}/logo-400.png`,
+    image: `${SITE_URL}/og-image.png`,
     offers: offers || {
       "@type": "AggregateOffer",
       priceCurrency: "USD",
@@ -151,6 +202,9 @@ export function buildGuidePageSchema({
   author,
   datePublished = "2026-03-01",
   dateModified = "2026-07-05",
+  image,
+  howTo,
+  service,
 }) {
   const schemas = [
     webPageSchema({
@@ -158,6 +212,7 @@ export function buildGuidePageSchema({
       description,
       url: canonical,
       breadcrumbs,
+      dateModified,
     }),
     articleSchema({
       headline: pageTitle,
@@ -166,15 +221,36 @@ export function buildGuidePageSchema({
       datePublished,
       dateModified,
       author,
+      image,
     }),
     breadcrumbSchema(breadcrumbs),
     softwareApplicationSchema({ description }),
   ];
   if (faqs?.length) schemas.push(faqPageSchema(faqs));
+  if (howTo?.steps?.length) {
+    schemas.push(
+      howToSchema({
+        name: howTo.name || pageTitle,
+        description: howTo.description || description,
+        url: canonical,
+        steps: howTo.steps,
+        dateModified,
+      })
+    );
+  }
+  if (service) {
+    schemas.push(
+      serviceSchema({
+        name: service.name || pageTitle,
+        description: service.description || description,
+        url: canonical,
+        serviceType: service.serviceType,
+      })
+    );
+  }
   return schemas;
 }
 
-/** Map billing period to schema.org billingDuration ISO 8601 duration. */
 function billingDurationForPeriod(period, billingDuration) {
   if (billingDuration) return billingDuration;
   if (period === "free") return "P14D";
@@ -183,9 +259,6 @@ function billingDurationForPeriod(period, billingDuration) {
   return undefined;
 }
 
-/**
- * Product + nested Offer for a single JedMee plan (BOFU / pricing citations).
- */
 export function productPlanSchema(plan, { pricingUrl }) {
   const url = pricingUrl || `${SITE_URL}/#pricing`;
   const duration = billingDurationForPeriod(plan.period, plan.billingDuration);
@@ -220,7 +293,6 @@ export function productPlanSchema(plan, { pricingUrl }) {
   };
 }
 
-/** AggregateOffer wrapping all JedMee plans shown on the pricing section. */
 export function pricingAggregateOfferSchema(plans, { pricingUrl, withContext = true } = {}) {
   const url = pricingUrl || `${SITE_URL}/#pricing`;
   const prices = plans.map((p) => Number.parseFloat(p.price)).filter((n) => !Number.isNaN(n));
@@ -236,7 +308,6 @@ export function pricingAggregateOfferSchema(plans, { pricingUrl, withContext = t
   return withContext ? { "@context": "https://schema.org", ...core } : core;
 }
 
-/** Full pricing schema bundle: one Product per plan + AggregateOffer. */
 export function buildPricingSchemas(plans, options = {}) {
   const pricingUrl = options.pricingUrl || `${SITE_URL}/#pricing`;
   return [
