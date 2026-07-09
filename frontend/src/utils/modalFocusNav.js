@@ -7,7 +7,7 @@
 /** Pixels: elements within this vertical band are treated as one row (left-to-right). */
 const VISUAL_ROW_EPS = 8;
 
-/** Match CommonModal `getFocusables` — body fields only (no footer buttons). */
+/** Match CommonModal `getFocusables` - body fields only (no footer buttons). */
 export const CM_MODAL_FIELD_FOCUSABLE_SELECTOR =
   'input:not([type="hidden"]):not([disabled]):not([readonly]), textarea:not([disabled]):not([readonly]), select:not([disabled]), [contenteditable=""]:not([aria-disabled="true"]), [contenteditable="true"]:not([aria-disabled="true"])';
 

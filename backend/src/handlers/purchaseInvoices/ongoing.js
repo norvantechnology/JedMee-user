@@ -7,12 +7,12 @@ const { clean } = require("../../shared/purchase");
 /**
  * List ongoing (DRAFT) purchase invoices for the current account.
  *
- * Mirrors /sales-invoices/ongoing — supports multiple in-progress purchase
+ * Mirrors /sales-invoices/ongoing - supports multiple in-progress purchase
  * entries when staff is keying in several vendor bills simultaneously.
  *
  * Query params:
  *   scope=mine|shared (optional; default = all account drafts)
- *   q (optional) — fuzzy match on vendor name or bill number
+ *   q (optional) - fuzzy match on vendor name or bill number
  *   limit (optional, default 30, max 100)
  */
 async function handler(event) {

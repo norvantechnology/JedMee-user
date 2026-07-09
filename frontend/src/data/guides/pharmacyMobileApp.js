@@ -4,9 +4,9 @@ const CANONICAL = "https://jedmee.com/pharmacy-mobile-app";
 
 export const PHARMACY_MOBILE_APP_GUIDE = {
   pageTitle: "Pharmacy Mobile App & Remote Access",
-  metaTitle: "Mobile Pharmacy Software — Billing & Inventory on Phone",
+  metaTitle: "Mobile Pharmacy Software - Billing & Inventory on Phone",
   description:
-    "JedMee runs in mobile browsers and offers an Android APK — check stock, confirm orders, review day book, and bill from phone or tablet with live cloud sync.",
+    "JedMee runs in mobile browsers and offers an Android APK - check stock, confirm orders, review day book, and bill from phone or tablet with live cloud sync.",
   canonical: CANONICAL,
   label: "Mobile & Remote Access",
   datePublished: "2026-06-01",
@@ -22,7 +22,7 @@ export const PHARMACY_MOBILE_APP_GUIDE = {
     { name: "Mobile Pharmacy App", url: CANONICAL },
   ],
   introFacts: [
-    "JedMee is a responsive web app — use it in Chrome or Safari on any phone or tablet, or install the Android APK from the homepage download section.",
+    "JedMee is a responsive web app - use it in Chrome or Safari on any phone or tablet, or install the Android APK from the homepage download section.",
     "All devices share the same cloud account, so a purchase posted at the warehouse is reflected when staff check stock on mobile without manual exports.",
   ],
   service: {
@@ -35,7 +35,7 @@ export const PHARMACY_MOBILE_APP_GUIDE = {
     {
       heading: "Can a pharmacy run billing and inventory from a mobile app?",
       paragraphs: [
-        "Yes — for retail billing, stock lookups, payment recording, and wholesale order confirmation, JedMee works on mobile browsers and the Android APK. Bulk CSV imports and wide spreadsheet-style reports are easier on desktop, but counter sales and stock checks work on phone.",
+        "Yes - for retail billing, stock lookups, payment recording, and wholesale order confirmation, JedMee works on mobile browsers and the Android APK. Bulk CSV imports and wide spreadsheet-style reports are easier on desktop, but counter sales and stock checks work on phone.",
       ],
     },
     {

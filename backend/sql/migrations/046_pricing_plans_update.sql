@@ -34,7 +34,7 @@ VALUES
     'Professional',
     999,
     'monthly',
-    'Everything a busy pharmacy or distributor needs — billing, orders, analytics, and team access, all connected.',
+    'Everything a busy pharmacy or distributor needs - billing, orders, analytics, and team access, all connected.',
     '["Unlimited products & batches", "Advanced GST billing & invoicing", "Full inventory with expiry tracking", "Online order catalog for retailers", "Customer ledger & credit control", "Supplier & purchase tracking", "Advanced analytics & P&L reports", "PDF invoices with email sharing", "Up to 10 user accounts", "Priority email support"]'::jsonb,
     true,
     'Most Popular',

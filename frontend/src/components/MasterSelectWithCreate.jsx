@@ -27,7 +27,7 @@ const KIND_LABEL = {
 };
 
 /**
- * MasterSelectWithCreate — dropdown + attached + button for any master list.
+ * MasterSelectWithCreate - dropdown + attached + button for any master list.
  *
  * Usage:
  *   <MasterSelectWithCreate

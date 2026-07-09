@@ -42,7 +42,7 @@ async function handler(event) {
   }
 
   if (!matched) {
-    // Token not found — treat as already logged out (don't leak info).
+    // Token not found - treat as already logged out (don't leak info).
     return ok({ logged_out: true }, { message: "Logged out." });
   }
 

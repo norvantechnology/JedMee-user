@@ -10,9 +10,9 @@ ALTER TABLE sales_returns
     CHECK (b2b_b2c_tag IN ('B2B','B2C')),
   -- snapshot of customer GSTIN at time of return creation (mirrors original invoice)
   ADD COLUMN IF NOT EXISTS customer_gstin_snapshot TEXT,
-  -- place of supply (state code) — mirrors original invoice
+  -- place of supply (state code) - mirrors original invoice
   ADD COLUMN IF NOT EXISTS place_of_supply       TEXT,
-  -- 'INTRA_STATE' or 'INTER_STATE' — mirrors original invoice
+  -- 'INTRA_STATE' or 'INTER_STATE' - mirrors original invoice
   ADD COLUMN IF NOT EXISTS supply_type           TEXT
     CHECK (supply_type IS NULL OR supply_type IN ('INTRA_STATE','INTER_STATE'));
 
@@ -37,7 +37,7 @@ WHERE sr.sales_invoice_id = si.id
   AND sr.b2b_b2c_tag = 'B2C'
   AND sr.customer_gstin_snapshot IS NULL;
 
--- For returns NOT linked to an invoice — derive from customer GSTIN
+-- For returns NOT linked to an invoice - derive from customer GSTIN
 UPDATE sales_returns sr
 SET
   b2b_b2c_tag           = CASE

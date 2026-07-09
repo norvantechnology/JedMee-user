@@ -171,7 +171,7 @@ export default function PurchaseReturnsPage() {
               {
                 id: "return_number",
                 header: "Return #",
-                render: (r) => <span style={{ fontWeight: 700 }}>{r.return_number || "—"}</span>
+                render: (r) => <span style={{ fontWeight: 700 }}>{r.return_number || "-"}</span>
               },
               {
                 id: "created_at",
@@ -186,13 +186,13 @@ export default function PurchaseReturnsPage() {
               {
                 id: "vendor_name",
                 header: "Supplier / Division",
-                render: (r) => r.vendor_name || r.division_name || "—"
+                render: (r) => r.vendor_name || r.division_name || "-"
               },
               {
                 id: "original_invoice_number",
                 header: "Original Invoice",
                 sortable: false,
-                render: (r) => r.original_invoice_number || "—"
+                render: (r) => r.original_invoice_number || "-"
               },
               {
                 id: "return_reason",
@@ -200,7 +200,7 @@ export default function PurchaseReturnsPage() {
                 sortable: false,
                 render: (r) => (
                   <span style={{ color: "var(--color-text-3)" }}>
-                    {String(r.return_reason || "").replace(/_/g, " ") || "—"}
+                    {String(r.return_reason || "").replace(/_/g, " ") || "-"}
                   </span>
                 )
               },
@@ -213,7 +213,7 @@ export default function PurchaseReturnsPage() {
               {
                 id: "status",
                 header: "Status",
-                render: (r) => <span style={{ fontWeight: 700 }}>{r.status || "—"}</span>
+                render: (r) => <span style={{ fontWeight: 700 }}>{r.status || "-"}</span>
               },
               {
                 id: "actions",

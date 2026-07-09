@@ -13,16 +13,16 @@
   background: var(--color-card);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
-  /* Remove left padding offset — section head now provides the visual anchor */
+  /* Remove left padding offset - section head now provides the visual anchor */
   padding: 0;
 }
 
-/* Remove the left accent bar — replaced by dark section header */
+/* Remove the left accent bar - replaced by dark section header */
 .sfmSection::before {
   display: none;
 }
 
-/* ── Section header — same calm chrome tokens as CommonModal .mcmHead ── */
+/* ── Section header - same calm chrome tokens as CommonModal .mcmHead ── */
 .sfmSectionHead {
   display: flex;
   flex-direction: column;
@@ -96,7 +96,7 @@
     gap: 8px;
   }
 
-  /* Section: no padding — header + body children handle their own padding */
+  /* Section: no padding - header + body children handle their own padding */
   .sfmSection {
     padding: 0;
     border-radius: var(--radius, 12px);

@@ -1,6 +1,6 @@
-/* ── GSTR-2 Page — additional classes (shared styles come from Gstr3bPage.css) ── */
+/* ── GSTR-2 Page - additional classes (shared styles come from Gstr3bPage.css) ── */
 
-/* ── Section 2 legend — multi-item grid layout ── */
+/* ── Section 2 legend - multi-item grid layout ── */
 .g2bLegend {
   display: flex;
   flex-wrap: wrap;
@@ -29,9 +29,9 @@
   white-space: nowrap;
 }
 
-/* Supplier link — underline always visible so user knows it's clickable */
+/* Supplier link - underline always visible so user knows it's clickable */
 
-/* ── Red critical banner (HSN missing — mandatory compliance) ── */
+/* ── Red critical banner (HSN missing - mandatory compliance) ── */
 .g2bCriticalBanner {
   display: flex;
   align-items: flex-start;
@@ -46,7 +46,7 @@
 .g2bCriticalBanner svg { flex-shrink: 0; margin-top: 2px; }
 .g2bCriticalBanner strong { color: #991b1b; }
 
-/* ── Amber warning banner (GSTIN missing — financial loss) ── */
+/* ── Amber warning banner (GSTIN missing - financial loss) ── */
 .g2bWarnBanner {
   display: flex;
   align-items: flex-start;
@@ -62,7 +62,7 @@
 .g2bWarnBanner strong { color: #92400e; }
 .g2bWarnBanner .g2bWarnAmt { font-weight: 700; color: #dc2626; }
 
-/* ── Summary row — 3-column grid for 6 cards (2 balanced rows of 3) ── */
+/* ── Summary row - 3-column grid for 6 cards (2 balanced rows of 3) ── */
 .g2bSummaryRow {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -78,16 +78,16 @@
   font-size: 26px;
   font-weight: 800;
   line-height: 1.15;
-  color: #b45309; /* amber — zero means no benefit this period */
+  color: #b45309; /* amber - zero means no benefit this period */
 }
 .g2bNetPositive {
   font-size: 26px;
   font-weight: 800;
   line-height: 1.15;
-  color: #059669; /* green — positive ITC available to claim */
+  color: #059669; /* green - positive ITC available to claim */
 }
 
-/* ── Net ITC Claimable row in carry-forward table — stronger highlight ── */
+/* ── Net ITC Claimable row in carry-forward table - stronger highlight ── */
 .g2bNetRow {
   background: color-mix(in srgb, var(--color-primary) 7%, transparent) !important;
 }
@@ -130,7 +130,7 @@
   margin: 0;
 }
 
-/* ── Blocked ITC card — red border to signal financial loss ── */
+/* ── Blocked ITC card - red border to signal financial loss ── */
 .g2bBlockedCard {
   border-color: color-mix(in srgb, #ef4444 40%, transparent) !important;
   background: color-mix(in srgb, #ef4444 4%, var(--color-card)) !important;
@@ -154,12 +154,12 @@
 /* ── No RCM badge ── */
 .g2bBadgeNoRcm { background: #f3f4f6; color: #6b7280; }
 
-/* ── Notes section — stronger border ── */
+/* ── Notes section - stronger border ── */
 .g2bNotesSection {
   border-color: color-mix(in srgb, var(--color-warning, #f59e0b) 35%, transparent) !important;
 }
 
-/* ── Section 4 blocked ITC warning — outside table, above it ── */
+/* ── Section 4 blocked ITC warning - outside table, above it ── */
 .g2bBlockedWarn {
   display: flex;
   align-items: flex-start;
@@ -280,14 +280,14 @@
   padding-left: 12px !important;
 }
 
-/* ── N/A days badge — muted italic for 180-day N/A (Issue 11) ── */
+/* ── N/A days badge - muted italic for 180-day N/A (Issue 11) ── */
 .g2bNaDays {
   font-size: 11px;
   color: #9ca3af;
   font-style: italic;
 }
 
-/* ── Supply Type column — compact on smaller screens (Issue 13) ── */
+/* ── Supply Type column - compact on smaller screens (Issue 13) ── */
 .g2bSupplyType {
   font-size: 12px;
   color: var(--color-text-3);
@@ -297,7 +297,7 @@
   .g2bSupplyType { font-size: 11px; }
 }
 
-/* ── Net ITC row — override color to allow dynamic inline color (Issue 5) ── */
+/* ── Net ITC row - override color to allow dynamic inline color (Issue 5) ── */
 .g2bNetRow td {
   border-top: 2px solid color-mix(in srgb, var(--color-primary) 25%, transparent) !important;
   font-weight: 700;

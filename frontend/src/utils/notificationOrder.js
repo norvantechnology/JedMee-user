@@ -1,4 +1,4 @@
-/** Order notification helpers — action buttons only for pending orders. */
+/** Order notification helpers - action buttons only for pending orders. */
 
 export function parseNotificationPayload(payload) {
   if (payload == null) return {};

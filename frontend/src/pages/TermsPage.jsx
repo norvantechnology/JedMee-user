@@ -97,7 +97,7 @@ export default function TermsPage() {
   const [active, setActive] = useState(null);
 
   useSeoMeta({
-    title: "Terms of Service — JedMee Pharmacy Software",
+    title: "Terms of Service - JedMee Pharmacy Software",
     description:
       "Read JedMee Terms of Service for pharmacy management software. Covers subscriptions, data ownership, tax compliance, acceptable use, and account policies.",
     canonical: "https://jedmee.com/terms",
@@ -107,10 +107,10 @@ export default function TermsPage() {
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "Terms of Service — JedMee Pharmacy Software",
+      "name": "Terms of Service - JedMee Pharmacy Software",
       "url": "https://jedmee.com/terms",
       "description":
-        "JedMee Terms of Service for pharmacy management software — subscriptions, data ownership, and acceptable use.",
+        "JedMee Terms of Service for pharmacy management software - subscriptions, data ownership, and acceptable use.",
       "inLanguage": "en",
       "isPartOf": { "@type": "WebSite", "url": "https://jedmee.com" },
       "breadcrumb": {
@@ -212,7 +212,7 @@ export default function TermsPage() {
           <div className="ip-cta-inner">
             <h2 className="ip-cta-title">Ready to Get Started?</h2>
             <p className="ip-cta-sub">
-              Join 500+ pharmacies already using JedMee. Start free — no credit card required.
+              Join 500+ pharmacies already using JedMee. Start free - no credit card required.
             </p>
             <div className="ip-cta-btns">
               <button className="ln-btn ln-btn--white ln-btn--lg" onClick={() => navigate("/register")}>

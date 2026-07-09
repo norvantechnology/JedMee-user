@@ -24,7 +24,7 @@ export const PHARMACY_INVENTORY_GUIDE = {
     steps: [
       {
         name: "Create purchase invoice",
-        text: "Enter supplier invoice with batch number, expiry date, and quantity — stock is added to the batch record.",
+        text: "Enter supplier invoice with batch number, expiry date, and quantity - stock is added to the batch record.",
       },
       {
         name: "Bill retail sales against batch",
@@ -55,7 +55,7 @@ export const PHARMACY_INVENTORY_GUIDE = {
     { name: "Pharmacy Inventory Guide", url: CANONICAL },
   ],
   introFacts: [
-    "JedMee alerts pharmacies before batches expire (typically 30–60 days ahead), supports loose-unit sales, flags low stock against minimum levels, and reports non-moving items — two cartons of the same medicine may have different expiry dates and must be tracked separately.",
+    "JedMee alerts pharmacies before batches expire (typically 30–60 days ahead), supports loose-unit sales, flags low stock against minimum levels, and reports non-moving items - two cartons of the same medicine may have different expiry dates and must be tracked separately.",
     "Pharmacy inventory management tracks every medicine by product, batch, quantity, expiry date, and location so you know what is on shelf, what is expiring soon, and what to reorder.",
   ],
   sections: [
@@ -82,7 +82,7 @@ export const PHARMACY_INVENTORY_GUIDE = {
         },
         {
           q: "Loose / broken pack sales",
-          a: "Sell individual tablets or partial strips while decrementing the parent batch quantity — essential for retail chemists.",
+          a: "Sell individual tablets or partial strips while decrementing the parent batch quantity - essential for retail chemists.",
         },
       ],
     },
@@ -102,10 +102,10 @@ export const PHARMACY_INVENTORY_GUIDE = {
     {
       heading: "Reports that improve buying decisions",
       bullets: [
-        "Non-moving stock report — items with zero sales in 90+ days",
-        "Product–supplier report — who you buy each SKU from",
-        "Stock analysis — sales vs current quantity by category",
-        "Near-expiry list — actionable before write-off",
+        "Non-moving stock report - items with zero sales in 90+ days",
+        "Product–supplier report - who you buy each SKU from",
+        "Stock analysis - sales vs current quantity by category",
+        "Near-expiry list - actionable before write-off",
       ],
       paragraphs: [
         "Use non-moving reports before placing repeat purchase orders. Redirect budget to fast movers identified in sales analysis.",
@@ -114,7 +114,7 @@ export const PHARMACY_INVENTORY_GUIDE = {
     {
       heading: "Inventory best practices",
       paragraphs: [
-        "Follow FEFO (first-expiry-first-out) when picking for customers. Reconcile purchase invoices the same day goods arrive. Run a weekly near-expiry review meeting — 15 minutes can save thousands in write-offs annually.",
+        "Follow FEFO (first-expiry-first-out) when picking for customers. Reconcile purchase invoices the same day goods arrive. Run a weekly near-expiry review meeting - 15 minutes can save thousands in write-offs annually.",
       ],
     },
   ],

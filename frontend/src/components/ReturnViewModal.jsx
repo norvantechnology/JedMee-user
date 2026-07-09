@@ -8,14 +8,14 @@ import { Printer } from "lucide-react";
 import "./ReturnViewModal.css";
 
 /**
- * ReturnViewModal — shared "View / Print" modal for Sales Returns and Purchase Returns.
+ * ReturnViewModal - shared "View / Print" modal for Sales Returns and Purchase Returns.
  *
  * Props:
- *   open       {boolean}              — controls visibility
- *   onClose    {() => void}           — close handler
- *   returnId   {string|null}          — ID of the return to fetch
- *   type       {"sales"|"purchase"}   — determines labels and field mapping
- *   fetchFn    {(id) => Promise}      — service function: getSalesReturn or getPurchaseReturn
+ *   open       {boolean}              - controls visibility
+ *   onClose    {() => void}           - close handler
+ *   returnId   {string|null}          - ID of the return to fetch
+ *   type       {"sales"|"purchase"}   - determines labels and field mapping
+ *   fetchFn    {(id) => Promise}      - service function: getSalesReturn or getPurchaseReturn
  */
 export default function ReturnViewModal({ open, onClose, returnId, type = "sales", fetchFn }) {
   const [data, setData] = useState(null);
@@ -38,7 +38,7 @@ export default function ReturnViewModal({ open, onClose, returnId, type = "sales
     return () => { cancelled = true; };
   }, [open, returnId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Normalise the response shape — APIs may return { return: {...}, items: [...] }
+  // Normalise the response shape - APIs may return { return: {...}, items: [...] }
   // or a flat object with an `items` array embedded.
   const ret = data?.return ?? data ?? null;
   const items = Array.isArray(data?.items) ? data.items : Array.isArray(ret?.items) ? ret.items : [];
@@ -46,11 +46,11 @@ export default function ReturnViewModal({ open, onClose, returnId, type = "sales
   const isSales = type === "sales";
   const partyLabel = isSales ? "Customer" : "Supplier / Division";
   const partyName = isSales
-    ? (ret?.customer_name || "—")
-    : (ret?.vendor_name || ret?.division_name || "—");
+    ? (ret?.customer_name || "-")
+    : (ret?.vendor_name || ret?.division_name || "-");
   const refInvoice = isSales
-    ? (ret?.invoice_number || ret?.sales_invoice_number || "—")
-    : (ret?.original_invoice_number || "—");
+    ? (ret?.invoice_number || ret?.sales_invoice_number || "-")
+    : (ret?.original_invoice_number || "-");
   const totalAmount = isSales
     ? Number(ret?.total_return_amount || 0)
     : Number(ret?.total_amount || 0);
@@ -66,7 +66,7 @@ export default function ReturnViewModal({ open, onClose, returnId, type = "sales
   }
 
   const modalTitle = ret?.return_number
-    ? `${isSales ? "Sales" : "Purchase"} Return — ${ret.return_number}`
+    ? `${isSales ? "Sales" : "Purchase"} Return - ${ret.return_number}`
     : isSales ? "Sales Return" : "Purchase Return";
 
   return (
@@ -102,16 +102,16 @@ export default function ReturnViewModal({ open, onClose, returnId, type = "sales
           <div className="rvmInfoGrid">
             <div className="rvmInfoCell">
               <span className="rvmInfoLabel">Return #</span>
-              <span className="rvmInfoVal">{ret.return_number || "—"}</span>
+              <span className="rvmInfoVal">{ret.return_number || "-"}</span>
             </div>
             <div className="rvmInfoCell">
               <span className="rvmInfoLabel">Date</span>
-              <span className="rvmInfoVal">{fmtDateIndian(ret.return_date) || "—"}</span>
+              <span className="rvmInfoVal">{fmtDateIndian(ret.return_date) || "-"}</span>
             </div>
             <div className="rvmInfoCell">
               <span className="rvmInfoLabel">Status</span>
               <span className={`rvmStatusPill rvmStatusPill_${String(ret.status || "").toLowerCase()}`}>
-                {ret.status || "—"}
+                {ret.status || "-"}
               </span>
             </div>
             <div className="rvmInfoCell">
@@ -163,8 +163,8 @@ export default function ReturnViewModal({ open, onClose, returnId, type = "sales
                     return (
                       <tr key={item.id || i} className="rvmRow">
                         <td className="rvmTd">{i + 1}</td>
-                        <td className="rvmTd">{item.product_name || "—"}</td>
-                        <td className="rvmTd">{item.batch_no || "—"}</td>
+                        <td className="rvmTd">{item.product_name || "-"}</td>
+                        <td className="rvmTd">{item.batch_no || "-"}</td>
                         <td className="rvmTd rvmNum">
                           {qty}
                           {freeQty > 0 && (

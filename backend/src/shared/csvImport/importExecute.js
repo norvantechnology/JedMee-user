@@ -1229,7 +1229,7 @@ async function execPurchaseReturnGroups(accountId, actorId, entries, importJobId
           return { returnId: ret.id, affectedBatchIds: cres.affectedBatchIds || [] };
         } catch (e) {
           if (e.code !== "MODULE_NOT_FOUND") return { err: e };
-          return { returnId: ret.id }; // handler not yet available — leave as DRAFT
+          return { returnId: ret.id }; // handler not yet available - leave as DRAFT
         }
       }
       return { returnId: ret.id };

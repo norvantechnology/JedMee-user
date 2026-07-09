@@ -6,7 +6,7 @@ export async function listSalesInvoices(params) {
 
 /**
  * Lightweight list of in-progress (DRAFT) sales invoices for the parallel
- * billing UI — supports multiple customers being served simultaneously at
+ * billing UI - supports multiple customers being served simultaneously at
  * the counter.
  */
 export async function listOngoingSalesInvoices(params) {

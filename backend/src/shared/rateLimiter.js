@@ -2,7 +2,7 @@
  * In-memory IP-based rate limiter.
  *
  * Works for both local Express dev server and Lambda (per warm instance).
- * For 10-20 users this is sufficient — Lambda instances are reused and
+ * For 10-20 users this is sufficient - Lambda instances are reused and
  * a single warm instance handles all traffic at this scale.
  *
  * Usage in a Lambda handler:
@@ -37,7 +37,7 @@ function startCleanup() {
 startCleanup();
 
 /**
- * Rate limit profiles — tuned for 10-20 users.
+ * Rate limit profiles - tuned for 10-20 users.
  * Adjust windowMs / max as needed.
  */
 const PROFILES = {
@@ -84,7 +84,7 @@ function checkRateLimit(profile, ip) {
   if (!entry || now > entry.resetAt) {
     entry = { count: 1, resetAt: now + cfg.windowMs };
     store.set(key, entry);
-    return null; // first request in window — allowed
+    return null; // first request in window - allowed
   }
 
   entry.count++;
@@ -93,7 +93,7 @@ function checkRateLimit(profile, ip) {
     return { message: cfg.message, retryAfterSec };
   }
 
-  return null; // within limit — allowed
+  return null; // within limit - allowed
 }
 
 /**

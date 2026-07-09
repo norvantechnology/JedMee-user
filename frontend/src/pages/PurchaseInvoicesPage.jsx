@@ -200,9 +200,9 @@ function emptyLine() {
     batchSearch: "",
     expiryDate: "",
     mfgDate: "",
-    qty: 1,           // always in STRIPS (base unit) — sent to backend
+    qty: 1,           // always in STRIPS (base unit) - sent to backend
     freeQty: 0,
-    purchaseRate: 0,  // always per STRIP — sent to backend
+    purchaseRate: 0,  // always per STRIP - sent to backend
     mrp: 0,
     salesRate: 0,
     discountPercent: 0,
@@ -214,7 +214,7 @@ function emptyLine() {
     mfgPurchaseLocked: false,
     mfgCompanyName: "",
     availableBatches: [],
-    // Packaging unit conversion (display only — not sent to backend)
+    // Packaging unit conversion (display only - not sent to backend)
     unitType: UNIT_TYPES.STRIP,  // selected display unit
     packingFactors: { stripsPerBox: 1, boxesPerCase: 1, stripsPerCase: 1, unitsPerStrip: 1 }
   };
@@ -311,7 +311,7 @@ export default function PurchaseInvoicesPage() {
   const [savingVendorContact, setSavingVendorContact] = useState(false);
 
   const [open, setOpen] = useState(false);
-  // isAddMode: true when the user opened the modal as "New" — stays true even
+  // isAddMode: true when the user opened the modal as "New" - stays true even
   // after the first background auto-save creates the invoice. Keeps the modal
   // title and footer buttons in "Add" state throughout the session.
   const [isAddMode, setIsAddMode] = useState(false);
@@ -1184,7 +1184,7 @@ export default function PurchaseInvoicesPage() {
               batchSearch: `${x.batch_no || ""} | Exp ${String(x.expiry_date || "").slice(0, 10)}${batchExpiryDaysInlineSuffix(x.expiry_date)}`,
               expiryDate: String(x.expiry_date || "").slice(0, 10),
               mfgDate: String(x.mfg_date || "").slice(0, 10),
-              qty: n(x.qty),           // stored in strips — display as-is (unitType=STRIP)
+              qty: n(x.qty),           // stored in strips - display as-is (unitType=STRIP)
               freeQty: n(x.free_qty),
               purchaseRate: n(x.purchase_rate), // stored per strip
               mrp: n(x.mrp),
@@ -1628,7 +1628,7 @@ export default function PurchaseInvoicesPage() {
                 header: "Pay mode",
                 sortable: false,
                 render: (r) => {
-                  if (r.status === "CANCELLED") return "—";
+                  if (r.status === "CANCELLED") return "-";
                   const mode = r.payment_mode || (r.payment_status === "PAID" ? "CASH" : "CREDIT");
                   return <span style={{ fontWeight: 600 }}>{formatPaymentModeLabel(mode)}</span>;
                 },
@@ -1868,7 +1868,7 @@ export default function PurchaseInvoicesPage() {
             <button className="piGhostBtn sfmBtnGhost" type="button" disabled={busy || !(editingStatus === "DRAFT" || isAddMode) || !(isEditingDraft ? canUpdate : canAdd)} onClick={() => { setSubmitted(true); saveDraft(); }}>
               {saveBusy ? <InlineButtonProgress label="Saving..." /> : "Save Draft"}
             </button>
-            {/* Primary actions — dominant */}
+            {/* Primary actions - dominant */}
             {!isAddMode && editingStatus === "CONFIRMED" ? (
               <button
                 className="piPrimaryBtn piPrimaryBtn_confirm sfmBtnPrimary"
@@ -2099,7 +2099,7 @@ export default function PurchaseInvoicesPage() {
                 });
                 emitToast({
                   type: "success",
-                  message: `${batch.product_name || "Product"} selected — enter qty`
+                  message: `${batch.product_name || "Product"} selected - enter qty`
                 });
               }}
             />
@@ -2254,7 +2254,7 @@ export default function PurchaseInvoicesPage() {
                         )}
                       </td>
                       <td>
-                        {/* Unit selector — converts qty/rate between Case/Box/Strip */}
+                        {/* Unit selector - converts qty/rate between Case/Box/Strip */}
                         {(() => {
                           const unitOpts = getUnitOptions(it.packingFactors || {});
                           if (unitOpts.length <= 1) return null;
@@ -2293,7 +2293,7 @@ export default function PurchaseInvoicesPage() {
                           inputMode="numeric"
                           pattern="[0-9]*\.?[0-9]*"
                           value={it.qty}
-                          title={`Qty in ${it.unitType || "strips"} — stored as ${Math.round(displayQtyToStrips(Number(it.qty || 0), it.unitType || UNIT_TYPES.STRIP, it.packingFactors || {}) * 1000) / 1000} strips`}
+                          title={`Qty in ${it.unitType || "strips"} - stored as ${Math.round(displayQtyToStrips(Number(it.qty || 0), it.unitType || UNIT_TYPES.STRIP, it.packingFactors || {}) * 1000) / 1000} strips`}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/[^0-9.]/g, "").replace(/^(\d*\.?\d*).*$/, "$1");
                             setItem(idx, { qty: raw });
@@ -2305,7 +2305,7 @@ export default function PurchaseInvoicesPage() {
                         <AmountInput
                           className={`raInput piNum${submitted && !(Number(it.purchaseRate || 0) > 0) ? " piInput_err" : ""}`}
                           value={String(it.purchaseRate ?? "")}
-                          title={`Rate per ${it.unitType || "strip"} — stored as ${Math.round(displayRateToStripRate(Number(it.purchaseRate || 0), it.unitType || UNIT_TYPES.STRIP, it.packingFactors || {}) * 100) / 100}/strip`}
+                          title={`Rate per ${it.unitType || "strip"} - stored as ${Math.round(displayRateToStripRate(Number(it.purchaseRate || 0), it.unitType || UNIT_TYPES.STRIP, it.packingFactors || {}) * 100) / 100}/strip`}
                           onChange={(raw) => setItem(idx, { purchaseRate: raw })}
                           inputMode="decimal"
                         />
@@ -2337,7 +2337,7 @@ export default function PurchaseInvoicesPage() {
           </CommonLineItemsSection>
             {submitted && hasLineValidationErrors && (
               <div className="piLineErrBanner">
-                Some line items are incomplete — please fill in Product, Batch, Qty, Purchase Rate and MRP for every row.
+                Some line items are incomplete - please fill in Product, Batch, Qty, Purchase Rate and MRP for every row.
               </div>
             )}
             {(form.items || []).map((it, idx) =>
@@ -2804,7 +2804,7 @@ export default function PurchaseInvoicesPage() {
                 return (
                   <div key={idx} className={`piReturnRow${maxQty <= 0 ? " piReturnRow_disabled" : ""}`}>
                     <div className="piReturnItemHeader">
-                      <span className="piReturnItemName">{it.productName || "—"}</span>
+                      <span className="piReturnItemName">{it.productName || "-"}</span>
                       {it.batchNo ? <span className="piReturnBatch">Batch: {it.batchNo}</span> : null}
                     </div>
                     {it.purchasedQty != null ? (

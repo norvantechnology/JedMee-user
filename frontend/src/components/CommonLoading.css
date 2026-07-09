@@ -48,19 +48,19 @@
   width: 52px;
   height: 52px;
   display: block;
-  /* Spin the whole SVG — track is symmetric so only the arc appears to move */
+  /* Spin the whole SVG - track is symmetric so only the arc appears to move */
   animation: clArcSpin 0.9s linear infinite;
   transform-origin: center;
 }
 
-/* Track circle — faint ring */
+/* Track circle - faint ring */
 .cl__pageSpinner .cl__track {
   fill: none;
   stroke: color-mix(in srgb, var(--cl-accent) 16%, var(--cl-border));
   stroke-width: 3.5;
 }
 
-/* Arc — primary color, rounded caps, partial dash */
+/* Arc - primary color, rounded caps, partial dash */
 .cl__pageSpinner .cl__arc {
   fill: none;
   stroke: var(--cl-accent);

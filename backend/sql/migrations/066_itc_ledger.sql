@@ -55,7 +55,7 @@ ALTER TABLE vendors
   ADD COLUMN IF NOT EXISTS state_code            TEXT;
 
 ------------------------------------------------------------------------
--- 3) ITC Ledger — monthly snapshot per account
+-- 3) ITC Ledger - monthly snapshot per account
 --    One row per (account_id, year, month).
 --    snapshot_locked = true once the month is filed in GSTR-3B.
 ------------------------------------------------------------------------
@@ -99,7 +99,7 @@ CREATE INDEX IF NOT EXISTS idx_itc_ledger_year_month
   ON itc_ledger(account_id, year DESC, month DESC);
 
 ------------------------------------------------------------------------
--- 4) ITC Reversal Log — audit trail for every ITC reversal event
+-- 4) ITC Reversal Log - audit trail for every ITC reversal event
 ------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS itc_reversal_log (
   id                   uuid        PRIMARY KEY DEFAULT gen_random_uuid(),

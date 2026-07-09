@@ -29,7 +29,7 @@ async function handler(event) {
 
   const qs = event?.queryStringParameters || {};
 
-  // Date range — default to current month if not provided
+  // Date range - default to current month if not provided
   const today = new Date();
   const defaultFrom = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-01`;
   const defaultTo   = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;

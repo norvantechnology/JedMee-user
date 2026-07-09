@@ -7,7 +7,7 @@
 -- On confirm, loose_stock on the batch is incremented by return_loose_qty.
 
 ------------------------------------------------------------------------
--- 1. sales_return_items — return_loose_qty
+-- 1. sales_return_items - return_loose_qty
 ------------------------------------------------------------------------
 ALTER TABLE sales_return_items
   ADD COLUMN IF NOT EXISTS return_loose_qty numeric(12,3) NOT NULL DEFAULT 0;
@@ -28,7 +28,7 @@ COMMENT ON COLUMN sales_return_items.return_loose_qty IS
   'On confirm, this quantity is added back to product_batches.loose_stock.';
 
 ------------------------------------------------------------------------
--- 2. purchase_return_items — return_loose_qty
+-- 2. purchase_return_items - return_loose_qty
 ------------------------------------------------------------------------
 ALTER TABLE purchase_return_items
   ADD COLUMN IF NOT EXISTS return_loose_qty numeric(12,3) NOT NULL DEFAULT 0;

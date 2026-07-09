@@ -1,7 +1,7 @@
 /* ============================================================
    MergedReportsPage.css
    Shared by InventoryReportsPage and LedgerReportsPage.
-   All colors from theme variables only — no hardcoded values.
+   All colors from theme variables only - no hardcoded values.
    ============================================================ */
 
 /* ── Page header ── */
@@ -193,7 +193,7 @@
     font-size: 17px;
   }
 
-  /* Always show tab labels — never hide them */
+  /* Always show tab labels - never hide them */
   .mrTab {
     padding: 7px 11px;
     font-size: 12px;

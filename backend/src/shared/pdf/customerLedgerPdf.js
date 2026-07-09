@@ -3,7 +3,7 @@ const { n, inr } = require("./money");
 const { safeFilePart } = require("./money");
 
 /**
- * @param {object} ledgerDoc — from buildCustomerLedgerDoc
+ * @param {object} ledgerDoc - from buildCustomerLedgerDoc
  * @returns {Promise<{ buffer: Buffer; filename: string }>}
  */
 async function buildCustomerLedgerPdfAttachment(ledgerDoc) {

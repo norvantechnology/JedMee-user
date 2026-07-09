@@ -102,7 +102,7 @@ function GuideRelatedLinks({ relatedGuides }) {
       )}
       <div className="ip-related-title" style={{ marginTop: topical.length ? 20 : 0 }}>Explore JedMee</div>
       <ul>
-        <li><Link to="/">Home — pharmacy management software</Link></li>
+        <li><Link to="/">Home - pharmacy management software</Link></li>
         <li><Link to="/free-trial">Free 14-day trial</Link></li>
         <li><a href="/#pricing">Pricing plans</a></li>
         <li><Link to="/pharmacy-mobile-app">Mobile pharmacy access</Link></li>
@@ -244,7 +244,7 @@ export default function ContentGuidePage({
           <div className="ip-cta-inner">
             <h2 className="ip-cta-title">Try JedMee free for 14 days</h2>
             <p className="ip-cta-sub">
-              Tax billing, inventory, expiry alerts, and wholesale orders — one cloud platform. No credit card required.
+              Tax billing, inventory, expiry alerts, and wholesale orders - one cloud platform. No credit card required.
             </p>
             <div className="ip-cta-btns">
               <Link to="/register" className="ln-btn ln-btn--white ln-btn--lg">Start free trial</Link>

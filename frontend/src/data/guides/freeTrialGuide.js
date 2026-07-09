@@ -4,10 +4,10 @@ import { PRICING_PLANS } from "../pricingPlans.js";
 const CANONICAL = "https://jedmee.com/free-trial";
 
 export const FREE_TRIAL_GUIDE = {
-  pageTitle: "JedMee Free Trial — 14 Days, No Credit Card",
-  metaTitle: "Pharmacy Software Free Trial — No Credit Card Required",
+  pageTitle: "JedMee Free Trial - 14 Days, No Credit Card",
+  metaTitle: "Pharmacy Software Free Trial - No Credit Card Required",
   description:
-    "Start JedMee's 14-day pharmacy software free trial with full billing, inventory, and expiry features. No credit card required — compare plans before you subscribe.",
+    "Start JedMee's 14-day pharmacy software free trial with full billing, inventory, and expiry features. No credit card required - compare plans before you subscribe.",
   canonical: CANONICAL,
   label: "Free Trial & Pricing",
   datePublished: "2026-06-01",
@@ -23,7 +23,7 @@ export const FREE_TRIAL_GUIDE = {
     { name: "Free Trial", url: CANONICAL },
   ],
   introFacts: [
-    "JedMee offers a 14-day free trial on the Starter plan with no credit card required at signup — register at jedmee.com/register to begin.",
+    "JedMee offers a 14-day free trial on the Starter plan with no credit card required at signup - register at jedmee.com/register to begin.",
     "During the trial you can use tax billing, batch inventory, expiry alerts, customer and vendor ledgers, and CSV import so you can run real shop workflows before choosing a paid plan from $9/month.",
   ],
   sections: [
@@ -55,7 +55,7 @@ export const FREE_TRIAL_GUIDE = {
     {
       heading: "How do I start the free trial?",
       paragraphs: [
-        "Go to jedmee.com/register, choose wholesaler or retailer account type, and complete signup with your pharmacy name and email. Import products via CSV or enter manually — contact supportjedmee@gmail.com if you need onboarding help.",
+        "Go to jedmee.com/register, choose wholesaler or retailer account type, and complete signup with your pharmacy name and email. Import products via CSV or enter manually - contact supportjedmee@gmail.com if you need onboarding help.",
       ],
     },
     {
@@ -80,7 +80,7 @@ export const FREE_TRIAL_GUIDE = {
     },
     {
       q: "How does JedMee pricing compare after the trial?",
-      a: `Paid plans start at $${PRICING_PLANS[1]?.price || "9"}/month with no large upfront license — see homepage pricing for current tiers.`,
+      a: `Paid plans start at $${PRICING_PLANS[1]?.price || "9"}/month with no large upfront license - see homepage pricing for current tiers.`,
     },
   ],
 };

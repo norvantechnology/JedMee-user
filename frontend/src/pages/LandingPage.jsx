@@ -17,7 +17,7 @@ import "./InnerPages.css";
 gsap.registerPlugin(ScrollTrigger);
 
 /* ─────────────────────────────────────────────────────────────
-   SEO CONFIG — single source of truth for all dynamic values
+   SEO CONFIG - single source of truth for all dynamic values
    Update this object whenever contact info, pricing, or ratings change.
    These values feed BOTH the visible UI and the JSON-LD schema below.
 ───────────────────────────────────────────────────────────── */
@@ -31,8 +31,8 @@ const SEO_CONFIG = {
   pharmacyCount:  "500+",
   billsCreated:   "2M+",
   plans: PRICING_PLANS,
-  /* Canonical FAQs — used in schema AND the visible FAQ section.
-     Only ONE set exists — no duplication possible. */
+  /* Canonical FAQs - used in schema AND the visible FAQ section.
+     Only ONE set exists - no duplication possible. */
   faqs: [
     {
       q: "Can both medicine shops and distributors use JedMee?",
@@ -48,7 +48,7 @@ const SEO_CONFIG = {
     },
     {
       q: "Can I add my existing medicines and data?",
-      a: "Yes. Import medicines, batches, customers, and suppliers from a CSV file — no manual entry needed.",
+      a: "Yes. Import medicines, batches, customers, and suppliers from a CSV file - no manual entry needed.",
     },
     {
       q: "How do retailers order from wholesalers?",
@@ -135,7 +135,7 @@ function Counter({ end, suffix = "", duration = 2000 }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   BRAND LOGO — WebP with PNG fallback, explicit dimensions (CLS)
+   BRAND LOGO - WebP with PNG fallback, explicit dimensions (CLS)
 ───────────────────────────────────────────────────────────── */
 function BrandLogo({ className, width = 140, height = 40, loading = "eager" }) {
   return (
@@ -254,11 +254,11 @@ function LandingNav({ navigate, authed }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   SEO INTRO — front-loaded facts for crawlers & AI extraction
+   SEO INTRO - front-loaded facts for crawlers & AI extraction
 ───────────────────────────────────────────────────────────── */
 function SeoIntroSection() {
   const facts = [
-    "JedMee is pharmacy management software (SaaS) for retail chemists, medical stores, and pharmaceutical wholesalers — accessible from any browser without installing desktop programs.",
+    "JedMee is pharmacy management software (SaaS) for retail chemists, medical stores, and pharmaceutical wholesalers - accessible from any browser without installing desktop programs.",
     "Core modules: tax-compliant sales & purchase billing, batch-wise inventory with expiry tracking, customer and supplier ledgers, prescription notes, wholesale order catalogs, and GSTR-1 oriented tax reports.",
     "Who it is for: independent medicine shops billing 30+ invoices per day, multi-staff pharmacies needing role-based access, and distributors supplying 20–500+ retail accounts.",
     "Pricing: free 14-day trial (no credit card), then plans from $9/month. Setup typically takes one afternoon with CSV import for existing products and batches.",
@@ -266,7 +266,7 @@ function SeoIntroSection() {
   return (
     <section className="ip-seo-intro" aria-labelledby="seo-intro-heading">
       <div className="ln-container ip-seo-intro-inner">
-        <h2 id="seo-intro-heading">Pharmacy management software — what JedMee does</h2>
+        <h2 id="seo-intro-heading">Pharmacy management software - what JedMee does</h2>
         <p style={{ margin: 0, fontSize: "var(--text-sm)", color: "var(--color-text-muted)", lineHeight: 1.75 }}>
           Short answers for pharmacy owners evaluating billing, inventory, and wholesale tools:
         </p>
@@ -312,7 +312,7 @@ function HeroSection({ navigate }) {
             <span className="ln-hero-title-accent">Smarter. Faster.</span>
           </h1>
           <p className="ln-hero-sub">
-            JedMee is cloud pharmacy management software for medicine shops and wholesale distributors — tax billing (GST/VAT), batch inventory, expiry alerts, customer ledgers, and retailer order catalogs in one platform. 500+ pharmacies · 2M+ invoices processed · free 14-day trial.
+            JedMee is cloud pharmacy management software for medicine shops and wholesale distributors - tax billing (GST/VAT), batch inventory, expiry alerts, customer ledgers, and retailer order catalogs in one platform. 500+ pharmacies · 2M+ invoices processed · free 14-day trial.
           </p>
           <div className="ln-hero-ctas">
             <button className="ln-btn ln-btn--primary ln-btn--lg" onClick={() => navigate("/login")}>
@@ -420,7 +420,7 @@ function DashboardMockup() {
           </div>
           <div className="ln-mock-chart">
             <div className="ln-mock-chart-head">
-              <span className="ln-mock-chart-title">Sales vs Purchases — This Week</span>
+              <span className="ln-mock-chart-title">Sales vs Purchases - This Week</span>
               <div className="ln-mock-legend">
                 <span className="ln-mock-dot-sales" />Sales
                 <span className="ln-mock-dot-buy" />Purchases
@@ -516,7 +516,7 @@ function ProblemSection() {
       icon: "clipboard", color: "#ef4444", num: "01",
       title: "Manual Stock Counting",
       desc: "Counting medicines by hand takes hours and still causes errors. You never know your exact stock.",
-      solution: "JedMee tracks stock automatically — always accurate",
+      solution: "JedMee tracks stock automatically - always accurate",
     },
     {
       icon: "alertCircle", color: "#f97316", num: "02",
@@ -528,13 +528,13 @@ function ProblemSection() {
       icon: "file", color: "#6b3fa0", num: "03",
       title: "Slow Paper Billing",
       desc: "Handwritten bills are slow, messy, and hard to find. Tax calculations are a headache.",
-      solution: "Create tax invoices in seconds — print or share instantly",
+      solution: "Create tax invoices in seconds - print or share instantly",
     },
     {
       icon: "bell", color: "#0ea5e9", num: "04",
       title: "Orders via Phone & WhatsApp",
-      desc: "Phone orders cause confusion — items get missed, quantities go wrong.",
-      solution: "Retailers order online — you confirm with one click",
+      desc: "Phone orders cause confusion - items get missed, quantities go wrong.",
+      solution: "Retailers order online - you confirm with one click",
     },
   ];
   return (
@@ -574,14 +574,14 @@ function FeaturesSection() {
     { icon: "truck",   color: "#22c55e", title: "Supplier & Purchases", desc: "Record purchases, track payment due dates, and manage all suppliers." },
     { icon: "users",   color: "#8b5cf6", title: "Customer Management", desc: "Track outstanding payments, credit limits, and full purchase history." },
     { icon: "chart",   color: "#06b6d4", title: "Sales Reports & Day Book", desc: "See daily sales, purchases, and profit at a glance. Clear numbers, simple reports.", wide: true },
-    { icon: "layers",  color: "#f97316", title: "Retailer & Wholesaler Roles", desc: "Separate views for retailers and wholesalers — each user sees exactly what they need.", wide: true },
+    { icon: "layers",  color: "#f97316", title: "Retailer & Wholesaler Roles", desc: "Separate views for retailers and wholesalers - each user sees exactly what they need.", wide: true },
   ];
   return (
     <section className="ln-features" id="features">
       <div className="ln-container">
         <div className="ln-section-label">What You Get</div>
         <h2 className="ln-section-title">Everything Your Pharmacy Needs,<br />In One Place</h2>
-        <p className="ln-section-sub">Billing, stock, orders, reports — all connected, all simple.</p>
+        <p className="ln-section-sub">Billing, stock, orders, reports - all connected, all simple.</p>
         <div className="ln-bento">
           {features.map((f, i) => (
             <div key={i} className={`ln-feat${f.wide ? " ln-feat--wide" : ""}`}
@@ -613,7 +613,7 @@ function WorkflowSection() {
     ],
     wholesaler: [
       { icon: "layers",   step: "01", title: "Set Up Your Catalog",   desc: "List your medicines with prices. Retailers browse and order online." },
-      { icon: "bell",     step: "02", title: "Confirm Orders",        desc: "See new orders instantly. Confirm with one click — no phone calls." },
+      { icon: "bell",     step: "02", title: "Confirm Orders",        desc: "See new orders instantly. Confirm with one click - no phone calls." },
       { icon: "truck",    step: "03", title: "Manage Stock",          desc: "Track all stock and batches. Record purchases and supplier payments." },
       { icon: "barChart", step: "04", title: "Grow Your Business",    desc: "Monitor receivables and check daily business performance." },
     ],
@@ -726,7 +726,7 @@ function PlatformSection() {
         <div className="ln-plat-window">
           <div className="ln-plat-bar">
             <span className="ln-plat-dot red" /><span className="ln-plat-dot amber" /><span className="ln-plat-dot green" />
-            <span className="ln-plat-title">JedMee — {tabs[activeTab].label}</span>
+            <span className="ln-plat-title">JedMee - {tabs[activeTab].label}</span>
           </div>
           <div className="ln-plat-app">
             <div className="ln-plat-side">
@@ -845,14 +845,14 @@ function TestimonialsSection() {
       rating: 5,
     },
     {
-      quote: "We supply to 60+ retail pharmacies. Managing their orders over phone was a constant mess — wrong quantities, missed items, endless follow-up calls. With JedMee's order catalog, retailers place orders themselves and I confirm in one click. Our dispatch errors dropped to almost zero within the first month.",
+      quote: "We supply to 60+ retail pharmacies. Managing their orders over phone was a constant mess - wrong quantities, missed items, endless follow-up calls. With JedMee's order catalog, retailers place orders themselves and I confirm in one click. Our dispatch errors dropped to almost zero within the first month.",
       name: "Victor Nash",
       role: "Owner, Nash Pharma Distributors · Toronto, Canada",
       initials: "VN",
       rating: 5,
     },
     {
-      quote: "The expiry tracking alone is worth every dollar. We used to write off $1,500–2,000 in expired stock every quarter. Last quarter it was under $200. JedMee alerts us 60 days before expiry so we have time to return or sell the stock — that's real money saved.",
+      quote: "The expiry tracking alone is worth every dollar. We used to write off $1,500–2,000 in expired stock every quarter. Last quarter it was under $200. JedMee alerts us 60 days before expiry so we have time to return or sell the stock - that's real money saved.",
       name: "Sarah Mitchell",
       role: "Manager, Mitchell Pharmacy · Phoenix, AZ",
       initials: "SA",
@@ -1002,7 +1002,7 @@ function PricingSection({ navigate }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   FAQ — renders from SEO_CONFIG.faqs (single source of truth)
+   FAQ - renders from SEO_CONFIG.faqs (single source of truth)
 ───────────────────────────────────────────────────────────── */
 function FAQSection() {
   const [open, setOpen] = useState(null);
@@ -1065,11 +1065,11 @@ function DownloadSection() {
       </div>
 
       <div className="ln-container">
-        {/* Section header — centered */}
+        {/* Section header - centered */}
         <div className="ln-dl-header">
           <div className="ln-dl-badge">
             <Icon name="zap" size={13} />
-            <span>Mobile App — Free Download</span>
+            <span>Mobile App - Free Download</span>
           </div>
           <h2 className="ln-dl-title">
             Your Pharmacy, Always<br />
@@ -1144,7 +1144,7 @@ function DownloadSection() {
                         ))}
                       </div>
 
-                      {/* 5 KPI cards — 2 columns */}
+                      {/* 5 KPI cards - 2 columns */}
                       <div className="ln-dl-kpi-grid">
                         <div className="ln-dl-kpi ln-dl-kpi--blue">
                           <div className="ln-dl-kpi-dot ln-dl-kpi-dot--blue" />
@@ -1386,7 +1386,7 @@ function DownloadSection() {
                     </div>
                   </div>
 
-                  {/* Sidebar overlay — slides in/out during animation */}
+                  {/* Sidebar overlay - slides in/out during animation */}
                   <div className="ln-dl-sidebar">
                     {/* Header row: jedmee logo + close btn + avatar */}
                     <div className="ln-dl-sidebar-header">
@@ -1397,7 +1397,7 @@ function DownloadSection() {
                       </div>
                     </div>
 
-                    {/* Dashboard — active */}
+                    {/* Dashboard - active */}
                     <div className="ln-dl-sidebar-item active">
                       <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                       <span>Dashboard</span>
@@ -1504,7 +1504,7 @@ function DownloadSection() {
 
             {/* Download buttons */}
             <div className="ln-dl-buttons">
-              {/* Android APK — direct .apk download */}
+              {/* Android APK - direct .apk download */}
               <a
                 href={appInfo.android.available ? appInfo.android.apkUrl : "#download"}
                 download={appInfo.android.available ? appInfo.android.fileName || `jedmee-v${appInfo.version}.apk` : undefined}
@@ -1537,12 +1537,12 @@ function DownloadSection() {
                 </div>
               </a>
 
-              {/* iOS — dynamic: shows download when IPA is available, else "coming soon" */}
+              {/* iOS - dynamic: shows download when IPA is available, else "coming soon" */}
               <a
                 href={appInfo.ios.available ? appInfo.ios.ipaUrl : "#download"}
                 download={appInfo.ios.available ? appInfo.ios.fileName || `jedmee-v${appInfo.version}.ipa` : undefined}
                 className={`ln-dl-btn ln-dl-btn--ios${!appInfo.ios.available ? " ln-dl-btn--disabled" : ""}`}
-                aria-label={appInfo.ios.available ? "Download JedMee IPA for iOS" : "iOS App Store — coming soon"}
+                aria-label={appInfo.ios.available ? "Download JedMee IPA for iOS" : "iOS App Store - coming soon"}
               >
                 <div className="ln-dl-btn-icon">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
@@ -1601,7 +1601,7 @@ function CTASection({ navigate }) {
       </div>
       <div className="ln-container ln-cta-inner">
         <div className="ln-cta-badge"><Icon name="sparkle" size={14} /> Ready to simplify your pharmacy?</div>
-        <h2 className="ln-cta-title">Start Managing Your Pharmacy<br />the Smart Way — Today</h2>
+        <h2 className="ln-cta-title">Start Managing Your Pharmacy<br />the Smart Way - Today</h2>
         <p className="ln-cta-sub">Join thousands of pharmacies worldwide already using JedMee.</p>
         <div className="ln-cta-actions">
           <button className="ln-btn ln-btn--white ln-btn--lg" onClick={() => navigate("/login")}>
@@ -1684,14 +1684,14 @@ export default function LandingPage() {
   useSeoMeta({
     title: "Pharmacy Management Software | Free Trial",
     description:
-      "JedMee is pharmacy software for medicine shops and distributors. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial, no credit card needed.",
+      "JedMee is pharmacy software for medicine shops and distributors. Tax billing, inventory tracking, expiry alerts, and invoicing - free trial, no credit card needed.",
     canonical: `${SEO_CONFIG.siteUrl}/`,
   });
 
   /*
    * ── JSON-LD ──────────────────────────────────────────────────────────
    *
-   * IMPORTANT — schema ownership:
+   * IMPORTANT - schema ownership:
    *   • SoftwareApplication  → HERE only  (removed from index.html)
    *   • FAQPage              → HERE only  (removed from index.html)
    *   • WebPage              → HERE only
@@ -1707,10 +1707,10 @@ export default function LandingPage() {
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": `${SEO_CONFIG.siteName} — Pharmacy Management Software`,
+      "name": `${SEO_CONFIG.siteName} - Pharmacy Management Software`,
       "url": `${SEO_CONFIG.siteUrl}/`,
       "description":
-        "Cloud-based pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, and invoicing — free trial.",
+        "Cloud-based pharmacy management software for medicine shops and distributors worldwide. Tax billing, inventory tracking, expiry alerts, and invoicing - free trial.",
       "inLanguage": "en",
       "isPartOf": { "@type": "WebSite", "url": SEO_CONFIG.siteUrl },
       "breadcrumb": {
@@ -1721,7 +1721,7 @@ export default function LandingPage() {
       },
     },
 
-    /* 2. SoftwareApplication — pricing pulled from SEO_CONFIG so it stays in sync */
+    /* 2. SoftwareApplication - pricing pulled from SEO_CONFIG so it stays in sync */
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
@@ -1771,7 +1771,7 @@ export default function LandingPage() {
       },
     },
 
-    /* 3. FAQPage — built directly from SEO_CONFIG.faqs; zero duplication risk */
+    /* 3. FAQPage - built directly from SEO_CONFIG.faqs; zero duplication risk */
     {
       "@context": "https://schema.org",
       "@type": "FAQPage",

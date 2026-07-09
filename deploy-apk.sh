@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════════════════
-#  JedMee — Build & Deploy Script
+#  JedMee - Build & Deploy Script
 #  Usage:  ./deploy-apk.sh [--android] [--ios] [--all]
 #  Default (no flags): builds Android only
 #
@@ -127,7 +127,7 @@ if $BUILD_ANDROID; then
   elif [[ -f "$ARMV7_APK" ]]; then
     SELECTED_APK="$ARMV7_APK"; ARCH_LABEL="armeabi-v7a"
   else
-    error "APK build failed — no split APK found in build/app/outputs/flutter-apk/"
+    error "APK build failed - no split APK found in build/app/outputs/flutter-apk/"
   fi
 
   success "APK built [$ARCH_LABEL]"
@@ -183,7 +183,7 @@ if $BUILD_IOS; then
 
   IPA_SRC=$(find "$MOBILE_DIR/build/ios/ipa" -name "*.ipa" 2>/dev/null | head -1)
   if [[ -z "$IPA_SRC" ]]; then
-    warn "IPA not found — iOS build may have failed. Skipping iOS deployment."
+    warn "IPA not found - iOS build may have failed. Skipping iOS deployment."
   else
     IPA_NAME="jedmee-v${VERSION_NAME}.ipa"
     IOS_IPA_DEST="$DOWNLOADS_DIR/$IPA_NAME"
@@ -204,7 +204,7 @@ fi
 echo ""
 info "Writing version.json..."
 
-# Determine APK/ZIP URLs — use versioned filename directly (no symlink dependency)
+# Determine APK/ZIP URLs - use versioned filename directly (no symlink dependency)
 ANDROID_APK_URL="/downloads/jedmee-v${VERSION_NAME}.apk"
 ANDROID_ZIP_URL="/downloads/jedmee-v${VERSION_NAME}.zip"
 IOS_IPA_URL="/downloads/jedmee-v${VERSION_NAME}.ipa"

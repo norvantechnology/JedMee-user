@@ -1,5 +1,5 @@
 /**
- * App-wide button primitives — import from this module only.
+ * App-wide button primitives - import from this module only.
  *
  * - AppButton: themed actions (variant, size, icon, iconOnly).
  * - AsyncButton: AppButton + loading / loadingText (uses InlineButtonProgress).

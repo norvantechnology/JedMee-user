@@ -510,19 +510,19 @@ export function ProductSupplierReportContent({ embedded = false } = {}) {
                         <td className="psrColIdx psrIdxVal">{idx + 1}</td>
                         <td>
                           <div className="rptVendorContact">
-                            <span className="rptVendorName">{p.name || p.code || "—"}</span>
+                            <span className="rptVendorName">{p.name || p.code || "-"}</span>
                             {p.drug_name ? <span className="rptVendorAddress">{p.drug_name}</span> : null}
                             {p.code ? (
                               <span className="rptVendorAddress psrCodePill">{p.code}</span>
                             ) : null}
                           </div>
                         </td>
-                        <td className="psrMfgCell">{p.mfg_name || p.mfg_short || <span className="psrMuted">—</span>}</td>
+                        <td className="psrMfgCell">{p.mfg_name || p.mfg_short || <span className="psrMuted">-</span>}</td>
                         <td className="rptNum psrColSuppliers">
                           {supplierCount > 0 ? (
                             <span className="psrSupCount">{supplierCount}</span>
                           ) : (
-                            <span className="psrMuted">—</span>
+                            <span className="psrMuted">-</span>
                           )}
                         </td>
                         <td className="rptNum psrColStock">
@@ -534,7 +534,7 @@ export function ProductSupplierReportContent({ embedded = false } = {}) {
                           {expiringCount > 0 ? (
                             <span className="rptExpiryChip is-soon">{expiringCount}</span>
                           ) : (
-                            <span className="psrMuted">—</span>
+                            <span className="psrMuted">-</span>
                           )}
                         </td>
                       </tr>

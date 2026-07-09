@@ -12,8 +12,8 @@ const {
  * Used by the frontend LocaleContext to bootstrap country/tax/currency data.
  *
  * Query params:
- *   ?code=IN          — return a single country config
- *   ?withTaxRates=1   — include formatted tax rate list per country
+ *   ?code=IN          - return a single country config
+ *   ?withTaxRates=1   - include formatted tax rate list per country
  */
 async function handler(event) {
   try {

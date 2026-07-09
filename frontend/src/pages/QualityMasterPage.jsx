@@ -833,7 +833,7 @@ export default function QualityMasterPage() {
                       sortable: false,
                       render: (r) =>
                         r.is_control ? (
-                          <span className="qmBadge qmBadge_warn" title="Schedule H/H1/X — prescription mandatory">
+                          <span className="qmBadge qmBadge_warn" title="Schedule H/H1/X - prescription mandatory">
                             Rx
                           </span>
                         ) : r.is_otc !== false ? (
@@ -879,7 +879,7 @@ export default function QualityMasterPage() {
                       sortable: false,
                       render: (r) => {
                         const name = r.supplier_short_name || r.supplier_name;
-                        if (!name) return <span style={{ color: "var(--color-text-4)", fontSize: 12 }}>—</span>;
+                        if (!name) return <span style={{ color: "var(--color-text-4)", fontSize: 12 }}>-</span>;
                         return (
                           <span
                             title={r.supplier_name || ""}
@@ -906,7 +906,7 @@ export default function QualityMasterPage() {
                 render: (r) => {
                   const s = r.sales_gst != null && r.sales_gst !== "" ? Number(r.sales_gst) : null;
                   const p = r.purchase_gst != null && r.purchase_gst !== "" ? Number(r.purchase_gst) : null;
-                  if (s === null && p === null) return <span style={{ color: "var(--color-text-3)" }}>—</span>;
+                  if (s === null && p === null) return <span style={{ color: "var(--color-text-3)" }}>-</span>;
                   if (s !== null && p !== null && s === p) {
                     return <span style={{ fontWeight: 600, color: "var(--color-text-2)" }}>{s}%</span>;
                   }
@@ -1222,7 +1222,7 @@ export default function QualityMasterPage() {
                               <BarcodeDisplay value={b.barcode} height={36} className="qmBarcodePreview-img" />
                             </div>
                           ) : (
-                            "—"
+                            "-"
                           )}
                         </td>
                         <td className="qmBDTd qmBDTd_expiry" data-label="Expiry">
@@ -1244,11 +1244,11 @@ export default function QualityMasterPage() {
                         <td className="qmBDTd qmBDTd_num" data-label="Sales">{fmtMoney(b.sales_rate)}</td>
                         <td className="qmBDTd qmBDTd_num" data-label="Net">{fmtMoney(b.net_rate)}</td>
                         <td className="qmBDTd qmBDTd_num" data-label="Stock">
-                          <span className="qmBDStockNum" title="Billable (paid) units — sales invoice Qty uses this bucket">
+                          <span className="qmBDStockNum" title="Billable (paid) units - sales invoice Qty uses this bucket">
                             {stockNum}
                           </span>
                           {freeStock > 0 ? (
-                            <div className="qmBDStockSub" title="Free balance — use Free Qty on sales lines">
+                            <div className="qmBDStockSub" title="Free balance - use Free Qty on sales lines">
                               {freeStock} free · {billStock + freeStock} total
                             </div>
                           ) : null}
@@ -1262,7 +1262,7 @@ export default function QualityMasterPage() {
                           {(() => {
                             const ls = Number(b.loose_stock ?? 0);
                             const lu = String(b.loose_unit_name || "").trim();
-                            if (ls <= 0) return <span style={{ color: "var(--color-text-4)", fontSize: 12 }}>—</span>;
+                            if (ls <= 0) return <span style={{ color: "var(--color-text-4)", fontSize: 12 }}>-</span>;
                             return (
                               <div>
                                 <span className="qmBDStockNum" title="Loose units in stock">{ls}</span>
@@ -1385,7 +1385,7 @@ export default function QualityMasterPage() {
                   isPreferred: true
                 });
               } catch {
-                /* non-fatal — product was saved; supplier link can be retried */
+                /* non-fatal - product was saved; supplier link can be retried */
               }
             }
 

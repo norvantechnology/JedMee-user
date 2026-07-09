@@ -1,11 +1,11 @@
 -- Migration 050: Missing compound indexes for high-traffic query paths
 --
 -- Covers gaps identified in the backend audit (Phase 14):
---   • purchase_returns  — list/filter/invoice-lookup paths
---   • purchase_return_items — tenant isolation + join path
---   • sales_invoice_items  — GSTR-1 HSN grouping + invoice join
---   • vendors              — soft-delete list path
---   • purchase_invoices    — vendor-filtered list path
+--   • purchase_returns  - list/filter/invoice-lookup paths
+--   • purchase_return_items - tenant isolation + join path
+--   • sales_invoice_items  - GSTR-1 HSN grouping + invoice join
+--   • vendors              - soft-delete list path
+--   • purchase_invoices    - vendor-filtered list path
 --
 -- All statements use IF NOT EXISTS so the migration is safe to re-run.
 
@@ -84,7 +84,7 @@ CREATE INDEX IF NOT EXISTS idx_purchase_invoices_account_vendor_date
   WHERE deleted_at IS NULL;
 
 ------------------------------------------------------------------------
--- purchase_returns — trigram search
+-- purchase_returns - trigram search
 -- list.js searches: return_number ILIKE '%q%' OR credit_note_number ILIKE '%q%'
 ------------------------------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_purchase_returns_return_number_trgm

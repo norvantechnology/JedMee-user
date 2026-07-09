@@ -1,4 +1,4 @@
-/** Canonical JedMee pricing tiers — feeds UI fallbacks and Product JSON-LD. */
+/** Canonical JedMee pricing tiers - feeds UI fallbacks and Product JSON-LD. */
 export const PRICING_PLANS = [
   {
     name: "Starter",
@@ -6,7 +6,7 @@ export const PRICING_PLANS = [
     priceCurrency: "USD",
     period: "free",
     billingDuration: "P14D",
-    description: "Free 14-day trial for small medicine shops — no credit card required",
+    description: "Free 14-day trial for small medicine shops - no credit card required",
   },
   {
     name: "Growth",

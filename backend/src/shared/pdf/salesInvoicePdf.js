@@ -1,5 +1,5 @@
 /**
- * Sales invoice PDF — matches the browser print view layout.
+ * Sales invoice PDF - matches the browser print view layout.
  * Uses PDFKit (no Chromium/Puppeteer) for Lambda compatibility.
  */
 const { pdfToBuffer } = require('./pdfBuffer');
@@ -80,7 +80,7 @@ async function buildSalesInvoicePdfAttachment(doc) {
 
     const itemRows = items.map((it, idx) => [
       String(idx + 1),
-      safeStr(it.product_name || it.drug_name || '—', 50),
+      safeStr(it.product_name || it.drug_name || '-', 50),
       safeStr(it.batch_no || '', 14),
       ymd(it.expiry_date),
       n(it.qty).toString(),
@@ -140,7 +140,7 @@ async function buildSalesInvoicePdfAttachment(doc) {
 
       y = Math.max(gstTableBottom, totStartY + 18 + totRows.filter(([, v]) => v != null).length * 13) + 12;
     } else {
-      // No GST summary — just totals full width
+      // No GST summary - just totals full width
       y = drawSectionLabel(pdf, ML, y, W, 'Totals');
       y += 6;
       const totRows = [

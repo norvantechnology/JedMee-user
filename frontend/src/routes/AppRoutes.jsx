@@ -78,7 +78,7 @@ export function AppRoutes() {
   useEffect(() => {
     const auth = readAuth();
     if (!auth?.refreshToken) return;
-    // Avoid calling /me with an expired access token — App waits for bootstrapAuth first; this
+    // Avoid calling /me with an expired access token - App waits for bootstrapAuth first; this
     // guards StrictMode / edge timing so we never clear the session before silent refresh runs.
     if (!hasValidAccessToken(auth)) return;
 

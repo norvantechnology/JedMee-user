@@ -1,14 +1,14 @@
 /**
- * Notification type registry — maps to P1–P4 priority matrix and delivery rules.
+ * Notification type registry - maps to P1–P4 priority matrix and delivery rules.
  *
  * Channels:
- *   inApp  — always (stored in user_notifications)
- *   push   — P1 + P2 by default (FCM mobile)
- *   email  — daily digest for P2–P4 summaries (see notificationEmailDigest.js)
+ *   inApp  - always (stored in user_notifications)
+ *   push   - P1 + P2 by default (FCM mobile)
+ *   email  - daily digest for P2–P4 summaries (see notificationEmailDigest.js)
  */
 
 const TYPES = {
-  // ── P1 CRITICAL — inventory & compliance ─────────────────────────────────
+  // ── P1 CRITICAL - inventory & compliance ─────────────────────────────────
   EXPIRED_BATCH: {
     priority: "P1",
     category: "INVENTORY",
@@ -52,7 +52,7 @@ const TYPES = {
     actionPath: "/quality-master",
   },
 
-  // ── P2 HIGH — payments ─────────────────────────────────────────────────────
+  // ── P2 HIGH - payments ─────────────────────────────────────────────────────
   PAYABLE_OVERDUE: {
     priority: "P2",
     category: "PAYMENT",
@@ -75,7 +75,7 @@ const TYPES = {
     actionPath: "/sales-billing",
   },
 
-  // ── P3 MEDIUM — transactions / orders ────────────────────────────────────
+  // ── P3 MEDIUM - transactions / orders ────────────────────────────────────
   NEW_ORDER: {
     priority: "P3",
     category: "TRANSACTION",
@@ -157,7 +157,7 @@ const TYPES = {
     actionPath: "/dashboard",
   },
 
-  // ── P4 LOW — system ────────────────────────────────────────────────────────
+  // ── P4 LOW - system ────────────────────────────────────────────────────────
   EXPORT_READY: {
     priority: "P4",
     category: "SYSTEM",

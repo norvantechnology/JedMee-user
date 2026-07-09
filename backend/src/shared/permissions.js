@@ -133,7 +133,7 @@ async function hasPermission(userId, resource, action) {
   const a = normalizeAction(action);
   if (!r || !a) return false;
   const ctx = await getPermissionsForUser(userId);
-  // Do NOT short-circuit for account owners — getPermissionsForUser already
+  // Do NOT short-circuit for account owners - getPermissionsForUser already
   // applies applyRoleVisibility so role-restricted resources (e.g. MANUFACTURERS
   // for a RETAILER owner) are correctly absent from ctx.permissions.
   return Boolean(ctx.permissions?.[r]?.[a]);

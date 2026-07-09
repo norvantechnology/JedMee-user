@@ -1,9 +1,9 @@
 import { openPrintDocument } from "./printDocument.js";
 
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   const s = String(d).slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return s || "—";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return s || "-";
   const dt = new Date(`${s}T00:00:00`);
   if (!Number.isFinite(dt.getTime())) return s;
   return dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
@@ -52,8 +52,8 @@ export function buildReturnHtml({ ret = {}, items = [], type = "sales" }) {
       const amt = Number(item.amount != null ? item.amount : qty * rate);
       return `<tr>
         <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;">${i + 1}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;">${esc(item.product_name || "—")}</td>
-        <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;">${esc(item.batch_no || "—")}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;">${esc(item.product_name || "-")}</td>
+        <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;">${esc(item.batch_no || "-")}</td>
         <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:right;">${qty}${freeQty ? ` + ${freeQty}F` : ""}</td>
         <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:right;">${fmtAmt(rate)}</td>
         <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:700;">${fmtAmt(amt)}</td>

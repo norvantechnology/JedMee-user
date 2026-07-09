@@ -147,7 +147,7 @@ async function handler(event) {
            LIMIT 8`,
           [ctx.accountId, date]
         ),
-        // Previous day — for comparison
+        // Previous day - for comparison
         query(
           `SELECT
              COALESCE(SUM(CASE WHEN is_walk_in_sale = true THEN total_amount ELSE 0 END),0)::numeric(14,2) AS cash_sales,

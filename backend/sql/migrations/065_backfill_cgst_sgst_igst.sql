@@ -33,7 +33,7 @@ WHERE sii.sales_invoice_id = si.id
 
 -- Also fix the gstrB2bB2c report: update B2B invoice CGST/SGST/IGST fallback
 -- by ensuring the sales_invoices.total_gst is consistent with line items.
--- (No change needed to sales_invoices.total_gst — it already stores total GST correctly.)
+-- (No change needed to sales_invoices.total_gst - it already stores total GST correctly.)
 
 -- Verify: count of rows fixed (informational only)
 -- SELECT COUNT(*) FROM sales_invoice_items WHERE cgst_amount > 0 OR sgst_amount > 0 OR igst_amount > 0;

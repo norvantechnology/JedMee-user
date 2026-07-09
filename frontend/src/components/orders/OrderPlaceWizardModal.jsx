@@ -244,7 +244,7 @@ export default function OrderPlaceWizardModal({
       >
         <div className="cmpOrderWizard">
 
-          {/* ── Step progress (no instructional subtitle — saves vertical space) ── */}
+          {/* ── Step progress (no instructional subtitle - saves vertical space) ── */}
           <div className="cmpOrderStepRow">
             <div className="cmpOrderStepMeta">Step {step} of 2</div>
             <div className="cmpOrderStepBar" role="tablist" aria-label="Place order steps">

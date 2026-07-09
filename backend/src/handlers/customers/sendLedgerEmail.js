@@ -70,7 +70,7 @@ function buildCustomerLedgerEmailHtml({ cust, sellerName, netBal, balanceType, b
   ].filter(Boolean).join("\n");
 
   return emailBase({
-    preheader: `Your ledger statement — Balance Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}`,
+    preheader: `Your ledger statement - Balance Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}`,
     headerLabel: "Customer Ledger Statement",
     headerTitle: custName,
     headerSub: cust.code ? `Code: ${E(cust.code)}` : undefined,
@@ -121,8 +121,8 @@ async function handler(event) {
     return fail(500, "INTERNAL_ERROR", "PDF generation failed.", { subMessage: String(e?.message || "") });
   }
 
-  const subject = `Customer Ledger Statement — ${cust.name || "Customer"}`.trim();
-  const text    = `Dear ${cust.name || "Customer"},\n\nPlease find your customer ledger statement attached as a PDF.\n\nNet Balance: Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}\n\n— ${sellerName}`;
+  const subject = `Customer Ledger Statement - ${cust.name || "Customer"}`.trim();
+  const text    = `Dear ${cust.name || "Customer"},\n\nPlease find your customer ledger statement attached as a PDF.\n\nNet Balance: Rs.${Math.abs(netBal).toFixed(2)} ${balanceType}\n\n- ${sellerName}`;
   const html    = buildCustomerLedgerEmailHtml({ cust, sellerName, netBal, balanceType, balanceColor });
 
   const m = await sendMail({

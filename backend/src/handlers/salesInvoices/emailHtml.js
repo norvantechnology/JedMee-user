@@ -35,7 +35,7 @@ function buildSalesInvoiceEmailHtml(doc) {
         const bg = i % 2 === 0 ? C.bgCard : C.bgAlt;
         return [
           `<tr style="background:${bg};">`,
-          `  <td style="padding:10px 14px;font-size:13px;color:${C.textDark};border-bottom:1px solid ${C.border};">${E(l.product_name || l.product_code || "—")}</td>`,
+          `  <td style="padding:10px 14px;font-size:13px;color:${C.textDark};border-bottom:1px solid ${C.border};">${E(l.product_name || l.product_code || "-")}</td>`,
           `  <td style="padding:10px 14px;font-size:13px;color:${C.textMid};text-align:center;border-bottom:1px solid ${C.border};">${n(l.qty)}</td>`,
           `  <td style="padding:10px 14px;font-size:13px;color:${C.textDark};text-align:right;border-bottom:1px solid ${C.border};font-weight:600;">${fmt(l.line_total)}</td>`,
           `</tr>`,
@@ -106,15 +106,15 @@ function buildSalesInvoiceEmailHtml(doc) {
     `      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">`,
     `        <tr>`,
     `          <td style="padding:4px 0;font-size:12px;color:${C.textMuted};width:40%;">Invoice No.</td>`,
-    `          <td style="padding:4px 0;font-size:13px;color:${C.textDark};font-weight:700;">${invNo || "—"}</td>`,
+    `          <td style="padding:4px 0;font-size:13px;color:${C.textDark};font-weight:700;">${invNo || "-"}</td>`,
     `        </tr>`,
     `        <tr>`,
     `          <td style="padding:4px 0;font-size:12px;color:${C.textMuted};">Date</td>`,
-    `          <td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(invDate) || "—"}</td>`,
+    `          <td style="padding:4px 0;font-size:13px;color:${C.textDark};">${E(invDate) || "-"}</td>`,
     `        </tr>`,
     `        <tr>`,
     `          <td style="padding:4px 0;font-size:12px;color:${C.textMuted};">Status</td>`,
-    `          <td style="padding:6px 0;">${statusBadge || "—"}</td>`,
+    `          <td style="padding:6px 0;">${statusBadge || "-"}</td>`,
     `        </tr>`,
     sellerName ? [
       `        <tr>`,
@@ -137,7 +137,7 @@ function buildSalesInvoiceEmailHtml(doc) {
   ].join("\n");
 
   return emailBase({
-    preheader: `Invoice ${invNo} from ${sellerName || "your supplier"} — Total ${fmt(sub)}`,
+    preheader: `Invoice ${invNo} from ${sellerName || "your supplier"} - Total ${fmt(sub)}`,
     headerLabel: "Sales Invoice",
     headerTitle: invNo ? `Invoice #${invNo}` : "Sales Invoice",
     headerSub: sellerName || undefined,

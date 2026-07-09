@@ -14,7 +14,7 @@ import { Printer, Pencil } from "lucide-react";
 import "./ReturnViewModal.css";
 
 /**
- * InvoiceViewModal — shared read-only view for Sales & Purchase invoices.
+ * InvoiceViewModal - shared read-only view for Sales & Purchase invoices.
  *
  * Props:
  *   open       {boolean}
@@ -22,8 +22,8 @@ import "./ReturnViewModal.css";
  *   invoiceId  {string|null}
  *   type       {"sales"|"purchase"}
  *   fetchFn    {(id) => Promise}
- *   canEdit    {boolean}           — show Edit for DRAFT rows
- *   onEdit     {(id) => void}      — opens the edit form (parent closes this modal)
+ *   canEdit    {boolean}           - show Edit for DRAFT rows
+ *   onEdit     {(id) => void}      - opens the edit form (parent closes this modal)
  */
 export default function InvoiceViewModal({
   open,
@@ -61,8 +61,8 @@ export default function InvoiceViewModal({
   const isSales = type === "sales";
   const partyLabel = isSales ? "Customer" : "Supplier / Division";
   const partyName = isSales
-    ? inv?.customer_name || "—"
-    : inv?.vendor_name || inv?.division_name || "—";
+    ? inv?.customer_name || "-"
+    : inv?.vendor_name || inv?.division_name || "-";
 
   const totalAmount = Number(
     inv?.grand_total ?? inv?.total_amount ?? inv?.net_amount ?? 0
@@ -116,7 +116,7 @@ export default function InvoiceViewModal({
   }
 
   const modalTitle = inv?.invoice_number
-    ? `${isSales ? "Sales" : "Purchase"} Invoice — ${inv.invoice_number}`
+    ? `${isSales ? "Sales" : "Purchase"} Invoice - ${inv.invoice_number}`
     : isSales
       ? "Sales Invoice"
       : "Purchase Invoice";
@@ -163,12 +163,12 @@ export default function InvoiceViewModal({
           <div className="rvmInfoGrid">
             <div className="rvmInfoCell">
               <span className="rvmInfoLabel">Invoice #</span>
-              <span className="rvmInfoVal">{inv.invoice_number || "—"}</span>
+              <span className="rvmInfoVal">{inv.invoice_number || "-"}</span>
             </div>
             <div className="rvmInfoCell">
               <span className="rvmInfoLabel">Date</span>
               <span className="rvmInfoVal">
-                {fmtDateIndian(inv.invoice_date) || "—"}
+                {fmtDateIndian(inv.invoice_date) || "-"}
               </span>
             </div>
             {inv.due_date ? (
@@ -182,7 +182,7 @@ export default function InvoiceViewModal({
               <span
                 className={`rvmStatusPill rvmStatusPill_${String(inv.status || "").toLowerCase()}`}
               >
-                {inv.status || "—"}
+                {inv.status || "-"}
               </span>
             </div>
             <div className="rvmInfoCell">
@@ -265,7 +265,7 @@ export default function InvoiceViewModal({
                       <td className="rvmTd">{fmtDateIndian(p.payment_date)}</td>
                       <td className="rvmTd">{formatPaymentModeLabel(p.payment_mode)}</td>
                       <td className="rvmTd rvmNum">{fmtMoney(p.amount)}</td>
-                      <td className="rvmTd">{p.reference_number || "—"}</td>
+                      <td className="rvmTd">{p.reference_number || "-"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -306,8 +306,8 @@ export default function InvoiceViewModal({
                     return (
                       <tr key={item.id || i} className="rvmRow">
                         <td className="rvmTd">{i + 1}</td>
-                        <td className="rvmTd">{item.product_name || "—"}</td>
-                        <td className="rvmTd">{item.batch_no || "—"}</td>
+                        <td className="rvmTd">{item.product_name || "-"}</td>
+                        <td className="rvmTd">{item.batch_no || "-"}</td>
                         <td className="rvmTd rvmNum">
                           {qty}
                           {freeQty > 0 ? (

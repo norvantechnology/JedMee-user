@@ -8,10 +8,10 @@
  *       e.g. https://cdn.jedmee.com/assets/logo.png
  */
 
-// ─── Brand Palette — minimal, document-like ───────────────────────────────────
+// ─── Brand Palette - minimal, document-like ───────────────────────────────────
 const C = {
-  primary:      '#5B21B6',   // violet — used only for table headers & accents
-  primaryLight: '#EDE9FE',   // very light violet — section label bg
+  primary:      '#5B21B6',   // violet - used only for table headers & accents
+  primaryLight: '#EDE9FE',   // very light violet - section label bg
   border:       '#D1D5DB',   // gray border
   borderLight:  '#E5E7EB',   // lighter border
   text:         '#111827',   // near-black body text
@@ -51,7 +51,7 @@ function preheaderSpacer() {
 
 // ─── Professional inline SVG icons ───────────────────────────────────────────
 const ICONS = {
-  /** 48×48 rounded badge — envelope */
+  /** 48×48 rounded badge - envelope */
   email: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 20px;"><tr><td align="center">
     <div style="display:inline-block;width:56px;height:56px;border-radius:12px;background:#F3F4F6;border:1px solid #E5E7EB;text-align:center;line-height:56px;">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;display:inline-block;">
@@ -61,7 +61,7 @@ const ICONS = {
     </div>
   </td></tr></table>`,
 
-  /** 48×48 rounded badge — lock */
+  /** 48×48 rounded badge - lock */
   lock: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 20px;"><tr><td align="center">
     <div style="display:inline-block;width:56px;height:56px;border-radius:12px;background:#F3F4F6;border:1px solid #E5E7EB;text-align:center;line-height:56px;">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;display:inline-block;">
@@ -72,7 +72,7 @@ const ICONS = {
     </div>
   </td></tr></table>`,
 
-  /** 48×48 rounded badge — invoice/receipt */
+  /** 48×48 rounded badge - invoice/receipt */
   invoice: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 20px;"><tr><td align="center">
     <div style="display:inline-block;width:56px;height:56px;border-radius:12px;background:#F3F4F6;border:1px solid #E5E7EB;text-align:center;line-height:56px;">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;display:inline-block;">
@@ -82,7 +82,7 @@ const ICONS = {
     </div>
   </td></tr></table>`,
 
-  /** 48×48 rounded badge — ledger/book */
+  /** 48×48 rounded badge - ledger/book */
   ledger: `<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto 20px;"><tr><td align="center">
     <div style="display:inline-block;width:56px;height:56px;border-radius:12px;background:#F3F4F6;border:1px solid #E5E7EB;text-align:center;line-height:56px;">
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;display:inline-block;">
@@ -93,7 +93,7 @@ const ICONS = {
     </div>
   </td></tr></table>`,
 
-  /** Inline 14×14 shield — for security notice */
+  /** Inline 14×14 shield - for security notice */
   shield: `<svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;display:inline-block;margin-right:4px;position:relative;top:-1px;">
     <path d="M6.5 1L1 3v3.25C1 9.25 3.5 12 6.5 12.5c3-.5 5.5-3.25 5.5-6.25V3L6.5 1z" stroke="#374151" stroke-width="1.3" fill="none" stroke-linejoin="round"/>
     <path d="M4 6.5l2 2 3-3" stroke="#374151" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -239,7 +239,7 @@ function emailBase({ preheader = '', headerLabel = '', headerTitle = '', headerS
 // ─── Reusable block builders ──────────────────────────────────────────────────
 
 /**
- * Summary card — clean bordered box (no colored background).
+ * Summary card - clean bordered box (no colored background).
  */
 function summaryCard({ label, value, valueColor, badge, subtext }) {
   const badgeHtml = badge
@@ -276,7 +276,7 @@ function metaRow(pairs) {
     : '';
 }
 
-/** Section heading — simple, clean */
+/** Section heading - simple, clean */
 function sectionHeading(text) {
   return `<p style="margin:0 0 10px;font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.1em;font-family:'Inter',Helvetica,Arial,sans-serif;border-left:3px solid #5B21B6;padding-left:8px;">${E(text)}</p>`;
 }
@@ -300,7 +300,7 @@ function para(text, opts = {}) {
 }
 
 /**
- * Notice / alert box — clean bordered style.
+ * Notice / alert box - clean bordered style.
  */
 function noticeBox({ type = 'info', text }) {
   const map = {

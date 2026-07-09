@@ -62,7 +62,7 @@ async function handler(event) {
       let supplyType = "INTRA_STATE";
       if (placeOfSupply) {
         try {
-          // NOTE: app_users does not have a state_code column — derive the
+          // NOTE: app_users does not have a state_code column - derive the
           // 2-digit state code from the first two chars of gst_number instead.
           const bizRs = await q(
             `SELECT gst_number FROM app_users WHERE id = $1 LIMIT 1`,

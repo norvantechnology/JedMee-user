@@ -3,7 +3,7 @@ import { fmtInputAmount, parseInputAmount } from "../../utils/currency.js";
 import { parseAmount } from "../../utils/amountFormat.js";
 
 /**
- * AmountInput — controlled input that formats numbers with locale-aware comma
+ * AmountInput - controlled input that formats numbers with locale-aware comma
  * separation while typing (respects the active currency's locale).
  *
  * INR active:  1000 → "1,000" / 100000 → "1,00,000"

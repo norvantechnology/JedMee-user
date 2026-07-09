@@ -98,7 +98,7 @@
   }
 }
 
-/* ── Mobile sidebar open: lock body scroll (overflow only — no position:fixed
+/* ── Mobile sidebar open: lock body scroll (overflow only - no position:fixed
    which would create a new containing block for position:fixed children) ── */
 @media (max-width: 720px) {
   body.sidebar-mobile-open {

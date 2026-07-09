@@ -12,14 +12,14 @@ import "./OngoingBillsBar.css";
  * Horizontal rail of in-progress DRAFT bills.
  *
  * Renders above sales or purchase pages so shop staff can serve multiple
- * customers/vendors in parallel — tap a chip to resume that bill, or click
+ * customers/vendors in parallel - tap a chip to resume that bill, or click
  * `+ New` to start a fresh one.
  *
  * Props:
- *   module        — "sales" | "purchase"
- *   activeId      — current bill id (highlighted)
- *   onSelect(bill)— called when user picks a chip; pass `null` for "new"
- *   refreshKey    — change to force a refetch (e.g. after save/confirm)
+ *   module        - "sales" | "purchase"
+ *   activeId      - current bill id (highlighted)
+ *   onSelect(bill)- called when user picks a chip; pass `null` for "new"
+ *   refreshKey    - change to force a refetch (e.g. after save/confirm)
  *
  * Each bill object carries: id, invoiceNumber, partyName, itemCount,
  * totalAmount, createdByName.
@@ -75,7 +75,7 @@ export default function OngoingBillsBar({
           + {isSales ? "New bill" : "New purchase"}
         </button>
         <span className="ongoingBills__hint">
-          No ongoing {isSales ? "bills" : "purchases"} — start a new one.
+          No ongoing {isSales ? "bills" : "purchases"} - start a new one.
         </span>
       </div>
     );

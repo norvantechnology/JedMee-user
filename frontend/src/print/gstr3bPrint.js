@@ -62,7 +62,7 @@ export function printGstr3bReport({ data, taxLabel }) {
   /* ── Critical HSN warning (compact, top of PDF) ── */
   const hsnWarningHtml = notes.missing_hsn_count > 0 ? `
     <div class="prWarnBox">
-      <strong>⚠ Action Required:</strong> ${notes.missing_hsn_count} sales line item(s) missing HSN codes — mandatory for GSTR-1 filing. Update before sharing with CA.
+      <strong>⚠ Action Required:</strong> ${notes.missing_hsn_count} sales line item(s) missing HSN codes - mandatory for GSTR-1 filing. Update before sharing with CA.
     </div>` : "";
 
   const generatedOn = new Date().toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -71,12 +71,12 @@ export function printGstr3bReport({ data, taxLabel }) {
   const headerHtml = `
     <div class="prHead">
       <div class="prHeadLeft">
-        <h1 class="prTitle">GSTR-3B — Monthly Summary Return</h1>
+        <h1 class="prTitle">GSTR-3B - Monthly Summary Return</h1>
         <p class="prSub">Form GSTR-3B &nbsp;|&nbsp; Sections 3.1, 3.2, 4, 5 &amp; 6</p>
       </div>
       <div class="prHeadRight">
         <table class="prMetaTable">
-          <tr><td class="prMetaLabel">Legal / Trade Name</td><td class="prMetaVal">${esc(biz.firm_name || "—")}</td></tr>
+          <tr><td class="prMetaLabel">Legal / Trade Name</td><td class="prMetaVal">${esc(biz.firm_name || "-")}</td></tr>
           <tr><td class="prMetaLabel">GSTIN</td><td class="prMetaVal prMono">${esc(biz.gst_number || "Not set")}</td></tr>
           <tr><td class="prMetaLabel">Return Period</td><td class="prMetaVal">${esc(MONTH_NAMES[month] || "")} ${esc(String(year))}</td></tr>
           <tr><td class="prMetaLabel">Financial Year</td><td class="prMetaVal">${fy} &nbsp;<span style="color:#6b7280;font-weight:400">(Month ${monthNum} of FY ${fy})</span></td></tr>
@@ -97,7 +97,7 @@ export function printGstr3bReport({ data, taxLabel }) {
       <div class="prCard">
         <div class="prCardLabel">Total ${esc(taxLabel)} Collected</div>
         <div class="prCardValue">${amt(s.total_gst_collected)}</div>
-        ${s.all_sales_nil_rated ? '<div class="prCardNote">All sales nil-rated / exempt — ₹0 GST is correct</div>' : ""}
+        ${s.all_sales_nil_rated ? '<div class="prCardNote">All sales nil-rated / exempt - ₹0 GST is correct</div>' : ""}
       </div>
       <div class="prCard">
         <div class="prCardLabel">Total ITC from Purchases</div>
@@ -119,14 +119,14 @@ export function printGstr3bReport({ data, taxLabel }) {
   /* ── Data quality warning ── */
   const dataQualityHtml = s.gst_rate_mismatch_count > 0 ? `
     <div class="prWarnBox" style="margin-bottom:8px">
-      <strong>⚠ Data Quality:</strong> ${s.gst_rate_mismatch_count} line item(s) have a GST rate set but ₹0 GST collected — reclassified as Nil Rated.
+      <strong>⚠ Data Quality:</strong> ${s.gst_rate_mismatch_count} line item(s) have a GST rate set but ₹0 GST collected - reclassified as Nil Rated.
       Verify these items have the correct GST rate in your product master.
     </div>` : "";
 
-  /* ── Section 3.1 — Outward Supplies ── */
+  /* ── Section 3.1 - Outward Supplies ── */
   const sec31Html = `
     <div class="prSection">
-      <h3>3.1 — Details of Outward Supplies and Inward Supplies Liable to Reverse Charge</h3>
+      <h3>3.1 - Details of Outward Supplies and Inward Supplies Liable to Reverse Charge</h3>
       ${dataQualityHtml}
       <table class="prTable">
         <thead><tr>
@@ -170,10 +170,10 @@ export function printGstr3bReport({ data, taxLabel }) {
       </table>
     </div>`;
 
-  /* ── Section 3.2 — Inter-state Supplies ── */
+  /* ── Section 3.2 - Inter-state Supplies ── */
   const sec32Html = `
     <div class="prSection">
-      <h3>3.2 — Supplies Made to Unregistered Persons, Composition Taxpayers and UIN Holders</h3>
+      <h3>3.2 - Supplies Made to Unregistered Persons, Composition Taxpayers and UIN Holders</h3>
       <p class="prNote">Inter-state supplies only. Intra-state supplies are not shown here.
       From July 2025, these values are <strong>auto-populated from GSTR-1</strong> on the GST portal and cannot be manually edited.</p>
       <table class="prTable">
@@ -191,10 +191,10 @@ export function printGstr3bReport({ data, taxLabel }) {
       </table>
     </div>`;
 
-  /* ── Table 3.3 — Supplies through E-commerce Operators (Section 9(5)) ── */
+  /* ── Table 3.3 - Supplies through E-commerce Operators (Section 9(5)) ── */
   const tableIIHtml = `
     <div class="prSection">
-      <h3>3.3 — Supplies Made Through E-Commerce Operators (Section 9(5))</h3>
+      <h3>3.3 - Supplies Made Through E-Commerce Operators (Section 9(5))</h3>
       <p class="prNote">Tax to be paid by e-commerce operator on behalf of supplier. Enter zero if not applicable.</p>
       <table class="prTable">
         <thead><tr>
@@ -218,10 +218,10 @@ export function printGstr3bReport({ data, taxLabel }) {
       </table>
     </div>`;
 
-  /* ── Section 4 — ITC ── */
+  /* ── Section 4 - ITC ── */
   const sec4Html = `
     <div class="prSection">
-      <h3>4 — Eligible Input Tax Credit (ITC)</h3>
+      <h3>4 - Eligible Input Tax Credit (ITC)</h3>
       <table class="prTable">
         <thead><tr>
           ${th("Source")}
@@ -234,7 +234,7 @@ export function printGstr3bReport({ data, taxLabel }) {
         </tr></thead>
         <tbody>
           <tr>
-            ${td("(A) ITC Available — Eligible Purchases (Supplier has GSTIN)")}
+            ${td("(A) ITC Available - Eligible Purchases (Supplier has GSTIN)")}
             ${td(amt(itcElig.taxable_value), "prNum")}
             ${td(amt(itcElig.cgst), "prNum")}
             ${td(amt(itcElig.sgst), "prNum")}
@@ -243,11 +243,11 @@ export function printGstr3bReport({ data, taxLabel }) {
             ${td(itcElig.invoice_count || 0, "prNum")}
           </tr>
           <tr>
-            ${td("(B) ITC Available — Imports (if any)")}
+            ${td("(B) ITC Available - Imports (if any)")}
             ${td(amt(0), "prNum")}${td(amt(0), "prNum")}${td(amt(0), "prNum")}${td(amt(0), "prNum")}${td(amt(0), "prNum")}${td(0, "prNum")}
           </tr>
           <tr class="prInfoRow">
-            ${td("(C) Ineligible ITC — Purchases from Unregistered Suppliers (reference only, not claimable)")}
+            ${td("(C) Ineligible ITC - Purchases from Unregistered Suppliers (reference only, not claimable)")}
             ${td(amt(itcInel.taxable_value), "prNum")}
             ${td(amt(itcInel.cgst), "prNum")}
             ${td(amt(itcInel.sgst), "prNum")}
@@ -256,7 +256,7 @@ export function printGstr3bReport({ data, taxLabel }) {
             ${td(itcInel.invoice_count || 0, "prNum")}
           </tr>
           <tr class="prInfoRow">
-            ${td("(D) ITC Reversed — Purchase Returns")}
+            ${td("(D) ITC Reversed - Purchase Returns")}
             ${td(amt(itcRev.total_amount), "prNum")}
             ${td(amt(itcRev.cgst), "prNum")}
             ${td(amt(itcRev.sgst), "prNum")}
@@ -271,21 +271,21 @@ export function printGstr3bReport({ data, taxLabel }) {
             ${td(amt(itcNet.sgst), "prNum", true, "#1d4ed8")}
             ${td(amt(itcNet.igst), "prNum", true, "#1d4ed8")}
             ${td(amt(0), "prNum", true)}
-            ${td("—", "prNum")}
+            ${td("-", "prNum")}
           </tr>
         </tbody>
       </table>
       ${itcInel.invoice_count > 0 ? `
-        <p class="prNote prNoteWarn">⚠ Row C (Ineligible ITC): GST paid ₹${n2(s.ineligible_itc_cost)} is an <strong>additional cost to your business</strong> — not claimable as ITC.
+        <p class="prNote prNoteWarn">⚠ Row C (Ineligible ITC): GST paid ₹${n2(s.ineligible_itc_cost)} is an <strong>additional cost to your business</strong> - not claimable as ITC.
         Row C is shown for reference only and is NOT subtracted from Net ITC.
-        RCM may apply on specific notified goods/services — consult your CA.</p>` : ""}
+        RCM may apply on specific notified goods/services - consult your CA.</p>` : ""}
     </div>`;
 
-  /* ── Section 5 — Nil-rated Inward Supplies ── */
+  /* ── Section 5 - Nil-rated Inward Supplies ── */
   const sec5Html = `
     <div class="prSection">
-      <h3>5 — Exempt, Nil-Rated and Non-GST Inward Supplies</h3>
-      <p class="prNote">No tax is applicable on these supplies — CGST/SGST/IGST columns are absent per the official GSTR-3B form.</p>
+      <h3>5 - Exempt, Nil-Rated and Non-GST Inward Supplies</h3>
+      <p class="prNote">No tax is applicable on these supplies - CGST/SGST/IGST columns are absent per the official GSTR-3B form.</p>
       <table class="prTable">
         <thead><tr>
           ${th("Nature of Supply")}
@@ -312,7 +312,7 @@ export function printGstr3bReport({ data, taxLabel }) {
       </table>
     </div>`;
 
-  /* ── Section 6 — Net Tax Payable ── */
+  /* ── Section 6 - Net Tax Payable ── */
   const showCf = Number(s.carry_forward_total) > 0;
   const cfHeader = showCf ? th("Carry Forward", "prNum") : "";
 
@@ -336,7 +336,7 @@ export function printGstr3bReport({ data, taxLabel }) {
 
   const sec6Html = `
     <div class="prSection">
-      <h3>6 — Payment of Tax</h3>
+      <h3>6 - Payment of Tax</h3>
       <p class="prNote">Interest and Late Fee are ₹0.00 when filed on or before the due date (${dueDateStr}). These will be non-zero if filed after the due date.</p>
       <table class="prTable">
         <thead><tr>
@@ -354,9 +354,9 @@ export function printGstr3bReport({ data, taxLabel }) {
 
   /* ── Important Notes + Disclaimer ── */
   const noteLines = [];
-  // HSN warning already shown at top of PDF — not repeated here
+  // HSN warning already shown at top of PDF - not repeated here
   if (notes.missing_gstin_count > 0)
-    noteLines.push({ warn: true, text: `${notes.missing_gstin_count} purchase invoice(s) from suppliers without GSTIN — GST paid is a cost, not claimable as ITC. RCM may apply — consult your CA.` });
+    noteLines.push({ warn: true, text: `${notes.missing_gstin_count} purchase invoice(s) from suppliers without GSTIN - GST paid is a cost, not claimable as ITC. RCM may apply - consult your CA.` });
   if (notes.purchase_returns_count > 0)
     noteLines.push({ warn: false, text: `${notes.purchase_returns_count} purchase return(s) totalling ₹${n2(notes.purchase_returns_amount)} reversed ITC this month.` });
   noteLines.push({ warn: false, text: "From July 2025, Table 3.2 values are auto-populated from GSTR-1 on the GST portal and cannot be manually edited." });
@@ -392,7 +392,7 @@ export function printGstr3bReport({ data, taxLabel }) {
 
       <div class="prFooter">
         <span>GSTR-3B &bull; ${esc(MONTH_NAMES[month] || "")} ${esc(String(year))}</span>
-        <span>System-generated report — verify before filing</span>
+        <span>System-generated report - verify before filing</span>
       </div>
     </div>
 

@@ -276,7 +276,7 @@ export function MfgStockistReportContent({ embedded = false } = {}) {
                                   {s.vendor_phone}
                                 </a>
                               ) : (
-                                <span className="rptVendorPhoneEmpty">—</span>
+                                <span className="rptVendorPhoneEmpty">-</span>
                               )}
                             </td>
                             <td>

@@ -175,7 +175,7 @@ export default function AuthUnifiedPage() {
     description:
       activeTab === "register"
         ? "Create your JedMee account and start managing your pharmacy or distribution business with tax billing, stock tracking, and more."
-        : "Sign in to JedMee — your all-in-one pharmacy management platform for stock, billing, orders, and payments.",
+        : "Sign in to JedMee - your all-in-one pharmacy management platform for stock, billing, orders, and payments.",
   });
 
   // ── Login state ──
@@ -312,7 +312,7 @@ export default function AuthUnifiedPage() {
         });
         if (user) saveAuthUser(user);
       }
-      // Navigate based on account status — never send PENDING/REJECTED/BLOCKED to dashboard.
+      // Navigate based on account status - never send PENDING/REJECTED/BLOCKED to dashboard.
       const status = String(user?.status || "").toUpperCase();
       const isBlocked = Boolean(user?.is_blocked);
       if (isBlocked || status === "PENDING" || status === "REJECTED") {
@@ -428,7 +428,7 @@ export default function AuthUnifiedPage() {
             Zero hassle.
           </h1>
           <p className="auLeftSub">
-            Track sales, manage inventory, handle billing — all in one verified platform built for wholesalers and retailers.
+            Track sales, manage inventory, handle billing - all in one verified platform built for wholesalers and retailers.
           </p>
         </div>
 
@@ -743,7 +743,7 @@ export default function AuthUnifiedPage() {
                       >
                         {CURRENCY_LIST.map((c) => (
                           <option key={c.code} value={c.code}>
-                            {c.symbol} — {c.name} ({c.code})
+                            {c.symbol} - {c.name} ({c.code})
                           </option>
                         ))}
                       </select>

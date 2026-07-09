@@ -12,7 +12,7 @@ export async function uploadToPresignedUrl({ uploadUrl, file }) {
     const res = await fetch(uploadUrl, {
       method: "PUT",
       body: file
-      // No Content-Type header — avoids CORS preflight to S3
+      // No Content-Type header - avoids CORS preflight to S3
     });
     return { ok: res.ok, status: res.status };
   } catch (err) {

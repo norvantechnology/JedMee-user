@@ -1344,7 +1344,7 @@
 }
 
 /* ═══════════════════════════════
-   MOBILE IMPROVEMENTS — 768px
+   MOBILE IMPROVEMENTS - 768px
 ═══════════════════════════════ */
 @media (max-width: 768px) {
   /* Panel header: add row gap when controls wrap */
@@ -1372,7 +1372,7 @@
 }
 
 /* ═══════════════════════════════
-   MOBILE IMPROVEMENTS — 640px
+   MOBILE IMPROVEMENTS - 640px
 ═══════════════════════════════ */
 @media (max-width: 640px) {
   /* Panel header: tighter on mobile */
@@ -1415,7 +1415,7 @@
 }
 
 /* ═══════════════════════════════
-   MOBILE IMPROVEMENTS — 480px
+   MOBILE IMPROVEMENTS - 480px
 ═══════════════════════════════ */
 @media (max-width: 480px) {
   /* Seg-ctrl: ultra compact */
@@ -1441,7 +1441,7 @@
   }
 }
 /* ═══════════════════════════════════════════════════════
-   NEW ANALYTICS WIDGETS  — added for dashboard v3
+   NEW ANALYTICS WIDGETS  - added for dashboard v3
    ═══════════════════════════════════════════════════════ */
 
 /* ── Pending Orders Banner ── */

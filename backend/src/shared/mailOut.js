@@ -89,18 +89,18 @@ function buildFrom() {
   const brand = String(process.env.APP_BRAND_NAME || 'JedMee').trim();
   // Already has display name
   if (raw.includes('<')) return raw;
-  // Just an address — wrap it
+  // Just an address - wrap it
   return `"${brand}" <${raw}>`;
 }
 
 /**
  * Build anti-spam / deliverability headers.
  * These headers significantly reduce the chance of landing in spam:
- *   1. Message-ID   — unique ID, required by RFC 5322; missing = spam signal
- *   2. List-Unsubscribe — tells Gmail/Outlook this is bulk mail (good thing)
- *   3. X-Mailer     — identifies the sending software
- *   4. Precedence   — "bulk" tells MTAs this is automated
- *   5. Auto-Submitted — RFC 3834 automated mail marker
+ *   1. Message-ID   - unique ID, required by RFC 5322; missing = spam signal
+ *   2. List-Unsubscribe - tells Gmail/Outlook this is bulk mail (good thing)
+ *   3. X-Mailer     - identifies the sending software
+ *   4. Precedence   - "bulk" tells MTAs this is automated
+ *   5. Auto-Submitted - RFC 3834 automated mail marker
  */
 function buildAntiSpamHeaders(to) {
   const brand = String(process.env.APP_BRAND_NAME || 'JedMee').trim();
@@ -140,13 +140,13 @@ async function sendMail(p) {
 
   if (isDryRun()) {
     // eslint-disable-next-line no-console
-    console.log('[medico:mail] dry-run — would send:', { to, subject, htmlLen: (p.html || '').length, attachments: attachMeta });
+    console.log('[medico:mail] dry-run - would send:', { to, subject, htmlLen: (p.html || '').length, attachments: attachMeta });
     return { ok: true, dryRun: true };
   }
 
   if (!isSmtpConfigured()) {
     // eslint-disable-next-line no-console
-    console.log('[medico:mail] SMTP not configured — skipping send:', { to, subject, htmlLen: (p.html || '').length, attachments: attachMeta });
+    console.log('[medico:mail] SMTP not configured - skipping send:', { to, subject, htmlLen: (p.html || '').length, attachments: attachMeta });
     return { ok: true, dryRun: true };
   }
 

@@ -121,7 +121,7 @@ async function handler(event) {
         const maxReturnableFree = n(src.free_qty) - alreadyReturnedFree;
         // For loose: use current loose_stock on the batch as the upper bound
         // (purchase_invoice_items doesn't track loose_qty, so we allow any non-negative value
-        //  up to what's currently in loose_stock — validated at confirm time)
+        //  up to what's currently in loose_stock - validated at confirm time)
 
         if (returnQty > maxReturnable) {
           return { err: fail(400, "VALIDATION_ERROR", `Return qty (${returnQty}) exceeds max returnable qty (${maxReturnable}) for item "${src.product_name || purchaseInvoiceItemId}".`) };

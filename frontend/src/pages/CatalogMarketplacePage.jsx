@@ -238,7 +238,7 @@ export default function CatalogMarketplacePage() {
                     return (
                       <div key={id} className={["cmpCard", inCart ? "cmpCard_inCart" : "", outOfStock ? "cmpCard_oos" : ""].filter(Boolean).join(" ")}>
                         <div className="cmpCardHead">
-                          <div className="cmpCardHeadLeft"><div className="cmpCardName">{row.product_name || "—"}</div><div className="cmpCardCode">{row.product_code || ""}</div></div>
+                          <div className="cmpCardHeadLeft"><div className="cmpCardName">{row.product_name || "-"}</div><div className="cmpCardCode">{row.product_code || ""}</div></div>
                           {(row.wholesaler_name || activeWholesaler?.wholesaler_name) && <div className="cmpCardWsBadge"><Users size={9} aria-hidden="true" />{row.wholesaler_name || activeWholesaler?.wholesaler_name}</div>}
                         </div>
                         <div className="cmpCardPills">
@@ -249,7 +249,7 @@ export default function CatalogMarketplacePage() {
                         <div className="cmpCardPrices">
                           <div className="cmpCardPriceItem"><div className="cmpCardPriceLabel">Catalog</div><div className="cmpCardPriceValue cmpCardPriceValue_cat">{fmtCurrency(row.catalog_price || 0)}</div></div>
                           <div className="cmpCardPriceDivider" />
-                          <div className="cmpCardPriceItem"><div className="cmpCardPriceLabel">MRP</div><div className="cmpCardPriceValue">{row.mrp != null && row.mrp !== "" ? fmtCurrency(row.mrp) : "—"}</div></div>
+                          <div className="cmpCardPriceItem"><div className="cmpCardPriceLabel">MRP</div><div className="cmpCardPriceValue">{row.mrp != null && row.mrp !== "" ? fmtCurrency(row.mrp) : "-"}</div></div>
                           <div className="cmpCardPriceDivider" />
                           <div className="cmpCardPriceItem"><div className="cmpCardPriceLabel">Stock</div><div className="cmpCardPriceValue">{stock}</div></div>
                         </div>
@@ -327,7 +327,7 @@ export default function CatalogMarketplacePage() {
                         <span className={`mcVisBadge${row.is_visible ? " mcVisBadge_yes" : " mcVisBadge_no"}`}>{row.is_visible ? "Visible" : "Hidden"}</span>
                         <div className="mcCardHead">
                           <div className="mcCardIcon"><IconMcProduct width={18} height={18} /></div>
-                          <div><div className="mcCardName">{row.product_name || "—"}</div><div className="mcCardCode">{row.product_code || ""}</div></div>
+                          <div><div className="mcCardName">{row.product_name || "-"}</div><div className="mcCardCode">{row.product_code || ""}</div></div>
                         </div>
                         <div className="mcPills">
                           {row.packing && <span className="mcPill mcPill_pack">Pack {row.packing}</span>}
@@ -337,13 +337,13 @@ export default function CatalogMarketplacePage() {
                         <div className="mcPrices">
                           <div className="mcPrice"><div className="mcPriceLabel">Catalog</div><div className="mcPriceValue mcPriceValue_cat">{fmtCurrency(row.catalog_price || 0)}</div></div>
                           <div className="mcPriceDivider" />
-                          <div className="mcPrice"><div className="mcPriceLabel">MRP</div><div className="mcPriceValue">{row.mrp != null && row.mrp !== "" ? fmtCurrency(row.mrp) : "—"}</div></div>
+                          <div className="mcPrice"><div className="mcPriceLabel">MRP</div><div className="mcPriceValue">{row.mrp != null && row.mrp !== "" ? fmtCurrency(row.mrp) : "-"}</div></div>
                           <div className="mcPriceDivider" />
                           <div className="mcPrice"><div className="mcPriceLabel">Stock</div><div className="mcPriceValue">{stock}</div></div>
                         </div>
                         <div className="mcQtyRow">
                           <div className="mcQtyGroup"><span className="mcQtyLabel">Min Order:</span><span className="mcQtyValue">{row.min_order_qty || 1}</span></div>
-                          <div className="mcQtyGroup"><span className="mcQtyLabel">Max Order:</span><span className="mcQtyValue">{row.max_order_qty || "—"}</span></div>
+                          <div className="mcQtyGroup"><span className="mcQtyLabel">Max Order:</span><span className="mcQtyValue">{row.max_order_qty || "-"}</span></div>
                         </div>
                         {row.catalog_notes && <div className="mcNote"><MessageSquare size={12} aria-hidden="true" />{row.catalog_notes}</div>}
                         <div className="mcCardFoot">
@@ -380,7 +380,7 @@ export default function CatalogMarketplacePage() {
             </div>
 
             {addStep === 1 ? (
-              /* Step 1 — product search list */
+              /* Step 1 - product search list */
               <>
                 <div className="mcSearchBox" style={{ marginBottom: 10 }}>
                   <Search size={14} className="mcSearchIcon" aria-hidden="true" />
@@ -400,7 +400,7 @@ export default function CatalogMarketplacePage() {
                           <div key={p.id} className={`mcProdItem${sel ? " mcProdItem_sel" : ""}`} onClick={() => { setAddSelectedProduct(p); setForm((f) => ({ ...f, product_id: String(p.id || "") })); }}>
                             <div className={`mcProdRadio${sel ? " mcProdRadio_on" : ""}`}>{sel && <IconCheck width={9} height={9} />}</div>
                             <div className="mcProdInfo">
-                              <div className="mcProdName">{p.name || "—"}</div>
+                              <div className="mcProdName">{p.name || "-"}</div>
                               <div className="mcProdMeta"><span className="mcProdCode">{p.code || ""}</span>{p.packing ? <span> · Pack {p.packing}</span> : null}</div>
                             </div>
                           </div>
@@ -416,12 +416,12 @@ export default function CatalogMarketplacePage() {
                 </ModalFooterShell>
               </>
             ) : (
-              /* Step 2 — pricing / limits / toggles / notes */
+              /* Step 2 - pricing / limits / toggles / notes */
               <>
                 {addSelectedProduct && (
                   <div className="mcSelCard">
                     <div className="mcSelIcon"><IconMcProduct width={16} height={16} /></div>
-                    <div><div className="mcSelName">{addSelectedProduct.name || addSelectedProduct.product_name || "—"}</div><div className="mcSelMeta">{addSelectedProduct.code || addSelectedProduct.product_code || ""}{addSelectedProduct.packing ? ` · Pack ${addSelectedProduct.packing}` : ""}</div></div>
+                    <div><div className="mcSelName">{addSelectedProduct.name || addSelectedProduct.product_name || "-"}</div><div className="mcSelMeta">{addSelectedProduct.code || addSelectedProduct.product_code || ""}{addSelectedProduct.packing ? ` · Pack ${addSelectedProduct.packing}` : ""}</div></div>
                   </div>
                 )}
                 <div className="mcSecLabel">Pricing</div>
@@ -472,7 +472,7 @@ export default function CatalogMarketplacePage() {
             {editingRow && (
               <div className="mcSelCard">
                 <div className="mcSelIcon"><IconMcProduct width={16} height={16} /></div>
-                <div><div className="mcSelName">{editingRow.product_name || "—"}</div><div className="mcSelMeta">{editingRow.product_code || ""}{editingRow.packing ? ` · Pack ${editingRow.packing}` : ""}</div></div>
+                <div><div className="mcSelName">{editingRow.product_name || "-"}</div><div className="mcSelMeta">{editingRow.product_code || ""}{editingRow.packing ? ` · Pack ${editingRow.packing}` : ""}</div></div>
               </div>
             )}
             <div className="mcSecLabel">Pricing</div>

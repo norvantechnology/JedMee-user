@@ -921,7 +921,7 @@
 .cmpPill_gst  { background: var(--mc-p1); color: var(--mc-p6); }
 .cmpPill_drug { background: var(--mc-wnb); color: var(--mc-wn); }
 
-/* Price grid — same layout as wholesaler .mcPrices */
+/* Price grid - same layout as wholesaler .mcPrices */
 .cmpCardPrices {
   display: grid;
   grid-template-columns: 1fr 1px 1fr 1px 1fr;

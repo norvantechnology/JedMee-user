@@ -52,7 +52,7 @@ async function handler(event) {
       let supplyType = null;
 
       if (salesInvoiceId) {
-        // Copy tag from the original invoice — returns must match the invoice group
+        // Copy tag from the original invoice - returns must match the invoice group
         const invTagRs = await q(
           `SELECT b2b_b2c_tag, customer_gstin_snapshot, place_of_supply, supply_type
            FROM sales_invoices WHERE id = $1 AND account_id = $2 LIMIT 1`,
@@ -66,7 +66,7 @@ async function handler(event) {
           supplyType          = invTag.supply_type || null;
         }
       } else {
-        // No linked invoice — derive from customer GSTIN (walk-in always B2C)
+        // No linked invoice - derive from customer GSTIN (walk-in always B2C)
         const customerGstinRaw = String(customer.gst_number || '').trim().toUpperCase();
         const gstinValid = isValidGstin(customerGstinRaw);
         b2bB2cTag             = gstinValid ? 'B2B' : 'B2C';

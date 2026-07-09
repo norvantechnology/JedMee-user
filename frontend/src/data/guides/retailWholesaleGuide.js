@@ -6,7 +6,7 @@ export const RETAIL_WHOLESALE_GUIDE = {
   pageTitle: "Retail + Wholesale Pharmacy in One System",
   metaTitle: "Combined Retail Billing & Wholesale Distribution Software",
   description:
-    "Run retail counter billing and wholesale distribution from one JedMee account — shared inventory, separate workflows, retailer order catalogs, and unified reporting.",
+    "Run retail counter billing and wholesale distribution from one JedMee account - shared inventory, separate workflows, retailer order catalogs, and unified reporting.",
   canonical: CANONICAL,
   label: "Retail & Wholesale",
   datePublished: "2026-06-01",
@@ -22,8 +22,8 @@ export const RETAIL_WHOLESALE_GUIDE = {
     { name: "Retail + Wholesale", url: CANONICAL },
   ],
   introFacts: [
-    "Many medicine businesses run a retail counter and a wholesale division — JedMee supports both in one cloud account with division-wise stock, retail GST billing, and B2B order catalogs for retailer customers.",
-    "Retail sales decrement batch stock at the shop; wholesale dispatch bills retailers on credit or cash with separate price lists — owners see combined day book and division-level stock valuation.",
+    "Many medicine businesses run a retail counter and a wholesale division - JedMee supports both in one cloud account with division-wise stock, retail GST billing, and B2B order catalogs for retailer customers.",
+    "Retail sales decrement batch stock at the shop; wholesale dispatch bills retailers on credit or cash with separate price lists - owners see combined day book and division-level stock valuation.",
   ],
   service: {
     name: "JedMee retail and wholesale pharmacy platform",

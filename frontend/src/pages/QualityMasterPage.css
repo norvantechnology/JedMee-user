@@ -1,6 +1,6 @@
 /* QualityMasterPage.css
    Page-specific styles only.
-   .qmWrap and .qmCard removed — use .pageWrap and .pageCard from layouts/AppShell.css.
+   .qmWrap and .qmCard removed - use .pageWrap and .pageCard from layouts/AppShell.css.
    Shared button/input styles come from styles/common.css and components/StructuredForm.css.
 */
 

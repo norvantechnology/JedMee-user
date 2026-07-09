@@ -13,7 +13,7 @@ const CONTACT_FAQS = [
   },
   {
     q: "Do you offer a free trial?",
-    a: "Yes — JedMee offers a 14-day free trial on all plans with no credit card required. After the trial, paid plans start at $9/month.",
+    a: "Yes - JedMee offers a 14-day free trial on all plans with no credit card required. After the trial, paid plans start at $9/month.",
   },
   {
     q: "Can I migrate data from my existing software?",
@@ -53,7 +53,7 @@ export default function ContactPage() {
   const [status, setStatus] = useState("idle"); // idle | sending | sent
 
   useSeoMeta({
-    title: "Contact JedMee — Pharmacy Software Support & Sales",
+    title: "Contact JedMee - Pharmacy Software Support & Sales",
     description:
       "Contact JedMee for pharmacy software support, pricing, or a free demo. We help medicine shops and distributors worldwide with billing and inventory management.",
     canonical: "https://jedmee.com/contact",
@@ -63,7 +63,7 @@ export default function ContactPage() {
     {
       "@context": "https://schema.org",
       "@type": "ContactPage",
-      "name": "Contact JedMee — Pharmacy Software Support & Sales",
+      "name": "Contact JedMee - Pharmacy Software Support & Sales",
       "url": "https://jedmee.com/contact",
       "description":
         "Contact JedMee for pharmacy software support, pricing, or a free demo.",
@@ -155,7 +155,7 @@ export default function ContactPage() {
               We're Here to <span className="ip-hero-title-accent">Help</span>
             </h1>
             <p className="ip-hero-sub">
-              Whether you have a question about features, pricing, onboarding, or anything else — our team is ready to answer within one business day.
+              Whether you have a question about features, pricing, onboarding, or anything else - our team is ready to answer within one business day.
             </p>
           </div>
         </div>
@@ -288,7 +288,7 @@ export default function ContactPage() {
           <div className="ip-cta-inner">
             <h2 className="ip-cta-title">Still Have Questions?</h2>
             <p className="ip-cta-sub">
-              Start free and explore JedMee yourself — no credit card required. Or reach out and we'll walk you through it.
+              Start free and explore JedMee yourself - no credit card required. Or reach out and we'll walk you through it.
             </p>
             <div className="ip-cta-btns">
               <button className="ln-btn ln-btn--white ln-btn--lg" onClick={() => navigate("/register")}>

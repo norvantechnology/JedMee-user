@@ -266,7 +266,7 @@ export function SalesStockAnalysisContent({ embedded = false } = {}) {
                         <td className="ssaColIdx ssaIdxVal">{idx + 1}</td>
                         <td>
                           <div className="rptVendorContact">
-                            <span className="rptVendorName">{r.product_name || r.product_code || "—"}</span>
+                            <span className="rptVendorName">{r.product_name || r.product_code || "-"}</span>
                             {r.drug_name ? (
                               <span className="rptVendorAddress">{r.drug_name}</span>
                             ) : null}
@@ -275,11 +275,11 @@ export function SalesStockAnalysisContent({ embedded = false } = {}) {
                             ) : null}
                           </div>
                         </td>
-                        <td className="ssaMfgCell">{r.mfg_name || <span className="ssaMuted">—</span>}</td>
+                        <td className="ssaMfgCell">{r.mfg_name || <span className="ssaMuted">-</span>}</td>
                         {/* ── Sales group ── */}
                         <td className="rptNum ssaNumVal ssaColSales">{fmtQty(r.qty_sold)}</td>
                         <td className="rptNum ssaNumVal ssaMuted ssaColSales">
-                          {r.loose_sold > 0 ? fmtQty(r.loose_sold) : "—"}
+                          {r.loose_sold > 0 ? fmtQty(r.loose_sold) : "-"}
                         </td>
                         <td className="rptNum ssaNumVal ssaColSales ssaColInvoices">{r.invoice_count}</td>
                         {/* ── Revenue ── */}
@@ -289,7 +289,7 @@ export function SalesStockAnalysisContent({ embedded = false } = {}) {
                           <span className={chipClass}>{fmtQty(r.current_stock)}</span>
                         </td>
                         <td className="rptNum ssaNumVal ssaMuted ssaColStock">
-                          {r.loose_stock > 0 ? fmtQty(r.loose_stock) : "—"}
+                          {r.loose_stock > 0 ? fmtQty(r.loose_stock) : "-"}
                         </td>
                       </tr>
                     );
@@ -311,7 +311,7 @@ export function SalesStockAnalysisContent({ embedded = false } = {}) {
           </span>
           <span className="ssaLegendItem">
             <span className="rptExpiryChip is-soon">3</span>
-            <span>Low — stock &lt; 20% of qty sold</span>
+            <span>Low - stock &lt; 20% of qty sold</span>
           </span>
           <span className="ssaLegendItem">
             <span className="rptExpiryChip is-expired">0</span>

@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 
 /**
- * SparklineChart — lightweight inline SVG sparkline for KPI cards.
+ * SparklineChart - lightweight inline SVG sparkline for KPI cards.
  * Props:
- *   values   : number[]   — data points
- *   color    : string     — stroke color (CSS var or hex)
- *   height   : number     — SVG height (default 40)
- *   width    : number     — SVG width (default 100)
- *   area     : boolean    — fill area under line (default true)
- *   strokeWidth : number  — line thickness (default 1.8)
+ *   values   : number[]   - data points
+ *   color    : string     - stroke color (CSS var or hex)
+ *   height   : number     - SVG height (default 40)
+ *   width    : number     - SVG width (default 100)
+ *   area     : boolean    - fill area under line (default true)
+ *   strokeWidth : number  - line thickness (default 1.8)
  */
 export default function SparklineChart({
   values = [],

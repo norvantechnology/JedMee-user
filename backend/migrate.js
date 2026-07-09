@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * migrate.js — JedMee DB Migration Runner
+ * migrate.js - JedMee DB Migration Runner
  *
  * Usage:
  *   node migrate.js <stage> [options]
@@ -292,7 +292,7 @@ async function main() {
     console.log(head(`Pending (${pending.length} of ${allFiles.length}):`));
 
     if (pending.length === 0) {
-      console.log(info('Nothing to run — database is up to date.'));
+      console.log(info('Nothing to run - database is up to date.'));
       return;
     }
 
@@ -317,7 +317,7 @@ async function main() {
         console.error(err(`  ${e.message}`));
         failCount++;
         // Stop on first failure to preserve DB integrity
-        console.error(err('Stopping — fix the error above and re-run.'));
+        console.error(err('Stopping - fix the error above and re-run.'));
         break;
       }
     }

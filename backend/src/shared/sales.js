@@ -47,7 +47,7 @@ function addCalendarDaysYmd(ymd, days) {
  * Resolution order:
  *   1. explicit client today (`clientTodayYmd`), capped at server+1 day slack
  *   2. civil today in the client's timezone (`timeZone`), if provided
- *   3. server local date + 1 day slack — the max civil date anywhere on earth
+ *   3. server local date + 1 day slack - the max civil date anywhere on earth
  *      for the current UTC instant (covers up to UTC+14 without allowing real
  *      future dates beyond a single day of timezone skew)
  */
@@ -68,7 +68,7 @@ function effectiveInvoiceDateCap(opts = {}) {
   return slack;
 }
 
-/** @deprecated Prefer localCalendarYmd — kept for backward compatibility */
+/** @deprecated Prefer localCalendarYmd - kept for backward compatibility */
 function todayYmd() {
   return localCalendarYmd();
 }

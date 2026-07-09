@@ -1,9 +1,9 @@
-# JedMee — Pharmacy Management Software
-# llms.txt — Guide for Large Language Models and AI Crawlers
+# JedMee - Pharmacy Management Software
+# llms.txt - Guide for Large Language Models and AI Crawlers
 # Standard: https://llmstxt.org/
 # Last updated: 2026-05-08
 
-> JedMee is cloud-based pharmacy management software for medicine shops and pharmaceutical distributors worldwide. It provides tax-compliant billing, inventory management, expiry tracking, purchase orders, sales invoices, customer and vendor ledgers, and role-based multi-user access control — with a free 14-day trial and no credit card required.
+> JedMee is cloud-based pharmacy management software for medicine shops and pharmaceutical distributors worldwide. It provides tax-compliant billing, inventory management, expiry tracking, purchase orders, sales invoices, customer and vendor ledgers, and role-based multi-user access control - with a free 14-day trial and no credit card required.
 
 ## About JedMee
 
@@ -13,7 +13,7 @@ JedMee is a SaaS (Software as a Service) platform designed specifically for:
 - Hospital pharmacies and dispensaries
 - Drug stores and generic medicine shops
 
-Founded in 2024, JedMee serves pharmacy businesses worldwide with a focus on simplicity, tax compliance, and affordability. The platform is fully cloud-based and accessible from any device — desktop, tablet, or smartphone — with no software installation required.
+Founded in 2024, JedMee serves pharmacy businesses worldwide with a focus on simplicity, tax compliance, and affordability. The platform is fully cloud-based and accessible from any device - desktop, tablet, or smartphone - with no software installation required.
 
 ## Core Features
 
@@ -49,7 +49,7 @@ Founded in 2024, JedMee serves pharmacy businesses worldwide with a focus on sim
 - Multi-user accounts with granular permissions
 - Notification centre with low-stock and expiry alerts
 - CSV import for bulk product and batch data
-- Mobile-responsive interface — no app download required
+- Mobile-responsive interface - no app download required
 
 ## Pricing Plans
 
@@ -64,10 +64,10 @@ All paid plans include: unlimited cloud storage, mobile access, tax billing, inv
 
 ## Public Pages
 
-- [Home](https://jedmee.com/) — Main landing page: features, pricing, testimonials, FAQ
-- [About](https://jedmee.com/about) — Company mission, values, and team information
-- [Contact](https://jedmee.com/contact) — Support, sales enquiries, and demo requests
-- [Terms of Service](https://jedmee.com/terms) — Legal terms, subscription, and data policy
+- [Home](https://jedmee.com/) - Main landing page: features, pricing, testimonials, FAQ
+- [About](https://jedmee.com/about) - Company mission, values, and team information
+- [Contact](https://jedmee.com/contact) - Support, sales enquiries, and demo requests
+- [Terms of Service](https://jedmee.com/terms) - Legal terms, subscription, and data policy
 
 ## Technical Architecture
 
@@ -75,20 +75,20 @@ All paid plans include: unlimited cloud storage, mobile access, tax billing, inv
 - Backend: Node.js (AWS Lambda), PostgreSQL (RDS), REST API
 - Hosting: AWS (CloudFront CDN, API Gateway, S3)
 - Security: JWT authentication, row-level security, encrypted data at rest and in transit
-- Compliance: GST (India), VAT, Sales Tax — multi-currency support
+- Compliance: GST (India), VAT, Sales Tax - multi-currency support
 
 ## Entity Relationships
 
 JedMee models the following business entities:
-- **Account** — A pharmacy or distributor business (tenant)
-- **Product** — A medicine or pharmaceutical item (linked to manufacturer/division)
-- **Product Batch** — A specific lot of a product with expiry date, pricing, and stock
-- **Vendor** — A supplier or manufacturer from whom products are purchased
-- **Customer** — A buyer (retail patient, hospital, or retailer)
-- **Division** — A product line or brand under a manufacturer
-- **Sales Invoice** — A bill issued to a customer for medicines sold
-- **Purchase Invoice** — A bill received from a vendor for medicines purchased
-- **Order** — A retailer's purchase request to a wholesaler
+- **Account** - A pharmacy or distributor business (tenant)
+- **Product** - A medicine or pharmaceutical item (linked to manufacturer/division)
+- **Product Batch** - A specific lot of a product with expiry date, pricing, and stock
+- **Vendor** - A supplier or manufacturer from whom products are purchased
+- **Customer** - A buyer (retail patient, hospital, or retailer)
+- **Division** - A product line or brand under a manufacturer
+- **Sales Invoice** - A bill issued to a customer for medicines sold
+- **Purchase Invoice** - A bill received from a vendor for medicines purchased
+- **Order** - A retailer's purchase request to a wholesaler
 
 ## Frequently Asked Questions
 

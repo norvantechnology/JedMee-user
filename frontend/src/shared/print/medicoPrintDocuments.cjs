@@ -41,7 +41,7 @@ function batchExpiryDaysInlineSuffix(dateStr) {
   return bit ? ` · ${bit}` : "";
 }
 
-/** Shared print stylesheet — keep in sync with former `PRINT_STYLES` (print iframe). Adds explicit `--font`. */
+/** Shared print stylesheet - keep in sync with former `PRINT_STYLES` (print iframe). Adds explicit `--font`. */
 function getMedicoPrintDocumentCss() {
   return `
   :root {
@@ -122,7 +122,7 @@ function sellerPhone(seller) {
   return String(seller?.phone ?? seller?.phone_number ?? "").trim();
 }
 
-/** Body HTML only — same markup as legacy `salesInvoicePrint.js`. */
+/** Body HTML only - same markup as legacy `salesInvoicePrint.js`. */
 function buildSalesInvoiceBodyHtml(data) {
   const seller = data?.seller || {};
   const inv = data?.invoice || {};
@@ -287,7 +287,7 @@ function buildSalesInvoiceCompleteHtmlDocument(data, opts) {
 }
 
 /**
- * Body HTML for purchase invoice — same CSS classes as sales invoice.
+ * Body HTML for purchase invoice - same CSS classes as sales invoice.
  * Data shape: { seller, invoice, items, printable }
  * invoice fields: invoice_number, vendor_invoice_number, invoice_date, due_date,
  *   status, payment_status, vendor_name, vendor_email, division_label,

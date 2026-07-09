@@ -804,7 +804,7 @@ export default function CommonTable({
           </button>
         ) : null}
 
-        {/* Columns icon — always last/rightmost */}
+        {/* Columns icon - always last/rightmost */}
         {showColumnCustomizer ? (
           <div className="tblColsWrap">
             <button

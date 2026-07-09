@@ -1,9 +1,9 @@
 /**
  * Native `<select size="1">` Enter sequence inside CommonModal:
- * 1) Enter — open picker (showPicker / click)
- * 2) Enter — while list is open, event is not intercepted (`:open`); after close,
+ * 1) Enter - open picker (showPicker / click)
+ * 2) Enter - while list is open, event is not intercepted (`:open`); after close,
  *    `change` marks "picked"; if no `change`, a plain Enter marks picked so step 3 can run
- * 3) Enter — focus next field
+ * 3) Enter - focus next field
  */
 
 const state = new WeakMap();

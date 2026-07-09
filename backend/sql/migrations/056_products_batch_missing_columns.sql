@@ -7,19 +7,19 @@
 --
 -- Columns added:
 --   products:
---     is_otc          boolean  — OTC flag (source-of-truth; snapshotted to batches)
---     rack_location   text     — shelf/rack label for physical location
+--     is_otc          boolean  - OTC flag (source-of-truth; snapshotted to batches)
+--     rack_location   text     - shelf/rack label for physical location
 --
 --   product_batches:
---     is_otc          boolean  — snapshot of products.is_otc (SNAPSHOT_COLUMNS)
---     special_rate_1  numeric  — optional special pricing tier 1
---     special_rate_2  numeric  — optional special pricing tier 2
---     loose_stock     numeric  — loose/broken-pack stock quantity
---     loose_unit_name text     — unit name for loose stock (e.g. "tablet", "ml")
---     hold_reason     text     — reason text when is_hold = true
+--     is_otc          boolean  - snapshot of products.is_otc (SNAPSHOT_COLUMNS)
+--     special_rate_1  numeric  - optional special pricing tier 1
+--     special_rate_2  numeric  - optional special pricing tier 2
+--     loose_stock     numeric  - loose/broken-pack stock quantity
+--     loose_unit_name text     - unit name for loose stock (e.g. "tablet", "ml")
+--     hold_reason     text     - reason text when is_hold = true
 
 ------------------------------------------------------------------------
--- 1. products — is_otc
+-- 1. products - is_otc
 ------------------------------------------------------------------------
 ALTER TABLE products
   ADD COLUMN IF NOT EXISTS is_otc boolean NOT NULL DEFAULT true;
@@ -28,7 +28,7 @@ COMMENT ON COLUMN products.is_otc IS
   'Over-the-counter flag. true = OTC (no prescription needed). Default true.';
 
 ------------------------------------------------------------------------
--- 2. products — rack_location
+-- 2. products - rack_location
 ------------------------------------------------------------------------
 ALTER TABLE products
   ADD COLUMN IF NOT EXISTS rack_location text;
@@ -37,7 +37,7 @@ COMMENT ON COLUMN products.rack_location IS
   'Physical shelf / rack label (e.g. "A-3", "cold chain"). Optional.';
 
 ------------------------------------------------------------------------
--- 3. product_batches — is_otc  (snapshot of products.is_otc)
+-- 3. product_batches - is_otc  (snapshot of products.is_otc)
 ------------------------------------------------------------------------
 ALTER TABLE product_batches
   ADD COLUMN IF NOT EXISTS is_otc boolean NOT NULL DEFAULT true;
@@ -48,7 +48,7 @@ COMMENT ON COLUMN product_batches.is_otc IS
   'with reports that join only product_batches.';
 
 ------------------------------------------------------------------------
--- 4. product_batches — special_rate_1 / special_rate_2
+-- 4. product_batches - special_rate_1 / special_rate_2
 ------------------------------------------------------------------------
 ALTER TABLE product_batches
   ADD COLUMN IF NOT EXISTS special_rate_1 numeric(12,2),
@@ -58,7 +58,7 @@ COMMENT ON COLUMN product_batches.special_rate_1 IS 'Optional special pricing ti
 COMMENT ON COLUMN product_batches.special_rate_2 IS 'Optional special pricing tier 2 (e.g. institution rate).';
 
 ------------------------------------------------------------------------
--- 5. product_batches — loose_stock / loose_unit_name
+-- 5. product_batches - loose_stock / loose_unit_name
 ------------------------------------------------------------------------
 ALTER TABLE product_batches
   ADD COLUMN IF NOT EXISTS loose_stock     numeric(12,3) NOT NULL DEFAULT 0,
@@ -77,7 +77,7 @@ COMMENT ON COLUMN product_batches.loose_unit_name IS
   'Unit name for loose stock (e.g. "tablet", "capsule", "ml"). Stored in normalised lowercase.';
 
 ------------------------------------------------------------------------
--- 6. product_batches — hold_reason
+-- 6. product_batches - hold_reason
 ------------------------------------------------------------------------
 ALTER TABLE product_batches
   ADD COLUMN IF NOT EXISTS hold_reason text;

@@ -22,7 +22,7 @@ function n(v)  { return Math.round((parseFloat(v) || 0) * 100) / 100; }
 function plural(count, word) { return `${count} ${word}${count !== 1 ? "s" : ""}`; }
 function isValidGstin(g) { return g && GSTIN_REGEX.test(g.trim().toUpperCase()); }
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   return new Date(d).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
 function buildYearOptions() {
@@ -58,7 +58,7 @@ function AmtCell({ v, bold, highlight, danger, muted, ineligible }) {
   if (highlight) cls += " tHighlight";
   if (danger || ineligible) cls += " g2bDanger";
   if (muted)     cls += " tMuted";
-  return <td className={cls}>{muted ? "—" : `₹${n2(v)}`}</td>;
+  return <td className={cls}>{muted ? "-" : `₹${n2(v)}`}</td>;
 }
 
 function exportCsv(data, year, month) {
@@ -90,11 +90,11 @@ function exportCsv(data, year, month) {
     [],
     ["=== SUPPLIER-WISE ITC SUMMARY ==="],
     ["#", "Supplier Name", "GSTIN", "Invoices", "Purchase Value", "CGST ITC", "SGST ITC", "IGST ITC", "CESS ITC", "Total ITC", "Status"],
-    ...(data.supplier_summary || []).map((r, i) => [i+1, r.vendor_name, r.vendor_gstin||"—", r.invoice_count, r.purchase_value, r.cgst_itc, r.sgst_itc, r.igst_itc, r.cess_itc||0, r.total_itc, r.itc_status]),
+    ...(data.supplier_summary || []).map((r, i) => [i+1, r.vendor_name, r.vendor_gstin||"-", r.invoice_count, r.purchase_value, r.cgst_itc, r.sgst_itc, r.igst_itc, r.cess_itc||0, r.total_itc, r.itc_status]),
     [],
     ["=== INVOICE-WISE ITC DETAIL ==="],
     ["#", "Invoice No", "Date", "Supplier", "GSTIN", "HSN Code", "Supply Type", "Taxable Value", "CGST", "SGST", "IGST", "Total GST", "ITC Status", "Payment Status", "Days to Reversal"],
-    ...(data.invoice_detail || []).map((r, i) => [i+1, r.invoice_number, fmtDate(r.invoice_date), r.vendor_name, r.vendor_gstin||"—", r.hsn_code||"Missing", r.supply_type, r.taxable_value, r.cgst_itc, r.sgst_itc, r.igst_itc, r.total_gst, r.itc_status, r.payment_status, r.days_to_reversal]),
+    ...(data.invoice_detail || []).map((r, i) => [i+1, r.invoice_number, fmtDate(r.invoice_date), r.vendor_name, r.vendor_gstin||"-", r.hsn_code||"Missing", r.supply_type, r.taxable_value, r.cgst_itc, r.sgst_itc, r.igst_itc, r.total_gst, r.itc_status, r.payment_status, r.days_to_reversal]),
     [],
     ["=== ITC REVERSALS ==="],
     ["#", "Return No", "Return Date", "Original Invoice", "Supplier", "CGST Reversed", "SGST Reversed", "IGST Reversed", "Total Reversed", "Return Amount"],
@@ -102,7 +102,7 @@ function exportCsv(data, year, month) {
     [],
     ["=== BLOCKED / INELIGIBLE ITC ==="],
     ["#", "Invoice No", "Date", "Supplier", "GSTIN Status", "Purchase Value", "CGST Paid", "SGST Paid", "IGST Paid", "CESS Paid", "Total GST Paid", "Reason Blocked", "RCM Applicable"],
-    ...(data.blocked_itc || []).map((r, i) => [i+1, r.invoice_number, fmtDate(r.invoice_date), r.vendor_name, r.vendor_gstin||"No GSTIN", r.purchase_value, r.cgst_paid||0, r.sgst_paid||0, r.igst_paid||0, r.cess_paid||0, r.gst_paid, r.reason_blocked, r.rcm_applicable ? "Yes — Check with CA" : "No"]),
+    ...(data.blocked_itc || []).map((r, i) => [i+1, r.invoice_number, fmtDate(r.invoice_date), r.vendor_name, r.vendor_gstin||"No GSTIN", r.purchase_value, r.cgst_paid||0, r.sgst_paid||0, r.igst_paid||0, r.cess_paid||0, r.gst_paid, r.reason_blocked, r.rcm_applicable ? "Yes - Check with CA" : "No"]),
     [],
     ["=== 180-DAY PAYMENT RISK ==="],
     ["#", "Invoice No", "Supplier", "Invoice Date", "Reversal Due Date", "Days Remaining", "Taxable Value", "ITC at Risk", "Payment Status"],
@@ -168,8 +168,8 @@ export default function Gstr2Page() {
     <ReportShell>
       <div className="pageWrap">
         <ReportPageIntro
-          title="GSTR-2 — Purchase ITC Report"
-          subtitle="Monthly purchase-side GST report — track ITC eligibility, reversals, and 180-day payment risk. Share with your CA for GSTR-3B Section 4 filing."
+          title="GSTR-2 - Purchase ITC Report"
+          subtitle="Monthly purchase-side GST report - track ITC eligibility, reversals, and 180-day payment risk. Share with your CA for GSTR-3B Section 4 filing."
         />
 
         <ReportCard busy={loading}>
@@ -213,7 +213,7 @@ export default function Gstr2Page() {
             <div className="g3bEmpty">
               <div className="g3bEmptyIcon"><BarChart3 size={32}/></div>
               <div className="g3bEmptyTitle">Select month and year, then click Generate Report</div>
-              <div className="g3bEmptySub">GSTR-2 shows your monthly purchase ITC — eligible ITC from registered suppliers, reversals from returns, and 180-day payment risk. Share with your CA for GSTR-3B Section 4.</div>
+              <div className="g3bEmptySub">GSTR-2 shows your monthly purchase ITC - eligible ITC from registered suppliers, reversals from returns, and 180-day payment risk. Share with your CA for GSTR-3B Section 4.</div>
             </div>
           )}
 
@@ -224,7 +224,7 @@ export default function Gstr2Page() {
                 <div className="g2bCriticalBanner">
                   <AlertTriangle size={16}/>
                   <div>
-                    <strong>Action Required — {s.missing_hsn_count} Purchase Line {s.missing_hsn_count === 1 ? "Item" : "Items"} Missing HSN Code{s.missing_hsn_count !== 1 ? "s" : ""}</strong>
+                    <strong>Action Required - {s.missing_hsn_count} Purchase Line {s.missing_hsn_count === 1 ? "Item" : "Items"} Missing HSN Code{s.missing_hsn_count !== 1 ? "s" : ""}</strong>
                     <div style={{ fontSize: 12, marginTop: 2 }}>HSN codes are mandatory for ITC claims. Update these items in your purchase invoices before sharing with CA.</div>
                   </div>
                 </div>
@@ -233,7 +233,7 @@ export default function Gstr2Page() {
                 <div className="g2bWarnBanner">
                   <AlertTriangle size={16}/>
                   <div>
-                    <strong>{plural(s.missing_gstin_count, "Supplier")} Without GSTIN — <span className="g2bWarnAmt">₹{n2(s.ineligible_itc_total)}</span> ITC Blocked</strong>
+                    <strong>{plural(s.missing_gstin_count, "Supplier")} Without GSTIN - <span className="g2bWarnAmt">₹{n2(s.ineligible_itc_total)}</span> ITC Blocked</strong>
                     <div style={{ fontSize: 12, marginTop: 2 }}>Add supplier GSTIN in the Suppliers module to recover ITC on future purchases from these suppliers.</div>
                   </div>
                 </div>
@@ -249,13 +249,13 @@ export default function Gstr2Page() {
                       <div className="g3bBizGstin">
                         GSTIN: <strong>{biz.gst_number}</strong>
                         {gstinValid === false && (
-                          <span className="g2bGstinInvalidBadge" title="GSTIN does not match standard 15-character format — verify with your CA">
+                          <span className="g2bGstinInvalidBadge" title="GSTIN does not match standard 15-character format - verify with your CA">
                             <AlertTriangle size={11}/> Invalid format
                           </span>
                         )}
                       </div>
                     )
-                    : <div className="g3bBizGstin g3bGstinMissing"><AlertTriangle size={12}/> GSTIN not set — add it in your profile</div>}
+                    : <div className="g3bBizGstin g3bGstinMissing"><AlertTriangle size={12}/> GSTIN not set - add it in your profile</div>}
                 </div>
                 <div className="g3bBizRight">
                   <span className="g3bPeriodLabel">{MONTH_NAMES[month]} {year}</span>
@@ -264,12 +264,12 @@ export default function Gstr2Page() {
 
               {generatedAt && (
                 <div className="g3bGeneratedBar">
-                  <span>Generated: {generatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} — {generatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
-                  <span className="g3bGeneratedNote">New invoices added after this time won't appear — click <strong>Refresh</strong> to recalculate.</span>
+                  <span>Generated: {generatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {generatedAt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  <span className="g3bGeneratedNote">New invoices added after this time won't appear - click <strong>Refresh</strong> to recalculate.</span>
                 </div>
               )}
 
-              {/* Summary cards — Issues 2, 3, 4: correct icon/color logic */}
+              {/* Summary cards - Issues 2, 3, 4: correct icon/color logic */}
               <div className="g2bSummaryRow">
                 <div className="g3bStatCard">
                   <div className="g3bStatIcon" style={{ "--ic": "var(--color-primary)" }}><Banknote size={18}/></div>
@@ -281,9 +281,9 @@ export default function Gstr2Page() {
                   <div className="g3bStatIcon" style={{ "--ic": "#f59e0b" }}><TrendingUp size={18}/></div>
                   <div className="g3bStatLabel">Total GST Paid</div>
                   <div className="g3bStatValue" style={{ color: allGstIneligible ? "#b45309" : "var(--color-text)" }}>{fmtCurrency(s.total_gst_paid)}</div>
-                  <div className="g3bStatNote">{allGstIneligible ? "All GST paid is ineligible — additional cost" : "Eligible + Ineligible combined"}</div>
+                  <div className="g3bStatNote">{allGstIneligible ? "All GST paid is ineligible - additional cost" : "Eligible + Ineligible combined"}</div>
                 </div>
-                {/* Issue 3: Eligible ITC — amber/ShieldX when zero (warning), green/ShieldCheck when positive */}
+                {/* Issue 3: Eligible ITC - amber/ShieldX when zero (warning), green/ShieldCheck when positive */}
                 <div className="g3bStatCard">
                   <div className="g3bStatIcon" style={{ "--ic": Number(s.eligible_itc_total) > 0 ? "#10b981" : "#f59e0b" }}>
                     {Number(s.eligible_itc_total) > 0 ? <ShieldCheck size={18}/> : <ShieldX size={18}/>}
@@ -292,14 +292,14 @@ export default function Gstr2Page() {
                   <div className="g3bStatValue" style={{ color: Number(s.eligible_itc_total) > 0 ? "#059669" : "#b45309" }}>{fmtCurrency(s.eligible_itc_total)}</div>
                   <div className="g3bStatNote">{Number(s.eligible_itc_total) === 0 ? "No eligible purchases this period" : `${plural(s.eligible_invoice_count, "eligible invoice")}`}</div>
                 </div>
-                {/* Issue 2: Blocked ITC — red border via g2bBlockedCard */}
+                {/* Issue 2: Blocked ITC - red border via g2bBlockedCard */}
                 <div className="g3bStatCard g2bBlockedCard">
                   <div className="g3bStatIcon" style={{ "--ic": "#ef4444" }}><ShieldX size={18}/></div>
                   <div className="g3bStatLabel">Blocked / Ineligible ITC</div>
                   <div className="g3bStatValue" style={{ color: "#dc2626" }}>{fmtCurrency(s.ineligible_itc_total)}</div>
-                  <div className="g3bStatNote">{plural(s.ineligible_invoice_count, "ineligible invoice")} — additional cost</div>
+                  <div className="g3bStatNote">{plural(s.ineligible_invoice_count, "ineligible invoice")} - additional cost</div>
                 </div>
-                {/* Issue 4: ITC Reversed — amber when reversals exist, grey when zero */}
+                {/* Issue 4: ITC Reversed - amber when reversals exist, grey when zero */}
                 <div className="g3bStatCard">
                   <div className="g3bStatIcon" style={{ "--ic": Number(s.reversal_total) > 0 ? "#f59e0b" : "#9ca3af" }}><RotateCcw size={18}/></div>
                   <div className="g3bStatLabel">ITC Reversed</div>
@@ -341,7 +341,7 @@ export default function Gstr2Page() {
                       </tr>
                       {n(s.ineligible_itc_total) > 0 && (
                         <tr>
-                          <td><span style={{ color: "#dc2626" }}>GST Paid (Ineligible — not claimable)</span></td>
+                          <td><span style={{ color: "#dc2626" }}>GST Paid (Ineligible - not claimable)</span></td>
                           <td className="tR g2bDanger">₹{n2(inelCgst)}</td>
                           <td className="tR g2bDanger">₹{n2(inelSgst)}</td>
                           <td className="tR g2bDanger">₹{n2(inelIgst)}</td>
@@ -354,7 +354,7 @@ export default function Gstr2Page() {
                         <AmtCell v={cf.reversed?.cgst}/><AmtCell v={cf.reversed?.sgst}/>
                         <AmtCell v={cf.reversed?.igst}/><AmtCell v={cf.reversed?.cess}/><AmtCell v={cf.reversed?.total} bold/>
                       </tr>
-                      {/* Issue 5: Net ITC Claimable row — bold + colored values (green/amber) */}
+                      {/* Issue 5: Net ITC Claimable row - bold + colored values (green/amber) */}
                       <tr className="g2bNetRow">
                         <td className="tBold">Net ITC Claimable</td>
                         <td className="tR tBold" style={{ color: netItcColor }}>₹{n2(cf.net?.cgst)}</td>
@@ -370,7 +370,7 @@ export default function Gstr2Page() {
                 {allIneligible && (
                   <div className="g3bNoteRow g3bNoteWarn g2bNoteAccent" style={{ margin: "8px 18px 12px", borderRadius: 8 }}>
                     <Info size={14}/>
-                    <span>Net ITC Claimable = ₹0.00 because all purchases this period are from suppliers without GSTIN. The ₹{n2(s.total_gst_paid)} shown above is GST paid but <strong>not claimable</strong> — it is an additional business cost.</span>
+                    <span>Net ITC Claimable = ₹0.00 because all purchases this period are from suppliers without GSTIN. The ₹{n2(s.total_gst_paid)} shown above is GST paid but <strong>not claimable</strong> - it is an additional business cost.</span>
                   </div>
                 )}
               </div>
@@ -378,7 +378,7 @@ export default function Gstr2Page() {
               {/* Section 1: Supplier-wise ITC summary */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">Section 1 — ITC Summary by Supplier</span>
+                  <span className="g3bSectionTitle">Section 1 - ITC Summary by Supplier</span>
                   <span className="g3bSectionBadge">{plural((data.supplier_summary || []).length, "supplier")}</span>
                 </div>
                 {(data.supplier_summary || []).length === 0 ? (
@@ -416,7 +416,7 @@ export default function Gstr2Page() {
                             <td className="tR">{row.invoice_count}</td>
                             {/* Issue 9: Purchase Value in total row uses tR tBold (black), not tHighlight */}
                             <AmtCell v={row.purchase_value}/>
-                            {/* Issue 8: CESS ITC — ineligible prop ensures red for ineligible rows */}
+                            {/* Issue 8: CESS ITC - ineligible prop ensures red for ineligible rows */}
                             <AmtCell v={row.cgst_itc} ineligible={row.itc_status === "INELIGIBLE"}/>
                             <AmtCell v={row.sgst_itc} ineligible={row.itc_status === "INELIGIBLE"}/>
                             <AmtCell v={row.igst_itc} ineligible={row.itc_status === "INELIGIBLE"}/>
@@ -426,7 +426,7 @@ export default function Gstr2Page() {
                           </tr>
                         ))}
                         <tr className="tTotal">
-                          <td colSpan={4} className="tBold">{allIneligible ? "Total GST Paid (All — None Claimable)" : "Total (All Suppliers)"}</td>
+                          <td colSpan={4} className="tBold">{allIneligible ? "Total GST Paid (All - None Claimable)" : "Total (All Suppliers)"}</td>
                           {/* Issue 9: Purchase Value uses tR tBold (black), not tHighlight (purple) */}
                           <td className="tR tBold">₹{n2(s.total_purchase_value)}</td>
                           <AmtCell v={allCgst} bold ineligible={n(s.eligible_itc_total) === 0 && allCgst > 0}/>
@@ -445,8 +445,8 @@ export default function Gstr2Page() {
                   <Info size={14}/>
                   <span>
                     {allIneligible
-                      ? <>No eligible suppliers this period — all GST shown in <strong style={{ color: "#dc2626" }}>red</strong> is an additional cost, not claimable as ITC. Net ITC Claimable = ₹0.00.</>
-                      : <>Ineligible ITC amounts shown in <strong style={{ color: "#dc2626" }}>red</strong> are for reference only — these are additional costs, not claimable as ITC. Total row includes all GST paid (eligible + ineligible).</>}
+                      ? <>No eligible suppliers this period - all GST shown in <strong style={{ color: "#dc2626" }}>red</strong> is an additional cost, not claimable as ITC. Net ITC Claimable = ₹0.00.</>
+                      : <>Ineligible ITC amounts shown in <strong style={{ color: "#dc2626" }}>red</strong> are for reference only - these are additional costs, not claimable as ITC. Total row includes all GST paid (eligible + ineligible).</>}
                   </span>
                 </div>
               </div>
@@ -454,7 +454,7 @@ export default function Gstr2Page() {
               {/* Section 2: Invoice-wise ITC detail */}
               <div className="g3bSection" id="g2bSec2">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">Section 2 — Invoice-wise ITC Detail</span>
+                  <span className="g3bSectionTitle">Section 2 - Invoice-wise ITC Detail</span>
                   <span className="g3bSectionBadge">{plural((data.invoice_detail || []).length, "invoice")}</span>
                 </div>
                 <div className="g3bTableScroll">
@@ -476,7 +476,7 @@ export default function Gstr2Page() {
                           <td className="tBold">
                             {row.invoice_number}
                             {row.missing_hsn_count > 0 && (
-                              <span title={`${row.missing_hsn_count} item(s) missing HSN code — required for ITC claims`} style={{ marginLeft: 4, cursor: "help" }}>
+                              <span title={`${row.missing_hsn_count} item(s) missing HSN code - required for ITC claims`} style={{ marginLeft: 4, cursor: "help" }}>
                                 <AlertTriangle size={12} style={{ color: "#f59e0b", verticalAlign: "middle" }}/>
                               </span>
                             )}
@@ -488,7 +488,7 @@ export default function Gstr2Page() {
                           <td>
                             {row.hsn_code
                               ? <span className="g2bHsnCell">{row.hsn_code}</span>
-                              : <span className="g2bHsnMissing" title="HSN code missing — required for ITC claims">Missing ⚠</span>}
+                              : <span className="g2bHsnMissing" title="HSN code missing - required for ITC claims">Missing ⚠</span>}
                           </td>
                           <td className="g2bSupplyType">
                             {row.supply_type === "INTER_STATE" ? "Inter-State" : "Intra-State"}
@@ -499,15 +499,15 @@ export default function Gstr2Page() {
                           <AmtCell v={row.sgst_itc} ineligible={row.itc_status === "INELIGIBLE"}/>
                           <AmtCell v={row.igst_itc} ineligible={row.itc_status === "INELIGIBLE"}/>
                           <td><ItcBadge status={row.itc_status}/></td>
-                          {/* Issue 11: PAYMENT N/A uses badge, DAYS TO REVERSAL N/A uses muted text — visually distinct */}
+                          {/* Issue 11: PAYMENT N/A uses badge, DAYS TO REVERSAL N/A uses muted text - visually distinct */}
                           <td>
                             {row.itc_status === "INELIGIBLE"
-                              ? <span className="g2bNaBadge" title="Payment tracking not applicable — ITC already ineligible due to missing GSTIN">N/A — Ineligible</span>
+                              ? <span className="g2bNaBadge" title="Payment tracking not applicable - ITC already ineligible due to missing GSTIN">N/A - Ineligible</span>
                               : <PayBadge status={row.payment_status}/>}
                           </td>
                           <td className="tR">
                             {row.itc_status === "INELIGIBLE"
-                              ? <span className="g2bNaDays" title="Not applicable — if supplier GSTIN is added later, 180-day clock runs from invoice date">N/A</span>
+                              ? <span className="g2bNaDays" title="Not applicable - if supplier GSTIN is added later, 180-day clock runs from invoice date">N/A</span>
                               : (
                                 <span style={{ fontWeight: 600, color: row.days_to_reversal < 0 ? "#dc2626" : row.days_to_reversal <= 30 ? "#b45309" : "#059669" }}>
                                   {row.days_to_reversal < 0 ? `${Math.abs(row.days_to_reversal)}d overdue` : `${row.days_to_reversal}d`}
@@ -521,19 +521,19 @@ export default function Gstr2Page() {
                 </div>
                 {/* Issue 10: Legend split into separate bullet points for readability */}
                 <div className="g2bLegend">
-                  <div className="g2bLegendItem"><span style={{ color: "#f59e0b" }}>⚠</span> Missing HSN code — required for ITC claims</div>
-                  <div className="g2bLegendItem"><span className="g2bRcmTag" style={{ fontSize: 10 }}>RCM</span> Reverse Charge Mechanism — consult CA</div>
+                  <div className="g2bLegendItem"><span style={{ color: "#f59e0b" }}>⚠</span> Missing HSN code - required for ITC claims</div>
+                  <div className="g2bLegendItem"><span className="g2bRcmTag" style={{ fontSize: 10 }}>RCM</span> Reverse Charge Mechanism - consult CA</div>
                   <div className="g2bLegendItem"><span style={{ background: "#fffbeb", border: "1px solid #fde68a", padding: "1px 6px", borderRadius: 4, fontSize: 11 }}>Yellow row</span> Invoice has missing HSN codes</div>
-                  <div className="g2bLegendItem"><span className="g2bNaBadge" style={{ fontSize: 10 }}>N/A — Ineligible</span> Payment not tracked (ITC ineligible)</div>
+                  <div className="g2bLegendItem"><span className="g2bNaBadge" style={{ fontSize: 10 }}>N/A - Ineligible</span> Payment not tracked (ITC ineligible)</div>
                   <div className="g2bLegendItem"><span className="g2bNaDays">N/A</span> 180-day clock not applicable (no GSTIN)</div>
                   <div className="g2bLegendItem" style={{ color: "var(--color-text-4)" }}>Taxable Value excludes GST</div>
                 </div>
               </div>
 
-              {/* Section 3: ITC reversals — always shown */}
+              {/* Section 3: ITC reversals - always shown */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">Section 3 — ITC Reversals (Purchase Returns)</span>
+                  <span className="g3bSectionTitle">Section 3 - ITC Reversals (Purchase Returns)</span>
                   <span className="g3bSectionBadge">{plural((data.reversals || []).length, "return")}</span>
                 </div>
                 {(data.reversals || []).length === 0 ? (
@@ -583,10 +583,10 @@ export default function Gstr2Page() {
                 )}
               </div>
 
-              {/* Section 4: Blocked / Ineligible ITC — always shown */}
+              {/* Section 4: Blocked / Ineligible ITC - always shown */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">Section 4 — Blocked / Ineligible ITC</span>
+                  <span className="g3bSectionTitle">Section 4 - Blocked / Ineligible ITC</span>
                   <span className="g3bSectionBadge">{plural((data.blocked_itc || []).length, "invoice")}</span>
                 </div>
                 {(data.blocked_itc || []).length === 0 ? (
@@ -599,7 +599,7 @@ export default function Gstr2Page() {
                     {/* Issue 17: Warning banner outside the card, above the table */}
                     <div className="g2bBlockedWarn">
                       <AlertTriangle size={14}/>
-                      <span>Total blocked ITC: <strong style={{ color: "#dc2626" }}>₹{n2(data.blocked_itc_total)}</strong> — This is an additional cost to your business, not recoverable as ITC.</span>
+                      <span>Total blocked ITC: <strong style={{ color: "#dc2626" }}>₹{n2(data.blocked_itc_total)}</strong> - This is an additional cost to your business, not recoverable as ITC.</span>
                     </div>
                     <div className="g3bTableScroll">
                       <table className="g3bTable">
@@ -652,16 +652,16 @@ export default function Gstr2Page() {
                     </div>
                     <div className="g2bGstinAction">
                       <Info size={13}/>
-                      <span>To recover ITC on future purchases from these suppliers — add their GSTIN in the <strong>Suppliers module</strong> (Suppliers → Edit Supplier → GSTIN field).</span>
+                      <span>To recover ITC on future purchases from these suppliers - add their GSTIN in the <strong>Suppliers module</strong> (Suppliers → Edit Supplier → GSTIN field).</span>
                     </div>
                   </>
                 )}
               </div>
 
-              {/* Section 5: 180-day payment risk — always shown */}
+              {/* Section 5: 180-day payment risk - always shown */}
               <div className="g3bSection">
                 <div className="g3bSectionHead">
-                  <span className="g3bSectionTitle">Section 5 — 180-Day Payment Risk</span>
+                  <span className="g3bSectionTitle">Section 5 - 180-Day Payment Risk</span>
                   <span className="g3bSectionBadge">{plural((data.risk_invoices || []).length, "invoice")}</span>
                 </div>
                 {(data.risk_invoices || []).length === 0 ? (
@@ -715,7 +715,7 @@ export default function Gstr2Page() {
                 )}
               </div>
 
-              {/* Important Notes — Issue 19: no info icon in heading, Issue 20: consistent disclaimer styling */}
+              {/* Important Notes - Issue 19: no info icon in heading, Issue 20: consistent disclaimer styling */}
               <div className="g3bSection g2bNotesSection">
                 <div className="g3bSectionHead">
                   <span className="g3bSectionTitle">Important Notes for CA</span>
@@ -725,17 +725,17 @@ export default function Gstr2Page() {
                     <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>ITC can only be claimed from GST-registered suppliers with valid GSTIN.</li>
                     <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>ITC must be reversed if supplier invoice is unpaid beyond 180 days.</li>
                     <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>Purchase returns automatically reverse ITC on returned quantities.</li>
-                    <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>RCM purchases may allow ITC — consult your CA for specific goods.</li>
+                    <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>RCM purchases may allow ITC - consult your CA for specific goods.</li>
                     <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>This report is system-generated. Cross-check with your actual purchase invoices and books of accounts before sharing with CA.</li>
                     <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>IGST ITC can be used to pay IGST, then CGST, then SGST in that order.</li>
-                    <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>Purchases from unregistered suppliers for specific notified goods (including certain medicines) may attract Reverse Charge Mechanism (RCM) — consult your CA.</li>
+                    <li style={{ fontSize: 13, color: "var(--color-text-2, #6b7280)", lineHeight: 1.5 }}>Purchases from unregistered suppliers for specific notified goods (including certain medicines) may attract Reverse Charge Mechanism (RCM) - consult your CA.</li>
                   </ol>
                 </div>
-                {/* Issue 20: Legal Disclaimer — consistent amber box, no red heading */}
+                {/* Issue 20: Legal Disclaimer - consistent amber box, no red heading */}
                 <div className="g3bDisclaimer" style={{ margin: "8px 18px 16px" }}>
                   <AlertTriangle size={14}/>
                   <span style={{ fontSize: 12 }}>
-                    <strong>Legal Disclaimer:</strong> ITC claims in GSTR-3B are verified against supplier GSTR-1 filings on the GST portal. Mismatches may result in department notices. GSTR-3B cannot be revised once filed — verify all figures carefully before sharing with your CA.
+                    <strong>Legal Disclaimer:</strong> ITC claims in GSTR-3B are verified against supplier GSTR-1 filings on the GST portal. Mismatches may result in department notices. GSTR-3B cannot be revised once filed - verify all figures carefully before sharing with your CA.
                   </span>
                 </div>
               </div>

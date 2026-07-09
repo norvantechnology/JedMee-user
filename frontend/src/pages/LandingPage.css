@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   JEDMEE LANDING PAGE — FULL CSS
+   JEDMEE LANDING PAGE - FULL CSS
    Font: Sora (headings) + DM Sans (body)
    Animation: GSAP (handled in JSX) + CSS keyframes
    ═══════════════════════════════════════════════════════════════ */
@@ -562,7 +562,7 @@ svg { display: block; }
 }
 .ln-hero-trust-item .ln-icon { color: var(--color-success); }
 
-/* Visual side — overflow:visible so pills are never clipped */
+/* Visual side - overflow:visible so pills are never clipped */
 .ln-hero-visual {
   position: relative;
   display: flex;
@@ -571,7 +571,7 @@ svg { display: block; }
   overflow: visible;
 }
 
-/* Scene wrapper — flat stacking context, pills are 2D overlays */
+/* Scene wrapper - flat stacking context, pills are 2D overlays */
 .ln-dash-scene {
   position: relative;
   width: 100%;
@@ -580,7 +580,7 @@ svg { display: block; }
   box-sizing: border-box;
 }
 
-/* The actual dashboard screenshot — static 3D tilt, flattens to 2D on hover */
+/* The actual dashboard screenshot - static 3D tilt, flattens to 2D on hover */
 .ln-dash-main {
   position: relative;
   border-radius: var(--radius-xl);
@@ -590,13 +590,13 @@ svg { display: block; }
     0 12px 32px color-mix(in srgb, var(--color-text) 14%, transparent),
     0 0 0 1px var(--color-border);
   background: var(--color-card);
-  /* strong 3D tilt — more dramatic perspective */
+  /* strong 3D tilt - more dramatic perspective */
   transform: perspective(800px) rotateY(-18deg) rotateX(8deg);
   transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
               box-shadow 0.8s ease;
 }
 
-/* Shine sweep — diagonal glare that crosses the screenshot every 5s */
+/* Shine sweep - diagonal glare that crosses the screenshot every 5s */
 .ln-dash-main::after {
   content: '';
   position: absolute;
@@ -642,7 +642,7 @@ svg { display: block; }
     0 0 0 1px var(--color-border);
 }
 
-/* Floating notification pills — static 2D overlays, no animation */
+/* Floating notification pills - static 2D overlays, no animation */
 .ln-dash-float {
   position: absolute;
   display: flex;
@@ -659,7 +659,7 @@ svg { display: block; }
   -webkit-backdrop-filter: blur(14px);
   z-index: 20;
   white-space: nowrap;
-  /* pills are flat — no 3D transform, no float animation */
+  /* pills are flat - no 3D transform, no float animation */
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .ln-dash-float:hover {
@@ -669,17 +669,17 @@ svg { display: block; }
     0 4px 12px color-mix(in srgb, var(--color-text) 10%, transparent);
 }
 
-/* Pill 1 — Order Confirmed: top-right */
+/* Pill 1 - Order Confirmed: top-right */
 .ln-dash-float--1 {
   top: 10px;
   right: 10px;
 }
-/* Pill 2 — Expiry Alert: mid-left */
+/* Pill 2 - Expiry Alert: mid-left */
 .ln-dash-float--2 {
   bottom: 90px;
   left: 10px;
 }
-/* Pill 3 — Today's Sales: bottom-right */
+/* Pill 3 - Today's Sales: bottom-right */
 .ln-dash-float--3 {
   bottom: 10px;
   right: 64px;
@@ -1681,7 +1681,7 @@ svg { display: block; }
   height: 100%;
 }
 
-/* ── Shimmer keyframe — sweeps diagonally across card on hover ── */
+/* ── Shimmer keyframe - sweeps diagonally across card on hover ── */
 @keyframes ln-shimmer {
   0%   { transform: translateX(-120%) skewX(-20deg); }
   100% { transform: translateX(220%)  skewX(-20deg); }
@@ -1776,7 +1776,7 @@ svg { display: block; }
   );
 }
 
-/* glare div no longer needed — keep for DOM compat but hide */
+/* glare div no longer needed - keep for DOM compat but hide */
 .ln-plan-glare { display: none; }
 
 .ln-plan-badge {
@@ -2138,7 +2138,7 @@ svg { display: block; }
 }
 
 /* ─────────────────────────────────────────────────────────────
-   23. RESPONSIVE — TABLET (≤ 1024px)
+   23. RESPONSIVE - TABLET (≤ 1024px)
 ───────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .ln-container { padding: 0 28px; }
@@ -2179,7 +2179,7 @@ svg { display: block; }
 }
 
 /* ─────────────────────────────────────────────────────────────
-   24. RESPONSIVE — MOBILE (≤ 640px)
+   24. RESPONSIVE - MOBILE (≤ 640px)
 ───────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
   :root {
@@ -2196,7 +2196,7 @@ svg { display: block; }
   .ln-nav-inner { gap: var(--space-md); }
   .ln-nav-links { display: none; }
 
-  /* Mobile menu overlay — sibling of nav, outside its stacking context */
+  /* Mobile menu overlay - sibling of nav, outside its stacking context */
   .ln-mobile-menu {
     display: flex;
     flex-direction: column;
@@ -2280,7 +2280,7 @@ svg { display: block; }
   .ln-wf-tabs { width: 100%; }
   .ln-wf-tab { flex: 1; justify-content: center; font-size: var(--text-xs); padding: 9px 10px; }
 
-  /* Timeline: single column, no gap — spacing handled by node padding-bottom */
+  /* Timeline: single column, no gap - spacing handled by node padding-bottom */
   .ln-wf-timeline {
     grid-template-columns: 1fr;
     gap: 0;
@@ -2305,7 +2305,7 @@ svg { display: block; }
     z-index: 0;
   }
 
-  /* Node: 2-column grid — circle left, all text right */
+  /* Node: 2-column grid - circle left, all text right */
   .ln-wf-node {
     display: grid;
     grid-template-columns: 44px 1fr;
@@ -2338,7 +2338,7 @@ svg { display: block; }
   /* Hide horizontal connector */
   .ln-wf-connector { display: none; }
 
-  /* Platform — dynamically scaled desktop screenshot on mobile */
+  /* Platform - dynamically scaled desktop screenshot on mobile */
   .ln-platform { padding: 48px 0; }
   .ln-plat-tabs { gap: 6px; flex-wrap: wrap; justify-content: center; }
   .ln-plat-tab { font-size: 10px; padding: 7px 12px; }
@@ -2361,7 +2361,7 @@ svg { display: block; }
       0 4px 16px rgba(0, 0, 0, 0.10);
   }
 
-  /* Firefox fallback — zoom: calc() not supported */
+  /* Firefox fallback - zoom: calc() not supported */
   @supports not (zoom: 1) {
     .ln-plat-window {
       zoom: unset;
@@ -2373,14 +2373,14 @@ svg { display: block; }
     }
   }
 
-  /* Inner app: exact desktop layout — sidebar + content */
+  /* Inner app: exact desktop layout - sidebar + content */
   .ln-plat-app {
     grid-template-columns: 180px 1fr;
     min-width: 720px;
     min-height: 440px;
   }
 
-  /* Show sidebar — same as desktop */
+  /* Show sidebar - same as desktop */
   .ln-plat-side { display: flex; }
 
   /* Comparison */
@@ -2543,7 +2543,7 @@ svg { display: block; }
   gap: 14px;
 }
 
-/* Inner layout — card with glass border */
+/* Inner layout - card with glass border */
 .ln-dl-inner {
   position: relative;
   z-index: 1;
@@ -2709,7 +2709,7 @@ svg { display: block; }
 /* All direct children sit above the shine overlay so text stays visible on hover */
 .ln-dl-btn > * { position: relative; z-index: 1; }
 
-/* Android — brand purple */
+/* Android - brand purple */
 .ln-dl-btn--android {
   background: linear-gradient(135deg, #6b3fa0 0%, #5a3288 100%);
   box-shadow: 0 4px 20px rgba(107,63,160,.4), 0 1px 0 rgba(255,255,255,.12) inset;
@@ -2726,7 +2726,7 @@ svg { display: block; }
 .ln-dl-btn--android:hover .ln-dl-btn-size { color: #fff; }
 .ln-dl-btn--android:active { transform: translateY(0); }
 
-/* iOS — muted slate */
+/* iOS - muted slate */
 .ln-dl-btn--ios {
   background: rgba(255,255,255,.05);
   border: 1px solid rgba(255,255,255,.1);
@@ -3099,7 +3099,7 @@ svg { display: block; }
   background: #f0eeff;
 }
 
-/* Scroll content wrapper — slow scroll down, fast scroll up */
+/* Scroll content wrapper - slow scroll down, fast scroll up */
 .ln-dl-scroll-content {
   display: flex;
   flex-direction: column;
@@ -3111,7 +3111,7 @@ svg { display: block; }
   /* Slowly scroll down to bottom */
   0%    { transform: translateY(0);      animation-timing-function: cubic-bezier(.2,.6,.4,1); }
   50%   { transform: translateY(-680px); animation-timing-function: linear; }
-  /* Long pause at bottom — sidebar slides in, stays open, slides out */
+  /* Long pause at bottom - sidebar slides in, stays open, slides out */
   83%   { transform: translateY(-680px); animation-timing-function: cubic-bezier(.8,0,1,.6); }
   /* Fast snap back to top */
   88%   { transform: translateY(0);      animation-timing-function: linear; }
@@ -3350,7 +3350,7 @@ svg { display: block; }
   .ln-dl-feature-item { font-size: var(--text-xs); }
 }
 /* ─────────────────────────────────────────────────────────────
-   PHONE MOCKUP — Rich Dashboard UI (appended)
+   PHONE MOCKUP - Rich Dashboard UI (appended)
 ───────────────────────────────────────────────────────────── */
 
 /* Status bar */
@@ -3564,7 +3564,7 @@ svg { display: block; }
 .ln-dl-inv-status--paid   { background: rgba(22,163,74,.12); color: #16a34a; }
 .ln-dl-inv-status--unpaid { background: rgba(220,38,38,.1);  color: #dc2626; }
 
-/* Alert — updated for text span */
+/* Alert - updated for text span */
 .ln-dl-alert span { font-size: 7px; }
 
 /* Bottom navigation */
@@ -3600,7 +3600,7 @@ svg { display: block; }
 .ln-dl-nav-item.active span { color: #6b3fa0; }
 .ln-dl-nav-item.active .ln-icon { color: #6b3fa0; }
 /* ─────────────────────────────────────────────────────────────
-   PHONE MOCKUP — Extended Dashboard Elements
+   PHONE MOCKUP - Extended Dashboard Elements
 ───────────────────────────────────────────────────────────── */
 
 /* Date filter tabs */
@@ -3765,7 +3765,7 @@ svg { display: block; }
   line-height: 1.2;
 }
 /* ─────────────────────────────────────────────────────────────
-   PHONE MOCKUP — Additional Dashboard Sections
+   PHONE MOCKUP - Additional Dashboard Sections
 ───────────────────────────────────────────────────────────── */
 
 /* Profit card */
@@ -3798,7 +3798,7 @@ svg { display: block; }
   font-family: 'Sora', sans-serif;
 }
 
-/* Business Insights — side-by-side cards */
+/* Business Insights - side-by-side cards */
 .ln-dl-insights-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

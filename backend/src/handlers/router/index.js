@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Single Lambda router — dispatches every API Gateway event to the correct
+ * Single Lambda router - dispatches every API Gateway event to the correct
  * handler module.  Replaces ~155 individual Lambda functions with one,
  * cutting CloudFormation resource count from 500+ to ~50 and deploy time
  * from 20 min to ~2 min.
@@ -329,7 +329,7 @@ function resolveRoute(method, path, fallbackResource) {
   }
 
   // Backward-compat: if the function is still wired to per-route events,
-  // event.resource will already be the template — try a direct lookup.
+  // event.resource will already be the template - try a direct lookup.
   if (fallbackResource && fallbackResource !== '/{proxy+}') {
     const direct = ROUTES[`${method} ${fallbackResource}`];
     if (direct) return { template: fallbackResource, modulePath: direct, params: null };

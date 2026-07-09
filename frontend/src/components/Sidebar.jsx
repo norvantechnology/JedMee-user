@@ -53,7 +53,7 @@ function initialsFrom(nameOrEmail) {
   return s.slice(0, 2).toUpperCase();
 }
 
-/** Icons for sidebar routes — all 18 px via CSS, contextually correct LucideIcons. */
+/** Icons for sidebar routes - all 18 px via CSS, contextually correct LucideIcons. */
 function pickSidebarIcon(to) {
   const path = String(to || "");
   switch (path) {

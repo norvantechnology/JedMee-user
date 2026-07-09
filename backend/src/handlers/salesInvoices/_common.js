@@ -127,7 +127,7 @@ async function validateAndEnrichSalesItems(q, accountId, rawItems, options = {})
       return { ok: false, message: MSG.SALE_LOCKED };
     }
 
-    // packing_units: units per strip — from batch snapshot, fallback to product, fallback to 10
+    // packing_units: units per strip - from batch snapshot, fallback to product, fallback to 10
     const packingUnits = Math.max(1, Number(batch.packing_units || 10));
 
     const originalFreeQty = freeQty;

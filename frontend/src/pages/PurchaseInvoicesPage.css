@@ -4,7 +4,7 @@
   gap: 12px;
   min-width: 0;
   width: 100%;
-  /* Do NOT set overflow-x:hidden — it implicitly makes overflow-y:auto,
+  /* Do NOT set overflow-x:hidden - it implicitly makes overflow-y:auto,
      creating a nested scroll container that fights with mcmBody's scroll. */
 }
 
@@ -30,7 +30,7 @@
   margin-top: 6px;
 }
 
-/* piItemsTable — column widths only; visual styles come from cliItemsTable in CommonLineItemsSection.css */
+/* piItemsTable - column widths only; visual styles come from cliItemsTable in CommonLineItemsSection.css */
 .piItemsTable {
   min-width: 1420px;
 }
@@ -44,7 +44,7 @@
   text-align: left;
 }
 
-/* Column widths — sized for 1500px modal, all content visible without truncation */
+/* Column widths - sized for 1500px modal, all content visible without truncation */
 .piItemsTable thead th:nth-child(1),
 .piItemsTable tbody td:nth-child(1) { width: 38px; }
 .piItemsTable thead th:nth-child(2),
@@ -599,7 +599,7 @@
   color: var(--color-warning, #b45309);
 }
 
-/* Summary strip — now uses .cliSummaryStrip / .cliSummaryCell etc. from CommonLineItemsSection.css */
+/* Summary strip - now uses .cliSummaryStrip / .cliSummaryCell etc. from CommonLineItemsSection.css */
 
 .piModalTicker {
   margin-top: 8px;
@@ -612,12 +612,12 @@
   font-weight: 700;
 }
 
-/* ── Confirm variant — no shadow ── */
+/* ── Confirm variant - no shadow ── */
 .piPrimaryBtn_confirm {
   box-shadow: none;
 }
 
-/* ── Payment / success variant — green fill, no shadow ── */
+/* ── Payment / success variant - green fill, no shadow ── */
 .piPrimaryBtn_payment {
   border-color: color-mix(in srgb, var(--color-success) 55%, transparent);
   background: linear-gradient(
@@ -1477,13 +1477,13 @@
   }
 }
 
-/* Compact section body padding — matches sales page */
+/* Compact section body padding - matches sales page */
 .piModalForm .piSectionBody {
   padding: 10px 14px;
   gap: 8px;
 }
 
-/* Optional / secondary fields — lighter label + softer border */
+/* Optional / secondary fields - lighter label + softer border */
 .piOptionalField label {
   color: var(--color-text-4);
   font-weight: 500;
@@ -1500,7 +1500,7 @@
   font-style: italic;
 }
 
-/* Summary strip hierarchy — matches sales page */
+/* Summary strip hierarchy - matches sales page */
 .piModalForm .cliSummaryStrip .cliSummaryCell:not(.cliSummaryCell_total) .cliSummaryLabel {
   font-size: 9px;
   color: var(--color-text-4);

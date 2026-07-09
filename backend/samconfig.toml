@@ -25,5 +25,5 @@ confirm_changeset       = false
 fail_on_empty_changeset = false
 capabilities            = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
 parameter_overrides     = "Stage=local"
-# s3_bucket is intentionally omitted — pass it via
+# s3_bucket is intentionally omitted - pass it via
 # --s3-bucket <bucket> in CI or `sam deploy --guided` locally.

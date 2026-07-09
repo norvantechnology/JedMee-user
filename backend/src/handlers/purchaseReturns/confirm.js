@@ -100,7 +100,7 @@ async function handler(event) {
                VALUES ($1,$2,'PURCHASE_RETURN',0,0,'PURCHASE_RETURN_ITEM',$3,$4,$5)`,
               [
                 ctx.accountId, it.batch_id, it.id,
-                `Loose return: ${returnLooseQty} unit(s) — Purchase return ${ret.return_number}`, actorId
+                `Loose return: ${returnLooseQty} unit(s) - Purchase return ${ret.return_number}`, actorId
               ]
             );
           }

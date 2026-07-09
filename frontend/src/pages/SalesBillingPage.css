@@ -1,4 +1,4 @@
-/* ─── Rate controls group — no-wrap so Disc% never orphans on its own row ── */
+/* ─── Rate controls group - no-wrap so Disc% never orphans on its own row ── */
 .sbmRateControls {
   display: flex;
   flex-wrap: nowrap;
@@ -16,7 +16,7 @@
   gap: 12px;
   min-width: 0;
   width: 100%;
-  /* Do NOT set overflow-x:hidden here — it implicitly makes overflow-y:auto,
+  /* Do NOT set overflow-x:hidden here - it implicitly makes overflow-y:auto,
      creating a nested scroll container that fights with mcmBody's own scroll.
      Horizontal overflow is handled per-section (cliItemsWrap). */
 }
@@ -27,7 +27,7 @@
   padding: 0;
 }
 
-/* ─── Credit Line — base styles from .piCreditLine (CommonModal.css) ─────── */
+/* ─── Credit Line - base styles from .piCreditLine (CommonModal.css) ─────── */
 .sbmCreditLineStrong {
   font-weight: 800;
 }
@@ -121,7 +121,7 @@
   min-width: 0;
 }
 
-/* Rate bar labels: compact uppercase — intentionally smaller than piHeadField labels
+/* Rate bar labels: compact uppercase - intentionally smaller than piHeadField labels
    since the rate bar is a dense control strip, not a primary form section */
 .sbmRateField label {
   font-size: 10px;
@@ -148,7 +148,7 @@
   flex: 0 0 auto;
 }
 
-/* Overall Disc %: narrow — it's a short numeric field */
+/* Overall Disc %: narrow - it's a short numeric field */
 .sbmRateField_disc {
   width: 88px;
   max-width: 100%;
@@ -224,7 +224,7 @@
   min-height: 34px;
 }
 
-/* sbmItemsTable — column widths only; visual styles come from cliItemsTable in CommonLineItemsSection.css */
+/* sbmItemsTable - column widths only; visual styles come from cliItemsTable in CommonLineItemsSection.css */
 /* Table has 15 columns: #, PRODUCT, BATCH, EXPIRY, STOCK, QTY, FREE, LOOSE, UNIT, MRP, RATE, DISC%, GST%, AMOUNT, DELETE */
 .sbmItemsTable {
   min-width: 1400px;
@@ -235,7 +235,7 @@
 .sbmItemsTable thead th.center,
 .sbmItemsTable thead th.c { text-align: center; }
 
-/* Column widths — sized for 1500px modal, all content visible without truncation */
+/* Column widths - sized for 1500px modal, all content visible without truncation */
 .sbmItemsTable thead th:nth-child(1),
 .sbmItemsTable tbody td:nth-child(1) { width: 38px; text-align: center; }
 .sbmItemsTable thead th:nth-child(2),
@@ -404,7 +404,7 @@
   white-space: nowrap;
 }
 
-/* Zero loose stock — muted appearance */
+/* Zero loose stock - muted appearance */
 .sbmLooseStockChip_zero {
   color: var(--color-text-4);
   background: var(--color-surface);
@@ -453,7 +453,7 @@
   color: var(--color-text);
 }
 
-/* ─── Trash button — less aggressive ─────────────────────────────────────── */
+/* ─── Trash button - less aggressive ─────────────────────────────────────── */
 .sbmTrashBtn {
   width: 26px;
   height: 26px;
@@ -534,7 +534,7 @@
   margin-right: 4px;
 }
 
-/* Summary strip — now uses .cliSummaryStrip / .cliSummaryCell etc. from CommonLineItemsSection.css */
+/* Summary strip - now uses .cliSummaryStrip / .cliSummaryCell etc. from CommonLineItemsSection.css */
 
 /* Top border separator for summary strip */
 .sbmModalForm .cliSummaryStrip {
@@ -542,12 +542,12 @@
   margin-top: 0;
 }
 
-/* Sales-specific: discount cell value — softer amber instead of alarming red */
+/* Sales-specific: discount cell value - softer amber instead of alarming red */
 .cliSummaryStrip .cliSummaryCell:nth-child(2) .cliSummaryValue {
   color: color-mix(in srgb, var(--color-warning-darker, #b45309) 90%, var(--color-text-2));
 }
 
-/* TOTAL PAYABLE — more dominant */
+/* TOTAL PAYABLE - more dominant */
 .sbmModalForm .cliSummaryCell_total {
   background: color-mix(in srgb, var(--color-primary) 16%, var(--color-card)) !important;
   border-left: 3px solid var(--color-primary) !important;
@@ -576,7 +576,7 @@
   border-top: 1px solid var(--color-border);
 }
 
-/* Change to Return display — visually distinct output field */
+/* Change to Return display - visually distinct output field */
 .sbmCashValue {
   height: var(--mcm-ctrl-h, 42px);
   min-height: var(--mcm-ctrl-h, 42px);
@@ -804,13 +804,13 @@
    Strategy (desktop only):
    1. sbmModalForm fills mcmBody as a flex child (flex:1 1 auto, min-height:0)
       so the modal body itself does NOT need to scroll.
-   2. cliSection is the only flex-grow child — it fills remaining vertical space.
+   2. cliSection is the only flex-grow child - it fills remaining vertical space.
    3. cliItemsWrap scrolls the table rows internally (overflow-y:auto).
-   4. cliFooter (Add line item) is flex-shrink:0 — always visible.
+   4. cliFooter (Add line item) is flex-shrink:0 - always visible.
    5. All other sections (header, rate bar, summary, cash) are flex-shrink:0.
    Mobile (≤720px) keeps the existing card-row layout unchanged.              */
 @media (min-width: 721px) {
-  /* Form fills the modal body — becomes the single scroll container */
+  /* Form fills the modal body - becomes the single scroll container */
   .mcmBody .sfm.piModalForm.sbmModalForm {
     flex: 1 1 auto;
     min-height: 0;
@@ -1284,7 +1284,7 @@
     min-height: 36px !important;
   }
 }
-/* ─── Optional / secondary fields — lighter label + softer border ────────── */
+/* ─── Optional / secondary fields - lighter label + softer border ────────── */
 .sbmOptionalField label {
   color: var(--color-text-4);
   font-weight: 500;
@@ -1322,7 +1322,7 @@
   font-weight: 600;
 }
 
-/* Total Payable cell — dominant emphasis */
+/* Total Payable cell - dominant emphasis */
 .sbmModalForm .cliSummaryStrip .cliSummaryCell_total .cliSummaryLabel {
   font-size: 10px;
   font-weight: 800;
@@ -1341,7 +1341,7 @@
   border: 1px solid var(--color-border);
 }
 
-/* Rate bar inside section body — no extra top margin when inside section */
+/* Rate bar inside section body - no extra top margin when inside section */
 .sbmModalForm .piSectionBody .sbmRateBar {
   margin-top: 10px;
 }
@@ -1356,7 +1356,7 @@
   margin-bottom: 2px;
 }
 
-/* ─── Cash hint — de-emphasised ──────────────────────────────────────────── */
+/* ─── Cash hint - de-emphasised ──────────────────────────────────────────── */
 .sbmPaymentOpts {
   display: flex;
   flex-wrap: wrap;

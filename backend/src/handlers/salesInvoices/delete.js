@@ -77,7 +77,7 @@ async function handler(event) {
         [id, ctx.accountId, actorId]
       );
     } catch (colErr) {
-      // Column doesn't exist yet — fall back to deleted_at only
+      // Column doesn't exist yet - fall back to deleted_at only
       if (/column.*deleted_by_user_id.*does not exist/i.test(String(colErr.message || ''))) {
         upd = await query(
           `UPDATE sales_invoices

@@ -35,7 +35,7 @@ function buildYearOptions() {
 }
 
 function fmtDate(d) {
-  if (!d) return "—";
+  if (!d) return "-";
   const dt = new Date(d);
   return dt.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
@@ -52,29 +52,29 @@ function exportCsv(data, period) {
   rows.push(["GSTR-1 B2B vs B2C Segregation Report"]);
   rows.push([`Period: ${period?.from_date || ""} to ${period?.to_date || ""}`]);
   rows.push([]);
-  rows.push(["SECTION 1 — B2B INVOICES (Report individually in GSTR-1)"]);
+  rows.push(["SECTION 1 - B2B INVOICES (Report individually in GSTR-1)"]);
   rows.push(["#","Invoice No","Invoice Date","Customer Name","Customer GSTIN","Place of Supply","Taxable Value","CGST","SGST","IGST","Cess","Total Value","GSTIN Issue"]);
   b2bList.forEach((r, i) => rows.push([i+1,r.invoice_number,r.invoice_date,r.customer_name,r.customer_gstin||"",r.place_of_supply||"",n2(r.taxable_value),n2(r.cgst),n2(r.sgst),n2(r.igst),"0.00",n2(r.total_value),r.gstin_issue||""]));
   rows.push([]);
-  rows.push(["SECTION 2 — B2C SUMMARY BY GST RATE (Enter in GSTR-1 B2C summary)"]);
+  rows.push(["SECTION 2 - B2C SUMMARY BY GST RATE (Enter in GSTR-1 B2C summary)"]);
   rows.push(["GST Rate","Invoice Count","Taxable Value","CGST","SGST","IGST","Cess","Total Value"]);
   b2cSum.forEach(r => rows.push([`${r.gst_rate}%`,r.invoice_count,n2(r.taxable_value),n2(r.cgst),n2(r.sgst),n2(r.igst),"0.00",n2(r.total_value)]));
   rows.push(["TOTAL",b2cTot.invoice_count||0,n2(b2cTot.taxable_value),n2(b2cTot.cgst),n2(b2cTot.sgst),n2(b2cTot.igst),"0.00",n2(b2cTot.total_value)]);
   rows.push([]);
   if (largeB2c.length > 0) {
-    rows.push(["SECTION 3 — LARGE B2C INVOICES >₹2.5 LAKH (Report individually in GSTR-1)"]);
+    rows.push(["SECTION 3 - LARGE B2C INVOICES >₹2.5 LAKH (Report individually in GSTR-1)"]);
     rows.push(["#","Invoice No","Invoice Date","Customer Name","Taxable Value","CGST","SGST","IGST","Cess","Total Value"]);
     largeB2c.forEach((r, i) => rows.push([i+1,r.invoice_number,r.invoice_date,r.customer_name,n2(r.taxable_value),n2(r.cgst),n2(r.sgst),n2(r.igst),"0.00",n2(r.total_value)]));
     rows.push([]);
   }
   if (b2bReturns.length > 0) {
-    rows.push(["SECTION 4 — B2B CREDIT NOTES / RETURNS (CDNR — Report in GSTR-1)"]);
+    rows.push(["SECTION 4 - B2B CREDIT NOTES / RETURNS (CDNR - Report in GSTR-1)"]);
     rows.push(["#","Return No","Return Date","Customer Name","Customer GSTIN","Linked Invoice No","Return Amount"]);
     b2bReturns.forEach((r, i) => rows.push([i+1,r.return_number,r.return_date,r.customer_name,r.customer_gstin||"",r.linked_invoice_number||"",n2(r.return_amount)]));
     rows.push([]);
   }
   if (b2cReturns.length > 0) {
-    rows.push(["SECTION 5 — B2C CREDIT NOTES / RETURNS (CDNUR — Report in GSTR-1)"]);
+    rows.push(["SECTION 5 - B2C CREDIT NOTES / RETURNS (CDNUR - Report in GSTR-1)"]);
     rows.push(["#","Return No","Return Date","Customer Name","Linked Invoice No","Return Amount"]);
     b2cReturns.forEach((r, i) => rows.push([i+1,r.return_number,r.return_date,r.customer_name,r.linked_invoice_number||"",n2(r.return_amount)]));
   }
@@ -94,7 +94,7 @@ function AmtCell({ v, bold, highlight }) {
 }
 
 function GstinChip({ gstin, issue }) {
-  if (!gstin) return <span className="b2bGstinCode invalid">—</span>;
+  if (!gstin) return <span className="b2bGstinCode invalid">-</span>;
   return <span className={`b2bGstinCode${issue ? " invalid" : ""}`}>{gstin}</span>;
 }
 
@@ -158,7 +158,7 @@ export default function GstrB2bB2cPage() {
     <ReportShell>
       <div className="pageWrap">
         <ReportPageIntro
-          title="GSTR-1 — B2B vs B2C Segregation Report"
+          title="GSTR-1 - B2B vs B2C Segregation Report"
           subtitle={`Separates sales into B2B (with GSTIN) and B2C (without GSTIN) for correct ${taxLabel} filing`}
         />
         <ReportCard>
@@ -265,7 +265,7 @@ export default function GstrB2bB2cPage() {
                       {!biz.gstin_valid && <span style={{ marginLeft: 8, color: "var(--color-danger, #ef4444)", fontSize: 11 }}><AlertTriangle size={11} style={{ verticalAlign: "middle" }} /> Invalid format</span>}
                     </div>
                   ) : (
-                    <div style={{ fontSize: 12, color: "var(--color-warning-dark, #b45309)" }}><AlertTriangle size={11} /> GSTIN not set — add it in your profile</div>
+                    <div style={{ fontSize: 12, color: "var(--color-warning-dark, #b45309)" }}><AlertTriangle size={11} /> GSTIN not set - add it in your profile</div>
                   )}
                 </div>
                 <div style={{ textAlign: "right" }}>
@@ -282,7 +282,7 @@ export default function GstrB2bB2cPage() {
                   <div className="b2bStatValue">{summary.b2b_count || 0}</div>
                   <div className="b2bStatSub">{fmtCurrency(summary.b2b_value)}</div>
                   {summary.gstin_issue_count > 0 && <div className="b2bStatWarn">{summary.gstin_issue_count} GSTIN issue(s)</div>}
-                  {summary.b2b_return_count > 0 && <div className="b2bStatWarn" style={{ color: "var(--color-warning-dark, #b45309)" }}>{summary.b2b_return_count} return(s) — ₹{n2(summary.b2b_return_total)}</div>}
+                  {summary.b2b_return_count > 0 && <div className="b2bStatWarn" style={{ color: "var(--color-warning-dark, #b45309)" }}>{summary.b2b_return_count} return(s) - ₹{n2(summary.b2b_return_total)}</div>}
                 </div>
                 <div className="b2bStatCard b2bCardB2c">
                   <div className="b2bStatIcon" style={{ "--ic": "#8b5cf6" }}><Users size={18} /></div>
@@ -290,7 +290,7 @@ export default function GstrB2bB2cPage() {
                   <div className="b2bStatValue">{summary.b2c_count || 0}</div>
                   <div className="b2bStatSub">{fmtCurrency(summary.b2c_value)}</div>
                   {summary.large_b2c_count > 0 && <div className="b2bStatWarn">{summary.large_b2c_count} large B2C (&gt;₹2.5L)</div>}
-                  {summary.b2c_return_count > 0 && <div className="b2bStatWarn" style={{ color: "var(--color-warning-dark, #b45309)" }}>{summary.b2c_return_count} return(s) — ₹{n2(summary.b2c_return_total)}</div>}
+                  {summary.b2c_return_count > 0 && <div className="b2bStatWarn" style={{ color: "var(--color-warning-dark, #b45309)" }}>{summary.b2c_return_count} return(s) - ₹{n2(summary.b2c_return_total)}</div>}
                 </div>
                 <div className="b2bStatCard">
                   <div className="b2bStatIcon" style={{ "--ic": "#f59e0b" }}><ShieldCheck size={18} /></div>
@@ -308,7 +308,7 @@ export default function GstrB2bB2cPage() {
               {showIssues && (
                 <div className="b2bSection" style={{ margin: "0 20px 16px", borderColor: "color-mix(in srgb, var(--color-danger, #ef4444) 40%, transparent)" }}>
                   <div className="b2bSectionHead">
-                    <span className="b2bSectionTitle">⚠ GSTIN Issues — Resolve Before Filing</span>
+                    <span className="b2bSectionTitle">⚠ GSTIN Issues - Resolve Before Filing</span>
                     <span className="b2bSectionBadge b2bSectionBadgeWarn">{issues.length} invoice(s)</span>
                   </div>
                   <div className="b2bWarnBanner">
@@ -338,7 +338,7 @@ export default function GstrB2bB2cPage() {
               {showB2b && (
                 <div className="b2bSection">
                   <div className="b2bSectionHead">
-                    <span className="b2bSectionTitle">B2B Invoices — Report Individually in GSTR-1</span>
+                    <span className="b2bSectionTitle">B2B Invoices - Report Individually in GSTR-1</span>
                     <span className="b2bSectionBadge">{b2bAll.length} invoices</span>
                   </div>
                   <div className="b2bInfoBanner">
@@ -370,7 +370,7 @@ export default function GstrB2bB2cPage() {
                                   <GstinChip gstin={r.customer_gstin} issue={r.gstin_issue} />
                                   {r.gstin_issue && <div style={{ marginTop: 2 }}><IssueBadge issue={r.gstin_issue} /></div>}
                                 </td>
-                                <td>{r.place_of_supply || "—"}</td>
+                                <td>{r.place_of_supply || "-"}</td>
                                 <AmtCell v={r.taxable_value} />
                                 <AmtCell v={r.cgst} />
                                 <AmtCell v={r.sgst} />
@@ -400,7 +400,7 @@ export default function GstrB2bB2cPage() {
               {showB2c && (
                 <div className="b2bSection">
                   <div className="b2bSectionHead">
-                    <span className="b2bSectionTitle">B2C Summary — Grouped by {taxLabel} Rate</span>
+                    <span className="b2bSectionTitle">B2C Summary - Grouped by {taxLabel} Rate</span>
                     <span className="b2bSectionBadge">{summary.b2c_count || 0} invoices</span>
                   </div>
                   <div className="b2bInfoBanner">
@@ -461,7 +461,7 @@ export default function GstrB2bB2cPage() {
                     <>
                       <div className="b2bWarnBanner">
                         <AlertTriangle size={15} />
-                        <span>These invoices exceed ₹2.5 lakh and must be reported individually in GSTR-1 — not in the B2C summary section.</span>
+                        <span>These invoices exceed ₹2.5 lakh and must be reported individually in GSTR-1 - not in the B2C summary section.</span>
                       </div>
                       <div className="b2bTableScroll">
                         <table className="b2bTable">
@@ -500,7 +500,7 @@ export default function GstrB2bB2cPage() {
               {showReturns && (b2bReturns.length > 0 || b2cReturns.length > 0) && (
                 <div className="b2bSection">
                   <div className="b2bSectionHead">
-                    <span className="b2bSectionTitle">Credit Notes / Returns — CDNR (B2B) &amp; CDNUR (B2C)</span>
+                    <span className="b2bSectionTitle">Credit Notes / Returns - CDNR (B2B) &amp; CDNUR (B2C)</span>
                     <span className="b2bSectionBadge">{totalReturns} return(s)</span>
                   </div>
                   <div className="b2bInfoBanner">
@@ -512,7 +512,7 @@ export default function GstrB2bB2cPage() {
                   {b2bReturns.length > 0 && (
                     <>
                       <div style={{ padding: "8px 18px", fontWeight: 700, fontSize: 12, color: "var(--color-text-3)", background: "var(--color-surface, #fbf8ff)", borderBottom: "1px solid var(--color-border)" }}>
-                        B2B Returns (CDNR) — {b2bReturns.length} return(s)
+                        B2B Returns (CDNR) - {b2bReturns.length} return(s)
                       </div>
                       <div className="b2bTableScroll">
                         <table className="b2bTable">
@@ -530,7 +530,7 @@ export default function GstrB2bB2cPage() {
                                 <td style={{ whiteSpace: "nowrap" }}>{fmtDate(r.return_date)}</td>
                                 <td>{r.customer_name}</td>
                                 <td><GstinChip gstin={r.customer_gstin} /></td>
-                                <td style={{ color: "var(--color-text-3)", fontSize: 12 }}>{r.linked_invoice_number || "—"}</td>
+                                <td style={{ color: "var(--color-text-3)", fontSize: 12 }}>{r.linked_invoice_number || "-"}</td>
                                 <AmtCell v={r.return_amount} bold />
                               </tr>
                             ))}
@@ -544,7 +544,7 @@ export default function GstrB2bB2cPage() {
                   {b2cReturns.length > 0 && (
                     <>
                       <div style={{ padding: "8px 18px", fontWeight: 700, fontSize: 12, color: "var(--color-text-3)", background: "var(--color-surface, #fbf8ff)", borderBottom: "1px solid var(--color-border)", borderTop: b2bReturns.length > 0 ? "1px solid var(--color-border)" : "none" }}>
-                        B2C Returns (CDNUR) — {b2cReturns.length} return(s)
+                        B2C Returns (CDNUR) - {b2cReturns.length} return(s)
                       </div>
                       <div className="b2bTableScroll">
                         <table className="b2bTable">
@@ -561,7 +561,7 @@ export default function GstrB2bB2cPage() {
                                 <td style={{ fontWeight: 600 }}>{r.return_number}</td>
                                 <td style={{ whiteSpace: "nowrap" }}>{fmtDate(r.return_date)}</td>
                                 <td>{r.customer_name}</td>
-                                <td style={{ color: "var(--color-text-3)", fontSize: 12 }}>{r.linked_invoice_number || "—"}</td>
+                                <td style={{ color: "var(--color-text-3)", fontSize: 12 }}>{r.linked_invoice_number || "-"}</td>
                                 <AmtCell v={r.return_amount} bold />
                               </tr>
                             ))}
@@ -598,7 +598,7 @@ export default function GstrB2bB2cPage() {
                   </div>
                   <div className="b2bNoteRow b2bNoteInfo">
                     <Info size={14} />
-                    <span>B2C invoices above ₹2.5 lakh must be reported individually — they appear in the Large B2C section above.</span>
+                    <span>B2C invoices above ₹2.5 lakh must be reported individually - they appear in the Large B2C section above.</span>
                   </div>
                   <div className="b2bNoteRow b2bNoteInfo">
                     <Info size={14} />

@@ -7,9 +7,9 @@ const { getPermissionsForUser } = require("../../shared/permissions");
  * GET /dashboard/alerts
  *
  * Returns three alert categories:
- *  1. nonMoving  — batches with stock but no sale in N days
- *  2. expiring   — batches expiring within 90 days (or already expired)
- *  3. lowStock   — products whose total stock <= reorder_level
+ *  1. nonMoving  - batches with stock but no sale in N days
+ *  2. expiring   - batches expiring within 90 days (or already expired)
+ *  3. lowStock   - products whose total stock <= reorder_level
  */
 async function handler(event) {
   const auth = await requirePermission(event, "PRODUCT_BATCHES", "VIEW");

@@ -26,10 +26,10 @@
    SIDEBAR
 ════════════════════════════════════════ */
 .sidebar {
-  /* Local transition shorthand — scoped to sidebar only */
+  /* Local transition shorthand - scoped to sidebar only */
   --tr: 0.18s cubic-bezier(.4,0,.2,1);
 
-  /* Dark nav surface — mapped directly to theme.css --sidebar-* tokens */
+  /* Dark nav surface - mapped directly to theme.css --sidebar-* tokens */
   --brand:         var(--sidebar-active-border);
   --brand-lt:      color-mix(in srgb, var(--sidebar-active-border) 62%, var(--sidebar-text-active));
   --nav-bg:        var(--sidebar-bg);
@@ -102,7 +102,7 @@
   transition: width var(--tr), opacity var(--tr);
 }
 
-/* Favicon icon — shown only when sidebar is collapsed */
+/* Favicon icon - shown only when sidebar is collapsed */
 .sidebar-logo-favicon { display: none; }
 .sidebar-logo-favicon-img {
   width: 32px;
@@ -185,7 +185,7 @@
   opacity: 0.45;
   transition: opacity var(--tr), height var(--tr), padding var(--tr);
 }
-/* First group has no label — remove top padding so Dashboard sits flush */
+/* First group has no label - remove top padding so Dashboard sits flush */
 .nav-group:first-child .nav-group-label { display: none; }
 .sidebar.collapsed .nav-group-label { opacity: 0; height: 0; padding-top: 0; padding-bottom: 0; }
 .sidebar.collapsed .nav-group + .nav-group::before { content: ''; display: block; height: 1px; background: var(--nav-border); margin: 6px 14px; }
@@ -249,10 +249,10 @@
   background: transparent;
 }
 .nav-link:hover .nav-icon { color: var(--text-primary); }
-/* All icons: 18px, uniform size — no variation across items */
+/* All icons: 18px, uniform size - no variation across items */
 .nav-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
-/* 13px label — never truncated; weight 400 inactive, 500 hover, 600 active */
+/* 13px label - never truncated; weight 400 inactive, 500 hover, 600 active */
 .nav-label { font-size: 13px; font-weight: 400; flex: 1; overflow: hidden; text-overflow: ellipsis; opacity: 1; transition: opacity var(--tr); }
 .nav-link:hover .nav-label { font-weight: 500; }
 .nav-link.active .nav-label { font-weight: 600; }
@@ -471,7 +471,7 @@
     background: color-mix(in srgb, var(--color-text) 48%, transparent);
   }
 
-  /* Sidebar drawer — z-index 300 ensures it renders above the header (210) */
+  /* Sidebar drawer - z-index 300 ensures it renders above the header (210) */
   .sidebar {
     top: 56px;
     height: calc(100dvh - 56px);
@@ -484,7 +484,7 @@
     overflow: hidden !important;
   }
 
-  /* collapsed class has higher specificity (2 classes) — override it on mobile
+  /* collapsed class has higher specificity (2 classes) - override it on mobile
      so the drawer always uses full drawer width and correct transition */
   .sidebar.collapsed {
     width: min(82vw, 288px) !important;
@@ -501,7 +501,7 @@
   /* Hide desktop toggle */
   .toggle-btn { display: none; }
 
-  /* Logo bar: same as desktop — show full logo + close button */
+  /* Logo bar: same as desktop - show full logo + close button */
   .sidebar-logo {
     min-height: 64px;
     padding: 0 14px;
@@ -541,7 +541,7 @@
     padding: 6px 0 10px;
   }
 
-  /* Section group labels — tighter */
+  /* Section group labels - tighter */
   .nav-group {
     margin-bottom: 2px;
   }
@@ -552,7 +552,7 @@
     color: color-mix(in srgb, var(--color-on-primary) 55%, transparent);
   }
 
-  /* Nav items — compact touch targets */
+  /* Nav items - compact touch targets */
   .nav-item {
     margin: 1px 6px;
   }
@@ -575,7 +575,7 @@
     height: 16px;
   }
 
-  /* Nav label — keep 13px on mobile too, never truncate */
+  /* Nav label - keep 13px on mobile too, never truncate */
   .nav-label {
     font-size: 13px;
     font-weight: 500;
@@ -597,7 +597,7 @@
     padding-top: 2px;
   }
 
-  /* Footer — compact */
+  /* Footer - compact */
   .sidebar-footer {
     padding: 8px 8px;
     border-top: 1px solid var(--nav-border);

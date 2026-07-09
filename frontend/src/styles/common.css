@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   common.css  — Single source of truth for ALL shared UI patterns
+   common.css  - Single source of truth for ALL shared UI patterns
    Used by: every page, every modal, every form across the entire app.
 
    Design tokens come from theme.css.
@@ -127,7 +127,7 @@
   min-width: 0;
 }
 
-/* Field label — dark background strip, white text, accent dot */
+/* Field label - dark background strip, white text, accent dot */
 .raField > label {
   display: inline-flex;
   align-items: center;
@@ -154,7 +154,7 @@
   flex-shrink: 0;
 }
 
-/* Checkbox labels inside raField — reset field-label styles so they render normally */
+/* Checkbox labels inside raField - reset field-label styles so they render normally */
 .raField > label.sfmCheck,
 .raField > label.mfzCheck,
 .raField > label.cmCheck {
@@ -178,7 +178,7 @@
   display: none;
 }
 
-/* Base input — white background */
+/* Base input - white background */
 .raInput {
   width: 100%;
   height: 40px;
@@ -461,7 +461,7 @@ select.raInput {
 }
 
 /* ═══════════════════════════════════════════════════════
-   COMMON BUTTONS  (page-level, inline — use appBtn in modals)
+   COMMON BUTTONS  (page-level, inline - use appBtn in modals)
    These mirror AppButton.css but use the cm* namespace so
    page JSX doesn't need to import AppButton separately.
    ═══════════════════════════════════════════════════════ */
@@ -508,7 +508,7 @@ select.raInput {
   border-radius: calc(var(--radius) - 2px);
 }
 
-/* Primary — ocean blue fill */
+/* Primary - ocean blue fill */
 .cmBtn_primary {
   background: linear-gradient(
     180deg,

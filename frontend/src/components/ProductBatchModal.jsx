@@ -844,7 +844,7 @@ export default function ProductBatchModal({
                         disabled={busy || readOnly}
                         onChange={(e) => setField("vendorId", e.target.value)}
                       >
-                        <option value="">— No supplier —</option>
+                        <option value="">- No supplier -</option>
                         {vendorOptions.map((v) => (
                           <option key={v.id} value={v.id}>
                             {v.name || v.short_name || v.id}
@@ -1119,7 +1119,7 @@ export default function ProductBatchModal({
                         <input className="mfzInput" value={form.openStockFreeQty} disabled={busy || readOnly || !form.stockable || form.isNonEditableFreeQty || openingStockLocked} onChange={(e) => setField("openStockFreeQty", e.target.value)} />
                       </ModalFormField>
                     </div>
-                    {openingStockLocked ? <div className="pbmWarn">Locked — transactions already exist.</div> : null}
+                    {openingStockLocked ? <div className="pbmWarn">Locked - transactions already exist.</div> : null}
                   </div>
                   <div className="mfzField mfz12 pbmInset">
                     <div className="pbmInsetTitle">Loose stock</div>
@@ -1247,7 +1247,7 @@ export default function ProductBatchModal({
                     </label>
                   ))}
                 </ModalFormCheckGroup>
-                {form.isControl ? <div className="mfz12 pbmWarn">Controlled — prescription required at billing.</div> : null}
+                {form.isControl ? <div className="mfz12 pbmWarn">Controlled - prescription required at billing.</div> : null}
               </div>
             </div>
           ) : null}

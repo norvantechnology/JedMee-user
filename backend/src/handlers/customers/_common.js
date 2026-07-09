@@ -78,7 +78,7 @@ function validateCustomerPayload(body, isUpdate = false) {
       errs.push("Phone number must be 7 to 15 digits.");
     }
   }
-  // Strict GSTIN format validation — reject invalid format at save time
+  // Strict GSTIN format validation - reject invalid format at save time
   if (out.gstNumber && !isValidGstin(out.gstNumber)) {
     errs.push("GST number must be a valid 15-character GSTIN (e.g. 29ABCDE1234F1Z5). Invalid format is not allowed.");
   }

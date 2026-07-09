@@ -454,7 +454,7 @@ export default function SalesReturnsPage() {
                     setBusy(false);
                   }}
                 >
-                  <option value="">{isRetailer ? "No invoice — counter return" : "Select invoice"}</option>
+                  <option value="">{isRetailer ? "No invoice - counter return" : "Select invoice"}</option>
                   {(invoices || [])
                     .filter((x) => !form.customerId || String(x.customer_id) === String(form.customerId))
                     .map((inv) => (
@@ -668,9 +668,9 @@ export default function SalesReturnsPage() {
                       {/* ── Invoice-linked line: all info + inputs on one compact row ── */}
                       <div className="srmItemRow">
                         <div className="srmItemInfoSide">
-                          <span className="srmItemName">{it.productName || "—"}</span>
+                          <span className="srmItemName">{it.productName || "-"}</span>
                           <span className="srmItemMetaSep">·</span>
-                          <span className="srmItemBatch">Batch {it.batchNo || "—"}</span>
+                          <span className="srmItemBatch">Batch {it.batchNo || "-"}</span>
                           {it.expiryDate ? (
                             <>
                               <span className="srmItemMetaSep">·</span>
@@ -763,7 +763,7 @@ export default function SalesReturnsPage() {
 
             <div className={`srmTotalBar${!form.customerId ? " srmTotalBarLocked" : ""}`}>
               <span className="srmTotalLabel">Total Return Amount</span>
-              <span className="srmTotalAmount">{form.customerId ? fmtCurrency(returnTotal || 0) : "—"}</span>
+              <span className="srmTotalAmount">{form.customerId ? fmtCurrency(returnTotal || 0) : "-"}</span>
             </div>
             </div>{/* end srmItemsBody */}
           </div>

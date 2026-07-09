@@ -74,7 +74,7 @@ async function issueEmailVerificationOtp(normalizedEmail) {
     otpExpiresInSec,
     metaMessage:
       mailResult.dryRun || !smtpDeliveryRequired()
-        ? `Verification code issued (email simulation — configure SMTP for delivery). Valid ${ttlMin} min.`
+        ? `Verification code issued (email simulation - configure SMTP for delivery). Valid ${ttlMin} min.`
         : `We sent a 6-digit code to your email. It is valid for ${ttlMin} minutes.`
   };
 }
@@ -134,7 +134,7 @@ async function issuePasswordResetOtp(normalizedEmail) {
     otpExpiresInSec,
     metaMessage:
       mailResult.dryRun || !smtpDeliveryRequired()
-        ? `Reset code issued (email simulation — configure SMTP). Valid ${ttlMin} min.`
+        ? `Reset code issued (email simulation - configure SMTP). Valid ${ttlMin} min.`
         : `We sent a 6-digit code to your email. It is valid for ${ttlMin} minutes.`
   };
 }

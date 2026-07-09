@@ -58,7 +58,7 @@ async function apiFetch(method, url, body, opts, attempt = 0) {
     const r = await tryRefreshSession();
     if (r.ok) return await apiFetch(method, url, body, opts, 1);
 
-    // Only wipe session when refresh token is definitively invalid — not on network blips.
+    // Only wipe session when refresh token is definitively invalid - not on network blips.
     if (r.reason === "invalid_refresh" || r.reason === "no_session") {
       clearAuthOnce();
       const toastMode = opts?.toast ?? "auto";

@@ -84,7 +84,7 @@ async function handler(event) {
   const refreshHash = hashToken(refreshToken, salt);
   const refreshExpiresAt = secondsFromNow(refreshTtl);
 
-  // Insert a new session row — each device/login gets its own row so that
+  // Insert a new session row - each device/login gets its own row so that
   // logging in on a second device does NOT invalidate the first device's token.
   await query(
     `

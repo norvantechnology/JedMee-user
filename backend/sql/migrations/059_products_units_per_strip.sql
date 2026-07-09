@@ -1,6 +1,6 @@
 -- 059_products_units_per_strip.sql
 -- Add units_per_strip to products: how many individual units (tablets/capsules/ml)
--- are in one strip/blister/vial — the base inventory unit.
+-- are in one strip/blister/vial - the base inventory unit.
 --
 -- This enables correct price and quantity conversion when purchasing or selling
 -- by Case / Box / Strip / Unit (individual tablet/capsule).
@@ -19,7 +19,7 @@
 -- Idempotent: all statements use IF NOT EXISTS / DO blocks.
 
 ------------------------------------------------------------------------
--- 1. products — units_per_strip
+-- 1. products - units_per_strip
 ------------------------------------------------------------------------
 ALTER TABLE products
   ADD COLUMN IF NOT EXISTS units_per_strip integer NOT NULL DEFAULT 1;
@@ -36,7 +36,7 @@ COMMENT ON COLUMN products.units_per_strip IS
   'Used for loose-unit price and quantity conversion. Default 1 (no sub-unit splitting).';
 
 ------------------------------------------------------------------------
--- 2. product_batches — packing_units (snapshot of products.units_per_strip)
+-- 2. product_batches - packing_units (snapshot of products.units_per_strip)
 ------------------------------------------------------------------------
 ALTER TABLE product_batches
   ADD COLUMN IF NOT EXISTS packing_units integer NOT NULL DEFAULT 1;

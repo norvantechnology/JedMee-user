@@ -82,7 +82,7 @@ export function getCurrencySymbol(code) {
  * Intl.NumberFormat. Returns "" for non-finite input.
  *
  * fmtCurrency(1234.5)          → "₹1,234.50"   (INR active)
- * fmtCurrency(100000)          → "₹1,00,000.00" (INR — Indian grouping)
+ * fmtCurrency(100000)          → "₹1,00,000.00" (INR - Indian grouping)
  * fmtCurrency(1234.5, "USD")   → "$1,234.50"
  * fmtCurrency(null)            → ""
  */
@@ -108,7 +108,7 @@ export function fmtCurrency(value, code) {
  * currency's locale and decimal settings. Returns "" for non-finite input.
  *
  * fmtAmount(1234.5)          → "1,234.50"    (USD/EUR locale)
- * fmtAmount(100000)          → "1,00,000.00" (INR — Indian grouping)
+ * fmtAmount(100000)          → "1,00,000.00" (INR - Indian grouping)
  * fmtAmount(1234.5, "USD")   → "1,234.50"
  */
 export function fmtAmount(value, code) {
@@ -127,10 +127,10 @@ export function fmtAmount(value, code) {
 
 /**
  * Like fmtCurrency but returns a fallback string instead of "" for invalid input.
- * fmtCurrencySafe(null)        → "—"
+ * fmtCurrencySafe(null)        → "-"
  * fmtCurrencySafe(null, "USD", "$0.00") → "$0.00"
  */
-export function fmtCurrencySafe(value, code, fallback = "—") {
+export function fmtCurrencySafe(value, code, fallback = "-") {
   const result = fmtCurrency(value, code);
   return result === "" ? fallback : result;
 }
@@ -147,7 +147,7 @@ export function fmtCurrencyOrZero(value, code) {
 
 /**
  * Format a numeric value for input field display using the active currency's
- * locale grouping. Strips the currency symbol — suitable for <input> values.
+ * locale grouping. Strips the currency symbol - suitable for <input> values.
  *
  * For INR: uses Indian grouping (1,00,000.00)
  * For others: uses standard grouping (100,000.00)
@@ -169,7 +169,7 @@ export function fmtInputAmount(raw, code) {
   const dotIdx = str.indexOf(".");
   if (dotIdx >= 0) {
     const decPart = str.slice(dotIdx + 1);
-    // User is still typing decimals — format integer part only
+    // User is still typing decimals - format integer part only
     const intNum = Math.trunc(num);
     const intFormatted = new Intl.NumberFormat(cfg.locale, {
       minimumFractionDigits: 0,

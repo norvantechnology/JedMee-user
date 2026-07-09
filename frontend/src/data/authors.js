@@ -5,7 +5,7 @@ export const PRIMARY_AUTHOR = {
   title: "Pharmacy software guides",
   credentials: "Billing, inventory, and wholesale workflows",
   bio:
-    "Guides on this site are written and reviewed by the JedMee team to reflect how the product works today — billing, inventory, orders, and reports for medicine shops and distributors.",
+    "Guides on this site are written and reviewed by the JedMee team to reflect how the product works today - billing, inventory, orders, and reports for medicine shops and distributors.",
   initials: "JM",
 };
 
@@ -22,7 +22,7 @@ export const LEADERSHIP = [
   {
     name: "JedMee Founders",
     role: "Product & engineering",
-    bio: "Built JedMee for retail pharmacies and wholesale distributors — billing, inventory, expiry tracking, and B2B ordering in one cloud platform.",
+    bio: "Built JedMee for retail pharmacies and wholesale distributors - billing, inventory, expiry tracking, and B2B ordering in one cloud platform.",
     initials: "JF",
   },
   {

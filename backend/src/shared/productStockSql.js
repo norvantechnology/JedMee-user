@@ -1,5 +1,5 @@
 /**
- * Stock figures from inventory_txns — same source as products list (total_quantity)
+ * Stock figures from inventory_txns - same source as products list (total_quantity)
  * and product_batches list (total_stock).
  *
  * Per batch:
@@ -21,7 +21,7 @@ function batchInventoryStockJoin(accountSqlRef) {
   `;
 }
 
-/** All accounts — catalog browse may list multiple wholesalers. */
+/** All accounts - catalog browse may list multiple wholesalers. */
 function batchInventoryStockJoinAllAccounts() {
   return `
     LEFT JOIN (
@@ -40,7 +40,7 @@ const batchBillableStockSql = "COALESCE(st.qty, 0)::numeric(12, 3)";
 const batchFreeStockSql = "COALESCE(st.free_qty, 0)::numeric(12, 3)";
 const batchTotalStockSql = `(${batchBillableStockSql} + ${batchFreeStockSql})`;
 
-/** Live ledger stock — use instead of product_batches.current_stock (can be stale). */
+/** Live ledger stock - use instead of product_batches.current_stock (can be stale). */
 const batchLiveBillableColumn = `${batchBillableStockSql} AS current_stock`;
 const batchLiveFreeColumn = `${batchFreeStockSql} AS current_free_stock`;
 

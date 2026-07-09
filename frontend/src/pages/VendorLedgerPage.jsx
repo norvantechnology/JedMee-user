@@ -92,7 +92,7 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
     const netClass = stats.net > 0 ? "stat--net-dr" : stats.net < 0 ? "stat--net-cr" : "stat--net";
     const netType = stats.netType;
     const dateRangeHtml = (dateFrom || dateTo)
-      ? `<div class="date-range">Period: <strong>${dateFrom || "—"}</strong> to <strong>${dateTo || "—"}</strong></div>`
+      ? `<div class="date-range">Period: <strong>${dateFrom || "-"}</strong> to <strong>${dateTo || "-"}</strong></div>`
       : "";
     const rows = entries.map((e) => {
       const isDr = Number(e.debit || 0) > 0;
@@ -100,7 +100,7 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
       return `<tr class="${isDr ? "row-dr" : isCr ? "row-cr" : ""}">
         <td>${String(e.date || "").slice(0, 10)}</td>
         <td class="td-type">${String(e.type || "").replace(/_/g, " ")}</td>
-        <td class="td-ref">${e.reference || "—"}</td>
+        <td class="td-ref">${e.reference || "-"}</td>
         <td class="num td-dr">${isDr ? fmtCurrency(e.debit) : ""}</td>
         <td class="num td-cr">${isCr ? fmtCurrency(e.credit) : ""}</td>
         <td class="num td-bal">${fmtCurrency(e.balance || 0)}</td>
@@ -110,7 +110,7 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Supplier Ledger — ${vendor.name || ""}</title>
+  <title>Supplier Ledger - ${vendor.name || ""}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; color: #111; background: #fff; }
@@ -279,7 +279,7 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
               value={vendorId}
               onChange={(e) => setVendorId(e.target.value)}
             >
-              <option value="">— Select supplier —</option>
+              <option value="">- Select supplier -</option>
               {(vendors || []).map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
@@ -402,7 +402,7 @@ export function VendorLedgerReportContent({ embedded = false } = {}) {
                       >
                         <td>{fmtDateIndian(e.date)}</td>
                         <td className="vlTypeCell">{String(e.type || "").replace(/_/g, " ")}</td>
-                        <td className="vlRefCell">{e.reference || "—"}</td>
+                        <td className="vlRefCell">{e.reference || "-"}</td>
                         <td className="rptNum vlDrCell">
                           {isDr ? fmtMoney(e.debit) : ""}
                         </td>

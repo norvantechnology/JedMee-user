@@ -25,7 +25,7 @@ const REQUIRED_HINTS = {
 };
 
 /**
- * Fields that are "either/or" — at least one must be present.
+ * Fields that are "either/or" - at least one must be present.
  * Key = entityType, value = array of [fieldA, fieldB] pairs.
  */
 const EITHER_OR_HINTS = {

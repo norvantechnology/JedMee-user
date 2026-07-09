@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { GUIDE_LINKS } from "../../data/resourceLinks.js";
 
 /**
- * Resources dropdown for main nav — reuses existing ln-nav link styles.
+ * Resources dropdown for main nav - reuses existing ln-nav link styles.
  */
 export default function ResourcesNav({ onNavigate, linkClassName = "" }) {
   const [open, setOpen] = useState(false);
